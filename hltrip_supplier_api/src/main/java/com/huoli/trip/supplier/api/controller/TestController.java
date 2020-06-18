@@ -2,7 +2,6 @@ package com.huoli.trip.supplier.api.controller;
 
 import com.huoli.trip.supplier.feign.clinet.IYaoChuFaClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,8 +21,8 @@ public class TestController {
     private IYaoChuFaClient iYaoChuFaClient;
 
     @GetMapping(path = "/test")
-    ResponseEntity<Map> test() {
-        return ResponseEntity.ok(iYaoChuFaClient.getWeather().getBody());
+    Map test() {
+        return iYaoChuFaClient.getWeather();
     }
 
 }

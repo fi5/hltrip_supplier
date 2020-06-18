@@ -1,7 +1,5 @@
 package com.huoli.trip.supplier.feign.clinet;
 
-import org.springframework.http.ResponseEntity;
-
 import java.util.Map;
 
 /**
@@ -14,7 +12,7 @@ import java.util.Map;
  */
 public class YaoChuFaFailBack implements IYaoChuFaClient {
     @Override
-    public ResponseEntity<Map> getWeather() {
+    public Map getWeather() {
         return null;
     }
 }
