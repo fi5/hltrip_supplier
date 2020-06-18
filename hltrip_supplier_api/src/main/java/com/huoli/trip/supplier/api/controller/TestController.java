@@ -1,10 +1,14 @@
 package com.huoli.trip.supplier.api.controller;
 
-import com.huoli.trip.supplier.feign.clinet.IYaoChuFaClient;
+import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -21,8 +25,27 @@ public class TestController {
     private IYaoChuFaClient iYaoChuFaClient;
 
     @GetMapping(path = "/test")
-    Map test() {
-        return iYaoChuFaClient.getWeather();
+    String test() {
+        //{
+        //"data": {
+        //"productId": "68859_42041",
+        //"beginDate": "2016-05-01",
+        //"endDate": "2016-05-05"
+        //}
+        //}
+        Map<String,Object> req = new HashMap<>();
+        Map<String,String> data = new HashMap<>();
+        data.put("productId","247533_266960");
+        data.put("beginDate","2020-07-01");
+        data.put("endDate","2020-07-02");
+        req.put("data",data);
+        return iYaoChuFaClient.getWeather(req);
     }
 
+
+    @RequestMapping(path = "/feign")
+    String feign(HttpServletRequest request, @RequestBody Map<String,String> req) {
+        System.out.println(request.getHeader("hotelId"));
+        return "成功了";
+    }
 }

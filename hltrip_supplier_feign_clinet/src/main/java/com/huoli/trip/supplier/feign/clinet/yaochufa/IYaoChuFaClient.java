@@ -1,6 +1,7 @@
-package com.huoli.trip.supplier.feign.clinet;
+package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -14,9 +15,9 @@ import java.util.Map;
  * 版本：1.0<br>
  * 创建日期：2020/6/18<br>
  */
-@FeignClient(name = "yaoChuFa", url = "${feign.client.url}")
+@FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}",configuration = YaoChuFaFeignInterceptor.class)
 public interface IYaoChuFaClient {
 
-    @RequestMapping(method = RequestMethod.GET)
-    Map getWeather();
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
+    String getWeather(@RequestBody Map req);
 }
