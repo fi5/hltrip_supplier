@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoCo
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -17,6 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 @ComponentScan({"com.huoli.trip"})
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.clinet")
+@EnableCircuitBreaker
 @EnableSwagger2
 public class HltripSupplierApiApplication {
 
