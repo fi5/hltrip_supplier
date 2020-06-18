@@ -10,12 +10,14 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class,
         MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 @ComponentScan({"com.huoli.trip"})
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.clinet")
+@EnableSwagger2
 public class HltripSupplierApiApplication {
 
     public static void main(String[] args) {

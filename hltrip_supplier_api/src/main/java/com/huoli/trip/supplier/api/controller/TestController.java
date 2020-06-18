@@ -1,11 +1,9 @@
 package com.huoli.trip.supplier.api.controller;
 
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -20,9 +18,12 @@ import java.util.Map;
  * 创建日期：2020/6/18<br>
  */
 @RestController
+@Api(description = "测试接口")
 public class TestController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
+
+
 
     @GetMapping(path = "/test")
     String test() {
@@ -42,10 +43,10 @@ public class TestController {
         return iYaoChuFaClient.getWeather(req);
     }
 
-
-    @RequestMapping(path = "/feign")
-    String feign(HttpServletRequest request, @RequestBody Map<String,String> req) {
-        System.out.println(request.getHeader("hotelId"));
+//    @ApiOperation(value = "feign测试", notes="测试")
+//    @ApiImplicitParam(name = "req", value = "请求参数", paramType = "Map", required = true, dataType = "Map")
+    @RequestMapping(path = "/feign",method = RequestMethod.POST)
+    String feign(@RequestBody Map<String,String> req) {
         return "成功了";
     }
 }
