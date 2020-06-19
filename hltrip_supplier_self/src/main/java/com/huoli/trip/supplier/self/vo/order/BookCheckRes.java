@@ -1,4 +1,4 @@
-package vo.order;
+package com.huoli.trip.supplier.self.vo.order;
 
 import lombok.Data;
 

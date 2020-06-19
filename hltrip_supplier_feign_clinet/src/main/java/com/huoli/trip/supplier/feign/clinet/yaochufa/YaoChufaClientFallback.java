@@ -11,12 +11,12 @@ import com.huoli.trip.common.vo.order.PayOrderReq;
 import com.huoli.trip.common.vo.order.PayOrderRes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import vo.basevo.BaseRequest;
-import vo.basevo.BaseResponse;
-import vo.order.BookCheckReq;
-import vo.order.BookCheckRes;
-import vo.order.PayOrderReq;
-import vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.vo.basevo.BaseRequest;
+import com.huoli.trip.supplier.self.vo.basevo.BaseResponse;
+import com.huoli.trip.supplier.self.vo.order.BookCheckReq;
+import com.huoli.trip.supplier.self.vo.order.BookCheckRes;
+import com.huoli.trip.supplier.self.vo.order.PayOrderReq;
+import com.huoli.trip.supplier.self.vo.order.PayOrderRes;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package vo.basevo;
+package com.huoli.trip.supplier.self.vo.basevo;
 
 import lombok.Data;
 

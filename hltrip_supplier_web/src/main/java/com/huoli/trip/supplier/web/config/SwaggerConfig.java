@@ -27,7 +27,7 @@ public class SwaggerConfig {
                 .apiInfo(apiInfo())
                 .select()
                 //为当前包路径
-                .apis(RequestHandlerSelectors.basePackage("com.huoli.trip.supplier.api.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.huoli.trip.supplier.web.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }
