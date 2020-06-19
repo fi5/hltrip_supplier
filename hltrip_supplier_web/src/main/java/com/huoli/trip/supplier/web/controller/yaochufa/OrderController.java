@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.web.controller.YaoChuFa;
+package com.huoli.trip.supplier.web.controller.yaochufa;
 
 
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
