@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.controller;
+package com.huoli.trip.supplier.self.difengyun.constant;
 
 /**
  * 描述：<br/>
@@ -8,5 +8,5 @@ package com.huoli.trip.supplier.self.yaochufa.controller;
  * 版本：1.0<br>
  * 创建日期：2020/6/19<br>
  */
-public class TempController {
+public class DfyConstants {
 }
