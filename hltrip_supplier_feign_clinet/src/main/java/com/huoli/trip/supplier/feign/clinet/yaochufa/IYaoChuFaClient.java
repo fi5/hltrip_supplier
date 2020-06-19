@@ -52,7 +52,7 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/resendVoucher")
-    YcfCommonResult<YcfVochersResult> getVochers(YcfBaseRequest<YcfOrderBaSeRequest> request);
+    YcfCommonResult<YcfVochersResult> getVochers(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
     /**
      * 通过订单号获取订单状态等信息
@@ -60,6 +60,6 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
-    YcfCommonResult<YcfOrderStatusResult> getOederStatus(YcfBaseRequest<YcfOrderBaSeRequest> request);
+    YcfCommonResult<YcfOrderStatusResult> getOederStatus(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
 }
