@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.huoli.trip.supplier.self.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
 
 
 /**

@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.web.Service;
 
-import com.huoli.trip.supplier.self.yaochufavo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufavo.RefundNoticeRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import org.springframework.stereotype.Service;
 
 /***
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class YaoChuFaCallBackService {
-   public CommonResult refundNotice(RefundNoticeRequest request){
+   public YcfCommonResult refundNotice(YcfRefundNoticeRequest request){
         //todo
         return null;
     }

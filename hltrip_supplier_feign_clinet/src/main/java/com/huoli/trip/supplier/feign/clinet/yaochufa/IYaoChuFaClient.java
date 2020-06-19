@@ -1,18 +1,18 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufavo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufavo.OrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufavo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.huoli.trip.supplier.self.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.vo.order.BookCheckReq;
-import com.huoli.trip.supplier.self.vo.order.BookCheckRes;
-import com.huoli.trip.supplier.self.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
 
 import java.util.Map;
 
@@ -58,7 +58,7 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/resendVoucher")
-    CommonResult<VochersResult> getVochers(String partnerOrderId);
+    YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId);
 
     /**
      * 通过订单号获取订单状态等信息
@@ -66,6 +66,6 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
-    CommonResult<OrderStatusResult> getOederStatus(String partnerOrderId);
+    YcfCommonResult<YcfOrderStatusResult> getOederStatus(String partnerOrderId);
 
 }
