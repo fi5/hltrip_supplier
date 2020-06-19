@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.web.Service;
 
-import YaoChuFaVo.CommonResult;
-import YaoChuFaVo.RefundNoticeRequest;
+import com.huoli.trip.supplier.self.yaochufavo.CommonResult;
+import com.huoli.trip.supplier.self.yaochufavo.RefundNoticeRequest;
 import org.springframework.stereotype.Service;
 
 /***

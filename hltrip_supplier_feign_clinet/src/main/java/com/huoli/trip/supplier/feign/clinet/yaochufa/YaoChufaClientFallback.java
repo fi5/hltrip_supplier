@@ -1,8 +1,8 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import YaoChuFaVo.CommonResult;
-import YaoChuFaVo.OrderStatusResult;
-import YaoChuFaVo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufavo.CommonResult;
+import com.huoli.trip.supplier.self.yaochufavo.OrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufavo.VochersResult;
 import com.huoli.trip.common.vo.basevo.BaseRequest;
 import com.huoli.trip.common.vo.basevo.BaseResponse;
 import com.huoli.trip.common.vo.order.BookCheckReq;
