@@ -1,18 +1,18 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufavo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufavo.OrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufavo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.CommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.OrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.VochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.huoli.trip.supplier.self.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.vo.order.BookCheckReq;
-import com.huoli.trip.supplier.self.vo.order.BookCheckRes;
-import com.huoli.trip.supplier.self.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
 
 import java.util.Map;
 

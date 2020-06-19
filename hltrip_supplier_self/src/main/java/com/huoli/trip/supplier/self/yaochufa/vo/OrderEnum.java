@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufavo;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 public enum OrderEnum implements OrderCode {
 
