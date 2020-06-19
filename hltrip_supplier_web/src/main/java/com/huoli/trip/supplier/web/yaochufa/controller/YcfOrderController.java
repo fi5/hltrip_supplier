@@ -35,12 +35,20 @@ public class YcfOrderController {
     }
 
     YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId){
-        return iYaoChuFaClient.getVochers(partnerOrderId);
+        YcfBaseRequest request = new YcfBaseRequest();
+        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+        orderBaSeRequest.setPartnerOrderId(partnerOrderId);
+        request.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getVochers(request);
 
     }
 
     YcfCommonResult<YcfOrderStatusResult> getOrderStatus(String partnerOrderId){
-        return iYaoChuFaClient.getOederStatus(partnerOrderId);
+        YcfBaseRequest request = new YcfBaseRequest();
+        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+        orderBaSeRequest.setPartnerOrderId(partnerOrderId);
+        request.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getOederStatus(request);
     }
 
     @RequestMapping(method = {RequestMethod.POST},value="/api/service/yaochufa/refundNotice")
