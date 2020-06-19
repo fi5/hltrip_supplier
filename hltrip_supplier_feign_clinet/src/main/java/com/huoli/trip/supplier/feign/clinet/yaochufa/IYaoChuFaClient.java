@@ -7,12 +7,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import vo.basevo.BaseRequest;
-import vo.basevo.BaseResponse;
-import vo.order.BookCheckReq;
-import vo.order.BookCheckRes;
-import vo.order.PayOrderReq;
-import vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.vo.basevo.BaseRequest;
+import com.huoli.trip.supplier.self.vo.basevo.BaseResponse;
+import com.huoli.trip.supplier.self.vo.order.BookCheckReq;
+import com.huoli.trip.supplier.self.vo.order.BookCheckRes;
+import com.huoli.trip.supplier.self.vo.order.PayOrderReq;
+import com.huoli.trip.supplier.self.vo.order.PayOrderRes;
 
 import java.util.Map;
 
