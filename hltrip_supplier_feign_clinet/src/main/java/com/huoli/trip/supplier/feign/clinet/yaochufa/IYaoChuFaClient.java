@@ -7,6 +7,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import vo.basevo.BaseRequest;
+import vo.basevo.BaseResponse;
+import vo.order.BookCheckReq;
+import vo.order.BookCheckRes;
+import vo.order.PayOrderReq;
+import vo.order.PayOrderRes;
 
 import java.util.Map;
 
@@ -18,11 +24,32 @@ import java.util.Map;
  * 版本：1.0<br>
  * 创建日期：2020/6/18<br>
  */
-@FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}",configuration = YaoChuFaFeignInterceptor.class)
+@FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}"
+        ,configuration = YaoChuFaFeignInterceptor.class
+        ,fallback = YaoChufaClientFallback.class)
 public interface IYaoChuFaClient {
 
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
     String getWeather(@RequestBody Map req);
+
+    /**
+     * 可预订检查
+     * @param= req
+     * @return= BookCheckRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
+    BaseResponse<BookCheckRes> getCheckInfos(@RequestBody BaseRequest<BookCheckReq> req);
+    /**
+     * 支付订单
+     * @param= req
+     * @return= PayOrderRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/payOrder")
+    BaseResponse<PayOrderRes> payOrder(@RequestBody BaseRequest<PayOrderReq> req);
 
     /**
      * 通过订单编号

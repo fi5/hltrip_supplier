@@ -9,7 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
 /**
- * 描述：desc<br>
+ * 描述：desc<br> 请求头封装
  * 版权：Copyright (c) 2011-2020<br>
  * 公司：活力天汇<br>
  * 作者：顾刘川<br>
