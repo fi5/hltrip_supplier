@@ -62,4 +62,23 @@ public interface IYaoChuFaClient {
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
     YcfCommonResult<YcfOrderStatusResult> getOederStatus(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
+    /**
+     * 创建订单
+     * @param= req
+     * @return= YcfCreateOrderRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/createOrder")
+    YcfCommonResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req);
+
+    /**
+     * 申请取消订单
+     * @param= req
+     * @return= YcfCancelOrderRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/cancelOrder")
+    YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req);
 }
