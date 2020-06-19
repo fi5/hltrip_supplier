@@ -1,4 +1,4 @@
-package com.huoli.trip.common.entity;
+package YaoChuFaVo;
 
 import java.io.Serializable;
 

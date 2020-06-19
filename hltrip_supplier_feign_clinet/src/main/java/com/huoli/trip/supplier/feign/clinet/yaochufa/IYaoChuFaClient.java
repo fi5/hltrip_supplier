@@ -1,8 +1,8 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.common.entity.CommonResult;
-import com.huoli.trip.common.entity.OrderStatusResult;
-import com.huoli.trip.common.entity.VochersResult;
+import YaoChuFaVo.CommonResult;
+import YaoChuFaVo.OrderStatusResult;
+import YaoChuFaVo.VochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
