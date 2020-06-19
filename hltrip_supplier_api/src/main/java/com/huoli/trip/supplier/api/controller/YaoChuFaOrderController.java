@@ -1,8 +1,9 @@
 package com.huoli.trip.supplier.api.controller;
 
-import com.huoli.trip.common.entity.CommonResult;
-import com.huoli.trip.common.entity.OrderStatusResult;
-import com.huoli.trip.common.entity.VochersResult;
+
+import YaoChuFaVo.CommonResult;
+import YaoChuFaVo.OrderStatusResult;
+import YaoChuFaVo.VochersResult;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
