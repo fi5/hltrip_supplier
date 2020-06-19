@@ -1,10 +1,10 @@
 package com.huoli.trip.supplier.web.controller.YaoChuFa;
 
 
-import com.huoli.trip.supplier.self.yaochufa.vo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.OrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.RefundNoticeRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import com.huoli.trip.supplier.web.Service.YaoChuFaCallBackService;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,17 +25,17 @@ public class OrderController {
     private YaoChuFaCallBackService yaoChuFaCallBackService;
 
 
-    CommonResult<VochersResult> getVochers(String partnerOrderId){
+    YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId){
         return iYaoChuFaClient.getVochers(partnerOrderId);
 
     }
 
-    CommonResult<OrderStatusResult> getOrderStatus(String partnerOrderId){
+    YcfCommonResult<YcfOrderStatusResult> getOrderStatus(String partnerOrderId){
         return iYaoChuFaClient.getOederStatus(partnerOrderId);
     }
 
     @RequestMapping(method = {RequestMethod.POST},value="/api/service/yaochufa/refundNotice")
-    private void refundNotice(@RequestBody RefundNoticeRequest request){
+    private void refundNotice(@RequestBody YcfRefundNoticeRequest request){
         yaoChuFaCallBackService.refundNotice(request);
     }
 

@@ -3,8 +3,8 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 import java.io.Serializable;
 import java.util.List;
 
-public class OrderStatusResult implements Serializable {
+public class YcfOrderStatusResult implements Serializable {
     private String  orderId;
     private int code;
-    private List<Vocher> vochers;
+    private List<YcfVocher> ycfVochers;
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class Vocher implements Serializable {
+public class YcfVocher implements Serializable {
     private String vocherNo;
     private String vocherUrl;
     private String vocherExtendInfos;

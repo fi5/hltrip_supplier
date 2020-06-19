@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.vo;
 
-public enum OrderEnum implements OrderCode {
+public enum YcfYcfOrderEnum implements YcfOrderCode {
 
     /**
      * 0:待支付：创建订单成功，合作方尚未付款。

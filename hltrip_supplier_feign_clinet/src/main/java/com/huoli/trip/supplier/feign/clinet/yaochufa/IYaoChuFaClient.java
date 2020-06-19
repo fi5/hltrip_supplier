@@ -1,8 +1,8 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.OrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,7 +58,7 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/resendVoucher")
-    CommonResult<VochersResult> getVochers(String partnerOrderId);
+    YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId);
 
     /**
      * 通过订单号获取订单状态等信息
@@ -66,6 +66,6 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
-    CommonResult<OrderStatusResult> getOederStatus(String partnerOrderId);
+    YcfCommonResult<YcfOrderStatusResult> getOederStatus(String partnerOrderId);
 
 }

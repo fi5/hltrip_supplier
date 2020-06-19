@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class CommonResult<T> implements Serializable {
+public class YcfCommonResult<T> implements Serializable {
     /**
      * 是否处理成功
      * boolean

@@ -1,8 +1,8 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.CommonResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.OrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.VochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
@@ -43,12 +43,12 @@ public class YaoChufaClientFallback implements IYaoChuFaClient {
     }
 
     @Override
-    public CommonResult<VochersResult> getVochers(String partnerOrderId) {
+    public YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId) {
         return null;
     }
 
     @Override
-    public CommonResult<OrderStatusResult> getOederStatus(String partnerOrderId) {
+    public YcfCommonResult<YcfOrderStatusResult> getOederStatus(String partnerOrderId) {
         return null;
     }
 }

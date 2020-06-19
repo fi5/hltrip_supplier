@@ -11,7 +11,7 @@ import java.util.Date;
  * 退款通知请求对象
  */
 @Data
-public class RefundNoticeRequest implements Serializable {
+public class YcfRefundNoticeRequest implements Serializable {
     /**
      * 订单号
      * 必填
