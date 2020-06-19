@@ -1,6 +1,5 @@
 package YaoChuFaVo;
 
-import com.sun.istack.internal.NotNull;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +16,6 @@ public class RefundNoticeRequest implements Serializable {
      * 订单号
      * 必填
      */
-    @NotNull
     private String partnerOrderId;
     /**
      * 退款状态

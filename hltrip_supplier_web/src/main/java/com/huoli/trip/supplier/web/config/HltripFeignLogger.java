@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.api.config;
+package com.huoli.trip.supplier.web.config;
 
 import feign.Request;
 import feign.Response;

@@ -21,9 +21,10 @@
         <spring-cloud.version>Finchley.RELEASE</spring-cloud.version>
     </properties>
     <modules>
-        <module>hltrip_supplier_api</module>
+        <module>hltrip_supplier_web</module>
         <module>hltrip_supplier_self</module>
         <module>hltrip_supplier_feign_clinet</module>
+        <module>hltrip_supplier_api</module>
     </modules>
     <dependencyManagement>
         <dependencies>

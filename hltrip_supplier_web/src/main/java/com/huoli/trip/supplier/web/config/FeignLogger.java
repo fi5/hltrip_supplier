@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.api.config;
+package com.huoli.trip.supplier.web.config;
 
 import feign.Logger;
 import org.springframework.context.annotation.Bean;

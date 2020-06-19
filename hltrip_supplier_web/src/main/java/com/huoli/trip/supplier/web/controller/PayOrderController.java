@@ -1,5 +1,9 @@
-package com.huoli.trip.supplier.api.controller;
+package com.huoli.trip.supplier.web.controller;
 
+import com.huoli.trip.common.vo.basevo.BaseRequest;
+import com.huoli.trip.common.vo.basevo.BaseResponse;
+import com.huoli.trip.common.vo.order.PayOrderReq;
+import com.huoli.trip.common.vo.order.PayOrderRes;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -7,13 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import vo.basevo.BaseRequest;
-import vo.basevo.BaseResponse;
-import vo.order.BookCheckReq;
-import vo.order.BookCheckRes;
+
 
 /**
- * 描述: <br>订单
+ * 描述: <br>支付订单
  * 版权：Copyright (c) 2011-2020<br>
  * 公司：活力天汇<br>
  * 作者：王德铭<br>
@@ -21,13 +22,14 @@ import vo.order.BookCheckRes;
  * 创建日期：2020/6/18<br>
  */
 @RestController
-@Api(description = "订单")
-public class OrderController {
+@Api(description = "订单支付相关")
+public class PayOrderController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
-    @ApiOperation("可预订检查服务")
-    @PostMapping(path = "/getCheckInfos")
-    BaseResponse<BookCheckRes> getCheckInfos(@RequestBody BaseRequest<BookCheckReq> req) {
-        return iYaoChuFaClient.getCheckInfos(req);
+    @ApiOperation("支付订单服务")
+    @PostMapping(path = "/payOrder")
+    BaseResponse<PayOrderRes> payOrder(@RequestBody BaseRequest<PayOrderReq> req) {
+        return iYaoChuFaClient.payOrder(req);
     }
+
 }

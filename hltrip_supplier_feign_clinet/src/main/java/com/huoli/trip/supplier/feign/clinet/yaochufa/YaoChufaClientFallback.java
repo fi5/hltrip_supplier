@@ -1,13 +1,16 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
+import YaoChuFaVo.CommonResult;
+import YaoChuFaVo.OrderStatusResult;
+import YaoChuFaVo.VochersResult;
+import com.huoli.trip.common.vo.basevo.BaseRequest;
+import com.huoli.trip.common.vo.basevo.BaseResponse;
+import com.huoli.trip.common.vo.order.BookCheckReq;
+import com.huoli.trip.common.vo.order.BookCheckRes;
+import com.huoli.trip.common.vo.order.PayOrderReq;
+import com.huoli.trip.common.vo.order.PayOrderRes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import vo.basevo.BaseRequest;
-import vo.basevo.BaseResponse;
-import vo.order.BookCheckReq;
-import vo.order.BookCheckRes;
-import vo.order.PayOrderReq;
-import vo.order.PayOrderRes;
 
 import java.util.Map;
 
@@ -36,6 +39,16 @@ public class YaoChufaClientFallback implements IYaoChuFaClient {
     @Override
     public BaseResponse<PayOrderRes> payOrder(BaseRequest<PayOrderReq> req) {
         log.info("***********进入payOrder降级处理逻辑***************");
+        return null;
+    }
+
+    @Override
+    public CommonResult<VochersResult> getVochers(String partnerOrderId) {
+        return null;
+    }
+
+    @Override
+    public CommonResult<OrderStatusResult> getOederStatus(String partnerOrderId) {
         return null;
     }
 }

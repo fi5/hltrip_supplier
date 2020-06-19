@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.api.Service;
+package com.huoli.trip.supplier.web.Service;
 
 import YaoChuFaVo.CommonResult;
 import YaoChuFaVo.RefundNoticeRequest;

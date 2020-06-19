@@ -1,11 +1,11 @@
-package com.huoli.trip.supplier.api.controller.YaoChuFa;
+package com.huoli.trip.supplier.web.controller.YaoChuFa;
 
 
 import YaoChuFaVo.CommonResult;
 import YaoChuFaVo.OrderStatusResult;
 import YaoChuFaVo.RefundNoticeRequest;
 import YaoChuFaVo.VochersResult;
-import com.huoli.trip.supplier.api.Service.YaoChuFaCallBackService;
+import com.huoli.trip.supplier.web.Service.YaoChuFaCallBackService;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
