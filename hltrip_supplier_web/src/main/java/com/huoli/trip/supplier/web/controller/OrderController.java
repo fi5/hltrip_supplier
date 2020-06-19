@@ -1,9 +1,5 @@
 package com.huoli.trip.supplier.web.controller;
 
-import com.huoli.trip.common.vo.basevo.BaseRequest;
-import com.huoli.trip.common.vo.basevo.BaseResponse;
-import com.huoli.trip.common.vo.order.BookCheckReq;
-import com.huoli.trip.common.vo.order.BookCheckRes;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import vo.basevo.BaseRequest;
+import vo.basevo.BaseResponse;
+import vo.order.BookCheckReq;
+import vo.order.BookCheckRes;
 
 
 /**

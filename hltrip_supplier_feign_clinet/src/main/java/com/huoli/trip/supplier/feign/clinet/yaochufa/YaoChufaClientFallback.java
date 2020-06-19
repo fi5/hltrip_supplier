@@ -3,14 +3,14 @@ package com.huoli.trip.supplier.feign.clinet.yaochufa;
 import YaoChuFaVo.CommonResult;
 import YaoChuFaVo.OrderStatusResult;
 import YaoChuFaVo.VochersResult;
-import com.huoli.trip.common.vo.basevo.BaseRequest;
-import com.huoli.trip.common.vo.basevo.BaseResponse;
-import com.huoli.trip.common.vo.order.BookCheckReq;
-import com.huoli.trip.common.vo.order.BookCheckRes;
-import com.huoli.trip.common.vo.order.PayOrderReq;
-import com.huoli.trip.common.vo.order.PayOrderRes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import vo.basevo.BaseRequest;
+import vo.basevo.BaseResponse;
+import vo.order.BookCheckReq;
+import vo.order.BookCheckRes;
+import vo.order.PayOrderReq;
+import vo.order.PayOrderRes;
 
 import java.util.Map;
 
