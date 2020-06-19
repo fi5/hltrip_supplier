@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.order;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.util.Date;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class BookCheckReq{
+public class YcfBookCheckReq {
     //产品编号
     private String productId;
     //开始日期

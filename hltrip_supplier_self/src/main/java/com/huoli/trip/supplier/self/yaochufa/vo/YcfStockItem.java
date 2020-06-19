@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.order;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import lombok.Data;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class StockItem {
+public class YcfStockItem {
     //元素编号（房型编号，票种编号，餐饮编号）
     private String itemId;
     //库存量（可购买产品的份数）

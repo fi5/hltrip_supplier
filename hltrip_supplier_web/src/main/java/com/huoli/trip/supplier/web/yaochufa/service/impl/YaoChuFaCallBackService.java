@@ -1,6 +1,6 @@
-package com.huoli.trip.supplier.web.Service;
+package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import org.springframework.stereotype.Service;
 

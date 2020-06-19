@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.web.controller;
+package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
 import io.swagger.annotations.Api;

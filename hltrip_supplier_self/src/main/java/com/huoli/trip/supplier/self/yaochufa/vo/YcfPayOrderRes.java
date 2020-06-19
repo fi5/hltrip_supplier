@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.order;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import lombok.Data;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class PayOrderRes {
+public class YcfPayOrderRes {
 
     //订单状态
     private int orderStatus;

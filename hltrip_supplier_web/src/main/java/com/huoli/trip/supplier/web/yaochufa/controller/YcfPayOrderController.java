@@ -1,16 +1,16 @@
-package com.huoli.trip.supplier.web.controller;
+package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderRes;
 
 
 /**
@@ -23,12 +23,12 @@ import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
  */
 @RestController
 @Api(description = "订单支付相关")
-public class PayOrderController {
+public class YcfPayOrderController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
     @ApiOperation("支付订单服务")
     @PostMapping(path = "/payOrder")
-    BaseResponse<PayOrderRes> payOrder(@RequestBody BaseRequest<PayOrderReq> req) {
+    YcfCommonResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req) {
         return iYaoChuFaClient.payOrder(req);
     }
 

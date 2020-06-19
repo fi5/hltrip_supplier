@@ -1,18 +1,17 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckRes;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderRes;
 
 import java.util.Map;
 
@@ -40,7 +39,7 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
-    BaseResponse<BookCheckRes> getCheckInfos(@RequestBody BaseRequest<BookCheckReq> req);
+    YcfCommonResult<YcfBookCheckRes> getCheckInfos(@RequestBody YcfBaseRequest<YcfBookCheckReq> req);
     /**
      * 支付订单
      * @param= req
@@ -49,7 +48,7 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/payOrder")
-    BaseResponse<PayOrderRes> payOrder(@RequestBody BaseRequest<PayOrderReq> req);
+    YcfCommonResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req);
 
     /**
      * 通过订单编号

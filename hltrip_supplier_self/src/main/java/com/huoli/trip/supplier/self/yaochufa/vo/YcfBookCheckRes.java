@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.order;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
@@ -13,9 +13,9 @@ import java.util.List;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class BookCheckRes{
+public class YcfBookCheckRes {
     //产品编号
     private String productID;
     //价格库存列表
-    private List<SaleInfo> saleInfos;
+    private List<YcfSaleInfo> saleInfos;
 }

@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo;
+package com.huoli.trip.supplier.self.yaochufa.vo.basevo;
 
 import lombok.Data;
 

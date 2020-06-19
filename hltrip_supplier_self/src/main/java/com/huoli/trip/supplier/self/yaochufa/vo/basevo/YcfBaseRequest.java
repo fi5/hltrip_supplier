@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo;
+package com.huoli.trip.supplier.self.yaochufa.vo.basevo;
 
 import lombok.Data;
 
@@ -13,6 +13,6 @@ import java.io.Serializable;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class BaseRequest<T> implements Serializable {
+public class YcfBaseRequest<T> implements Serializable {
     private T data;
 }

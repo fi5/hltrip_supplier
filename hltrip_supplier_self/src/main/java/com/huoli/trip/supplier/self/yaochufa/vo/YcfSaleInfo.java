@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.yaochufa.vo.vo.order;
+package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class SaleInfo {
+public class YcfSaleInfo {
 
     //价格与库存时间
     private Date date;
@@ -26,5 +26,5 @@ public class SaleInfo {
     //总库存
     private int totalStock;
     //库存明细列表
-    private List<StockItem> stockList;
+    private List<YcfStockItem> stockList;
 }

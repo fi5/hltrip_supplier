@@ -1,16 +1,15 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.basevo.BaseResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.BookCheckRes;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.vo.order.PayOrderRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckRes;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderReq;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderRes;
 
 import java.util.Map;
 
@@ -31,13 +30,13 @@ public class YaoChufaClientFallback implements IYaoChuFaClient {
     }
 
     @Override
-    public BaseResponse<BookCheckRes> getCheckInfos(BaseRequest<BookCheckReq> req) {
+    public YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBaseRequest<YcfBookCheckReq> req) {
         log.info("***********进入getCheckInfos降级处理逻辑***************");
         return null;
     }
 
     @Override
-    public BaseResponse<PayOrderRes> payOrder(BaseRequest<PayOrderReq> req) {
+    public YcfCommonResult<YcfPayOrderRes> payOrder(YcfBaseRequest<YcfPayOrderReq> req) {
         log.info("***********进入payOrder降级处理逻辑***************");
         return null;
     }
