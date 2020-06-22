@@ -1,5 +1,6 @@
-package com.huoli.trip.supplier.feign.clinet.yaochufa;
+package com.huoli.trip.supplier.feign.clinet.yaochufa.client.impl;
 
+import com.huoli.trip.supplier.feign.clinet.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import lombok.extern.slf4j.Slf4j;
