@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level (%F:%L) |%X{X-B3-TraceId}| - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <!-- 第三方日志系统 -->
+        <logger name="org.springframework.core" level="ERROR"/>
+        <logger name="org.springframework.beans" level="ERROR"/>
+        <logger name="org.springframework.context" level="ERROR"/>
+        <logger name="org.springframework.web" level="ERROR"/>
+        <Logger name="com.baidu" level="FATAL"/>
+        <Logger name="com.alibaba.druid" level="ERROR"/>
+        <Logger name="org.apache.zookeeper" level="ERROR"/>
+        <Logger name="org.apache.kafka" level="ERROR"/>
+    </Loggers>
+</Configuration>
