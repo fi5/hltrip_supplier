@@ -5,6 +5,7 @@ import feign.RequestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 
@@ -27,6 +28,14 @@ public class YaoChuFaFeignInterceptor implements RequestInterceptor {
     private String partnerId;
     @Value("${yaochufa.version}")
     private String version;
+
+    @Value("${aa.aa}")
+    private String ss;
+
+    @PostConstruct
+    void tt(){
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++" + ss);
+    }
     @Override
     public void apply(RequestTemplate requestTemplate) {
         String timeStamp = String.valueOf(System.currentTimeMillis());

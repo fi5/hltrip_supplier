@@ -3,8 +3,10 @@ package com.huoli.trip.supplier.web.yaochufa.controller;
 import com.huoli.trip.supplier.feign.clinet.yaochufa.client.IYaoChuFaClient;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,13 @@ public class TestController {
     private IYaoChuFaClient iYaoChuFaClient;
 
 
+    @Value("${aa.aa}")
+    private String ss;
+
+    @PostConstruct
+    void tt(){
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++" + ss);
+    }
 
     @GetMapping(path = "/test")
     String test() {
