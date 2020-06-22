@@ -42,4 +42,6 @@ public class YcfCommonResult<T> implements Serializable {
      * 请求处理后的返回数据，具体对应每个接口返回的具体结构
      */
     private T data;
+
+
 }

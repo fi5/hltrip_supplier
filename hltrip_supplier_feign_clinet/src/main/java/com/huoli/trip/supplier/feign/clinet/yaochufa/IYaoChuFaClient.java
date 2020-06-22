@@ -20,10 +20,10 @@ import java.util.Map;
  */
 @FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}"
         ,configuration = YaoChuFaFeignInterceptor.class
-        ,fallback = YaoChufaClientFallback.class)
+        ,fallbackFactory = YaoChufaClientFallback.class)
 public interface IYaoChuFaClient {
 
-    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
     String getWeather(@RequestBody Map req);
 
     /**
