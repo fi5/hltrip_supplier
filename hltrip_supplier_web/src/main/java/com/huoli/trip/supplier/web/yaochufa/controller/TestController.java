@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
-import com.huoli.trip.supplier.feign.clinet.yaochufa.IYaoChuFaClient;
+import com.huoli.trip.supplier.feign.clinet.yaochufa.client.IYaoChuFaClient;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
