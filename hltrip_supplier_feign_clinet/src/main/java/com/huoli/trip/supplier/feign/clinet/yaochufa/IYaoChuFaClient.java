@@ -1,17 +1,12 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
+import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckRes;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderRes;
 
 import java.util.Map;
 
@@ -53,18 +48,37 @@ public interface IYaoChuFaClient {
     /**
      * 通过订单编号
      * 重发凭证
-     * @param partnerOrderId
+     * @param request
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/resendVoucher")
-    YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId);
+    YcfCommonResult<YcfVochersResult> getVochers(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
     /**
      * 通过订单号获取订单状态等信息
-     * @param partnerOrderId
+     * @param request
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
-    YcfCommonResult<YcfOrderStatusResult> getOederStatus(String partnerOrderId);
+    YcfCommonResult<YcfOrderStatusResult> getOederStatus(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
+    /**
+     * 创建订单
+     * @param= req
+     * @return= YcfCreateOrderRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/createOrder")
+    YcfCommonResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req);
+
+    /**
+     * 申请取消订单
+     * @param= req
+     * @return= YcfCancelOrderRes
+     * @author= wangdm
+     * @document http://opensip.yaochufa.com/sip/api
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/cancelOrder")
+    YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req);
 }

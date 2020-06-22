@@ -35,16 +35,42 @@ public class YcfOrderController {
     }
 
     YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId){
-        return iYaoChuFaClient.getVochers(partnerOrderId);
+        YcfBaseRequest request = new YcfBaseRequest();
+        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+        orderBaSeRequest.setPartnerOrderId(partnerOrderId);
+        request.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getVochers(request);
 
     }
 
     YcfCommonResult<YcfOrderStatusResult> getOrderStatus(String partnerOrderId){
-        return iYaoChuFaClient.getOederStatus(partnerOrderId);
+        YcfBaseRequest request = new YcfBaseRequest();
+        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+        orderBaSeRequest.setPartnerOrderId(partnerOrderId);
+        request.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getOederStatus(request);
     }
 
     @RequestMapping(method = {RequestMethod.POST},value="/api/service/yaochufa/refundNotice")
     private void refundNotice(@RequestBody YcfRefundNoticeRequest request){
         yaoChuFaCallBackService.refundNotice(request);
+    }
+
+    @ApiOperation("支付订单服务")
+    @PostMapping(path = "/payOrder")
+    YcfCommonResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req) {
+        return iYaoChuFaClient.payOrder(req);
+    }
+
+    @ApiOperation("创建订单")
+    @PostMapping(path = "/createOrder")
+    YcfCommonResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req) {
+        return iYaoChuFaClient.createOrder(req);
+    }
+
+    @ApiOperation("申请取消订单")
+    @PostMapping(path = "/cancelOrder")
+    YcfCommonResult<YcfCancelOrderRes> cancelOrder(@RequestBody YcfBaseRequest<YcfCancelOrderReq> req) {
+        return iYaoChuFaClient.cancelOrder(req);
     }
 }

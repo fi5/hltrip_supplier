@@ -1,15 +1,10 @@
 package com.huoli.trip.supplier.feign.clinet.yaochufa;
 
+import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckRes;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfPayOrderRes;
 
 import java.util.Map;
 
@@ -42,12 +37,23 @@ public class YaoChufaClientFallback implements IYaoChuFaClient {
     }
 
     @Override
-    public YcfCommonResult<YcfVochersResult> getVochers(String partnerOrderId) {
+    public YcfCommonResult<YcfVochersResult> getVochers(YcfBaseRequest<YcfOrderBaSeRequest> request) {
         return null;
     }
 
     @Override
-    public YcfCommonResult<YcfOrderStatusResult> getOederStatus(String partnerOrderId) {
+    public YcfCommonResult<YcfOrderStatusResult> getOederStatus(YcfBaseRequest<YcfOrderBaSeRequest> request) {
         return null;
     }
+
+    @Override
+    public YcfCommonResult<YcfCreateOrderRes> createOrder(YcfBaseRequest<YcfCreateOrderReq> req) {
+        return null;
+    }
+
+    @Override
+    public YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req) {
+        return null;
+    }
+
 }
