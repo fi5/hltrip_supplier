@@ -157,7 +157,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.huoli.trip.supplier.web.HltripSupplierApiApplication</mainClass>
+                            <mainClass>com.huoli.trip.supplier.web.HltripSupplierWebApplication</mainClass>
                             <useUniqueVersions>false</useUniqueVersions>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>libs/</classpathPrefix>

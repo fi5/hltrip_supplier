@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web;
 
+import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
@@ -19,13 +20,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 @ImportResource({"classpath:disconf-config.xml"})
 @ComponentScan({"com.huoli.trip"})
-@EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.clinet")
+@DubboComponentScan(value = "com.huoli.trip.supplier.web.service")
 @EnableHystrix
 @EnableSwagger2
-public class HltripSupplierApiApplication {
+public class HltripSupplierWebApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HltripSupplierApiApplication.class, args);
+        SpringApplication.run(HltripSupplierWebApplication.class, args);
     }
 
 }
