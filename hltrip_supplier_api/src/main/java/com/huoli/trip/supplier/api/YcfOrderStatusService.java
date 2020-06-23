@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 
 /**
@@ -9,9 +10,15 @@ import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 public interface YcfOrderStatusService {
     /**
      * 主动获取要出发订单相关信息
-     * @param partnerOrderId
+     * @param orderId
      * @return
      */
-    YcfCommonResult<YcfOrderStatusResult> getOrder(String partnerOrderId);
-    
+    YcfCommonResult<YcfOrderStatusResult> getOrder(String orderId);
+
+    /**
+     * 重新获取凭证
+     * @param orderId
+     * @return
+     */
+    YcfCommonResult<YcfVochersResult> getVochers(String orderId);
 }
