@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" packages="com.huoli.atrace.log.log4j2.layout">
+
+
+    <Appenders>
+        <!--这个输出控制台的配置-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 控制台只输出level及以上级别的信息(onMatch),其他的直接拒绝(onMismatch) -->
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 输出日志的格式 -->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        </Console>
+
+        <RollingFile name="File" fileName="logs/info.log"
+                     filePattern="logs/info-%d{yyyy-MM-dd}.log.gz" append="true">
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level |%X{X-B3-TraceId}| [%t] %class{36} %L %M -- %msg%xEx%n
+                </pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="logs" maxDepth="5">
+                    <IfFileName glob="info-*.log.gz" />
+                    <IfLastModified age="20d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="ErrorFile" fileName="logs/error.log"
+                     filePattern="logs/error-%d{yyyy-MM-dd}.log.gz" append="true">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level |%X{X-B3-TraceId}| [%t] %class{36} %L %M -- %msg%xEx%n
+                </pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="logs" maxDepth="5">
+                    <IfFileName glob="error-*.log.gz" />
+                    <IfLastModified age="30d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- 不影响业务运行，异步发送 -->
+        <Async name="AsyncFlume" bufferSize="262144" blocking="false" includeLocation="true">
+            <AppenderRef ref="FlumeAppender"/>
+            <errorRef ref="errorFlumeAppender"/>
+        </Async>
+
+        <!-- flume发送 batchSize（单次传输大小）需要当前日志场景决定，maxDelayMillis（最大等待时间） -->
+        <Flume name="FlumeAppender" compress="false" type="Avro" batchSize="500" maxDelayMillis="1000">
+            <!--测试配置：-->
+            <Agent host="39.96.193.163" port="8801"/>
+            <Agent host="39.96.193.163" port="8802"/>
+            <HuoliJsonLayout charset="UTF-8" dateFormat="yyyy-MM-dd HH:mm:ss.SSS" mode="simple" line="false">
+                <!-- spring cloud sleuth体系 -->
+                <KeyValuePair key="traceId" value="#mdc:X-B3-TraceId"/>
+                <KeyValuePair key="spanId" value="#mdc:X-B3-SpanId"/>
+                <!-- brave体系 -->
+                <!--<KeyValuePair key="traceId" value="#mdc:traceId"/>-->
+                <!--<KeyValuePair key="spanId" value="#mdc:spanId"/>-->
+            </HuoliJsonLayout>
+        </Flume>
+    </Appenders>
+
+
+    <Loggers>
+        <!-- 配置日志的根节点 -->
+        <Root level="INFO">
+            <AppenderRef ref="File" />
+            <AppenderRef ref="ErrorFile" />
+            <AppenderRef ref="Console" />
+            <appenderRef ref="AsyncFlume" />
+        </Root>
+        <!-- 第三方日志系统 -->
+        <!-- 不在线上环境打调用链日志或统计日志 -->
+        <logger name="trace" level="INFO" additivity="false">
+            <appender-ref ref="AsyncFlume" />
+        </logger>
+
+        <logger name="event" level="INFO" additivity="false">
+            <appender-ref ref="AsyncFlume" />
+        </logger>
+        <logger name="org.springframework.core" level="ERROR"/>
+        <logger name="org.springframework.beans" level="ERROR"/>
+        <logger name="org.springframework.context" level="ERROR"/>
+        <Logger name="org.springframework.kafka.listener" level="ERROR"/>
+        <logger name="org.springframework.web" level="ERROR"/>
+        <Logger name="com.baidu" level="FATAL"/>
+        <Logger name="com.alibaba.druid" level="ERROR"/>
+        <Logger name="org.apache.zookeeper" level="ERROR"/>
+        <Logger name="com.alibaba.dubbo" level="ERROR"/>
+        <Logger name="org.apache.kafka" level="ERROR"/>
+    </Loggers>
+</Configuration>

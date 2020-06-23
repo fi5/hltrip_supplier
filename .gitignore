@@ -33,3 +33,9 @@ nbdist/
 ### Jrebel ###
 rebel.xml
 rebel.xml.bak
+/hltrip_supplier_feign_clinet/libs/
+/hltrip_supplier_self/libs/
+/hltrip_supplier_web/libs/
+/logs/
+/hltrip_supplier_web/conf/
+/hltrip_supplier_web/libs.tar

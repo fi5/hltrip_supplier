@@ -1,5 +1,7 @@
-package com.huoli.trip.supplier.feign.clinet.yaochufa;
+package com.huoli.trip.supplier.feign.client.yaochufa.client;
 
+import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
+import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.YaoChufaClientFallback;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -20,10 +22,10 @@ import java.util.Map;
  */
 @FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}"
         ,configuration = YaoChuFaFeignInterceptor.class
-        ,fallback = YaoChufaClientFallback.class)
+        ,fallbackFactory = YaoChufaClientFallback.class)
 public interface IYaoChuFaClient {
 
-    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
     String getWeather(@RequestBody Map req);
 
     /**
