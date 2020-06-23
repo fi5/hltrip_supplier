@@ -23,7 +23,7 @@
     <modules>
         <module>hltrip_supplier_web</module>
         <module>hltrip_supplier_self</module>
-        <module>hltrip_supplier_feign_clinet</module>
+        <module>hltrip_supplier_feign_client</module>
         <module>hltrip_supplier_api</module>
     </modules>
     <dependencyManagement>
