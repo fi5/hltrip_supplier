@@ -13,6 +13,5 @@ public interface YcfOrderStatusService {
      * @return
      */
     YcfCommonResult<YcfOrderStatusResult> getOrder(String partnerOrderId);
-
-
+    
 }
