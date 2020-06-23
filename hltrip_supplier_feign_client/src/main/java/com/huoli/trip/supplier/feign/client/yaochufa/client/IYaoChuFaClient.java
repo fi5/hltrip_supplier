@@ -1,7 +1,7 @@
-package com.huoli.trip.supplier.feign.clinet.yaochufa.client;
+package com.huoli.trip.supplier.feign.client.yaochufa.client;
 
-import com.huoli.trip.supplier.feign.clinet.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
-import com.huoli.trip.supplier.feign.clinet.yaochufa.client.impl.YaoChufaClientFallback;
+import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
+import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.YaoChufaClientFallback;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import org.springframework.cloud.openfeign.FeignClient;

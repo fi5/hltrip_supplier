@@ -1,6 +1,6 @@
-package com.huoli.trip.supplier.feign.clinet.yaochufa.client.impl;
+package com.huoli.trip.supplier.feign.client.yaochufa.client.impl;
 
-import com.huoli.trip.supplier.feign.clinet.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;

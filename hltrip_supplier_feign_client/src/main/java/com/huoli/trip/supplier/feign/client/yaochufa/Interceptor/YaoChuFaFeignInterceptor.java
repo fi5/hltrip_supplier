@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.feign.clinet.yaochufa.Interceptor;
+package com.huoli.trip.supplier.feign.client.yaochufa.Interceptor;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;

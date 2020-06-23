@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
-import com.huoli.trip.supplier.feign.clinet.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
