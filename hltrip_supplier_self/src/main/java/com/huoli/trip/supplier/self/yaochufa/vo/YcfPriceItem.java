@@ -14,7 +14,7 @@ import java.util.Date;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class PriceItem {
+public class YcfPriceItem {
     //日期（2016-01-12）
     private Date date;
     //价格（底价模式：结算价；）

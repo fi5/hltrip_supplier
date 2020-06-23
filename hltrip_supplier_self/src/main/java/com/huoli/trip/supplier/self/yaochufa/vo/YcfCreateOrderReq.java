@@ -48,7 +48,7 @@ public class YcfCreateOrderReq {
     //出行客人集合(套餐预定规则要求，则必填)
     private List<YcfGuest> guests;
     //价格集合
-    private List<PriceItem> priceDetail;
+    private List<YcfPriceItem> priceDetail;
     //订单备注
     private String remark;
 
