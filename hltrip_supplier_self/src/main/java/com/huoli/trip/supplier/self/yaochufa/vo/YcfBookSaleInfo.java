@@ -15,7 +15,7 @@ import java.util.List;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfSaleInfo {
+public class YcfBookSaleInfo {
 
     //价格与库存时间
     private Date date;

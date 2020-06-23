@@ -17,5 +17,5 @@ public class YcfBookCheckRes {
     //产品编号
     private String productID;
     //价格库存列表
-    private List<YcfSaleInfo> saleInfos;
+    private List<YcfBookSaleInfo> saleInfos;
 }

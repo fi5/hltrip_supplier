@@ -8,12 +8,13 @@ import lombok.Data;
  * 公司：活力天汇<br>
  * 作者：王德铭<br>
  * 版本：1.0<br>
- * 创建日期：2020/4/26<br>
+ * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfFood {
-    //餐饮编号
-    private String foodId;
+public class YcfBookTicket {
+
+    //门票编号
+    private String ticketId;
     //开始使用日期
     private String checkInDate;
 }

@@ -11,7 +11,7 @@ import lombok.Data;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfRoom {
+public class YcfBookRoom {
     //房型编号
     private String roomId;
     //开始使用日期

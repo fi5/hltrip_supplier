@@ -40,13 +40,13 @@ public class YcfCreateOrderReq {
     //联系人证件类型
     private int credentialType;
     //房资源组(房/票/餐，不可同时为空)
-    private List<YcfRoom> roomDetail;
+    private List<YcfBookRoom> roomDetail;
     //门票资源组(房/票/餐，不可同时为空)
-    private List<YcfTicket> ticketDetail;
+    private List<YcfBookTicket> ticketDetail;
     //餐饮资源组(房/票/餐，不可同时为空)
-    private List<YcfFood> foodDetail;
+    private List<YcfBookFood> foodDetail;
     //出行客人集合(套餐预定规则要求，则必填)
-    private List<YcfGuest> guests;
+    private List<YcfBookGuest> guests;
     //价格集合
     private List<YcfPriceItem> priceDetail;
     //订单备注

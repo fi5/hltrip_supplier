@@ -11,7 +11,7 @@ import lombok.Data;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfGuest {
+public class YcfBookGuest {
     //中文姓名(套餐预定规则要求，则必填)
     private String cName;
     //英文姓名(套餐预定规则要求，则必填)
