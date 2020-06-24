@@ -1,8 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.constant;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderCode;
-
-public enum YcfOrderEnum implements YcfOrderCode {
+public enum YcfOrderEnum {
 
     /**
      * 0:待支付：创建订单成功，合作方尚未付款。
