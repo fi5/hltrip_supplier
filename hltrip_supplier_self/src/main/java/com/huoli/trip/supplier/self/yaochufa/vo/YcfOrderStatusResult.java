@@ -6,5 +6,5 @@ import java.util.List;
 public class YcfOrderStatusResult implements Serializable {
     private String  orderId;
     private int code;
-    private List<YcfVoucher> ycfVochers;
+    private List<YcfVoucher> ycfVouchers;
 }

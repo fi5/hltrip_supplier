@@ -55,12 +55,12 @@ public class YaoChuFaClientFallback implements FallbackFactory<IYaoChuFaClient> 
             }
 
             @Override
-            public YcfBaseResult<YcfVochersResult> getVochers(YcfBaseRequest<YcfOrderBaSeRequest> request) {
+            public YcfBaseResult<YcfVouchersResult> getVouchers(YcfBaseRequest<YcfOrderBaSeRequest> request) {
                 return null;
             }
 
             @Override
-            public YcfBaseResult<YcfOrderStatusResult> getOederStatus(YcfBaseRequest<YcfOrderBaSeRequest> request) {
+            public YcfBaseResult<YcfOrderStatusResult> getOrderStatus(YcfBaseRequest<YcfOrderBaSeRequest> request) {
                 return null;
             }
 

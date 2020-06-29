@@ -1,8 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Maps;
-import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;

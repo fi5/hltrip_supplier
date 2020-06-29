@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVouchersResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 /**
@@ -20,5 +20,5 @@ public interface YcfOrderStatusService {
      * @param orderId
      * @return
      */
-    YcfBaseResult<YcfVochersResult> getVouchers(String orderId);
+    YcfBaseResult<YcfVouchersResult> getVouchers(String orderId);
 }
