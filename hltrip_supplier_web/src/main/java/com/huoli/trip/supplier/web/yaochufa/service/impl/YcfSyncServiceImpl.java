@@ -86,6 +86,24 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
+    public void getPrice(YcfGetPriceRequest request){
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
+        log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
+        YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
+        log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && StringUtils.equals(baseResult.getStatusCode(), String.valueOf(YcfConstants.RESULT_CODE_SUCCESS))){
+            YcfGetPriceResponse response = baseResult.getData();
+            if(response == null){
+                log.error("获取价格失败，供应商（要出发）没有返回data");
+                return;
+            }
+            YcfPrice ycfPrice = new YcfPrice();
+            ycfPrice.setProductID(response.getProductID());
+            ycfPrice.setSaleInfos(response.getSaleInfos());
+            syncPrice(ycfPrice);
+        }
+    }
+
     public void syncPrice(YcfPrice ycfPrice){
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
         priceDao.updateBySupplierProductId(pricePO);

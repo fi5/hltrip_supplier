@@ -32,7 +32,15 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/getProductPois")
-    YcfBaseResult<List<YcfProductItem>> getPoi(@RequestBody YcfBaseRequest<YcfGetPoiRequest> request);
+    YcfBaseResult<YcfGetPoiResponse> getPoi(@RequestBody YcfBaseRequest<YcfGetPoiRequest> request);
+
+    /**
+     * 获取价格日历
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/StockPriceRequest")
+    YcfBaseResult<YcfGetPriceResponse> getPrice(@RequestBody YcfBaseRequest<YcfGetPriceRequest> request);
 
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
     String getWeather(@RequestBody Map req);

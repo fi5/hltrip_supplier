@@ -37,6 +37,5 @@ public class YchOrderStatusServiceImpl  implements YcfOrderStatusService {
         return iYaoChuFaClient.getVouchers(request);
     }
 
-
 }
 
