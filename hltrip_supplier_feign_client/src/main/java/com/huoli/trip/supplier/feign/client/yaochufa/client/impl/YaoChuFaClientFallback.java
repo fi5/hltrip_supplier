@@ -3,12 +3,14 @@ package com.huoli.trip.supplier.feign.client.yaochufa.client.impl;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +23,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class YaoChufaClientFallback implements FallbackFactory<IYaoChuFaClient> {
+public class YaoChuFaClientFallback implements FallbackFactory<IYaoChuFaClient> {
 
 
     @Override
@@ -33,37 +35,42 @@ public class YaoChufaClientFallback implements FallbackFactory<IYaoChuFaClient> 
         return new IYaoChuFaClient() {
 
             @Override
+            public YcfBaseResult<List<YcfProductItem>> getPoi(YcfBaseRequest<YcfGetPoiRequest> request){
+                return null;
+            }
+
+            @Override
             public String getWeather(Map req) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBaseRequest<YcfBookCheckReq> req) {
+            public YcfBaseResult<YcfBookCheckRes> getCheckInfos(YcfBaseRequest<YcfBookCheckReq> req) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfPayOrderRes> payOrder(YcfBaseRequest<YcfPayOrderReq> req) {
+            public YcfBaseResult<YcfPayOrderRes> payOrder(YcfBaseRequest<YcfPayOrderReq> req) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfVochersResult> getVochers(YcfBaseRequest<YcfOrderBaSeRequest> request) {
+            public YcfBaseResult<YcfVochersResult> getVochers(YcfBaseRequest<YcfOrderBaSeRequest> request) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfOrderStatusResult> getOederStatus(YcfBaseRequest<YcfOrderBaSeRequest> request) {
+            public YcfBaseResult<YcfOrderStatusResult> getOederStatus(YcfBaseRequest<YcfOrderBaSeRequest> request) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfCreateOrderRes> createOrder(YcfBaseRequest<YcfCreateOrderReq> req) {
+            public YcfBaseResult<YcfCreateOrderRes> createOrder(YcfBaseRequest<YcfCreateOrderReq> req) {
                 return null;
             }
 
             @Override
-            public YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req) {
+            public YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req) {
                 return null;
             }
         };

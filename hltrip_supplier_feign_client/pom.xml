@@ -28,12 +28,6 @@
         </dependency>
         <dependency>
             <groupId>com.huoli.trip</groupId>
-            <artifactId>hltrip_common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.huoli.trip</groupId>
             <artifactId>hltrip_supplier_self</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>

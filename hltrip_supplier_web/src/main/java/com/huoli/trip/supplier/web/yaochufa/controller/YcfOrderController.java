@@ -3,7 +3,7 @@ package com.huoli.trip.supplier.web.yaochufa.controller;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.yaochufa.service.impl.YaoChuFaCallBackService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,7 +30,7 @@ public class YcfOrderController {
 
     @ApiOperation("可预订检查服务")
     @PostMapping(path = "/getCheckInfos")
-    YcfCommonResult<YcfBookCheckRes> getCheckInfos(@RequestBody YcfBaseRequest<YcfBookCheckReq> req) {
+    YcfBaseResult<YcfBookCheckRes> getCheckInfos(@RequestBody YcfBaseRequest<YcfBookCheckReq> req) {
         return iYaoChuFaClient.getCheckInfos(req);
     }
 
@@ -42,19 +42,19 @@ public class YcfOrderController {
 
     @ApiOperation("支付订单服务")
     @PostMapping(path = "/payOrder")
-    YcfCommonResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req) {
+    YcfBaseResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req) {
         return iYaoChuFaClient.payOrder(req);
     }
 
     @ApiOperation("创建订单")
     @PostMapping(path = "/createOrder")
-    YcfCommonResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req) {
+    YcfBaseResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req) {
         return iYaoChuFaClient.createOrder(req);
     }
 
     @ApiOperation("申请取消订单")
     @PostMapping(path = "/cancelOrder")
-    YcfCommonResult<YcfCancelOrderRes> cancelOrder(@RequestBody YcfBaseRequest<YcfCancelOrderReq> req) {
+    YcfBaseResult<YcfCancelOrderRes> cancelOrder(@RequestBody YcfBaseRequest<YcfCancelOrderReq> req) {
         return iYaoChuFaClient.cancelOrder(req);
     }
 }

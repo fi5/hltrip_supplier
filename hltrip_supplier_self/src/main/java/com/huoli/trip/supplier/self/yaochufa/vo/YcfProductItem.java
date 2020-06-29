@@ -137,5 +137,5 @@ public class YcfProductItem {
     /**
      * 产品特色
      */
-    private List<ItemFeature> characterrList;
+    private List<YcfItemFeature> characterrList;
 }

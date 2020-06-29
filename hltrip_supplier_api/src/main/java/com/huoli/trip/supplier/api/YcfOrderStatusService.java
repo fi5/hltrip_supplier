@@ -2,7 +2,7 @@ package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 /**
  * 要出发订单dubbo服务接口定义
@@ -13,12 +13,12 @@ public interface YcfOrderStatusService {
      * @param orderId
      * @return
      */
-    YcfCommonResult<YcfOrderStatusResult> getOrder(String orderId);
+    YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId);
 
     /**
      * 重新获取凭证
      * @param orderId
      * @return
      */
-    YcfCommonResult<YcfVochersResult> getVochers(String orderId);
+    YcfBaseResult<YcfVochersResult> getVouchers(String orderId);
 }
