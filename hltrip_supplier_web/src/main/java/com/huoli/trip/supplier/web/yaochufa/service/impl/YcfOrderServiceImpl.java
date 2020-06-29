@@ -1,19 +1,19 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
-import com.huoli.trip.supplier.api.YcfOrderStatusService;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.huoli.trip.supplier.api.YcfOrderService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
-import com.alibaba.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 要出发订单dubbo服务接口实现
  */
 
-@Service
-public class YchOrderStatusServiceImpl  implements YcfOrderStatusService {
+@Service(timeout = 10000,group = "hllx")
+public class YcfOrderServiceImpl implements YcfOrderService {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
 
