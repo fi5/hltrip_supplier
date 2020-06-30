@@ -39,3 +39,4 @@ rebel.xml.bak
 /logs/
 /hltrip_supplier_web/libs.tar
 /hltrip_supplier_feign_client/libs/
+/hltrip_supplier_api/libs/

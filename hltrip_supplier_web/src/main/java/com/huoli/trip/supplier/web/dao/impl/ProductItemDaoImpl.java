@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -33,5 +35,11 @@ public class ProductItemDaoImpl implements ProductItemDao {
         mongoTemplate.getConverter().write(productItemPO, document);
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
+    }
+
+    public List<ProductItemPO> selectByCityAndType(String city, Integer type, int pageSize){
+        Query query = new Query(Criteria.where("city").is(city).and("itemType").is(type)).limit(pageSize);
+        List<ProductItemPO> productItems = mongoTemplate.find(query, ProductItemPO.class);
+        return productItems;
     }
 }

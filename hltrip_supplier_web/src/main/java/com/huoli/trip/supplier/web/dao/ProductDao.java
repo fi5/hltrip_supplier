@@ -17,4 +17,6 @@ public interface ProductDao {
      * @param productPO
      */
     void updateBySupplierProductId(ProductPO productPO);
+
+    void getProductList();
 }

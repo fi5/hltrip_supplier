@@ -31,7 +31,7 @@ public class YcfProductItem {
      * 2:景区
      * 3:餐饮
      */
-    private String poiType;
+    private Integer poiType;
 
     /**
      * 主标题

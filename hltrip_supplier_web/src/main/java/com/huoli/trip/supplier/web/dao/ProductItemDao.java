@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -17,4 +19,13 @@ public interface ProductItemDao {
      * @param productItemPO
      */
     void updateBySupplierItemId(ProductItemPO productItemPO);
+
+    /**
+     * 根据城市和类型查项目
+     * @param city
+     * @param type
+     * @param pageSize
+     * @return
+     */
+    List<ProductItemPO> selectByCityAndType(String city, Integer type, int pageSize);
 }

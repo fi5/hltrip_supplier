@@ -194,9 +194,11 @@ public class YcfConverter {
         productItemPO.setImages(JSON.toJSONString(productItem.getImageList()));
         productItemPO.setMainImages(JSON.toJSONString(productItem.getMainImageList()));
         productItemPO.setItemType(productItem.getPoiType());
-        productItemPO.setLatitude(productItem.getLatitude());
+        ItemCoordinatePO itemCoordinate = new ItemCoordinatePO();
+        itemCoordinate.setLatitude(productItem.getLatitude());
+        itemCoordinate.setLongitude(productItem.getLongitude());
+        productItemPO.setItemCoordinate(itemCoordinate);
         productItemPO.setLevel(productItem.getLevel());
-        productItemPO.setLongitude(productItem.getLongitude());
         productItemPO.setMainTitle(productItem.getPcMain());
         productItemPO.setName(productItem.getPoiName());
         productItemPO.setPhone(productItem.getPhone());

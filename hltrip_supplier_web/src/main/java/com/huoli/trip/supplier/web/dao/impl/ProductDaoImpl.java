@@ -34,4 +34,10 @@ public class ProductDaoImpl implements ProductDao {
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
+
+    @Override
+    public void getProductList(){
+
+
+    }
 }
