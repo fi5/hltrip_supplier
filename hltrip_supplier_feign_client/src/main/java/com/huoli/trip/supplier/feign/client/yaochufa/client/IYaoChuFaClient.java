@@ -3,14 +3,13 @@ package com.huoli.trip.supplier.feign.client.yaochufa.client;
 import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.YaoChuFaClientFallback;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,7 +41,7 @@ public interface IYaoChuFaClient {
     @RequestMapping(method = RequestMethod.POST,path = "/StockPriceRequest")
     YcfBaseResult<YcfGetPriceResponse> getPrice(@RequestBody YcfBaseRequest<YcfGetPriceRequest> request);
 
-    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/getProductPois")
     String getWeather(@RequestBody Map req);
 
     /**
