@@ -22,7 +22,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client.yaochufa.client")
 @EnableHystrix
 @EnableSwagger2
-@EnableMongoRepositories
 public class HltripSupplierWebApplication {
 
     public static void main(String[] args) {

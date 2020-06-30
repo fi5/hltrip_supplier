@@ -74,7 +74,7 @@ public class YcfConverter {
         FoodPO foodPO = new FoodPO();
         foodPO.setChoiceNum(product.getFoodChoiceNum());
         foodPO.setOptionNum(product.getFoodOptionNum());
-        if(ListUtils.isEmpty(product.getFoodList())){
+        if(!ListUtils.isEmpty(product.getFoodList())){
             List<FoodInfoPO> foodInfoPOs = product.getFoodList().stream().map(food -> convertToFoodInfoPO(food)).collect(Collectors.toList());
             foodPO.setFoods(foodInfoPOs);
             List<String> poiIds = product.getFoodList().stream().map(f -> f.getPoiId()).collect(Collectors.toList());
@@ -94,7 +94,7 @@ public class YcfConverter {
         ticketPO.setTicketType(product.getTicketType());
         ticketPO.setChoiceNum(product.getTicketChoiceNum());
         ticketPO.setOptionNum(product.getFoodOptionNum());
-        if(ListUtils.isEmpty(product.getTicketList())){
+        if(!ListUtils.isEmpty(product.getTicketList())){
             List<TicketInfoPO> ticketInfoPOs = product.getTicketList().stream().map(ticket -> convertToTicketInfoPO(ticket)).collect(Collectors.toList());
             ticketPO.setTickets(ticketInfoPOs);
             List<String> poiIds = product.getTicketList().stream().map(t -> t.getPoiId()).collect(Collectors.toList());
@@ -112,7 +112,7 @@ public class YcfConverter {
         RoomPO roomPO = new RoomPO();
         roomPO.setChoiceNum(product.getTicketChoiceNum());
         roomPO.setOptionNum(product.getFoodOptionNum());
-        if(ListUtils.isEmpty(product.getRoomList())){
+        if(!ListUtils.isEmpty(product.getRoomList())){
             List<RoomInfoPO> roomInfoPOs = product.getRoomList().stream().map(room -> convertToRoomInfoPO(room)).collect(Collectors.toList());
             roomPO.setRooms(roomInfoPOs);
             List<String> poiIds = product.getRoomList().stream().map(r -> r.getPoiId()).collect(Collectors.toList());
@@ -219,7 +219,7 @@ public class YcfConverter {
 //        pricePO.setSupplierId(""); // todo
 //        pricePO.setCode(CommonUtils.genCodeBySupplier(pricePO.getSupplierId(), price.getProductID()));
         pricePO.setSupplierProductId(price.getProductID());
-        if(ListUtils.isEmpty(price.getSaleInfos())){
+        if(!ListUtils.isEmpty(price.getSaleInfos())){
             List<PriceInfoPO> priceInfoPOs = price.getSaleInfos().stream().map(priceInfo -> convertToPriceInfoPO(priceInfo)).collect(Collectors.toList());
             pricePO.setPriceInfos(priceInfoPOs);
         }
