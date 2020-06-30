@@ -1,9 +1,8 @@
-package com.huoli.trip.supplier.web.dao.mongo.impl;
+package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
-import com.huoli.trip.supplier.web.dao.mongo.ProductItemDao;
+import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -21,18 +20,18 @@ import org.springframework.stereotype.Repository;
  * 创建日期：2020/6/28<br>
  */
 @Repository
-public class ProductItemDaoImpl implements ProductItemDao {
+public class ProductDaoImpl implements ProductDao {
 
-//    @Autowired
-//    private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
-    public void updateBySupplierItemId(ProductItemPO productItemPO){
+    public void updateBySupplierProductId(ProductPO productPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("code").is(productItemPO.getCode()));
+        query.addCriteria(Criteria.where("code").is(productPO.getCode()));
         Document document = new Document();
-//        mongoTemplate.getConverter().write(productItemPO, document);
-//        Update update = Update.fromDocument(document);
-//        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
+        mongoTemplate.getConverter().write(productPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 }

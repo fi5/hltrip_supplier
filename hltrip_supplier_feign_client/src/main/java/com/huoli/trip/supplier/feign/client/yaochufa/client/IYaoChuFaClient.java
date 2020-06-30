@@ -30,7 +30,7 @@ public interface IYaoChuFaClient {
      * @param request
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/getProductPois")
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/GetProductPois")
     YcfBaseResult<YcfGetPoiResponse> getPoi(@RequestBody YcfBaseRequest<YcfGetPoiRequest> request);
 
     /**
@@ -38,7 +38,7 @@ public interface IYaoChuFaClient {
      * @param request
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/StockPriceRequest")
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/StockPriceRequest")
     YcfBaseResult<YcfGetPriceResponse> getPrice(@RequestBody YcfBaseRequest<YcfGetPriceRequest> request);
 
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getProductPois")

@@ -1,8 +1,8 @@
-package com.huoli.trip.supplier.web.dao.mongo.impl;
+package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.PricePO;
-import com.huoli.trip.supplier.web.dao.mongo.PriceDao;
+import com.huoli.trip.supplier.web.dao.PriceDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -22,16 +22,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PriceDaoImpl implements PriceDao {
 
-//    @Autowired
-//    private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public void updateBySupplierProductId(PricePO pricePO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(pricePO.getCode()));
         Document document = new Document();
-//        mongoTemplate.getConverter().write(pricePO, document);
-//        Update update = Update.fromDocument(document);
-//        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
+        mongoTemplate.getConverter().write(pricePO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
     }
 }
