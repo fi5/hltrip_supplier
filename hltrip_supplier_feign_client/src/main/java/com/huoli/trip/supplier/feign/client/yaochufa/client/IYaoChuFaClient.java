@@ -25,7 +25,7 @@ import java.util.Map;
         ,fallbackFactory = YaoChufaClientFallback.class)
 public interface IYaoChuFaClient {
 
-    @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
+    @RequestMapping(method = RequestMethod.POST,path = "//OTA/GetProductPois")
     String getWeather(@RequestBody Map req);
 
     /**
