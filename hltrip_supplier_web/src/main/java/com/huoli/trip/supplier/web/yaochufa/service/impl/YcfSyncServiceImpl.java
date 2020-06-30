@@ -54,7 +54,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     public void syncProductItem(List<String> productItemIds){
         log.info("开始同步poi，id list = {}", JSON.toJSONString(productItemIds));
-        if(!ListUtils.isEmpty(productItemIds)){
+        if(ListUtils.isEmpty(productItemIds)){
             log.error("同步poi失败，poi id集合为空");
             return;
         }

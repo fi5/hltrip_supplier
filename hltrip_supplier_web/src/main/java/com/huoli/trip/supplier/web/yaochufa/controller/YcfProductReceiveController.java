@@ -11,7 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -21,7 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
  * 版本：1.0<br>
  * 创建日期：2020/6/24<br>
  */
-@RestController("/product")
+@RestController()
+@RequestMapping(value = "/product", produces = "application/json")
 @Slf4j
 public class YcfProductReceiveController {
 
@@ -47,5 +51,11 @@ public class YcfProductReceiveController {
             return YcfBaseResult.fail();
         }
         return YcfBaseResult.success();
+    }
+
+    @PostMapping(value = "/test/getpoi")
+    public String test(@RequestBody List<String> ids){
+        ycfSyncService.syncProductItem(ids);
+        return "ok";
     }
 }
