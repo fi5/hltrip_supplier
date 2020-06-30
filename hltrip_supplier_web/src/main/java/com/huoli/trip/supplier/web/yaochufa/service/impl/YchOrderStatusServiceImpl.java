@@ -4,9 +4,9 @@ import com.huoli.trip.supplier.api.YcfOrderStatusService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderBaSeRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVouchersResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.alibaba.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,23 +20,22 @@ public class YchOrderStatusServiceImpl  implements YcfOrderStatusService {
     private IYaoChuFaClient iYaoChuFaClient;
 
     @Override
-    public YcfCommonResult<YcfOrderStatusResult> getOrder(String orderId) {
+    public YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId) {
             YcfBaseRequest request = new YcfBaseRequest();
             YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
             orderBaSeRequest.setPartnerOrderId(orderId);
             request.setData(orderBaSeRequest);
-            return iYaoChuFaClient.getOederStatus(request);
+            return iYaoChuFaClient.getOrderStatus(request);
     }
 
     @Override
-    public YcfCommonResult<YcfVochersResult> getVochers(String orderId) {
+    public YcfBaseResult<YcfVouchersResult> getVouchers(String orderId) {
         YcfBaseRequest request = new YcfBaseRequest();
         YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
         orderBaSeRequest.setPartnerOrderId(orderId);
         request.setData(orderBaSeRequest);
-        return iYaoChuFaClient.getVochers(request);
+        return iYaoChuFaClient.getVouchers(request);
     }
-
 
 }
 

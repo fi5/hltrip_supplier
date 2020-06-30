@@ -14,22 +14,7 @@ import java.util.Date;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class PriceInfo {
-
-    /**
-     * 主键
-     */
-    private Long id;
-
-    /**
-     * 详情id
-     */
-    private Long productId;
-
-    /**
-     * 供应商价格id
-     */
-    private String supplierPriceId;
+public class YcfPriceInfo {
 
     /**
      * 价格日期

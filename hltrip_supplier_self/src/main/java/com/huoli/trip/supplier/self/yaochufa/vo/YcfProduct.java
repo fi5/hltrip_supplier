@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -266,5 +267,11 @@ public class YcfProduct {
      * 限制规则
      */
     private List<YcfProductLimitRule> limitBuyRules;
+
+    /**
+     * 产品相关项目的id集合
+     */
+    @JsonIgnore
+    private List<String> productItemIds;
 
 }

@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
 import com.huoli.trip.supplier.web.yaochufa.service.YcfSynOrderStatusService;
@@ -31,8 +31,8 @@ public class YcfPushOrderStatusController {
 
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
     @PostMapping(path = "/pushOrderStatus")
-    YcfCommonResult<Boolean> payOrder(@RequestBody YcfPushOrderStatusReq req) {
-        YcfCommonResult<Boolean> result = new YcfCommonResult<>();
+    YcfBaseResult<Boolean> payOrder(@RequestBody YcfPushOrderStatusReq req) {
+        YcfBaseResult<Boolean> result = new YcfBaseResult<>();
         //TODO 接收到数据处理逻辑
         OrderStatusInfo orderStatusInfo = ycfSynOrderStatusService.synOrderStatus(req);
         result.setData(true);

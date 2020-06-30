@@ -14,5 +14,16 @@ import java.io.Serializable;
  */
 @Data
 public class YcfBaseRequest<T> implements Serializable {
+    /**
+     * 请求体
+     */
     private T data;
+
+    public YcfBaseRequest(){
+
+    }
+
+    public YcfBaseRequest(T data){
+        this.data = data;
+    }
 }

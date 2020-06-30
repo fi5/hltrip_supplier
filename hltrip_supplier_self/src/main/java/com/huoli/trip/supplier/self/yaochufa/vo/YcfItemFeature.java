@@ -11,7 +11,7 @@ import lombok.Data;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class ItemFeature {
+public class YcfItemFeature {
 
     /**
      * 类型

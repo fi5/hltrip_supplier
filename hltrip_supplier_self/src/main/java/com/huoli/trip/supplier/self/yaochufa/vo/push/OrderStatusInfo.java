@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.vo.push;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVocher;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfVoucher;
 import lombok.Data;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class OrderStatusInfo {
     //订单状态
     private int orderStatus;
     //电子凭证码(当订单含有票资源，且该票资源存在凭证码时，订单状态为待出行“20”时推送此值)
-    private List<YcfVocher> vochers;
+    private List<YcfVoucher> vouchers;
     //备注（取消订单的原因等描述信息）
     private String remark;
 }
