@@ -7,7 +7,6 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -217,8 +216,8 @@ public class YcfConverter {
     public static PricePO convertToPricePO(YcfPrice price){
         PricePO pricePO = new PricePO();
         pricePO.setProductId(""); // todo 需要查
-        pricePO.setSupplierId(""); // todo
-        pricePO.setCode(CommonUtils.genCodeBySupplier(pricePO.getSupplierId(), price.getProductID()));
+//        pricePO.setSupplierId(""); // todo
+//        pricePO.setCode(CommonUtils.genCodeBySupplier(pricePO.getSupplierId(), price.getProductID()));
         pricePO.setSupplierProductId(price.getProductID());
         if(!ListUtils.isEmpty(price.getSaleInfos())){
             List<PriceInfoPO> priceInfoPOs = price.getSaleInfos().stream().map(priceInfo -> convertToPriceInfoPO(priceInfo)).collect(Collectors.toList());

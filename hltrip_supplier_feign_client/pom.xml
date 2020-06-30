@@ -36,11 +36,5 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-hystrix</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.baidu.disconf</groupId>
-            <artifactId>disconf-client</artifactId>
-            <version>2.6.37</version>
-        </dependency>
-
     </dependencies>
 </project>

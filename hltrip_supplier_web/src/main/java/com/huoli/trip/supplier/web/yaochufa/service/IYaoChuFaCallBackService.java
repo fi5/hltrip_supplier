@@ -11,7 +11,7 @@ import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
  * 版本：1.0<br>
  * 创建日期：2020/6/19<br>
  */
-public interface YcfSynOrderStatusService {
+public interface IYaoChuFaCallBackService {
 
     /**
      * 获取同步订单状态数据

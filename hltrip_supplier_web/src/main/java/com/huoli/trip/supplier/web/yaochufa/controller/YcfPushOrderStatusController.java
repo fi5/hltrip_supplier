@@ -4,7 +4,7 @@ import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
-import com.huoli.trip.supplier.web.yaochufa.service.YcfSynOrderStatusService;
+import com.huoli.trip.supplier.web.yaochufa.service.IYaoChuFaCallBackService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class YcfPushOrderStatusController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
     @Autowired
-    private YcfSynOrderStatusService ycfSynOrderStatusService;
+    private IYaoChuFaCallBackService ycfSynOrderStatusService;
 
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
     @PostMapping(path = "/pushOrderStatus")

@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,18 +37,14 @@ public class TestController {
 
     @GetMapping(path = "/test")
     String test() {
-        //{
-        //"data": {
-        //"productId": "68859_42041",
-        //"beginDate": "2016-05-01",
-        //"endDate": "2016-05-05"
-        //}
-        //}
         Map<String,Object> req = new HashMap<>();
-        Map<String,String> data = new HashMap<>();
-        data.put("productId","247533_266960");
-        data.put("beginDate","2020-07-01");
-        data.put("endDate","2020-07-02");
+        Map<String,Object> data = new HashMap<>();
+//        data.put("productId","247533_266960");
+//        data.put("beginDate","2020-07-01");
+//        data.put("endDate","2020-07-02");
+        List<String> poiIdList = new ArrayList<>();
+        poiIdList.add("29439");
+        data.put("poiIdList",poiIdList);
         req.put("data",data);
         return iYaoChuFaClient.getWeather(req);
     }
