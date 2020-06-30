@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.service;
 
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
 
@@ -20,4 +21,7 @@ public interface IYaoChuFaCallBackService {
      * @return
      */
     OrderStatusInfo synOrderStatus(YcfPushOrderStatusReq req);
+
+    //退款通知
+    void refundNotice(YcfRefundNoticeRequest req);
 }

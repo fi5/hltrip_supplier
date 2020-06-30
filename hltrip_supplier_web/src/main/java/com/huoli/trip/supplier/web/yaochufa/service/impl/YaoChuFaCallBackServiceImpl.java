@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class YaoChuFaCallBackServiceImpl implements IYaoChuFaCallBackService {
-   public YcfBaseResult refundNotice(YcfRefundNoticeRequest request){
-        //todo
-        return null;
+
+   public void refundNotice(YcfRefundNoticeRequest request){
+        //发http请求至中台,中台写kafka消息
     }
 
 
@@ -26,4 +26,5 @@ public class YaoChuFaCallBackServiceImpl implements IYaoChuFaCallBackService {
 //        log.info("获取到推送过来的订单状态信息: {}", orderInfos.toString());
         return orderInfos;
     }
+
 }

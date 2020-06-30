@@ -3,7 +3,6 @@ package com.huoli.trip.supplier.web.yaochufa.controller;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfProductItem;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPushProductResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.yaochufa.service.YcfSyncService;

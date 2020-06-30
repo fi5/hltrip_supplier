@@ -22,8 +22,8 @@
 		<property name="arguments">
 			<util:properties>
 				<prop key="disconf.conf">
-					/Users/glcword/Documents/IDEWork/flight_work/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties
-<!--					/Users/fengzhiqiang/work/航班管家/project_folder/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
+<!--					/Users/glcword/Documents/IDEWork/flight_work/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
+					/Users/fengzhiqiang/work/航班管家/project_folder/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties
 <!--					/usr/local/huoli_home/tripsupplier/disconf.properties-->
 				</prop>
 			</util:properties>

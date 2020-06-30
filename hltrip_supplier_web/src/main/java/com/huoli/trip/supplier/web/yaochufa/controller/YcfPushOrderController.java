@@ -25,13 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(description = "订单推送相关")
-public class YcfPushOrderStatusController {
+public class YcfPushOrderController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
     @Autowired
-    private IYaoChuFaCallBackService ycfSynOrderStatusService;
-    @Autowired
-    YcfOrderService ycfOrderService;
+    private IYaoChuFaCallBackService yaoChuFaCallBackService;
 
 
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
@@ -39,7 +37,7 @@ public class YcfPushOrderStatusController {
     YcfBaseResult<Boolean> payOrder(@RequestBody YcfPushOrderStatusReq req) {
         YcfBaseResult<Boolean> result = new YcfBaseResult<>();
         //TODO 接收到数据处理逻辑
-        OrderStatusInfo orderStatusInfo = ycfSynOrderStatusService.synOrderStatus(req);
+        OrderStatusInfo orderStatusInfo = yaoChuFaCallBackService.synOrderStatus(req);
         result.setData(true);
         return result;
     }
@@ -48,7 +46,7 @@ public class YcfPushOrderStatusController {
     @PostMapping(path = "/refundNotice")
     YcfBaseResult<Boolean> refundNotice(@RequestBody YcfRefundNoticeRequest req) {
         YcfBaseResult<Boolean> result = new YcfBaseResult<>();
-        ycfOrderService.refundNotice(req);
+        yaoChuFaCallBackService.refundNotice(req);
         return YcfBaseResult.success();
     }
 
