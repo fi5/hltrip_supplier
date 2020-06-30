@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 /**
  * 要出发订单dubbo服务接口定义
@@ -12,14 +12,14 @@ public interface YcfOrderService {
      * @param orderId
      * @return
      */
-    YcfCommonResult<YcfOrderStatusResult> getOrder(String orderId);
+    YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId);
 
-    /**
-     * 重新获取凭证
-     * @param orderId
-     * @return
-     */
-    YcfCommonResult<YcfVochersResult> getVochers(String orderId);
+//    /**
+//     * 重新获取凭证
+//     * @param orderId
+//     * @return
+//     */
+//    YcfCommonResult<YcfVochersResult> getVochers(String orderId);
     /**
      * 可预订检查
      * @param= bookCheckReq
@@ -27,7 +27,7 @@ public interface YcfOrderService {
      * @author= wangdm
      *
      */
-    YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq bookCheckReq);
+    YcfBaseResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq bookCheckReq);
     /**
      * 支付订单
      * @param= payOrderReq
@@ -35,7 +35,7 @@ public interface YcfOrderService {
      * @author= wangdm
      *
      */
-    YcfCommonResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq);
+    YcfBaseResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq);
     /**
      * 创建订单
      * @param= createOrderReq
@@ -43,7 +43,7 @@ public interface YcfOrderService {
      * @author= wangdm
      *
      */
-    YcfCommonResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq);
+    YcfBaseResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq);
     /**
      * 取消订单
      * @param= cancelOrderReq
@@ -51,5 +51,5 @@ public interface YcfOrderService {
      * @author= wangdm
      *
      */
-    YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq);
+    YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq);
 }

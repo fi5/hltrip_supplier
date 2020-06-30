@@ -5,7 +5,7 @@ import com.huoli.trip.supplier.api.YcfOrderService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -18,46 +18,46 @@ public class YcfOrderServiceImpl implements YcfOrderService {
     private IYaoChuFaClient iYaoChuFaClient;
 
     @Override
-    public YcfCommonResult<YcfOrderStatusResult> getOrder(String orderId) {
+    public YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId) {
             YcfBaseRequest request = new YcfBaseRequest();
             YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
             orderBaSeRequest.setPartnerOrderId(orderId);
             request.setData(orderBaSeRequest);
-            return iYaoChuFaClient.getOederStatus(request);
+            return iYaoChuFaClient.getOrderStatus(request);
     }
 
-    @Override
-    public YcfCommonResult<YcfVochersResult> getVochers(String orderId) {
-        YcfBaseRequest request = new YcfBaseRequest();
-        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
-        orderBaSeRequest.setPartnerOrderId(orderId);
-        request.setData(orderBaSeRequest);
-        return iYaoChuFaClient.getVochers(request);
-    }
+//    @Override
+//    public YcfBaseResult<YcfVochersResult> getVochers(String orderId) {
+//        YcfBaseRequest request = new YcfBaseRequest();
+//        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+//        orderBaSeRequest.setPartnerOrderId(orderId);
+//        request.setData(orderBaSeRequest);
+//        return iYaoChuFaClient.getVouchers(request);
+//    }
 
     @Override
-    public YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq checkReq) {
+    public YcfBaseResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq checkReq) {
         YcfBaseRequest<YcfBookCheckReq> req = new YcfBaseRequest<>();
         req.setData(checkReq);
         return iYaoChuFaClient.getCheckInfos(req);
     }
 
     @Override
-    public YcfCommonResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq) {
+    public YcfBaseResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq) {
         YcfBaseRequest<YcfPayOrderReq> req = new YcfBaseRequest<>();
         req.setData(payOrderReq);
         return iYaoChuFaClient.payOrder(req);
     }
 
     @Override
-    public YcfCommonResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq) {
+    public YcfBaseResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq) {
         YcfBaseRequest<YcfCreateOrderReq> req = new YcfBaseRequest<>();
         req.setData(createOrderReq);
         return iYaoChuFaClient.createOrder(req);
     }
 
     @Override
-    public YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq) {
+    public YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq) {
         YcfBaseRequest<YcfCancelOrderReq> req = new YcfBaseRequest<>();
         req.setData(cancelOrderReq);
         return iYaoChuFaClient.cancelOrder(req);
