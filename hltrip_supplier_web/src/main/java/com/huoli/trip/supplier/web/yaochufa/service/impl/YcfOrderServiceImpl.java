@@ -63,10 +63,5 @@ public class YcfOrderServiceImpl implements YcfOrderService {
         return iYaoChuFaClient.cancelOrder(req);
     }
 
-    @Override
-    public void refundNotice(YcfRefundNoticeRequest req) {
-
-    }
-
 }
 

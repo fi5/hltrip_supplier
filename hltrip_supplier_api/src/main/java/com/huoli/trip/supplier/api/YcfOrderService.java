@@ -53,6 +53,5 @@ public interface YcfOrderService {
      */
     YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq);
 
-    //退款通知
-    void refundNotice(YcfRefundNoticeRequest req);
+
 }
