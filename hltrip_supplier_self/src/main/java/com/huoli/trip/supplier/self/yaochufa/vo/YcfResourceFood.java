@@ -15,7 +15,7 @@ public class YcfResourceFood {
     /**
      * 餐饮编号
      */
-    private Long foodID;
+    private String foodID;
 
     /**
      * 餐饮名称
@@ -30,6 +30,6 @@ public class YcfResourceFood {
     /**
      * 基准数量 当一个产品售卖两份餐饮时，该值为2
      */
-    private String foodBaseNum;
+    private Integer foodBaseNum;
 
 }

@@ -9,4 +9,55 @@ package com.huoli.trip.supplier.self.yaochufa.constant;
  * 创建日期：2020/6/19<br>
  */
 public class YcfConstants {
+
+    // 返回状态
+
+    public static final int RESULT_CODE_SUCCESS = 200;
+
+    public static final int RESULT_CODE_REQUEST_ERROR = 400;
+
+    public static final int RESULT_CODE_SERVICE_ERROR = 500;
+
+    // 成功状态
+
+    public static final Boolean RESULT_STATUS_SUCCESS = true;
+
+    public static final Boolean RESULT_STATUS_FAIL = false;
+
+    // 产品处理状态
+    /**
+     * 待处理
+     */
+    public static final int PRODUCT_HANDLE_STATUS_WAIT = 0;
+
+    /**
+     * 处理成功
+     */
+    public static final int PRODUCT_HANDLE_STATUS_SUCCESS = 1;
+
+    /**
+     * 处理失败
+     */
+    public static final int PRODUCT_HANDLE_STATUS_FAIL = 2;
+
+    // 产品状态
+    /**
+     * 上线
+     */
+    public static final int PRODUCT_STATUS_VALID = 1;
+    /**
+     * 下线
+     */
+    public static final int PRODUCT_STATUS_INVALID = 0;
+
+    // 处理类型
+    /**
+     * 同步
+     */
+    public static final int HANDLE_TYPE_ASYNC = 0;
+    /**
+     * 异步
+     */
+    public static final int HANDLE_TYPE_SYNC = 1;
+
 }

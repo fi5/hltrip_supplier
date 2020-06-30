@@ -1,15 +1,16 @@
 package com.huoli.trip.supplier.feign.client.yaochufa.client;
 
 import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
-import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.YaoChufaClientFallback;
+import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.YaoChuFaClientFallback;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,8 +23,24 @@ import java.util.Map;
  */
 @FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}"
         ,configuration = YaoChuFaFeignInterceptor.class
-        ,fallbackFactory = YaoChufaClientFallback.class)
+        ,fallbackFactory = YaoChuFaClientFallback.class)
 public interface IYaoChuFaClient {
+
+    /**
+     * 获取poi信息
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/GetProductPois")
+    YcfBaseResult<YcfGetPoiResponse> getPoi(@RequestBody YcfBaseRequest<YcfGetPoiRequest> request);
+
+    /**
+     * 获取价格日历
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/OTA/StockPriceRequest")
+    YcfBaseResult<YcfGetPriceResponse> getPrice(@RequestBody YcfBaseRequest<YcfGetPriceRequest> request);
 
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvails")
     String getWeather(@RequestBody Map req);
@@ -36,7 +53,7 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/CheckAvail")
-    YcfCommonResult<YcfBookCheckRes> getCheckInfos(@RequestBody YcfBaseRequest<YcfBookCheckReq> req);
+    YcfBaseResult<YcfBookCheckRes> getCheckInfos(@RequestBody YcfBaseRequest<YcfBookCheckReq> req);
     /**
      * 支付订单
      * @param= req
@@ -45,7 +62,7 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/payOrder")
-    YcfCommonResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req);
+    YcfBaseResult<YcfPayOrderRes> payOrder(@RequestBody YcfBaseRequest<YcfPayOrderReq> req);
 
     /**
      * 通过订单编号
@@ -54,7 +71,7 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/resendVoucher")
-    YcfCommonResult<YcfVochersResult> getVochers(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
+    YcfBaseResult<YcfVouchersResult> getVouchers(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
     /**
      * 通过订单号获取订单状态等信息
@@ -62,7 +79,7 @@ public interface IYaoChuFaClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/getOrderStatus")
-    YcfCommonResult<YcfOrderStatusResult> getOederStatus(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
+    YcfBaseResult<YcfOrderStatusResult> getOrderStatus(@RequestBody YcfBaseRequest<YcfOrderBaSeRequest> request);
 
     /**
      * 创建订单
@@ -72,7 +89,7 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/createOrder")
-    YcfCommonResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req);
+    YcfBaseResult<YcfCreateOrderRes> createOrder(@RequestBody YcfBaseRequest<YcfCreateOrderReq> req);
 
     /**
      * 申请取消订单
@@ -82,5 +99,5 @@ public interface IYaoChuFaClient {
      * @document http://opensip.yaochufa.com/sip/api
      */
     @RequestMapping(method = RequestMethod.POST,path = "/OTA/cancelOrder")
-    YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req);
+    YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfBaseRequest<YcfCancelOrderReq> req);
 }

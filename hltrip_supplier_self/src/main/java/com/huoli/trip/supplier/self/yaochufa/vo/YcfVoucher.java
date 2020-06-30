@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @Data
-public class YcfVocher implements Serializable {
+public class YcfVoucher implements Serializable {
     //电子凭证码
     private String vocherNo;
     //二维码地址

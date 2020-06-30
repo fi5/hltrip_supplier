@@ -13,10 +13,11 @@ import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.data.mongodb.config.EnableMongoAuditing;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class,
-        MongoAutoConfiguration.class, MongoDataAutoConfiguration.class,
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 //@ImportResource({"classpath:disconf-config.xml"})
 @ComponentScan({"com.huoli.trip"})
@@ -24,6 +25,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client.yaochufa.client")
 @EnableHystrix
 @EnableSwagger2
+@EnableMongoRepositories
 public class HltripSupplierWebApplication {
 
     public static void main(String[] args) {
