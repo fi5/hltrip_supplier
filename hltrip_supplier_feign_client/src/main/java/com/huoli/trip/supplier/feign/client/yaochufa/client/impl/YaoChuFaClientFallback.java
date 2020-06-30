@@ -35,7 +35,12 @@ public class YaoChuFaClientFallback implements FallbackFactory<IYaoChuFaClient> 
         return new IYaoChuFaClient() {
 
             @Override
-            public YcfBaseResult<List<YcfProductItem>> getPoi(YcfBaseRequest<YcfGetPoiRequest> request){
+            public YcfBaseResult<YcfGetPriceResponse> getPrice(YcfBaseRequest<YcfGetPriceRequest> request){
+                return null;
+            }
+
+            @Override
+            public YcfBaseResult<YcfGetPoiResponse> getPoi(YcfBaseRequest<YcfGetPoiRequest> request){
                 return null;
             }
 
