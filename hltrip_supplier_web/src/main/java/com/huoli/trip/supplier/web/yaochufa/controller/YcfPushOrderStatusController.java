@@ -1,6 +1,8 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
+import com.huoli.trip.supplier.api.YcfOrderService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
@@ -28,6 +30,9 @@ public class YcfPushOrderStatusController {
     private IYaoChuFaClient iYaoChuFaClient;
     @Autowired
     private IYaoChuFaCallBackService ycfSynOrderStatusService;
+    @Autowired
+    YcfOrderService ycfOrderService;
+
 
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
     @PostMapping(path = "/pushOrderStatus")
@@ -37,6 +42,14 @@ public class YcfPushOrderStatusController {
         OrderStatusInfo orderStatusInfo = ycfSynOrderStatusService.synOrderStatus(req);
         result.setData(true);
         return result;
+    }
+
+    @ApiOperation("推送退款通知")
+    @PostMapping(path = "/refundNotice")
+    YcfBaseResult<Boolean> refundNotice(@RequestBody YcfRefundNoticeRequest req) {
+        YcfBaseResult<Boolean> result = new YcfBaseResult<>();
+        ycfOrderService.refundNotice(req);
+        return YcfBaseResult.success();
     }
 
 }
