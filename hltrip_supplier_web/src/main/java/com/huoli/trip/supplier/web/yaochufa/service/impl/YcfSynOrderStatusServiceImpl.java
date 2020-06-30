@@ -8,7 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 /**
- * 描述: <br>
+ * 描述: <br> 订单状态回调service
  * 版权：Copyright (c) 2011-2020<br>
  * 公司：活力天汇<br>
  * 作者：王德铭<br>

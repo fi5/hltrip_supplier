@@ -42,6 +42,26 @@ public class YcfOrderServiceImpl implements YcfOrderService {
         return iYaoChuFaClient.getCheckInfos(req);
     }
 
+    @Override
+    public YcfCommonResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq) {
+        YcfBaseRequest<YcfPayOrderReq> req = new YcfBaseRequest<>();
+        req.setData(payOrderReq);
+        return iYaoChuFaClient.payOrder(req);
+    }
+
+    @Override
+    public YcfCommonResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq) {
+        YcfBaseRequest<YcfCreateOrderReq> req = new YcfBaseRequest<>();
+        req.setData(createOrderReq);
+        return iYaoChuFaClient.createOrder(req);
+    }
+
+    @Override
+    public YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq) {
+        YcfBaseRequest<YcfCancelOrderReq> req = new YcfBaseRequest<>();
+        req.setData(cancelOrderReq);
+        return iYaoChuFaClient.cancelOrder(req);
+    }
 
 }
 

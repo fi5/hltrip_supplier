@@ -1,9 +1,6 @@
 package com.huoli.trip.supplier.api;
 
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckReq;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfBookCheckRes;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVochersResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfCommonResult;
 
 /**
@@ -25,10 +22,34 @@ public interface YcfOrderService {
     YcfCommonResult<YcfVochersResult> getVochers(String orderId);
     /**
      * 可预订检查
-     * @param= req
+     * @param= bookCheckReq
      * @return= BookCheckRes
      * @author= wangdm
      *
      */
-    YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq req);
+    YcfCommonResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq bookCheckReq);
+    /**
+     * 支付订单
+     * @param= payOrderReq
+     * @return= YcfPayOrderRes
+     * @author= wangdm
+     *
+     */
+    YcfCommonResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq);
+    /**
+     * 创建订单
+     * @param= createOrderReq
+     * @return= YcfCreateOrderRes
+     * @author= wangdm
+     *
+     */
+    YcfCommonResult<YcfCreateOrderRes> createOrder(YcfCreateOrderReq createOrderReq);
+    /**
+     * 取消订单
+     * @param= cancelOrderReq
+     * @return= YcfCancelOrderRes
+     * @author= wangdm
+     *
+     */
+    YcfCommonResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq);
 }
