@@ -1,10 +1,14 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
+import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,16 +22,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ProductDaoImpl implements ProductDao {
 
-//    @Autowired
-//    private MongoTemplate mongoTemplate;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public void updateBySupplierProductId(ProductPO productPO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(productPO.getCode()));
         Document document = new Document();
-//        mongoTemplate.getConverter().write(productPO, document);
-//        Update update = Update.fromDocument(document);
-//        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
+        mongoTemplate.getConverter().write(productPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 }
