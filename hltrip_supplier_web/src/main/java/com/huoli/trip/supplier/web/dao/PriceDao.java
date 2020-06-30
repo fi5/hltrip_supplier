@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.web.dao.mongo;
+package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.PricePO;
 

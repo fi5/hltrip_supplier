@@ -1,14 +1,10 @@
-package com.huoli.trip.supplier.web.dao.mongo.impl;
+package com.huoli.trip.supplier.web.dao.impl;
 
-import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.PricePO;
-import com.huoli.trip.supplier.web.dao.mongo.PriceDao;
+import com.huoli.trip.supplier.web.dao.PriceDao;
 import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 /**
