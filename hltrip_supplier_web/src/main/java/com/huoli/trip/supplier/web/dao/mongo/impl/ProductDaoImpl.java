@@ -24,16 +24,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ProductDaoImpl implements ProductDao {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+//    @Autowired
+//    private MongoTemplate mongoTemplate;
 
     @Override
     public void updateBySupplierProductId(ProductPO productPO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(productPO.getCode()));
         Document document = new Document();
-        mongoTemplate.getConverter().write(productPO, document);
-        Update update = Update.fromDocument(document);
-        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
+//        mongoTemplate.getConverter().write(productPO, document);
+//        Update update = Update.fromDocument(document);
+//        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 }

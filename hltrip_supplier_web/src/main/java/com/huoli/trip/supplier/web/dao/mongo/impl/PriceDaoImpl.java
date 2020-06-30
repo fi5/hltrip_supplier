@@ -22,16 +22,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PriceDaoImpl implements PriceDao {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+//    @Autowired
+//    private MongoTemplate mongoTemplate;
 
     @Override
     public void updateBySupplierProductId(PricePO pricePO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(pricePO.getCode()));
         Document document = new Document();
-        mongoTemplate.getConverter().write(pricePO, document);
-        Update update = Update.fromDocument(document);
-        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
+//        mongoTemplate.getConverter().write(pricePO, document);
+//        Update update = Update.fromDocument(document);
+//        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
     }
 }
