@@ -26,14 +26,14 @@ public class YcfOrderServiceImpl implements YcfOrderService {
             return iYaoChuFaClient.getOrderStatus(request);
     }
 
-//    @Override
-//    public YcfBaseResult<YcfVochersResult> getVochers(String orderId) {
-//        YcfBaseRequest request = new YcfBaseRequest();
-//        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
-//        orderBaSeRequest.setPartnerOrderId(orderId);
-//        request.setData(orderBaSeRequest);
-//        return iYaoChuFaClient.getVouchers(request);
-//    }
+    @Override
+    public YcfBaseResult<YcfVouchersResult> getVochers(String orderId) {
+        YcfBaseRequest request = new YcfBaseRequest();
+        YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
+        orderBaSeRequest.setPartnerOrderId(orderId);
+        request.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getVouchers(request);
+    }
 
     @Override
     public YcfBaseResult<YcfBookCheckRes> getCheckInfos(YcfBookCheckReq checkReq) {

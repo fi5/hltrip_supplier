@@ -50,9 +50,6 @@ public class HltripFeignLogger extends feign.Logger {
 
     @Override
     protected void log(String configKey, String format, Object... args) {
-        // Not using SLF4J's support for parameterized messages (even though it
-        // would be more efficient) because it would
-        // require the incoming message formats to be SLF4J-specific.
         if (logger.isInfoEnabled()) {
             logger.info(String.format(methodTag(configKey) + format, args));
         }

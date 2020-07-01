@@ -14,12 +14,12 @@ public interface YcfOrderService {
      */
     YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId);
 
-//    /**
-//     * 重新获取凭证
-//     * @param orderId
-//     * @return
-//     */
-//    YcfCommonResult<YcfVochersResult> getVochers(String orderId);
+    /**
+     * 重新获取凭证
+     * @param orderId
+     * @return
+     */
+    YcfBaseResult<YcfVouchersResult> getVochers(String orderId);
     /**
      * 可预订检查
      * @param= bookCheckReq
