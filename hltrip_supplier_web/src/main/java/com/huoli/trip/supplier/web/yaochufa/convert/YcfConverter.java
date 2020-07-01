@@ -42,7 +42,9 @@ public class YcfConverter {
         productPO.setDisplayStart(product.getGlobalSaleDisplayDateBegin());
         productPO.setExcludeDesc(product.getFeeExclude());
         productPO.setFoods(Lists.newArrayList(convertToFoodPO(product)));
-        productPO.setImages(JSON.toJSONString(product.getProductImageList()));
+        if(ListUtils.isNotEmpty(product.getProductImageList())){
+            productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
+        }
         productPO.setIncludeDesc(product.getFeeInclude());
         productPO.setInvalidTime(product.getEndDate());
         productPO.setLimitRules(JSON.toJSONString(product.getLimitBuyRules()));
@@ -190,9 +192,15 @@ public class YcfConverter {
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));
         productItemPO.setCountry(productItem.getCountry());
         productItemPO.setDescription(productItem.getDescription());
-        productItemPO.setFeatures(JSON.toJSONString(productItem.getCharacterrList()));
-        productItemPO.setImages(JSON.toJSONString(productItem.getImageList()));
-        productItemPO.setMainImages(JSON.toJSONString(productItem.getMainImageList()));
+        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
+            productItemPO.setFeatures(productItem.getCharacterrList().stream().map(f -> convertToItemFeaturePO(f)).collect(Collectors.toList()));
+        }
+        if(ListUtils.isNotEmpty(productItem.getImageList())){
+            productItemPO.setImages(productItem.getImageList().stream().map(i -> convertToImageBasePO(i)).collect(Collectors.toList()));
+        }
+        if(ListUtils.isNotEmpty(productItem.getMainImageList())){
+            productItemPO.setMainImages(productItem.getMainImageList().stream().map(i -> convertToImageBasePO(i)).collect(Collectors.toList()));
+        }
         productItemPO.setItemType(productItem.getPoiType());
         ItemCoordinatePO itemCoordinate = new ItemCoordinatePO();
         itemCoordinate.setLatitude(productItem.getLatitude());
@@ -206,7 +214,7 @@ public class YcfConverter {
         productItemPO.setSales(productItem.getSalesVolume());
         productItemPO.setScore(productItem.getRate());
         productItemPO.setSubTitle(productItem.getPcSub());
-        productItemPO.setTags(JSON.toJSONString(productItem.getTags()));
+        productItemPO.setTags(productItem.getTags());
         return productItemPO;
     }
 
@@ -254,5 +262,29 @@ public class YcfConverter {
             ids = Lists.newArrayList();
         }
         ids.addAll(list);
+    }
+
+    /**
+     * 转换成图片数据库对象
+     * @param imageBase
+     * @return
+     */
+    public static ImageBasePO convertToImageBasePO(YcfImageBase imageBase){
+        ImageBasePO imageBasePO = new ImageBasePO();
+        imageBasePO.setDesc(imageBase.getImageName());
+        imageBasePO.setUrl(imageBase.getImageUrl());
+        return imageBasePO;
+    }
+
+    /**
+     * 转换成特殊说明数据库对象
+     * @param itemFeature
+     * @return
+     */
+    public static ItemFeaturePO convertToItemFeaturePO(YcfItemFeature itemFeature){
+        ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+        itemFeaturePO.setDetail(itemFeature.getDetail());
+        itemFeaturePO.setType(itemFeature.getType());
+        return itemFeaturePO;
     }
 }
