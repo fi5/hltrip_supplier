@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import java.util.Map;
  */
 @RestController
 @Api(description = "测试接口")
+@Slf4j
 public class TestController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
@@ -32,7 +34,7 @@ public class TestController {
 
     @PostConstruct
     void tt(){
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++" + ss);
+       log.info("++++++++++++++++++++++++++++++++++++++++++++++++++" + ss);
     }
 
     @GetMapping(path = "/test")

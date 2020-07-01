@@ -10,13 +10,13 @@
             <AppenderRef ref="Console"/>
         </Root>
         <!-- 第三方日志系统 -->
-<!--        <logger name="org.springframework.core" level="ERROR"/>-->
-<!--        <logger name="org.springframework.beans" level="ERROR"/>-->
-<!--        <logger name="org.springframework.context" level="ERROR"/>-->
-<!--        <logger name="org.springframework.web" level="ERROR"/>-->
-<!--        <Logger name="com.baidu" level="FATAL"/>-->
-<!--        <Logger name="com.alibaba.druid" level="ERROR"/>-->
-<!--        <Logger name="org.apache.zookeeper" level="ERROR"/>-->
-<!--        <Logger name="org.apache.kafka" level="ERROR"/>-->
+        <logger name="org.springframework.core" level="ERROR"/>
+        <logger name="org.springframework.beans" level="ERROR"/>
+        <logger name="org.springframework.context" level="ERROR"/>
+        <logger name="org.springframework.web" level="ERROR"/>
+        <Logger name="com.baidu" level="FATAL"/>
+        <Logger name="com.alibaba.druid" level="ERROR"/>
+        <Logger name="org.apache.zookeeper" level="ERROR"/>
+        <Logger name="org.apache.kafka" level="ERROR"/>
     </Loggers>
 </Configuration>
