@@ -7,5 +7,5 @@ import java.util.List;
 
 @Data
 public class YcfVouchersResult implements Serializable {
-    List<YcfVoucher> ycfVouchers;
+    List<YcfVoucher> vochers;
 }
