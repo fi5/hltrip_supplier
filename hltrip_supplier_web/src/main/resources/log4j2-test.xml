@@ -47,25 +47,22 @@
         </RollingFile>
 
 <!--        &lt;!&ndash; 不影响业务运行，异步发送 &ndash;&gt;-->
-<!--        <Async name="AsyncFlume" bufferSize="262144" blocking="false" includeLocation="true">-->
-<!--            <AppenderRef ref="FlumeAppender"/>-->
-<!--            <errorRef ref="errorFlumeAppender"/>-->
-<!--        </Async>-->
+/
 
 <!--        &lt;!&ndash; flume发送 batchSize（单次传输大小）需要当前日志场景决定，maxDelayMillis（最大等待时间） &ndash;&gt;-->
-<!--        <Flume name="FlumeAppender" compress="false" type="Avro" batchSize="500" maxDelayMillis="1000">-->
-<!--            &lt;!&ndash;测试配置：&ndash;&gt;-->
-<!--            <Agent host="39.96.193.163" port="8801"/>-->
-<!--            <Agent host="39.96.193.163" port="8802"/>-->
-<!--            <HuoliJsonLayout charset="UTF-8" dateFormat="yyyy-MM-dd HH:mm:ss.SSS" mode="simple" line="false">-->
-<!--                &lt;!&ndash; spring cloud sleuth体系 &ndash;&gt;-->
-<!--                <KeyValuePair key="traceId" value="#mdc:X-B3-TraceId"/>-->
-<!--                <KeyValuePair key="spanId" value="#mdc:X-B3-SpanId"/>-->
-<!--                &lt;!&ndash; brave体系 &ndash;&gt;-->
-<!--                &lt;!&ndash;<KeyValuePair key="traceId" value="#mdc:traceId"/>&ndash;&gt;-->
-<!--                &lt;!&ndash;<KeyValuePair key="spanId" value="#mdc:spanId"/>&ndash;&gt;-->
-<!--            </HuoliJsonLayout>-->
-<!--        </Flume>-->
+        <Flume name="FlumeAppender" compress="false" type="Avro" batchSize="500" maxDelayMillis="1000">
+            <!--测试配置：-->
+            <Agent host="39.96.193.163" port="8801"/>
+            <Agent host="39.96.193.163" port="8802"/>
+            <HuoliJsonLayout charset="UTF-8" dateFormat="yyyy-MM-dd HH:mm:ss.SSS" mode="simple" line="false">
+                <!-- spring cloud sleuth体系 -->
+                <KeyValuePair key="traceId" value="#mdc:X-B3-TraceId"/>
+                <KeyValuePair key="spanId" value="#mdc:X-B3-SpanId"/>
+                <!-- brave体系 -->
+                <!--<KeyValuePair key="traceId" value="#mdc:traceId"/>-->
+                <!--<KeyValuePair key="spanId" value="#mdc:spanId"/>-->
+            </HuoliJsonLayout>
+        </Flume>
     </Appenders>
 
 
@@ -75,17 +72,17 @@
             <AppenderRef ref="File" />
             <AppenderRef ref="ErrorFile" />
             <AppenderRef ref="Console" />
-<!--            <appenderRef ref="AsyncFlume" />-->
+            <appenderRef ref="AsyncFlume" />
         </Root>
         <!-- 第三方日志系统 -->
         <!-- 不在线上环境打调用链日志或统计日志 -->
-<!--        <logger name="trace" level="INFO" additivity="false">-->
-<!--            <appender-ref ref="AsyncFlume" />-->
-<!--        </logger>-->
+        <logger name="trace" level="INFO" additivity="false">
+            <appender-ref ref="AsyncFlume" />
+        </logger>
 
-<!--        <logger name="event" level="INFO" additivity="false">-->
-<!--            <appender-ref ref="AsyncFlume" />-->
-<!--        </logger>-->
+        <logger name="event" level="INFO" additivity="false">
+            <appender-ref ref="AsyncFlume" />
+        </logger>
         <logger name="org.springframework.core" level="ERROR"/>
         <logger name="org.springframework.beans" level="ERROR"/>
         <logger name="org.springframework.context" level="ERROR"/>
