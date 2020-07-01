@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -36,8 +38,8 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
-    public void getProductList(){
-
-
+    public List<ProductPO> getProductListByItemIds(List<String> itemIds){
+        Query query = new Query(Criteria.where("mainItemId").in(itemIds));
+        return mongoTemplate.find(query, ProductPO.class);
     }
 }

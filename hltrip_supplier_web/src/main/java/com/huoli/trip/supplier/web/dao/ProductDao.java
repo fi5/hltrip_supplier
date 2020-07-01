@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.ProductPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -18,5 +20,10 @@ public interface ProductDao {
      */
     void updateBySupplierProductId(ProductPO productPO);
 
-    void getProductList();
+    /**
+     * 根据item查产品
+     * @param itemIds
+     * @return
+     */
+    List<ProductPO> getProductListByItemIds(List<String> itemIds);
 }
