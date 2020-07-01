@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,9 +14,9 @@ import java.util.List;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfBookCheckRes {
+public class YcfBookCheckRes implements Serializable {
     //产品编号
-    private String productID;
+    private String productId;
     //价格库存列表
     private List<YcfBookSaleInfo> saleInfos;
 }
