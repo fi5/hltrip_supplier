@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfPayOrderReq {
+public class YcfPayOrderReq implements Serializable {
     //订单号(hbgj)
     private String partnerOrderId;
     //支付金额 （售价模式：总售价；底价模式：总结算价；）

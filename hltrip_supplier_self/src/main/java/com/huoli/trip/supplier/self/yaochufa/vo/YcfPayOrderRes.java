@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述: <br>支付订单业务实体返回
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfPayOrderRes {
+public class YcfPayOrderRes implements Serializable {
 
     //订单状态
     private int orderStatus;

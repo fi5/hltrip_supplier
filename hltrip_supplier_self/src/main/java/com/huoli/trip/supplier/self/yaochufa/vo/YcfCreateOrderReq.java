@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfCreateOrderReq {
+public class YcfCreateOrderReq implements Serializable {
     //【合】订单号
     private String partnerOrderId;
     //要】产品编号

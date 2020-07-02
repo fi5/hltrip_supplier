@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述: <br> 创建订单返回
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfCreateOrderRes {
+public class YcfCreateOrderRes implements Serializable {
     //订单状态
     private int orderStatus;
     //【要】订单编号
