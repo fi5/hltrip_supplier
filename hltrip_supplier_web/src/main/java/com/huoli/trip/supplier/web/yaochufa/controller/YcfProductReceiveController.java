@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
@@ -32,9 +33,10 @@ public class YcfProductReceiveController {
     private YcfSyncService ycfSyncService;
 
     @PostMapping("/receive/product")
-    public YcfBaseResult<YcfPushProductResponse> receiveProduct(@RequestBody YcfProduct product){
+    public YcfBaseResult<YcfPushProductResponse> receiveProduct(@RequestBody List<YcfProduct> products){
         try {
-            ycfSyncService.syncProduct(product);
+            log.info("开始接收产品。。{}", JSON.toJSONString(products));
+            ycfSyncService.syncProduct(products);
         } catch (Exception e) {
             log.error("接收产品推送失败，", e);
             return YcfBaseResult.fail(new YcfPushProductResponse(YcfConstants.PRODUCT_HANDLE_STATUS_FAIL, YcfConstants.PRODUCT_STATUS_VALID, YcfConstants.HANDLE_TYPE_ASYNC));
@@ -45,6 +47,7 @@ public class YcfProductReceiveController {
     @PostMapping("/receive/price")
     public YcfBaseResult<YcfPushProductResponse> receivePrice(@RequestBody YcfPrice price){
         try {
+            log.info("开始接收价格。。{}", JSON.toJSONString(price));
             ycfSyncService.syncPrice(price);
         } catch (Exception e) {
             return YcfBaseResult.fail();

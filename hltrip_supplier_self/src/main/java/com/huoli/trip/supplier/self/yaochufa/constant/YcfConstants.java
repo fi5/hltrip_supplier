@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.self.yaochufa.constant;
 
+import com.google.common.collect.ImmutableList;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -59,5 +61,28 @@ public class YcfConstants {
      * 异步
      */
     public static final int HANDLE_TYPE_SYNC = 1;
+
+    // 产品类型
+    /**
+     * 要出发类型集合
+     */
+    public static final ImmutableList<Integer> PRODUCT_TYPE_LIST = ImmutableList.of(0, 1, 2, 3);
+    /**
+     * 套餐
+     */
+    public static final int PRODUCT_TYPE_PACKAGE = 0;
+    /**
+     * 单房
+     */
+    public static final int PRODUCT_TYPE_ROOM = 1;
+    /**
+     * 单票
+     */
+    public static final int PRODUCT_TYPE_TICKET = 2;
+    /**
+     * 单餐
+     */
+    public static final int PRODUCT_TYPE_FOOD = 3;
+
 
 }

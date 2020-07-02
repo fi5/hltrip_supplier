@@ -17,7 +17,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
 @ImportResource({"classpath:disconf-config.xml"})
 @ComponentScan({"com.huoli.trip"})
-@DubboComponentScan(value = "com.huoli.trip.supplier.web")
+//@DubboComponentScan(value = "com.huoli.trip.supplier.web")
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client.yaochufa.client")
 @EnableHystrix
 @EnableSwagger2

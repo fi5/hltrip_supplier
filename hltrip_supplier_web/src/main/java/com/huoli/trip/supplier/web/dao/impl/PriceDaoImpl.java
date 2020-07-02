@@ -28,7 +28,7 @@ public class PriceDaoImpl implements PriceDao {
     @Override
     public void updateBySupplierProductId(PricePO pricePO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("code").is(pricePO.getCode()));
+        query.addCriteria(Criteria.where("productId").is(pricePO.getProductId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(pricePO, document);
         Update update = Update.fromDocument(document);

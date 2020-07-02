@@ -11,7 +11,7 @@ import com.huoli.trip.supplier.api.TestService;
  * 版本：1.0<br>
  * 创建日期：2020/7/2<br>
  */
-@Service(group = "test")
+//@Service(group = "test")
 //@Component
 public class TestServiceImpl implements TestService {
     @Override

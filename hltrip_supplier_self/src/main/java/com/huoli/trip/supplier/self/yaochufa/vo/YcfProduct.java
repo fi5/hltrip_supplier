@@ -42,7 +42,6 @@ public class YcfProduct {
      * 2：单票
      * 3：单餐
      */
-    @JsonProperty("ProductType")
     private Integer productType;
 
     /**

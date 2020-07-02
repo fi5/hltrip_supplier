@@ -19,17 +19,17 @@ public class YcfPriceInfo {
     /**
      * 价格日期
      */
-    private Date saleDate;
+    private Date date;
 
     /**
      * 售卖价格
      */
-    private BigDecimal salePrice;
+    private BigDecimal price;
 
     /**
      * 结算价格
      */
-    private BigDecimal settlePrice;
+    private BigDecimal settlementPrice;
 
     /**
      * 价格类型

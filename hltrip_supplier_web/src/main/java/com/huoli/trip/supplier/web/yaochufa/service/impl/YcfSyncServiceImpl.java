@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
@@ -46,10 +47,59 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private IYaoChuFaClient yaoChuFaClient;
 
-    public void syncProduct(YcfProduct ycfProduct){
-        ProductPO productPO = YcfConverter.convertToProductPO(ycfProduct);
-        productDao.updateBySupplierProductId(productPO);
-        syncProductItem(ycfProduct.getProductItemIds());
+    public void syncProduct(List<YcfProduct> ycfProducts){
+        if(ListUtils.isEmpty(ycfProducts)){
+            log.error("要出发推送的产品列表为空");
+            return;
+        }
+        ycfProducts.forEach(ycfProduct -> {
+            if(StringUtils.isBlank(ycfProduct.getPoiId())){
+                log.info("要出发推送的产品没有主项目id,过滤掉。。");
+                return;
+            }
+            if(!YcfConstants.PRODUCT_TYPE_LIST.contains(ycfProduct.getProductType())){
+                log.info("要出发推送了未知类型产品，类型={}", ycfProduct.getProductType());
+                return;
+            }
+            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_ROOM){
+                log.info("要出发推送的单房，过滤掉。。");
+                return;
+            }
+            if(ycfProduct.getRoomChoiceNum() != null && ycfProduct.getRoomOptionNum() != null &&
+                    ycfProduct.getRoomChoiceNum() != ycfProduct.getRoomOptionNum()){
+                log.info("酒店可选和必选不一样（M选N），过滤掉。。");
+                return;
+            }
+            if(ycfProduct.getFoodChoiceNum() != null && ycfProduct.getFoodOptionNum() != null &&
+                    ycfProduct.getFoodChoiceNum() != ycfProduct.getFoodOptionNum()){
+                log.info("餐饮可选和必选不一样（M选N），过滤掉。。");
+                return;
+            }
+            if(ycfProduct.getTicketChoiceNum() != null && ycfProduct.getTicketOptionNum() != null &&
+                    ycfProduct.getTicketChoiceNum() != ycfProduct.getTicketOptionNum()){
+                log.info("景点可选和必选不一样（M选N），过滤掉。。");
+                return;
+            }
+            ProductPO productPO = YcfConverter.convertToProductPO(ycfProduct);
+            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_FOOD){
+                productPO.setProductType(ProductType.RESTAURANT.getCode());
+            } else if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_TICKET){
+                productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
+            } else {
+                if(ListUtils.isNotEmpty(ycfProduct.getRoomList())){
+                    productPO.setProductType(ProductType.FREE_TRIP.getCode());
+                } else if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
+                    productPO.setProductType(ProductType.SCENIC_TICKET_PLUS.getCode());
+                } else if(ListUtils.isNotEmpty(ycfProduct.getFoodList())){
+                    productPO.setProductType(ProductType.RESTAURANT.getCode());
+                } else {
+                    log.error("要出发无法归类productId={}，过滤掉，套餐里没有任何具体poi", ycfProduct.getProductID());
+                    return;
+                }
+            }
+            productDao.updateBySupplierProductId(productPO);
+            syncProductItem(ycfProduct.getProductItemIds());
+        });
     }
 
     public void syncProductItem(List<String> productItemIds){
@@ -106,6 +156,13 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     public void syncPrice(YcfPrice ycfPrice){
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
+        ProductPO productPO = productDao.getBySupplierProductId(ycfPrice.getProductID());
+        if(productPO != null){
+            pricePO.setProductId(productPO.getCode());
+        } else {
+            log.error("同步价格日历，根据供应商产品id={} 没有查到数据", ycfPrice.getProductID());
+            return;
+        }
         priceDao.updateBySupplierProductId(pricePO);
     }
 }

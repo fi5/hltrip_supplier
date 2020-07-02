@@ -2,9 +2,12 @@ package com.huoli.trip.supplier.web.yaochufa.convert;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 
 import java.util.List;
@@ -34,8 +37,9 @@ public class YcfConverter {
         productPO.setBuyMaxNight(product.getMaxNight());
         productPO.setBuyMin(product.getMinNum());
         productPO.setBuyMinNight(product.getMinNight());
-        productPO.setSupplierId(""); // todo
+        productPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productPO.setCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getProductID()));
+        productPO.setMainItemId(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getPoiId()));
         productPO.setDelayType(product.getAdvanceOrDelayType());
         productPO.setDescription(product.getProductDescription());
         productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
@@ -53,7 +57,6 @@ public class YcfConverter {
         productPO.setPreSaleEnd(product.getPreSaleDateEnd());
         productPO.setPreSaleStart(product.getPreSaleDateBegin());
         productPO.setPrice(product.getMarketPrice());
-        productPO.setProductType(product.getProductType());
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
         productPO.setRefundType(product.getRefundType());
@@ -131,7 +134,7 @@ public class YcfConverter {
     public static FoodInfoPO convertToFoodInfoPO(YcfResourceFood resourceFood){
         FoodInfoPO foodInfoPO = new FoodInfoPO();
         foodInfoPO.setBaseNum(resourceFood.getFoodBaseNum());
-        foodInfoPO.setItemId(""); // todo 项目应该先落地，然后这里去查库
+        foodInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceFood.getPoiId()));
         foodInfoPO.setSupplierItemId(resourceFood.getPoiId());
         foodInfoPO.setTitle(resourceFood.getFoodName());
         foodInfoPO.setSupplierResourceId(resourceFood.getFoodID());
@@ -146,7 +149,7 @@ public class YcfConverter {
     public static TicketInfoPO convertToTicketInfoPO(YcfResourceTicket resourceTicket){
         TicketInfoPO ticketInfoPO = new TicketInfoPO();
         ticketInfoPO.setBaseNum(resourceTicket.getTicketBaseNum());
-        ticketInfoPO.setItemId(""); // todo
+        ticketInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceTicket.getPoiId()));
         ticketInfoPO.setSupplierItemId(resourceTicket.getPoiId());
         ticketInfoPO.setSupplierResourceId(resourceTicket.getTicketID());
         ticketInfoPO.setTitle(resourceTicket.getTicketName());
@@ -169,7 +172,7 @@ public class YcfConverter {
         roomInfoPO.setFacility(resourceRoom.getRoomFac());
         roomInfoPO.setLatestTime(resourceRoom.getLatestTime());
         roomInfoPO.setBaseNum(resourceRoom.getRoomBaseNum());
-        roomInfoPO.setItemId(""); // todo
+        roomInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceRoom.getPoiId()));
         roomInfoPO.setSupplierItemId(resourceRoom.getPoiId());
         roomInfoPO.setSupplierResourceId(resourceRoom.getRoomID());
         roomInfoPO.setTitle(resourceRoom.getRoomName());
@@ -188,7 +191,7 @@ public class YcfConverter {
         productItemPO.setAppMainTitle(productItem.getAppMain());
         productItemPO.setAppSubTitle(productItem.getAppSub());
         productItemPO.setCity(productItem.getCity());
-        productItemPO.setSupplierId(""); // todo
+        productItemPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));
         productItemPO.setCountry(productItem.getCountry());
         productItemPO.setDescription(productItem.getDescription());
@@ -225,10 +228,8 @@ public class YcfConverter {
      */
     public static PricePO convertToPricePO(YcfPrice price){
         PricePO pricePO = new PricePO();
-        pricePO.setProductId(""); // todo 需要查
-//        pricePO.setSupplierId(""); // todo
-//        pricePO.setCode(CommonUtils.genCodeBySupplier(pricePO.getSupplierId(), price.getProductID()));
         pricePO.setSupplierProductId(price.getProductID());
+        pricePO.setProductId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, price.getProductID()));
         if(!ListUtils.isEmpty(price.getSaleInfos())){
             List<PriceInfoPO> priceInfoPOs = price.getSaleInfos().stream().map(priceInfo -> convertToPriceInfoPO(priceInfo)).collect(Collectors.toList());
             pricePO.setPriceInfos(priceInfoPOs);
@@ -243,11 +244,11 @@ public class YcfConverter {
      */
     public static PriceInfoPO convertToPriceInfoPO(YcfPriceInfo priceInfo){
         PriceInfoPO priceInfoPO = new PriceInfoPO();
-        priceInfo.setPriceType(priceInfo.getPriceType());
-        priceInfo.setSaleDate(priceInfo.getSaleDate());
-        priceInfo.setSalePrice(priceInfo.getSalePrice());
-        priceInfo.setSettlePrice(priceInfo.getSettlePrice());
-        priceInfo.setStock(priceInfo.getStock());
+        priceInfoPO.setPriceType(priceInfo.getPriceType());
+        priceInfoPO.setSaleDate(priceInfo.getDate());
+        priceInfoPO.setSalePrice(priceInfo.getPrice());
+        priceInfoPO.setSettlePrice(priceInfo.getSettlementPrice());
+        priceInfoPO.setStock(priceInfo.getStock());
         return priceInfoPO;
     }
 
@@ -262,6 +263,7 @@ public class YcfConverter {
             ids = Lists.newArrayList();
         }
         ids.addAll(list);
+        product.setProductItemIds(ids);
     }
 
     /**

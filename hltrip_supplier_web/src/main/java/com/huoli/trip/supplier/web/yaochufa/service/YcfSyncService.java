@@ -19,7 +19,7 @@ public interface YcfSyncService {
      * 同步产品
      * @param ycfProduct
      */
-    void syncProduct(YcfProduct ycfProduct);
+    void syncProduct(List<YcfProduct> ycfProduct);
 
     /**
      * 同步产品项目

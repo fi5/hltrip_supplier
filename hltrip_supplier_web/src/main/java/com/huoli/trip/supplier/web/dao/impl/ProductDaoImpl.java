@@ -42,4 +42,10 @@ public class ProductDaoImpl implements ProductDao {
         Query query = new Query(Criteria.where("mainItemId").in(itemIds));
         return mongoTemplate.find(query, ProductPO.class);
     }
+
+    @Override
+    public ProductPO getBySupplierProductId(String supplierProductId){
+        Query query = new Query(Criteria.where("supplierProductId").is(supplierProductId));
+        return mongoTemplate.findOne(query, ProductPO.class);
+    }
 }

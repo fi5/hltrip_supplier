@@ -26,4 +26,11 @@ public interface ProductDao {
      * @return
      */
     List<ProductPO> getProductListByItemIds(List<String> itemIds);
+
+    /**
+     * 根据供应商产品id查询
+     * @param supplierProductId
+     * @return
+     */
+    ProductPO getBySupplierProductId(String supplierProductId);
 }
