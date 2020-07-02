@@ -41,7 +41,7 @@ public class YcfConverter {
         productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
         productPO.setDisplayStart(product.getGlobalSaleDisplayDateBegin());
         productPO.setExcludeDesc(product.getFeeExclude());
-        productPO.setFoods(Lists.newArrayList(convertToFoodPO(product)));
+        productPO.setFoods(convertToFoodPO(product));
         if(ListUtils.isNotEmpty(product.getProductImageList())){
             productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
         }
@@ -57,12 +57,12 @@ public class YcfConverter {
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
         productPO.setRefundType(product.getRefundType());
-        productPO.setRooms(Lists.newArrayList(convertToRoomPO(product)));
+        productPO.setRooms(convertToRoomPO(product));
         productPO.setSalePrice(product.getMarketPrice());
         productPO.setStatus(product.getProductStatus());
         productPO.setSupplierName("要出发");
         productPO.setSupplierProductId(product.getProductID());
-        productPO.setTickets(Lists.newArrayList(convertToTicketPO(product)));
+        productPO.setTickets(convertToTicketPO(product));
         productPO.setValidTime(product.getStartDate());
         return productPO;
     }
