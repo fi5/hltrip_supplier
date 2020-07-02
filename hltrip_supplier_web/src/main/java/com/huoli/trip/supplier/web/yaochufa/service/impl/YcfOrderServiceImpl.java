@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 要出发订单dubbo服务接口实现
  */
 
-@Service(timeout = 10000,group = "hllx")
+@Service(group = "hllx")
 public class YcfOrderServiceImpl implements YcfOrderService {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
