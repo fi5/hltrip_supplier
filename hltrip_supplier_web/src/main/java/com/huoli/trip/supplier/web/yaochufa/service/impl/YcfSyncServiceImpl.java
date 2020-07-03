@@ -158,7 +158,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
         ProductPO productPO = productDao.getBySupplierProductId(ycfPrice.getProductID());
         if(productPO != null){
-            pricePO.setProductId(productPO.getCode());
+            pricePO.setProductCode(productPO.getCode());
         } else {
             log.error("同步价格日历，根据供应商产品id={} 没有查到数据", ycfPrice.getProductID());
             return;

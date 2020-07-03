@@ -39,7 +39,7 @@ public class YcfConverter {
         productPO.setBuyMinNight(product.getMinNight());
         productPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productPO.setCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getProductID()));
-        productPO.setMainItemId(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getPoiId()));
+        productPO.setMainItemCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getPoiId()));
         productPO.setDelayType(product.getAdvanceOrDelayType());
         productPO.setDescription(product.getProductDescription());
         productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
@@ -229,7 +229,7 @@ public class YcfConverter {
     public static PricePO convertToPricePO(YcfPrice price){
         PricePO pricePO = new PricePO();
         pricePO.setSupplierProductId(price.getProductID());
-        pricePO.setProductId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, price.getProductID()));
+        pricePO.setProductCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, price.getProductID()));
         if(!ListUtils.isEmpty(price.getSaleInfos())){
             List<PriceInfoPO> priceInfoPOs = price.getSaleInfos().stream().map(priceInfo -> convertToPriceInfoPO(priceInfo)).collect(Collectors.toList());
             pricePO.setPriceInfos(priceInfoPOs);
