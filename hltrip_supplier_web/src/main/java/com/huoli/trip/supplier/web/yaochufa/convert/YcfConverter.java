@@ -9,6 +9,7 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -205,10 +206,9 @@ public class YcfConverter {
             productItemPO.setMainImages(productItem.getMainImageList().stream().map(i -> convertToImageBasePO(i)).collect(Collectors.toList()));
         }
         productItemPO.setItemType(productItem.getPoiType());
-        ItemCoordinatePO itemCoordinate = new ItemCoordinatePO();
-        itemCoordinate.setLatitude(productItem.getLatitude());
-        itemCoordinate.setLongitude(productItem.getLongitude());
-        productItemPO.setItemCoordinate(itemCoordinate);
+        if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
+            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+        }
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
         productItemPO.setName(productItem.getPoiName());
