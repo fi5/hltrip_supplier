@@ -39,7 +39,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<ProductPO> getProductListByItemIds(List<String> itemIds){
-        Query query = new Query(Criteria.where("mainItemId").in(itemIds));
+        Query query = new Query(Criteria.where("mainItemCode").in(itemIds));
         return mongoTemplate.find(query, ProductPO.class);
     }
 
