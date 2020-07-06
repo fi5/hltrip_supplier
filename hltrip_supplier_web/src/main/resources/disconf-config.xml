@@ -25,6 +25,7 @@
 <!--					/Users/glcword/Documents/IDEWork/flight_work/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
 <!--					/Users/fengzhiqiang/work/航班管家/project_folder/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
 					/usr/local/huoli_home/tripsupplier/disconf.properties
+<!--					D:\hltripworkspace\disconf\disconf.properties-->
 				</prop>
 			</util:properties>
 		</property>
