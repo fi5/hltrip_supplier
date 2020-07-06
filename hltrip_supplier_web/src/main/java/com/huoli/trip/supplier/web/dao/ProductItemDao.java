@@ -28,4 +28,11 @@ public interface ProductItemDao {
      * @return
      */
     List<ProductItemPO> selectByCityAndType(String city, Integer type, int pageSize);
+
+    /**
+     * 根据code查询
+     * @param code
+     * @return
+     */
+    ProductItemPO selectByCode(String code);
 }
