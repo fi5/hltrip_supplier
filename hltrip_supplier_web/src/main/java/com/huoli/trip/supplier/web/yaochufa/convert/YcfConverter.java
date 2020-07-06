@@ -46,7 +46,7 @@ public class YcfConverter {
         productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
         productPO.setDisplayStart(product.getGlobalSaleDisplayDateBegin());
         productPO.setExcludeDesc(product.getFeeExclude());
-        productPO.setFoods(convertToFoodPO(product));
+        productPO.setFood(convertToFoodPO(product));
         if(ListUtils.isNotEmpty(product.getProductImageList())){
             productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
         }
@@ -61,12 +61,12 @@ public class YcfConverter {
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
         productPO.setRefundType(product.getRefundType());
-        productPO.setRooms(convertToRoomPO(product));
+        productPO.setRoom(convertToRoomPO(product));
         productPO.setSalePrice(product.getMarketPrice());
         productPO.setStatus(product.getProductStatus());
         productPO.setSupplierName("要出发");
         productPO.setSupplierProductId(product.getProductID());
-        productPO.setTickets(convertToTicketPO(product));
+        productPO.setTicket(convertToTicketPO(product));
         productPO.setValidTime(product.getStartDate());
         return productPO;
     }
@@ -207,8 +207,10 @@ public class YcfConverter {
         }
         productItemPO.setItemType(productItem.getPoiType());
         if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
-            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+//            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+
         }
+        productItemPO.setItemCoordinate(new Double[]{116.481533, 39.996504});
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
         productItemPO.setName(productItem.getPoiName());
