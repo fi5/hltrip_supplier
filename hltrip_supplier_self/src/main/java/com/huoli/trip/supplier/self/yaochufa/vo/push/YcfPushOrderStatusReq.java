@@ -20,7 +20,7 @@ public class YcfPushOrderStatusReq {
     //订单状态
     private int orderStatus;
     //电子凭证码(当订单含有票资源，且该票资源存在凭证码时，订单状态为待出行“20”时推送此值)
-    private List<YcfVoucher> vouchers;
+    private List<YcfVoucher> vochers;
     //备注（取消订单的原因等描述信息）
     private String remark;
 }

@@ -97,8 +97,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     return;
                 }
             }
-            productDao.updateBySupplierProductId(productPO);
             syncProductItem(ycfProduct.getProductItemIds());
+            ProductItemPO productItemPO = productItemDao.selectByCode(productPO.getMainItemCode());
+            productPO.setMainItem(productItemPO);
+            productDao.updateBySupplierProductId(productPO);
         });
     }
 

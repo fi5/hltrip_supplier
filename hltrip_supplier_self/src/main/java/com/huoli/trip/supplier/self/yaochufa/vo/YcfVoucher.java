@@ -12,5 +12,5 @@ public class YcfVoucher implements Serializable {
     //二维码地址
     private String vocherUrl;
     //凭证其他信息(1-手机尾号四位）
-    private Map<Integer,String> vocherExtendInfos;
+    private Map<String,String> vocherExtendInfos;
 }
