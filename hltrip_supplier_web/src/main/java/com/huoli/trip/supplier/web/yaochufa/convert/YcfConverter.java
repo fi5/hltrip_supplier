@@ -1,17 +1,16 @@
 package com.huoli.trip.supplier.web.yaochufa.convert;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 描述：<br/>
@@ -32,7 +31,9 @@ public class YcfConverter {
         ProductPO productPO = new ProductPO();
         productPO.setAllPreSale(product.getIsGlobalSale());
         productPO.setBookAheadMin(product.getBookAheadMin());
-        productPO.setBookRules(JSON.toJSONString(product.getBookRules()));
+        if(ListUtils.isNotEmpty(product.getBookRules())){
+            productPO.setBookRules(product.getBookRules().stream().map(rule -> convertToBookRulePO(rule)).collect(Collectors.toList()));
+        }
         productPO.setBuyMax(product.getMaxNum());
         productPO.setBuyMaxNight(product.getMaxNight());
         productPO.setBuyMin(product.getMinNum());
@@ -45,13 +46,15 @@ public class YcfConverter {
         productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
         productPO.setDisplayStart(product.getGlobalSaleDisplayDateBegin());
         productPO.setExcludeDesc(product.getFeeExclude());
-        productPO.setFoods(convertToFoodPO(product));
+        productPO.setFood(convertToFoodPO(product));
         if(ListUtils.isNotEmpty(product.getProductImageList())){
             productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
         }
         productPO.setIncludeDesc(product.getFeeInclude());
         productPO.setInvalidTime(product.getEndDate());
-        productPO.setLimitRules(JSON.toJSONString(product.getLimitBuyRules()));
+        if(ListUtils.isNotEmpty(product.getLimitBuyRules())){
+            productPO.setLimitRules(product.getLimitBuyRules().stream().map(rule -> convertToLimitRulePO(rule)).collect(Collectors.toList()));
+        }
         productPO.setName(product.getProductName());
         productPO.setPreSaleDescription(product.getPreSaleDescription());
         productPO.setPreSaleEnd(product.getPreSaleDateEnd());
@@ -60,12 +63,12 @@ public class YcfConverter {
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
         productPO.setRefundType(product.getRefundType());
-        productPO.setRooms(convertToRoomPO(product));
+        productPO.setRoom(convertToRoomPO(product));
         productPO.setSalePrice(product.getMarketPrice());
         productPO.setStatus(product.getProductStatus());
         productPO.setSupplierName("要出发");
         productPO.setSupplierProductId(product.getProductID());
-        productPO.setTickets(convertToTicketPO(product));
+        productPO.setTicket(convertToTicketPO(product));
         productPO.setValidTime(product.getStartDate());
         return productPO;
     }
@@ -205,10 +208,11 @@ public class YcfConverter {
             productItemPO.setMainImages(productItem.getMainImageList().stream().map(i -> convertToImageBasePO(i)).collect(Collectors.toList()));
         }
         productItemPO.setItemType(productItem.getPoiType());
-        ItemCoordinatePO itemCoordinate = new ItemCoordinatePO();
-        itemCoordinate.setLatitude(productItem.getLatitude());
-        itemCoordinate.setLongitude(productItem.getLongitude());
-        productItemPO.setItemCoordinate(itemCoordinate);
+        if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
+//            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+
+        }
+        productItemPO.setItemCoordinate(new Double[]{116.481533, 39.996504});
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
         productItemPO.setName(productItem.getPoiName());
@@ -288,5 +292,36 @@ public class YcfConverter {
         itemFeaturePO.setDetail(itemFeature.getDetail());
         itemFeaturePO.setType(itemFeature.getType());
         return itemFeaturePO;
+    }
+
+    /**
+     * 预定规则
+     * @param bookRule
+     * @return
+     */
+    public static BookRulePO convertToBookRulePO(YcfProductBookRule bookRule){
+        BookRulePO bookRulePO = new BookRulePO();
+        bookRulePO.setCnName(bookRule.getCName());
+        bookRulePO.setCredential(bookRule.getCredential());
+        bookRulePO.setCredentials(bookRule.getCredentialType());
+        bookRulePO.setEmail(bookRule.getEmail());
+        bookRulePO.setEnName(bookRule.getEName());
+        bookRulePO.setPeopleNum(bookRule.getPeopleNum());
+        bookRulePO.setPhone(bookRule.getMobile());
+        bookRulePO.setRuleType(bookRule.getPersonType());
+        return bookRulePO;
+    }
+
+    /**
+     * 预售规则
+     * @param limitRule
+     * @return
+     */
+    public static LimitRulePO convertToLimitRulePO(YcfProductLimitRule limitRule){
+        LimitRulePO limitRulePO = new LimitRulePO();
+        limitRulePO.setLimitDays(limitRule.getBuyDay());
+        limitRulePO.setLimitTotal(limitRule.getBuyCount());
+        limitRulePO.setRuleType(limitRule.getBuyRuleType());
+        return limitRulePO;
     }
 }
