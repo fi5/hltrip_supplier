@@ -100,6 +100,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             syncProductItem(ycfProduct.getProductItemIds());
             ProductItemPO productItemPO = productItemDao.selectByCode(productPO.getMainItemCode());
             productPO.setMainItem(productItemPO);
+            log.info("项目：{}", JSON.toJSONString(productPO));
             productPO.setCity(productItemPO.getCity());
             productDao.updateBySupplierProductId(productPO);
         });
