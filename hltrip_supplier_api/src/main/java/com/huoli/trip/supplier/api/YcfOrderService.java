@@ -53,5 +53,12 @@ public interface YcfOrderService {
      */
     YcfBaseResult<YcfCancelOrderRes> cancelOrder(YcfCancelOrderReq cancelOrderReq);
 
+	/**
+     * 获取库存价格
+     * @param bookCheckReq
+     * @return
+     */
+    YcfBaseResult<YcfGetPriceResponse> getStockPrice(YcfGetPriceRequest stockPriceReq);
+
 
 }
