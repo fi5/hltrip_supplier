@@ -43,6 +43,14 @@ public class YcfOrderServiceImpl implements YcfOrderService {
     }
 
     @Override
+    public YcfBaseResult<YcfGetPriceResponse> getStockPrice(YcfGetPriceRequest stockPriceReq) {
+        YcfBaseRequest<YcfGetPriceRequest> req = new YcfBaseRequest<>();
+        req.setData(stockPriceReq);
+        return iYaoChuFaClient.getPrice(req);
+    }
+
+
+    @Override
     public YcfBaseResult<YcfPayOrderRes> payOrder(YcfPayOrderReq payOrderReq) {
         YcfBaseRequest<YcfPayOrderReq> req = new YcfBaseRequest<>();
         req.setData(payOrderReq);
