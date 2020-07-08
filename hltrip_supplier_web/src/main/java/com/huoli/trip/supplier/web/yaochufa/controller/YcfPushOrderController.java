@@ -1,14 +1,13 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
-import com.huoli.trip.supplier.api.YcfOrderService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.push.OrderStatusInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
 import com.huoli.trip.supplier.web.yaochufa.service.IYaoChuFaCallBackService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Api(description = "订单推送相关")
+@Slf4j
 public class YcfPushOrderController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
@@ -34,12 +34,14 @@ public class YcfPushOrderController {
 
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
     @PostMapping(path = "/pushOrderStatus")
-    YcfBaseResult<Boolean> payOrder(@RequestBody YcfPushOrderStatusReq req) {
-        YcfBaseResult<Boolean> result = new YcfBaseResult<>();
-        //TODO 接收到数据处理逻辑
-        OrderStatusInfo orderStatusInfo = yaoChuFaCallBackService.synOrderStatus(req);
-        result.setData(true);
-        return result;
+    YcfBaseResult<Boolean> pushOrderStatus(@RequestBody YcfPushOrderStatusReq req) {
+        try{
+            yaoChuFaCallBackService.orderStatusNotice(req);
+        }catch (Exception e){
+            log.error("推送订单状态失败",e);
+            return YcfBaseResult.fail();
+        }
+        return YcfBaseResult.success();
     }
 
     @ApiOperation("推送退款通知")

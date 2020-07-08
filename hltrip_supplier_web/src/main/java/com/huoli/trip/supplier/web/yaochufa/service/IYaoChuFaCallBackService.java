@@ -15,12 +15,12 @@ import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
 public interface IYaoChuFaCallBackService {
 
     /**
-     * 获取同步订单状态数据
+     * 订单状态通知
      * @param req
      * @author= wangdm
      * @return
      */
-    OrderStatusInfo synOrderStatus(YcfPushOrderStatusReq req);
+    void orderStatusNotice(YcfPushOrderStatusReq req);
 
     //退款通知
     void refundNotice(YcfRefundNoticeRequest req);
