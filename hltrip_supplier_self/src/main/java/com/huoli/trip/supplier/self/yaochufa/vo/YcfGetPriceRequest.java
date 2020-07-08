@@ -27,12 +27,12 @@ public class YcfGetPriceRequest {
     private String partnerProductID;
 
     /**
-     * 开始时间
+     * 开始时间yyyy-MM-dd
      */
-    private Date startDate;
+    private String startDate;
 
     /**
-     * 结束时间
+     * 结束时间yyyy-MM-dd
      */
-    private Date endDate;
+    private String endDate;
 }
