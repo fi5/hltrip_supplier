@@ -1,5 +1,6 @@
-package com.huoli.trip.supplier.web.yaochufa.service;
+package com.huoli.trip.supplier.api;
 
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 
@@ -32,4 +33,6 @@ public interface YcfSyncService {
      * @param ycfPrice
      */
     void syncPrice(YcfPrice ycfPrice);
+
+    void getPrice(YcfGetPriceRequest request);
 }

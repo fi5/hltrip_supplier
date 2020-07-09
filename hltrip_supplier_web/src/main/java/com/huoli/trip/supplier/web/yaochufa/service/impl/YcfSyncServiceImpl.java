@@ -1,11 +1,13 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
@@ -15,11 +17,9 @@ import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
-import com.huoli.trip.supplier.web.yaochufa.service.YcfSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -31,8 +31,8 @@ import java.util.List;
  * 版本：1.0<br>
  * 创建日期：2020/6/28<br>
  */
-@Service
 @Slf4j
+@Service(group = "hltrip")
 public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
@@ -141,6 +141,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
+    @Override
     public void getPrice(YcfGetPriceRequest request){
         YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
         log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
