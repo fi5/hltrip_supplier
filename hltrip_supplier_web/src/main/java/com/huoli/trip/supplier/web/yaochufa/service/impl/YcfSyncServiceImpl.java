@@ -152,6 +152,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             YcfGetPriceResponse response = baseResult.getData();
             if(response == null){
                 log.error("获取价格失败，供应商（要出发）没有返回data");
+                return baseResult;
             }
             YcfPrice ycfPrice = new YcfPrice();
             ycfPrice.setProductID(response.getProductID());
