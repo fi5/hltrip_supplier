@@ -166,6 +166,7 @@ public class YcfConverter {
      */
     public static RoomInfoPO convertToRoomInfoPO(YcfResourceRoom resourceRoom){
         RoomInfoPO roomInfoPO = new RoomInfoPO();
+        roomInfoPO.setBaseNight(resourceRoom.getRoomBaseNight());
         roomInfoPO.setArea(resourceRoom.getArea());
         roomInfoPO.setBedSize(resourceRoom.getBedSize());
         roomInfoPO.setBedType(resourceRoom.getBedType());

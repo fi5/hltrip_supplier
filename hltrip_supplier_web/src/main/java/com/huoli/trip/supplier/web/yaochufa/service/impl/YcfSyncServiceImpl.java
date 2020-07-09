@@ -98,9 +98,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
             }
             syncProductItem(ycfProduct.getProductItemIds());
-            log.info("同步poi完成。。。。。。。。。。。。。。。。。。。");
+            log.info("同步poi完成。");
             ProductItemPO productItemPO = productItemDao.selectByCode(productPO.getMainItemCode());
-            log.info("项目：：：：：：：：：：：：：：：：：{}", JSON.toJSONString(productItemPO));
+            log.info("主项目={}", JSON.toJSONString(productItemPO));
             productPO.setMainItem(productItemPO);
             productPO.setCity(productItemPO.getCity());
             productDao.updateBySupplierProductId(productPO);
