@@ -1,12 +1,12 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPushProductResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-import com.huoli.trip.supplier.web.yaochufa.service.YcfSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
