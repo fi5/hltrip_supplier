@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;

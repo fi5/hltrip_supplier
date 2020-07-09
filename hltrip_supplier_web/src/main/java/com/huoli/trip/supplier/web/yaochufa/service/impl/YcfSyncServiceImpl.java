@@ -47,6 +47,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private IYaoChuFaClient yaoChuFaClient;
 
+    @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
         if(ListUtils.isEmpty(ycfProducts)){
             log.error("要出发推送的产品列表为空");
@@ -160,6 +161,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
+    @Override
     public void syncPrice(YcfPrice ycfPrice){
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
         ProductPO productPO = productDao.getBySupplierProductId(ycfPrice.getProductID());
