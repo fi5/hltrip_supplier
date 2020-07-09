@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述: <br>
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2020/6/19<br>
  */
 @Data
-public class YcfBookGuest {
+public class YcfBookGuest implements Serializable {
     //中文姓名(套餐预定规则要求，则必填)
     private String cName;
     //英文姓名(套餐预定规则要求，则必填)
