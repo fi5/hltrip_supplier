@@ -28,15 +28,6 @@ public class TestController {
     @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
 
-
-    @Value("${aa.aa}")
-    private String ss;
-
-    @PostConstruct
-    void tt(){
-       log.info("++++++++++++++++++++++++++++++++++++++++++++++++++" + ss);
-    }
-
     @GetMapping(path = "/test")
     String test() {
         Map<String,Object> req = new HashMap<>();
