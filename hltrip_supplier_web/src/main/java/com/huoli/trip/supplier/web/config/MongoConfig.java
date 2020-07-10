@@ -39,10 +39,12 @@ public class MongoConfig {
         converter.setCustomConversions(new MongoCustomConversions(list));
         return converter;
     }
+
     @Bean
     public MongoDatabaseFactory dbFactory(){
         return new SimpleMongoClientDatabaseFactory(ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConfigConstants.CONFIG_ITEM_MONGO_URI));
     }
+
     @Bean
     public MongoMappingContext mongoMappingContext() {
         MongoMappingContext mappingContext = new MongoMappingContext();
@@ -50,6 +52,7 @@ public class MongoConfig {
         mappingContext.afterPropertiesSet();
         return mappingContext;
     }
+
     @Bean
     public MongoTemplate mongoTemplate(){
         return new MongoTemplate(this.dbFactory(), this.mappingMongoConverter());
