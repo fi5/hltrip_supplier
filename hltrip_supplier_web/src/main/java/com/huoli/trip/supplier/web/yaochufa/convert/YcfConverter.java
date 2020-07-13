@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 描述：<br/>
@@ -172,9 +172,13 @@ public class YcfConverter {
         roomInfoPO.setBedType(resourceRoom.getBedType());
         roomInfoPO.setBreakfast(resourceRoom.getBreakfast());
         roomInfoPO.setBroadNet(resourceRoom.getBroadNet());
-        roomInfoPO.setEarliestTime(resourceRoom.getEarliestTime());
+        if(resourceRoom.getEarliestTime() != null){
+            roomInfoPO.setEarliestTime(DateTimeUtil.format(resourceRoom.getEarliestTime(), "HH:mm"));
+        }
+        if(resourceRoom.getLatestTime() != null){
+            roomInfoPO.setLatestTime(DateTimeUtil.format(resourceRoom.getLatestTime(), "HH:mm"));
+        }
         roomInfoPO.setFacility(resourceRoom.getRoomFac());
-        roomInfoPO.setLatestTime(resourceRoom.getLatestTime());
         roomInfoPO.setBaseNum(resourceRoom.getRoomBaseNum());
         roomInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceRoom.getPoiId()));
         roomInfoPO.setSupplierItemId(resourceRoom.getPoiId());
@@ -194,7 +198,10 @@ public class YcfConverter {
         productItemPO.setAddress(productItem.getAddress());
         productItemPO.setAppMainTitle(productItem.getAppMain());
         productItemPO.setAppSubTitle(productItem.getAppSub());
-        productItemPO.setCity(productItem.getCity());
+        String city = productItem.getCity();
+        if(StringUtils.isNotBlank(city) && city.endsWith("市")){
+            productItemPO.setCity(city);
+        }
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));
         productItemPO.setCountry(productItem.getCountry());
@@ -210,10 +217,8 @@ public class YcfConverter {
         }
         productItemPO.setItemType(productItem.getPoiType());
         if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
-//            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
-
+            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
         }
-        productItemPO.setItemCoordinate(new Double[]{116.481533, 39.996504});
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
         productItemPO.setName(productItem.getPoiName());
