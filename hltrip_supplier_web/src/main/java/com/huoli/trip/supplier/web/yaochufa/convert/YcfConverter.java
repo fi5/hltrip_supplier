@@ -66,7 +66,7 @@ public class YcfConverter {
         productPO.setRoom(convertToRoomPO(product));
         productPO.setSalePrice(product.getMarketPrice());
         productPO.setStatus(product.getProductStatus());
-        productPO.setSupplierName("要出发");
+        productPO.setSupplierName(Constants.SUPPLIER_NAME_YCF);
         productPO.setSupplierProductId(product.getProductID());
         productPO.setTicket(convertToTicketPO(product));
         productPO.setValidTime(product.getStartDate());
