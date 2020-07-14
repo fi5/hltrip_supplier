@@ -32,8 +32,8 @@ public class YaoChuFaCallBackServiceImpl implements IYaoChuFaCallBackService {
 
     @Override
     public void orderStatusNotice(YcfPushOrderStatusReq req) {
-//        String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
-        String url= "http://192.168.11.138:9061/hltrip_central/recSupplier/orderStatusNotice";
+        String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
+//        String url= "http://192.168.11.138:9061/hltrip_central/recSupplier/orderStatusNotice";
         try {
             String string = JSONObject.toJSONString(req);
             log.info("中台订单推送传参json:"+string);
