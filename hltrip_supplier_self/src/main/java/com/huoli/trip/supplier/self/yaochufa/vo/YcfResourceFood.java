@@ -15,7 +15,7 @@ public class YcfResourceFood {
     /**
      * 餐饮编号
      */
-    private String foodID;
+    private String foodId;
 
     /**
      * 餐饮名称
