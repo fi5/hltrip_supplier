@@ -18,7 +18,7 @@ public class YcfResourceRoom {
     /**
      * 房型编号
      */
-    private String roomID;
+    private String roomId;
 
     /**
      * 房型名称
