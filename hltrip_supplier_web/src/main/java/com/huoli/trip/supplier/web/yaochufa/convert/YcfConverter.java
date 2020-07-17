@@ -140,7 +140,7 @@ public class YcfConverter {
         foodInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceFood.getPoiId()));
         foodInfoPO.setSupplierItemId(resourceFood.getPoiId());
         foodInfoPO.setTitle(resourceFood.getFoodName());
-        foodInfoPO.setSupplierResourceId(resourceFood.getFoodID());
+        foodInfoPO.setSupplierResourceId(resourceFood.getFoodId());
         return foodInfoPO;
     }
 
@@ -154,7 +154,7 @@ public class YcfConverter {
         ticketInfoPO.setBaseNum(resourceTicket.getTicketBaseNum());
         ticketInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceTicket.getPoiId()));
         ticketInfoPO.setSupplierItemId(resourceTicket.getPoiId());
-        ticketInfoPO.setSupplierResourceId(resourceTicket.getTicketID());
+        ticketInfoPO.setSupplierResourceId(resourceTicket.getTicketId());
         ticketInfoPO.setTitle(resourceTicket.getTicketName());
         return ticketInfoPO;
     }
@@ -182,7 +182,7 @@ public class YcfConverter {
         roomInfoPO.setBaseNum(resourceRoom.getRoomBaseNum());
         roomInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceRoom.getPoiId()));
         roomInfoPO.setSupplierItemId(resourceRoom.getPoiId());
-        roomInfoPO.setSupplierResourceId(resourceRoom.getRoomID());
+        roomInfoPO.setSupplierResourceId(resourceRoom.getRoomId());
         roomInfoPO.setTitle(resourceRoom.getRoomName());
         return roomInfoPO;
     }
