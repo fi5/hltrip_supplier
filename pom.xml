@@ -128,6 +128,38 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <repositories>
+        <!-- 添加公司仓库 -->
+        <repository>
+            <id>company-repositories</id>
+            <name>inner repositories</name>
+            <url>http://mvn.133ec.com:8081/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- 国际机票货架仓库 -->
+        <repository>
+            <id>nexus-flight</id>
+            <name>Nexus Flight</name>
+            <url>http://60.205.218.7:8081/repository/maven-central/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <!--阿里云的仓库，加速下载 -->
+        <repository>
+            <id>maven-aliyun</id>
+            <name>maven-aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </repository>
+    </repositories>
     <distributionManagement>
         <snapshotRepository>
             <id>nexus-releases</id>
