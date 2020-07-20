@@ -40,14 +40,15 @@ public class SupplierAspect {
         try {
             Object args[] = joinPoint.getArgs();
             Object result;
-            String params;
+            String params = "";
             if(ArrayUtils.isNotEmpty(args) && args[0] != null){
-                try {
-                    params = JSON.toJSONString(args);
-                    JSONObject param = JSONObject.parseObject(JSON.toJSONString(args[0]));
-                } catch (Exception e) {
-                    log.error("反序列化方法 {} 的请求参数异常，这是为了获取traceId，不影响主流程。", e);
-                    params = "参数不能序列化";
+                for (Object arg : args) {
+                    try {
+                        params = JSON.toJSONString(arg);
+                    } catch (Exception e) {
+                        log.error("反序列化方法 {} 的请求参数异常，这是为了获取traceId，不影响主流程。", e);
+                        params = "参数不能序列化";
+                    }
                 }
             } else {
                 params = "无参数。";
