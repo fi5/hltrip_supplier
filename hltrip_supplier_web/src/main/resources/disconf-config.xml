@@ -15,25 +15,25 @@
        ">
 
 	<!-- 数据初始化 -->
-	<bean id="systemPrereqs"
-		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject" value="#{@systemProperties}" />
-		<property name="targetMethod" value="putAll" />
-		<property name="arguments">
-			<util:properties>
-				<prop key="disconf.conf">
-					<!--/Users/glcword/Documents/IDEWork/flight_work/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
-<!--					/Users/fengzhiqiang/work/航班管家/project_folder/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties-->
+<!--	<bean id="systemPrereqs"-->
+<!--		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">-->
+<!--		<property name="targetObject" value="#{@systemProperties}" />-->
+<!--		<property name="targetMethod" value="putAll" />-->
+<!--		<property name="arguments">-->
+<!--			<util:properties>-->
+<!--				<prop key="disconf.conf">-->
+<!--&lt;!&ndash;					/Users/glcword/Documents/IDEWork/flight_work/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties&ndash;&gt;-->
+<!--&lt;!&ndash;					/Users/fengzhiqiang/work/航班管家/project_folder/hltrip_supplier/hltrip_supplier_web/conf/disconf.properties&ndash;&gt;-->
 <!--					/usr/local/huoli_home/tripsupplier/disconf.properties-->
-					C:\companyWork\gitClone\hltrip_supplier\hltrip_supplier_web\conf\disconf.properties
-				</prop>
-			</util:properties>
-		</property>
-	</bean>
+<!--&lt;!&ndash;					D:\hltripworkspace\disconf\disconf.properties&ndash;&gt;-->
+<!--				</prop>-->
+<!--			</util:properties>-->
+<!--		</property>-->
+<!--	</bean>-->
 
 	<!-- disconf 配置 -->
 	<bean id="disconfMgrBean" class="com.baidu.disconf.client.DisconfMgrBean"
-		destroy-method="destroy" depends-on="systemPrereqs">
+		destroy-method="destroy">
 		<property name="scanPackage" value="com.huoli.trip.common.config" />
 	</bean>
 	<bean id="disconfMgrBean2" class="com.baidu.disconf.client.DisconfMgrBeanSecond"
