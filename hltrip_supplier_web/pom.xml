@@ -128,27 +128,27 @@
             <artifactId>log4j-flume-ng</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.flume.flume-ng-clients</groupId>
-            <artifactId>flume-ng-log4jappender</artifactId>
+            <groupId>com.huoli</groupId>
+            <artifactId>eagle-eye-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.huoli</groupId>
+            <artifactId>sleuth-2v-extend</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.huoli</groupId>
+            <artifactId>mj-client-basic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.baidu.disconf</groupId>
             <artifactId>disconf-client</artifactId>
         </dependency>
 
-        <!-- trace -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-sleuth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.huoli</groupId>
-            <artifactId>atrace-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.huoli</groupId>
-            <artifactId>sleuth-core-atrace-extend</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
