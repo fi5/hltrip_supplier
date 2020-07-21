@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -14,7 +15,7 @@ import java.util.Date;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfPriceInfo {
+public class YcfPriceInfo implements Serializable {
 
     /**
      * 价格日期
