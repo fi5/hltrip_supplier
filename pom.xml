@@ -58,31 +58,6 @@
                 <version>2.3.1.RELEASE</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-sleuth</artifactId>
-                <version>1.2.1.RELEASE</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-flume-ng</artifactId>
-                <version>2.8.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.flume.flume-ng-clients</groupId>
-                <artifactId>flume-ng-log4jappender</artifactId>
-                <version>1.7.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.huoli</groupId>
-                <artifactId>atrace-client</artifactId>
-                <version>1.3.7</version>
-            </dependency>
-            <dependency>
-                <groupId>com.huoli</groupId>
-                <artifactId>sleuth-core-atrace-extend</artifactId>
-                <version>1.3.7</version>
-            </dependency>
-            <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
                 <version>2.5.0</version>
@@ -115,8 +90,76 @@
                 <artifactId>hltrip_common</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
+
+            <!-- log -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-log4j2</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-flume-ng</artifactId>
+                <version>2.8.2</version>
+            </dependency>
+
+            <!--日志依赖 -->
+            <dependency>
+                <groupId>com.huoli</groupId>
+                <artifactId>eagle-eye-core</artifactId>
+                <version>1.9.5</version>
+            </dependency>
+            <!-- 基于sleuth的调用链实现，适配spring boot 1.x版本（optional），springboot 2.x请使用sleuth-2v-extend -->
+            <dependency>
+                <groupId>com.huoli</groupId>
+                <artifactId>sleuth-2v-extend</artifactId>
+                <version>1.9.5</version>
+            </dependency>
+            <!-- jvm信息采集展示（optional） -->
+            <dependency>
+                <groupId>com.huoli</groupId>
+                <artifactId>mj-client-basic</artifactId>
+                <version>2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>1.9.5</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+    <repositories>
+        <!-- 添加公司仓库 -->
+        <repository>
+            <id>company-repositories</id>
+            <name>inner repositories</name>
+            <url>http://mvn.133ec.com:8081/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- 国际机票货架仓库 -->
+        <repository>
+            <id>nexus-flight</id>
+            <name>Nexus Flight</name>
+            <url>http://60.205.218.7:8081/repository/maven-central/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <!--阿里云的仓库，加速下载 -->
+        <repository>
+            <id>maven-aliyun</id>
+            <name>maven-aliyun</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+        </repository>
+    </repositories>
     <distributionManagement>
         <snapshotRepository>
             <id>nexus-releases</id>

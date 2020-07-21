@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  * 创建日期：2020/6/29<br>
  */
 @Data
-public class YcfGetPriceResponse {
+public class YcfGetPriceResponse implements Serializable {
 
     /**
      * 产品id

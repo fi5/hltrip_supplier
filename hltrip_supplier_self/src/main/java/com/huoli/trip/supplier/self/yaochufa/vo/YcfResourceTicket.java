@@ -16,7 +16,7 @@ public class YcfResourceTicket {
     /**
      * 票种编号
      */
-    private String ticketID;
+    private String ticketId;
 
     /**
      * 票种名称
