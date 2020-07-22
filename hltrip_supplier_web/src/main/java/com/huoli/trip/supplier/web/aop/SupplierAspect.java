@@ -1,16 +1,14 @@
 package com.huoli.trip.supplier.web.aop;
 
-import brave.Span;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.BraveTrace;
 import com.huoli.eagle.eye.core.HuoliAtrace;
-import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.eagle.eye.core.statistical.Event;
 import com.huoli.eagle.eye.core.statistical.EventStatusEnum;
-import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.SupplierError;
 import com.huoli.trip.common.vo.response.BaseResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.config.TraceConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -22,10 +20,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-
-import javax.validation.ValidationException;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 
 /**
@@ -59,8 +53,8 @@ public class SupplierAspect {
     /**
      * dubbo 切面
      */
-    @Pointcut("@within(com.alibaba.dubbo.config.annotation.Service)")
-    public void service() {
+    @Pointcut("(execution(* com.huoli.trip.supplier.web.yaochufa.service..*.*(..)))) && (@within(com.alibaba.dubbo.config.annotation.Service))")
+    public void yaochufaService() {
     }
 
     @Around(value = "controller()")
@@ -116,8 +110,16 @@ public class SupplierAspect {
         }
     }
 
-    @Around(value = "service()")
+    @Around(value = "yaochufaService()")
     public Object aroundService(ProceedingJoinPoint joinPoint){
+        try {
+            return serviceCut(joinPoint);
+        } catch (Throwable e) {
+            return YcfBaseResult.fail();
+        }
+    }
+
+    private Object serviceCut(ProceedingJoinPoint joinPoint) throws Throwable{
         String function = joinPoint.getSignature().getName();
         Event.EventBuilder eventBuilder = new Event.EventBuilder();
         eventBuilder.withData("method", function);
@@ -127,7 +129,6 @@ public class SupplierAspect {
         stopWatch.start();
         try {
             Object args[] = joinPoint.getArgs();
-            this.paramValidate(args);
             Object result;
             String params;
             if(ArrayUtils.isNotEmpty(args) && args[0] != null){
@@ -154,51 +155,23 @@ public class SupplierAspect {
                 eventBuilder.withStatus(EventStatusEnum.SUCCESS);
             } catch  (Throwable e) {
                 log.error("[{}] 服务器内部错误异常: ", function, e);
-                result = BaseResponse.withFail(SupplierError.SERVER_ERROR.getCode(), SupplierError.SERVER_ERROR.getError());
                 eventBuilder.withData("code", SupplierError.SERVER_ERROR.getCode());
                 eventBuilder.withStatus(EventStatusEnum.FAIL);
+                throw e;
             } finally {
                 stopWatch.stop();
-            }
-            if (result == null) {
-                log.error("[{}] result 为空", function);
-                result = BaseResponse.withFail(SupplierError.UNKNOWN_ERROR.getCode(), SupplierError.UNKNOWN_ERROR.getError());
-                eventBuilder.withData("code", SupplierError.UNKNOWN_ERROR.getCode());
-                eventBuilder.withStatus(EventStatusEnum.FAIL);
             }
             log.info("[{}], response: {}, cost: {},", function, JSON.toJSONString(result),
                     stopWatch.getTotalTimeMillis());
             return result;
-        } catch (ValidationException e){
-            log.error("[{}] 请求参数异常: ", function, e);
-            eventBuilder.withData("code", SupplierError.BAD_REQUEST_ERROR.getCode());
-            eventBuilder.withStatus(EventStatusEnum.FAIL);
-            String result = String.format("%s : %s", SupplierError.BAD_REQUEST_ERROR.getError(), e.getMessage());
-            return BaseResponse.withFail(SupplierError.BAD_REQUEST_ERROR.getCode(), result);
         } catch (Throwable e) {
             eventBuilder.withData("code", SupplierError.UNKNOWN_ERROR.getCode());
             eventBuilder.withStatus(e);
             log.error("切面执行异常：", e);
-            return BaseResponse.withFail(SupplierError.UNKNOWN_ERROR.getCode(), SupplierError.UNKNOWN_ERROR.getError());
+            throw e;
         } finally {
             Event event = eventBuilder.build();
             huoliAtrace.reportEvent(event);
         }
-    }
-
-    /**
-     * 参数校验
-     * @param params
-     */
-    private void paramValidate(Object[] params) {
-        if (ArrayUtils.isEmpty(params)) {
-            return;
-        }
-        Stream.of(params).forEach(param -> {
-            if (Objects.isNull(param)) {
-                throw new ValidationException("传入参数为空！");
-            }
-            ValidatorUtil.validate(param);
-        });
     }
 }
