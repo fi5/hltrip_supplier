@@ -47,7 +47,7 @@
         </RollingFile>
 
 <!--        &lt;!&ndash; 不影响业务运行，异步发送 &ndash;&gt;-->
-/
+
 
 <!--        &lt;!&ndash; flume发送 batchSize（单次传输大小）需要当前日志场景决定，maxDelayMillis（最大等待时间） &ndash;&gt;-->
         <Flume name="FlumeAppender" compress="false" type="Avro" batchSize="500" maxDelayMillis="1000">

@@ -200,7 +200,7 @@ public class YcfConverter {
         productItemPO.setAppSubTitle(productItem.getAppSub());
         String city = productItem.getCity();
         if(StringUtils.isNotBlank(city) && city.endsWith("市")){
-            productItemPO.setCity(city);
+            productItemPO.setCity(city.substring(0, city.length() - 1));
         }
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));

@@ -32,7 +32,7 @@ import java.util.List;
  * 创建日期：2020/6/28<br>
  */
 @Slf4j
-@Service(group = "hltrip")
+@Service(timeout = 10000,group = "hltrip")
 public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired

@@ -113,7 +113,7 @@
             <dependency>
                 <groupId>com.huoli</groupId>
                 <artifactId>sleuth-2v-extend</artifactId>
-                <version>1.9.5</version>
+                <version>1.9.6</version>
             </dependency>
             <!-- jvm信息采集展示（optional） -->
             <dependency>
