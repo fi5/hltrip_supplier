@@ -21,6 +21,7 @@ public class YaoChuFaCallBackServiceImpl implements IYaoChuFaCallBackService {
        String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
        try {
 
+           log.info("请求的地址:"+url+",参数:"+JSONObject.toJSONString(request));
            String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(request), 10000, null);
            log.info("中台refundNotice返回:"+res);
        } catch (Exception e) {
