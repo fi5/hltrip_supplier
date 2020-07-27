@@ -62,7 +62,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 log.info("要出发推送了未知类型产品，类型={}", ycfProduct.getProductType());
                 return;
             }
-            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_ROOM){
+            if(ListUtils.isEmpty(ycfProduct.getFoodList()) &&
+                    ListUtils.isEmpty(ycfProduct.getRoomList()) &&
+                    ListUtils.isEmpty(ycfProduct.getTicketList())){
+                log.info("要出发推送的产品所有子项都是空，过滤掉。。");
+            }
+            // 类型是单房 或者 只有酒店项有数据的都认为是单房，过滤
+            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_ROOM ||
+                    (ListUtils.isEmpty(ycfProduct.getFoodList()) && ListUtils.isEmpty(ycfProduct.getTicketList()))){
                 log.info("要出发推送的单房，过滤掉。。");
                 return;
             }
@@ -82,17 +89,19 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 return;
             }
             ProductPO productPO = YcfConverter.convertToProductPO(ycfProduct);
-            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_FOOD){
+            // 只有餐饮项有数据的都认为是单餐
+            if(ListUtils.isEmpty(ycfProduct.getTicketList()) && ListUtils.isEmpty(ycfProduct.getRoomList())){
                 productPO.setProductType(ProductType.RESTAURANT.getCode());
-            } else if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_TICKET){
+            }
+            // 只有门票项有数据的都认为是单票
+            else if(ListUtils.isEmpty(ycfProduct.getRoomList()) && ListUtils.isEmpty(ycfProduct.getFoodList())){
                 productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
             } else {
+                // 进到这里说明子项一定大于1，按优先级分类
                 if(ListUtils.isNotEmpty(ycfProduct.getRoomList())){
                     productPO.setProductType(ProductType.FREE_TRIP.getCode());
                 } else if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
                     productPO.setProductType(ProductType.SCENIC_TICKET_PLUS.getCode());
-                } else if(ListUtils.isNotEmpty(ycfProduct.getFoodList())){
-                    productPO.setProductType(ProductType.RESTAURANT.getCode());
                 } else {
                     log.error("要出发无法归类productId={}，过滤掉，套餐里没有任何具体poi", ycfProduct.getProductID());
                     return;
