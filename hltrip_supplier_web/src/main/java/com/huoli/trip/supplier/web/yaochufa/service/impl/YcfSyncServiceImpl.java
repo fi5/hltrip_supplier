@@ -109,6 +109,24 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             syncProductItem(ycfProduct.getProductItemIds());
             log.info("同步poi完成。");
+            if(productPO.getRoom() != null && ListUtils.isNotEmpty(productPO.getRoom().getRooms())){
+                productPO.getRoom().getRooms().stream().filter(roomInfoPO -> roomInfoPO != null).forEach(roomInfoPO -> {
+                    ProductItemPO productItemPO = productItemDao.selectByCode(roomInfoPO.getItemId());
+                    roomInfoPO.setItem(productItemPO);
+                });
+            }
+            if(productPO.getTicket() != null && ListUtils.isNotEmpty(productPO.getTicket().getTickets())){
+                productPO.getTicket().getTickets().stream().filter(ticketInfoPO -> ticketInfoPO != null).forEach(ticketInfoPO -> {
+                    ProductItemPO productItemPO = productItemDao.selectByCode(ticketInfoPO.getItemId());
+                    ticketInfoPO.setItem(productItemPO);
+                });
+            }
+            if(productPO.getFood() != null && ListUtils.isNotEmpty(productPO.getFood().getFoods())){
+                productPO.getFood().getFoods().stream().filter(foodInfoPO -> foodInfoPO != null).forEach(foodInfoPO -> {
+                    ProductItemPO productItemPO = productItemDao.selectByCode(foodInfoPO.getItemId());
+                    foodInfoPO.setItem(productItemPO);
+                });
+            }
             ProductItemPO productItemPO = productItemDao.selectByCode(productPO.getMainItemCode());
             log.info("主项目={}", JSON.toJSONString(productItemPO));
             productPO.setMainItem(productItemPO);
