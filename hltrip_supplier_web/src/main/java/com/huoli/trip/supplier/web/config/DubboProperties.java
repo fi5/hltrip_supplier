@@ -17,7 +17,7 @@ public class DubboProperties implements Serializable {
     private String client;
     @Value("${dubbo.server.protocolName}")
     private String protocolName;
-//    @Value("${dubbo.server.protocolPort}")
-//    private Integer protocolPort;
+    @Value("${dubbo.server.protocolPort}")
+    private Integer protocolPort;
 
 }
