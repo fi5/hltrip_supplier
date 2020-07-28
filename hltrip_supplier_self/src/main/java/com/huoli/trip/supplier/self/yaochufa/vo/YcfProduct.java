@@ -96,12 +96,12 @@ public class YcfProduct {
     /**
      * 上架时间
      */
-    private Date startDate;
+    private String startDate;
 
     /**
      * 下架时间
      */
-    private Date endDate;
+    private String endDate;
 
     /**
      * 产品描述 （可以是富文本）
@@ -230,32 +230,32 @@ public class YcfProduct {
     /**
      * 展示开始时间
      */
-    private Date globalSaleDisplayDateBegin;
+    private String globalSaleDisplayDateBegin;
 
     /**
      * 展示结束时间
      */
-    private Date globalSaleDisplayDateEnd;
+    private String globalSaleDisplayDateEnd;
 
     /**
      * 预售开始时间
      */
-    private Date preSaleDateBegin;
+    private String preSaleDateBegin;
 
     /**
      * 预售结束时间
      */
-    private Date preSaleDateEnd;
+    private String preSaleDateEnd;
 
     /**
      * 预售使用开始时间
      */
-    private Date orderDateBegin;
+    private String orderDateBegin;
 
     /**
      * 预售使用结束时间
      */
-    private Date orderDateEnd;
+    private String orderDateEnd;
 
     /**
      * 预售说明

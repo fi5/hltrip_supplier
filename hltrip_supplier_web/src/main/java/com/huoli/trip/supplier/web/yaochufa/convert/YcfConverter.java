@@ -9,6 +9,7 @@ import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,22 +44,22 @@ public class YcfConverter {
         productPO.setMainItemCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getPoiId()));
         productPO.setDelayType(product.getAdvanceOrDelayType());
         productPO.setDescription(product.getProductDescription());
-        productPO.setDisplayEnd(product.getGlobalSaleDisplayDateEnd());
-        productPO.setDisplayStart(product.getGlobalSaleDisplayDateBegin());
+        productPO.setDisplayEnd(parseDate(product.getGlobalSaleDisplayDateEnd()));
+        productPO.setDisplayStart(parseDate(product.getGlobalSaleDisplayDateBegin()));
         productPO.setExcludeDesc(product.getFeeExclude());
         productPO.setFood(convertToFoodPO(product));
         if(ListUtils.isNotEmpty(product.getProductImageList())){
             productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
         }
         productPO.setIncludeDesc(product.getFeeInclude());
-        productPO.setInvalidTime(product.getEndDate());
+        productPO.setInvalidTime(parseDate(product.getEndDate()));
         if(ListUtils.isNotEmpty(product.getLimitBuyRules())){
             productPO.setLimitRules(product.getLimitBuyRules().stream().map(rule -> convertToLimitRulePO(rule)).collect(Collectors.toList()));
         }
         productPO.setName(product.getProductName());
         productPO.setPreSaleDescription(product.getPreSaleDescription());
-        productPO.setPreSaleEnd(product.getPreSaleDateEnd());
-        productPO.setPreSaleStart(product.getPreSaleDateBegin());
+        productPO.setPreSaleEnd(parseDate(product.getPreSaleDateEnd()));
+        productPO.setPreSaleStart(parseDate(product.getPreSaleDateBegin()));
         productPO.setPrice(product.getMarketPrice());
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
@@ -69,7 +70,7 @@ public class YcfConverter {
         productPO.setSupplierName(Constants.SUPPLIER_NAME_YCF);
         productPO.setSupplierProductId(product.getProductID());
         productPO.setTicket(convertToTicketPO(product));
-        productPO.setValidTime(product.getStartDate());
+        productPO.setValidTime(parseDate(product.getStartDate()));
         return productPO;
     }
 
@@ -171,14 +172,20 @@ public class YcfConverter {
         roomInfoPO.setBedSize(resourceRoom.getBedSize());
         roomInfoPO.setBedType(resourceRoom.getBedType());
         roomInfoPO.setBreakfast(resourceRoom.getBreakfast());
-        roomInfoPO.setBroadNet(resourceRoom.getBroadNet());
+        if(ListUtils.isNotEmpty(resourceRoom.getBroadNet())){
+            roomInfoPO.setBroadNet(String.join(",", resourceRoom.getBroadNet().stream().map(net ->
+                    String.valueOf(net)).collect(Collectors.toList())));
+        }
         if(resourceRoom.getEarliestTime() != null){
-            roomInfoPO.setEarliestTime(DateTimeUtil.format(resourceRoom.getEarliestTime(), "HH:mm"));
+            roomInfoPO.setEarliestTime(DateTimeUtil.format(DateTimeUtil.parseFullDate(resourceRoom.getEarliestTime()), "HH:mm"));
         }
         if(resourceRoom.getLatestTime() != null){
-            roomInfoPO.setLatestTime(DateTimeUtil.format(resourceRoom.getLatestTime(), "HH:mm"));
+            roomInfoPO.setLatestTime(DateTimeUtil.format(DateTimeUtil.parseFullDate(resourceRoom.getLatestTime()), "HH:mm"));
         }
-        roomInfoPO.setFacility(resourceRoom.getRoomFac());
+        if(ListUtils.isNotEmpty(resourceRoom.getRoomFac())){
+            roomInfoPO.setFacility(String.join(",", resourceRoom.getRoomFac().stream().map(fac ->
+                    String.valueOf(fac)).collect(Collectors.toList())));
+        }
         roomInfoPO.setBaseNum(resourceRoom.getRoomBaseNum());
         roomInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceRoom.getPoiId()));
         roomInfoPO.setSupplierItemId(resourceRoom.getPoiId());
@@ -329,5 +336,12 @@ public class YcfConverter {
         limitRulePO.setLimitTotal(limitRule.getBuyCount());
         limitRulePO.setRuleType(limitRule.getBuyRuleType());
         return limitRulePO;
+    }
+
+    public static Date parseDate(String date){
+        if(StringUtils.isNotBlank(date)){
+            return DateTimeUtil.parseDate(date);
+        }
+        return null;
     }
 }

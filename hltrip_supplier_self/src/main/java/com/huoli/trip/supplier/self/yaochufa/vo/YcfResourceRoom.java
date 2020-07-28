@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -83,7 +84,7 @@ public class YcfResourceRoom {
      * 5：免费无线
      * 支持免费有线和无线时传 2,5
      */
-    private String broadNet;
+    private List<Integer> broadNet;
 
     /**
      * 面积
@@ -105,15 +106,15 @@ public class YcfResourceRoom {
      * 10：热水
      * 含有空调、冰箱时传 0,1
      */
-    private String roomFac;
+    private List<Integer> roomFac;
 
     /**
      * 最早到店时间
      */
-    private Date earliestTime;
+    private String earliestTime;
 
     /**
      * 最晚离店时间
      */
-    private Date latestTime;
+    private String latestTime;
 }
