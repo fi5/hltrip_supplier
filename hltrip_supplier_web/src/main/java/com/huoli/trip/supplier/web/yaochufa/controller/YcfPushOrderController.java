@@ -35,6 +35,7 @@ public class YcfPushOrderController {
     @ApiOperation("推送订单状态【【要触发渠道】调用】")
     @PostMapping(path = "/pushOrderStatus")
     YcfBaseResult<Boolean> pushOrderStatus(@RequestBody YcfPushOrderStatusReq req) {
+        log.info("供应商触发了订单推送 订单号：{}",req.getPartnerOrderId());
         try{
             yaoChuFaCallBackService.orderStatusNotice(req);
         }catch (Exception e){
