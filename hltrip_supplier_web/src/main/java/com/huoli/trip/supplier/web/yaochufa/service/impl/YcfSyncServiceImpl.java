@@ -112,19 +112,19 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             if(productPO.getRoom() != null && ListUtils.isNotEmpty(productPO.getRoom().getRooms())){
                 productPO.getRoom().getRooms().stream().filter(roomInfoPO -> roomInfoPO != null).forEach(roomInfoPO -> {
                     ProductItemPO productItemPO = productItemDao.selectByCode(roomInfoPO.getItemId());
-                    roomInfoPO.setItem(productItemPO);
+                    roomInfoPO.setProductItem(productItemPO);
                 });
             }
             if(productPO.getTicket() != null && ListUtils.isNotEmpty(productPO.getTicket().getTickets())){
                 productPO.getTicket().getTickets().stream().filter(ticketInfoPO -> ticketInfoPO != null).forEach(ticketInfoPO -> {
                     ProductItemPO productItemPO = productItemDao.selectByCode(ticketInfoPO.getItemId());
-                    ticketInfoPO.setItem(productItemPO);
+                    ticketInfoPO.setProductItem(productItemPO);
                 });
             }
             if(productPO.getFood() != null && ListUtils.isNotEmpty(productPO.getFood().getFoods())){
                 productPO.getFood().getFoods().stream().filter(foodInfoPO -> foodInfoPO != null).forEach(foodInfoPO -> {
                     ProductItemPO productItemPO = productItemDao.selectByCode(foodInfoPO.getItemId());
-                    foodInfoPO.setItem(productItemPO);
+                    foodInfoPO.setProductItem(productItemPO);
                 });
             }
             ProductItemPO productItemPO = productItemDao.selectByCode(productPO.getMainItemCode());

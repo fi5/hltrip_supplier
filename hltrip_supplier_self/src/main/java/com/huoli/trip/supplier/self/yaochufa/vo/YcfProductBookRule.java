@@ -57,7 +57,7 @@ public class YcfProductBookRule {
      * 2 :一份套餐填两个
      * 以此类推
      */
-    private Integer peopleNum;   // todo 有没有一份填一个二份填二个？
+    private Integer peopleNum;
 
     /**
      * 证件支持类型
