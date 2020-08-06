@@ -8,6 +8,7 @@ import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
  * 版本：1.0<br>
  * 创建日期：2020/6/19<br>
  */
+@Slf4j
 public class YcfConverter {
 
     /**
@@ -226,8 +228,13 @@ public class YcfConverter {
         }
         productItemPO.setItemType(productItem.getPoiType());
         if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
-            double[] coordinate = CoordinateUtil.bd09_To_Gcj02(Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude()));
-            productItemPO.setItemCoordinate(Arrays.stream(coordinate).boxed().toArray(Double[]::new));
+            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+            try {
+                double[] coordinate = CoordinateUtil.bd09_To_Gcj02(Double.parseDouble(productItem.getLatitude()), Double.parseDouble(productItem.getLongitude()));
+                productItemPO.setItemCoordinate(new Double[]{coordinate[1], coordinate[0]});
+            } catch (Exception e) {
+                log.error("转换经纬度失败，不影响主流程，productItemCode = {}", productItemPO.getCode(), e);
+            }
         }
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
