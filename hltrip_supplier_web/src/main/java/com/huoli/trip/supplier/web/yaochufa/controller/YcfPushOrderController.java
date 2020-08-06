@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfRefundNoticeRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
@@ -48,6 +49,7 @@ public class YcfPushOrderController {
     @ApiOperation("推送退款通知")
     @PostMapping(path = "/refundNotice")
     YcfBaseResult<Boolean> refundNotice(@RequestBody YcfRefundNoticeRequest req) {
+        log.info("供应商触发了推送退款通知：{}", JSONObject.toJSONString(req));
         YcfBaseResult<Boolean> result = new YcfBaseResult<>();
         yaoChuFaCallBackService.refundNotice(req);
         return YcfBaseResult.success();

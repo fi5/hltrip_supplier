@@ -48,13 +48,13 @@ public class YcfRefundNoticeRequest implements Serializable {
      * 退款申请时间
      * 客人发起退款的时间
      */
-    private Date refundTime;
+    private String refundTime;
 
     /**
      * 退款处理时间
      * 要出发处理完退款的时间
      */
-    private Date responseTime;
+    private String responseTime;
     /**
      * 退款原因
      * 合】退款的原因
