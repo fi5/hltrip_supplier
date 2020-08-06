@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -224,7 +226,8 @@ public class YcfConverter {
         }
         productItemPO.setItemType(productItem.getPoiType());
         if(StringUtils.isNotBlank(productItem.getLatitude()) && StringUtils.isNotBlank(productItem.getLongitude())){
-            productItemPO.setItemCoordinate(new Double[]{Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude())});
+            double[] coordinate = CoordinateUtil.bd09_To_Gcj02(Double.parseDouble(productItem.getLongitude()), Double.parseDouble(productItem.getLatitude()));
+            productItemPO.setItemCoordinate(Arrays.stream(coordinate).boxed().toArray(Double[]::new));
         }
         productItemPO.setLevel(productItem.getLevel());
         productItemPO.setMainTitle(productItem.getPcMain());
