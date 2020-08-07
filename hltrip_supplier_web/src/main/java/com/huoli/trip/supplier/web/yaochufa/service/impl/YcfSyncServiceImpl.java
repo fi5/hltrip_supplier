@@ -147,7 +147,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         log.info("准备请求供应商(要出发)获取poi接口，参数={}", JSON.toJSONString(ycfGetPoiRequest));
         YcfBaseResult<YcfGetPoiResponse> baseResult = yaoChuFaClient.getPoi(ycfBaseRequest);
         log.info("供应商(要出发)获取poi接口返回，结果={}", JSON.toJSONString(baseResult));
-        if(baseResult.getSuccess() && StringUtils.equals(baseResult.getStatusCode(), String.valueOf(YcfConstants.RESULT_CODE_SUCCESS))){
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
             YcfGetPoiResponse response = baseResult.getData();
             if(response == null){
                 log.error("同步poi失败，供应商（要出发）没有返回data");
@@ -175,7 +175,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
         YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
         log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
-        if(baseResult.getSuccess() && StringUtils.equals(baseResult.getStatusCode(), String.valueOf(YcfConstants.RESULT_CODE_SUCCESS))){
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
             YcfGetPriceResponse response = baseResult.getData();
             if(response == null){
                 log.error("获取价格失败，供应商（要出发）没有返回data");
