@@ -26,7 +26,7 @@ public class YcfBaseResult<T> implements Serializable {
      * 400: 请求错误
      * 500:服务错误
      */
-    private String statusCode;
+    private int statusCode;
 
     /**
      * 错误信息
@@ -57,7 +57,7 @@ public class YcfBaseResult<T> implements Serializable {
     }
 
     public YcfBaseResult(Boolean success, int code, T data, String partnerId){
-        this.setStatusCode(String.valueOf(code));
+        this.setStatusCode(code);
         this.setSuccess(success);
         this.setPartnerId(partnerId);
         this.setData(data);
