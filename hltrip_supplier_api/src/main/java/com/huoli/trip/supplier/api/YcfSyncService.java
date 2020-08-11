@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.api;
 
+import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
@@ -27,8 +28,9 @@ public interface YcfSyncService {
     /**
      * 同步产品项目
      * @param productItemIds
+     * @return
      */
-    void syncProductItem(List<String> productItemIds);
+    List<ProductItemPO> syncProductItem(List<String> productItemIds);
 
     /**
      * 同步价格日历

@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
@@ -54,54 +55,29 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return;
         }
         ycfProducts.forEach(ycfProduct -> {
-            if(StringUtils.isBlank(ycfProduct.getPoiId())){
-                log.info("要出发推送的产品没有主项目id,过滤掉。。");
-                return;
-            }
-            if(!YcfConstants.PRODUCT_TYPE_LIST.contains(ycfProduct.getProductType())){
-                log.info("要出发推送了未知类型产品，类型={}", ycfProduct.getProductType());
-                return;
-            }
-            if(ListUtils.isEmpty(ycfProduct.getFoodList()) &&
-                    ListUtils.isEmpty(ycfProduct.getRoomList()) &&
-                    ListUtils.isEmpty(ycfProduct.getTicketList())){
-                log.info("要出发推送的产品所有子项都是空，过滤掉。。");
-            }
-            // 类型是单房 或者 只有酒店项有数据的都认为是单房，过滤
-            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_ROOM ||
-                    (ListUtils.isEmpty(ycfProduct.getFoodList()) && ListUtils.isEmpty(ycfProduct.getTicketList()))){
-                log.info("要出发推送的单房，过滤掉。。");
-                return;
-            }
-            if(ycfProduct.getRoomChoiceNum() != null && ycfProduct.getRoomOptionNum() != null &&
-                    ycfProduct.getRoomChoiceNum() != ycfProduct.getRoomOptionNum()){
-                log.info("酒店可选和必选不一样（M选N），过滤掉。。");
-                return;
-            }
-            if(ycfProduct.getFoodChoiceNum() != null && ycfProduct.getFoodOptionNum() != null &&
-                    ycfProduct.getFoodChoiceNum() != ycfProduct.getFoodOptionNum()){
-                log.info("餐饮可选和必选不一样（M选N），过滤掉。。");
-                return;
-            }
-            if(ycfProduct.getTicketChoiceNum() != null && ycfProduct.getTicketOptionNum() != null &&
-                    ycfProduct.getTicketChoiceNum() != ycfProduct.getTicketOptionNum()){
-                log.info("景点可选和必选不一样（M选N），过滤掉。。");
+            if(!filterProduct(ycfProduct)){
                 return;
             }
             ProductPO productPO = YcfConverter.convertToProductPO(ycfProduct);
+            List<ProductItemPO> productItemPOs = syncProductItem(ycfProduct.getProductItemIds());
+            if(ListUtils.isEmpty(productItemPOs)){
+                log.error("没有同步到主项目，过滤掉");
+                return;
+            }
+            int ycfPoiType = productItemPOs.get(0).getItemType();
             // 只有餐饮项有数据的都认为是单餐
             if(ListUtils.isEmpty(ycfProduct.getTicketList()) && ListUtils.isEmpty(ycfProduct.getRoomList())){
-                productPO.setProductType(ProductType.RESTAURANT.getCode());
+                productPO.setProductType(convertToProductType(ycfPoiType, false, ProductType.RESTAURANT.getCode()));
             }
             // 只有门票项有数据的都认为是单票
             else if(ListUtils.isEmpty(ycfProduct.getRoomList()) && ListUtils.isEmpty(ycfProduct.getFoodList())){
-                productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
+                productPO.setProductType(convertToProductType(ycfPoiType, false, ProductType.SCENIC_TICKET.getCode()));
             } else {
                 // 进到这里说明子项一定大于1，按优先级分类
                 if(ListUtils.isNotEmpty(ycfProduct.getRoomList())){
-                    productPO.setProductType(ProductType.FREE_TRIP.getCode());
+                    productPO.setProductType(convertToProductType(ycfPoiType, true, ProductType.FREE_TRIP.getCode()));
                 } else if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
-                    productPO.setProductType(ProductType.SCENIC_TICKET_PLUS.getCode());
+                    productPO.setProductType(convertToProductType(ycfPoiType, true, ProductType.SCENIC_TICKET_PLUS.getCode()));
                 } else {
                     log.error("要出发无法归类productId={}，过滤掉，套餐里没有任何具体poi", ycfProduct.getProductID());
                     return;
@@ -135,12 +111,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         });
     }
 
-    public void syncProductItem(List<String> productItemIds){
+    @Override
+    public List<ProductItemPO> syncProductItem(List<String> productItemIds){
         log.info("开始同步poi，id list = {}", JSON.toJSONString(productItemIds));
         if(ListUtils.isEmpty(productItemIds)){
             log.error("同步poi失败，poi id集合为空");
-            return;
+            return null;
         }
+        List<ProductItemPO> productItemPOs = Lists.newArrayList();
         YcfGetPoiRequest ycfGetPoiRequest = new YcfGetPoiRequest();
         ycfGetPoiRequest.setPoiIdList(productItemIds);
         YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(ycfGetPoiRequest);
@@ -151,22 +129,24 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             YcfGetPoiResponse response = baseResult.getData();
             if(response == null){
                 log.error("同步poi失败，供应商（要出发）没有返回data");
-                return;
+                return null;
             }
             List<YcfProductItem> ycfProductItems = response.getPoiList();
             if(ListUtils.isEmpty(ycfProductItems)){
                 log.error("同步poi失败，供应商（要出发）没有返回poi信息");
-                return;
+                return null;
             }
             ycfProductItems.forEach(item -> {
                 try {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
                     productItemDao.updateBySupplierItemId(productItemPO);
+                    productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);
                 }
             });
         }
+        return productItemPOs;
     }
 
     @Override
@@ -201,4 +181,71 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         priceDao.updateBySupplierProductId(pricePO);
     }
+
+    private boolean filterProduct(YcfProduct ycfProduct){
+        if(StringUtils.isBlank(ycfProduct.getPoiId())){
+            log.info("要出发推送的产品没有主项目id,过滤掉。。");
+            return false;
+        }
+        if(!YcfConstants.PRODUCT_TYPE_LIST.contains(ycfProduct.getProductType())){
+            log.info("要出发推送了未知类型产品，类型={}", ycfProduct.getProductType());
+            return false;
+        }
+        if(ListUtils.isEmpty(ycfProduct.getFoodList()) &&
+                ListUtils.isEmpty(ycfProduct.getRoomList()) &&
+                ListUtils.isEmpty(ycfProduct.getTicketList())){
+            log.info("要出发推送的产品所有子项都是空，过滤掉。。");
+            return false;
+        }
+        // 类型是单房 或者 只有酒店项有数据的都认为是单房，过滤
+        if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_ROOM ||
+                (ListUtils.isEmpty(ycfProduct.getFoodList()) && ListUtils.isEmpty(ycfProduct.getTicketList()))){
+            log.info("要出发推送的单房，过滤掉。。");
+            return false;
+        }
+        if(ycfProduct.getRoomChoiceNum() != null && ycfProduct.getRoomOptionNum() != null &&
+                ycfProduct.getRoomChoiceNum() != ycfProduct.getRoomOptionNum()){
+            log.info("酒店可选和必选不一样（M选N），过滤掉。。");
+            return false;
+        }
+        if(ycfProduct.getFoodChoiceNum() != null && ycfProduct.getFoodOptionNum() != null &&
+                ycfProduct.getFoodChoiceNum() != ycfProduct.getFoodOptionNum()){
+            log.info("餐饮可选和必选不一样（M选N），过滤掉。。");
+            return false;
+        }
+        if(ycfProduct.getTicketChoiceNum() != null && ycfProduct.getTicketOptionNum() != null &&
+                ycfProduct.getTicketChoiceNum() != ycfProduct.getTicketOptionNum()){
+            log.info("景点可选和必选不一样（M选N），过滤掉。。");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 转换类型
+     * 以产品主poi类型为准，为了修正同一个poi挂在多个不同类型的产品上
+     * @param poiType ycf poi类型
+     * @param pack 是否套餐
+     * @param productType 产品类型，如果没有算出来就原样返回
+     * @return
+     */
+    private int convertToProductType(int poiType, boolean pack, int productType){
+        if(poiType == YcfConstants.POI_TYPE_ROOM){
+            if(pack){
+                return ProductType.FREE_TRIP.getCode();
+            }
+            return productType;
+        }
+        if(poiType == YcfConstants.POI_TYPE_TICKET){
+            if(pack){
+                return ProductType.SCENIC_TICKET_PLUS.getCode();
+            }
+            return ProductType.SCENIC_TICKET.getCode();
+        }
+        if(poiType == YcfConstants.POI_TYPE_FOOD){
+            return ProductType.RESTAURANT.getCode();
+        }
+        return productType;
+    }
+
 }

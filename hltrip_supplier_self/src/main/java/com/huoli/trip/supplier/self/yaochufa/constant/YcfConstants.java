@@ -84,5 +84,18 @@ public class YcfConstants {
      */
     public static final int PRODUCT_TYPE_FOOD = 3;
 
+    // poi类型
+    /**
+     * 酒店
+     */
+    public static final int POI_TYPE_ROOM = 1;
+    /**
+     * 景区
+     */
+    public static final int POI_TYPE_TICKET = 2;
+    /**
+     * 餐饮
+     */
+    public static final int POI_TYPE_FOOD = 3;
 
 }
