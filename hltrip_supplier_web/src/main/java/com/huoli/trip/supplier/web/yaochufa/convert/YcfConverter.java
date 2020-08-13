@@ -218,7 +218,8 @@ public class YcfConverter {
         productItemPO.setCountry(productItem.getCountry());
         productItemPO.setDescription(productItem.getDescription());
         if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
-            productItemPO.setFeatures(productItem.getCharacterrList().stream().map(f -> convertToItemFeaturePO(f)).collect(Collectors.toList()));
+            productItemPO.setFeatures(productItem.getCharacterrList().stream().map(f ->
+                    convertToItemFeaturePO(f)).filter(f -> f != null).collect(Collectors.toList()));
         }
         if(ListUtils.isNotEmpty(productItem.getImageList())){
             productItemPO.setImages(productItem.getImageList().stream().map(i -> convertToImageBasePO(i)).collect(Collectors.toList()));
@@ -311,6 +312,9 @@ public class YcfConverter {
      * @return
      */
     public static ItemFeaturePO convertToItemFeaturePO(YcfItemFeature itemFeature){
+        if(StringUtils.isBlank(itemFeature.getDetail())){
+            return null;
+        }
         ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
         itemFeaturePO.setDetail(itemFeature.getDetail());
         itemFeaturePO.setType(itemFeature.getType());
