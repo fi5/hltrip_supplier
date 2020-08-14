@@ -43,10 +43,15 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
+    public void test1(){
+
+    }
+
 
     public static void main(String[] args){
         Document document = Jsoup.parse(htmlStr);
-        document.getElementsByTag("img").removeAttr("style").removeAttr("class");
+//        document.getElementsByTag("img").removeAttr("style").removeAttr("class");
+        document.getElementsContainingOwnText("图文详情");
         System.out.println(document.body().children().toString());
     }
 

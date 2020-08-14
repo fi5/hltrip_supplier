@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.vo;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.io.Serializable;
  * 创建日期：2020/6/29<br>
  */
 @Data
-public class YcfGetPriceRequest implements Serializable {
+public class YcfGetPriceRequest extends TraceRequest implements Serializable {
 
     /**
      * 产品id
