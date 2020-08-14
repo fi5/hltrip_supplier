@@ -49,6 +49,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:/common.properties</value>
+				<value>classpath:/supplier_yaochufa.properties</value>
 			</list>
 
 		</property>
