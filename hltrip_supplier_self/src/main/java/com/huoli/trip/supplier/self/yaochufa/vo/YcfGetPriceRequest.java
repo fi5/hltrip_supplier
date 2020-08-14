@@ -21,7 +21,7 @@ public class YcfGetPriceRequest implements Serializable {
     private String productID;
 
     /**
-     * 合作商id
+     * 管家产品id
      */
     private String partnerProductID;
 
@@ -34,4 +34,9 @@ public class YcfGetPriceRequest implements Serializable {
      * 结束时间yyyy-MM-dd
      */
     private String endDate;
+
+    /**
+     * 全量更新
+     */
+    private Boolean full = false;
 }

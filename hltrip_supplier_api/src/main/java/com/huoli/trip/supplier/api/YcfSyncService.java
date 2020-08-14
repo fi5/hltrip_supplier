@@ -1,10 +1,7 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.common.entity.ProductItemPO;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
+import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 import java.util.List;
@@ -44,4 +41,10 @@ public interface YcfSyncService {
      * @return
      */
     YcfBaseResult<YcfGetPriceResponse> getPrice(YcfGetPriceRequest request);
+
+    /**
+     * 更新产品全量价格
+     * @param ycfPrice
+     */
+    void syncFullPrice(YcfPrice ycfPrice);
 }

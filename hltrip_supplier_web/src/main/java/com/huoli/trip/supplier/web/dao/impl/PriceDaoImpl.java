@@ -34,4 +34,11 @@ public class PriceDaoImpl implements PriceDao {
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
     }
+
+    @Override
+    public PricePO getByProductCode(String productCode){
+        Criteria criteria = Criteria.where("productCode").is(productCode);
+        return mongoTemplate.findOne(new Query(criteria), PricePO.class);
+    }
+
 }

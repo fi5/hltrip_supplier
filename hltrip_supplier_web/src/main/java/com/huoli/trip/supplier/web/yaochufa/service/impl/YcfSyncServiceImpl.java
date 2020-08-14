@@ -3,11 +3,16 @@ package com.huoli.trip.supplier.web.yaochufa.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
+import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
@@ -22,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -151,6 +157,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Override
     public YcfBaseResult<YcfGetPriceResponse> getPrice(YcfGetPriceRequest request){
+        if(StringUtils.isBlank(request.getEndDate())){
+            request.setEndDate(request.getStartDate());
+        }
         YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
         log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
         YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
@@ -164,22 +173,66 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             YcfPrice ycfPrice = new YcfPrice();
             ycfPrice.setProductID(response.getProductID());
             ycfPrice.setSaleInfos(response.getSaleInfos());
-            syncPrice(ycfPrice);
+            if(request.getFull()){
+                syncFullPrice(ycfPrice);
+            } else {
+                syncPrice(ycfPrice);
+            }
         }
         return baseResult;
     }
 
     @Override
     public void syncPrice(YcfPrice ycfPrice){
+        String ycfProductId = ycfPrice.getProductID();
+        List<YcfPriceInfo> ycfPriceInfos = ycfPrice.getSaleInfos();
+        if(StringUtils.isBlank(ycfProductId) || ListUtils.isEmpty(ycfPriceInfos)){
+            return;
+        }
+        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+                PricePO pricePO = priceDao.getByProductCode(productCode);
+        if(pricePO == null){
+            pricePO = new PricePO();
+            pricePO.setProductCode(productCode);
+            pricePO.setPriceInfos(Lists.newArrayList());
+            pricePO.setSupplierProductId(ycfProductId);
+        }
+
+        List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
+        List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
+        ycfPriceInfos.forEach(ycfPriceInfo -> {
+            setPrice(priceInfoPOs, newPriceInfos, ycfPriceInfo);
+        });
+        priceInfoPOs.addAll(newPriceInfos);
+        priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
+        priceDao.updateBySupplierProductId(pricePO);
+    }
+
+    @Override
+    public void syncFullPrice(YcfPrice ycfPrice){
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
         ProductPO productPO = productDao.getBySupplierProductId(ycfPrice.getProductID());
         if(productPO != null){
             pricePO.setProductCode(productPO.getCode());
         } else {
-            log.error("同步价格日历，根据供应商产品id={} 没有查到数据", ycfPrice.getProductID());
+            log.error("同步价格日历，根据供应商产品id={} 没有查到相关产品", ycfPrice.getProductID());
             return;
         }
         priceDao.updateBySupplierProductId(pricePO);
+    }
+
+    private void setPrice(List<PriceInfoPO> priceInfoPOs, List<PriceInfoPO> newPriceInfos, YcfPriceInfo ycfPriceInfo){
+        PriceInfoPO priceInfoPO = priceInfoPOs.stream().filter(po ->
+                DateTimeUtil.trancateToDate(po.getSaleDate()).getTime() == DateTimeUtil.trancateToDate(ycfPriceInfo.getDate()).getTime()).findFirst().orElse(null);
+        if(priceInfoPO == null){
+            priceInfoPO = new PriceInfoPO();
+            priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(ycfPriceInfo.getDate()));
+            priceInfoPO.setPriceType(ycfPriceInfo.getPriceType());
+            newPriceInfos.add(priceInfoPO);
+        }
+        priceInfoPO.setStock(ycfPriceInfo.getStock());
+        priceInfoPO.setSalePrice(ycfPriceInfo.getPrice());
+        priceInfoPO.setSettlePrice(ycfPriceInfo.getSettlementPrice());
     }
 
     private boolean filterProduct(YcfProduct ycfProduct){

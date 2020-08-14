@@ -48,4 +48,11 @@ public class ProductDaoImpl implements ProductDao {
         Query query = new Query(Criteria.where("supplierProductId").is(supplierProductId));
         return mongoTemplate.findOne(query, ProductPO.class);
     }
+
+    @Override
+    public List<ProductPO> getCodeBySupplierId(String supplierId){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId));
+        query.fields().include("code").include("supplierProductId");
+        return mongoTemplate.find(query, ProductPO.class);
+    }
 }

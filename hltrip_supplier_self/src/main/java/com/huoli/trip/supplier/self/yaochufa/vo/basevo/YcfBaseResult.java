@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.self.yaochufa.vo.basevo;
 
-import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.util.ConfigGetter;
+import com.huoli.trip.supplier.self.yaochufa.constant.YcfConfigConstants;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import lombok.Data;
 
@@ -65,22 +65,22 @@ public class YcfBaseResult<T> implements Serializable {
 
     public static <T> YcfBaseResult<T> success(){
         return new YcfBaseResult<>(YcfConstants.RESULT_STATUS_SUCCESS, YcfConstants.RESULT_CODE_SUCCESS,
-                null, ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConfigConstants.CONFIG_ITEM_PARTNER_ID));
+                null, ConfigGetter.getByFileItemString(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.PARTNER_ID));
     }
 
     public static <T> YcfBaseResult<T> success(T data){
         return new YcfBaseResult<>(YcfConstants.RESULT_STATUS_SUCCESS, YcfConstants.RESULT_CODE_SUCCESS,
-                data, ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConfigConstants.CONFIG_ITEM_PARTNER_ID));
+                data, ConfigGetter.getByFileItemString(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.PARTNER_ID));
     }
 
     public static <T> YcfBaseResult<T> fail(T data){
         return new YcfBaseResult<>(YcfConstants.RESULT_STATUS_FAIL, YcfConstants.RESULT_CODE_SERVICE_ERROR,
-                data, ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConfigConstants.CONFIG_ITEM_PARTNER_ID));
+                data, ConfigGetter.getByFileItemString(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.PARTNER_ID));
     }
 
     public static <T> YcfBaseResult<T> fail(){
         return new YcfBaseResult<>(YcfConstants.RESULT_STATUS_FAIL, YcfConstants.RESULT_CODE_SERVICE_ERROR,
-                null, ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConfigConstants.CONFIG_ITEM_PARTNER_ID));
+                null, ConfigGetter.getByFileItemString(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.PARTNER_ID));
     }
 
 }
