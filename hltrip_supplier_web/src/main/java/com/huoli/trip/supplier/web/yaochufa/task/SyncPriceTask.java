@@ -36,6 +36,8 @@ public class SyncPriceTask {
 
     @Scheduled(cron = "0 0 2 ? * 1")
     public void syncFullPrice(){
+        long begin = System.currentTimeMillis();
+        log.info("开始执行定时任务，同步要出发价格日历。。");
         Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
         days = days == null ? 90 : days;
         String start = DateTimeUtil.formatDate(new Date());
@@ -55,5 +57,6 @@ public class SyncPriceTask {
                 log.error("线程暂停失败", e);
             }
         });
+        log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
     }
 }

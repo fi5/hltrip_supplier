@@ -25,6 +25,7 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
@@ -157,29 +158,45 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Override
     public YcfBaseResult<YcfGetPriceResponse> getPrice(YcfGetPriceRequest request){
+        YcfGetPriceResponse ycfGetPriceResponse = new YcfGetPriceResponse();
+        ycfGetPriceResponse.setPartnerProductID(request.getPartnerProductID());
+        ycfGetPriceResponse.setProductID(request.getProductID());
+        List<YcfPriceInfo> ycfPriceInfos = Lists.newArrayList();
+        ycfGetPriceResponse.setSaleInfos(ycfPriceInfos);
         if(StringUtils.isBlank(request.getEndDate())){
             request.setEndDate(request.getStartDate());
         }
-        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
-        log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
-        YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
-        log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
-        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
-            YcfGetPriceResponse response = baseResult.getData();
-            if(response == null){
-                log.error("获取价格失败，供应商（要出发）没有返回data");
-                return baseResult;
+        int diffDays = DateTimeUtil.getDateDiffDays(DateTimeUtil.parseDate(request.getEndDate()), DateTimeUtil.parseDate(request.getStartDate()));
+        // 要出发最多请求30天
+        int round = diffDays / 30;
+        int tail = diffDays % 30;
+        // 有余数需要循环商+1次
+        int n = round + (tail == 0 ? 0 : 1);
+        for(int i = 0; i < n; i++){
+            YcfGetPriceRequest newRequest = new YcfGetPriceRequest();
+            newRequest.setTraceId(request.getTraceId());
+            newRequest.setFull(request.getFull());
+            newRequest.setPartnerProductID(request.getPartnerProductID());
+            newRequest.setProductID(request.getProductID());
+            newRequest.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(request.getStartDate()), i * 30)));
+            newRequest.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(newRequest.getStartDate()), 30)));
+            if(i == n - 1){
+                newRequest.setEndDate(request.getEndDate());
             }
-            YcfPrice ycfPrice = new YcfPrice();
-            ycfPrice.setProductID(response.getProductID());
-            ycfPrice.setSaleInfos(response.getSaleInfos());
-            if(request.getFull()){
-                syncFullPrice(ycfPrice);
-            } else {
-                syncPrice(ycfPrice);
+            List<YcfPriceInfo> list;
+            try {
+                log.info("开始同步价格，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                list = syncPrice(newRequest);
+                log.info("同步价格完成，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+            } catch (Exception e) {
+                log.info("同步价异常，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate(), e);
+                continue;
+            }
+            if(ListUtils.isNotEmpty(list)){
+                ycfPriceInfos.addAll(list);
             }
         }
-        return baseResult;
+        return YcfBaseResult.success(ycfGetPriceResponse);
     }
 
     @Override
@@ -220,6 +237,31 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         priceDao.updateBySupplierProductId(pricePO);
     }
+
+    private List<YcfPriceInfo> syncPrice(YcfGetPriceRequest request){
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
+        log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
+        YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
+        log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
+            YcfGetPriceResponse response = baseResult.getData();
+            if(response == null){
+                log.error("获取价格失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            YcfPrice ycfPrice = new YcfPrice();
+            ycfPrice.setProductID(response.getProductID());
+            ycfPrice.setSaleInfos(response.getSaleInfos());
+            if(request.getFull()){
+                syncFullPrice(ycfPrice);
+            } else {
+                syncPrice(ycfPrice);
+            }
+            return response.getSaleInfos();
+        }
+        return null;
+    }
+
 
     private void setPrice(List<PriceInfoPO> priceInfoPOs, List<PriceInfoPO> newPriceInfos, YcfPriceInfo ycfPriceInfo){
         PriceInfoPO priceInfoPO = priceInfoPOs.stream().filter(po ->
