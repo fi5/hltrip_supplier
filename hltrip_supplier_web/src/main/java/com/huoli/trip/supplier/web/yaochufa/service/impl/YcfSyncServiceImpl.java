@@ -167,19 +167,23 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             request.setEndDate(request.getStartDate());
         }
         int diffDays = DateTimeUtil.getDateDiffDays(DateTimeUtil.parseDate(request.getEndDate()), DateTimeUtil.parseDate(request.getStartDate()));
-        // 要出发最多请求30天
+        // 要出发最多请求30天，
         int round = diffDays / 30;
         int tail = diffDays % 30;
         // 有余数需要循环商+1次
         int n = round + (tail == 0 ? 0 : 1);
+        // 开始结束日期相同n会=0
+        n = n == 0 ? 1 : n;
         for(int i = 0; i < n; i++){
             YcfGetPriceRequest newRequest = new YcfGetPriceRequest();
             newRequest.setTraceId(request.getTraceId());
             newRequest.setFull(request.getFull());
             newRequest.setPartnerProductID(request.getPartnerProductID());
             newRequest.setProductID(request.getProductID());
+            // 从结束日期+1天开始
             newRequest.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(request.getStartDate()), i * 30)));
-            newRequest.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(newRequest.getStartDate()), 30)));
+            // 前后共30天
+            newRequest.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(newRequest.getStartDate()), 29)));
             if(i == n - 1){
                 newRequest.setEndDate(request.getEndDate());
             }
@@ -261,7 +265,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         return null;
     }
-
 
     private void setPrice(List<PriceInfoPO> priceInfoPOs, List<PriceInfoPO> newPriceInfos, YcfPriceInfo ycfPriceInfo){
         PriceInfoPO priceInfoPO = priceInfoPOs.stream().filter(po ->
