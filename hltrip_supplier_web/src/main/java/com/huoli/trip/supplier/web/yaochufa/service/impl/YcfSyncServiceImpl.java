@@ -25,10 +25,10 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -114,7 +114,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.info("主项目={}", JSON.toJSONString(productItemPO));
             productPO.setMainItem(productItemPO);
             productPO.setCity(productItemPO.getCity());
-            productDao.updateBySupplierProductId(productPO);
+            ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
+            if(exist == null){
+                productPO.setCreateTime(productPO.getUpdateTime());
+            }
+            productDao.updateByCode(productPO);
         });
     }
 
@@ -146,7 +150,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ycfProductItems.forEach(item -> {
                 try {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
-                    productItemDao.updateBySupplierItemId(productItemPO);
+                    ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
+                    if(exist == null){
+                        productItemPO.setCreateTime(productItemPO.getUpdateTime());
+                    }
+                    productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);
@@ -211,14 +219,17 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return;
         }
         String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
-                PricePO pricePO = priceDao.getByProductCode(productCode);
+        PricePO pricePO = priceDao.getByProductCode(productCode);
         if(pricePO == null){
             pricePO = new PricePO();
             pricePO.setProductCode(productCode);
             pricePO.setPriceInfos(Lists.newArrayList());
             pricePO.setSupplierProductId(ycfProductId);
+            pricePO.setCreateTime(new Date());
         }
-
+        pricePO.setUpdateTime(new Date());
+        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
         List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
         ycfPriceInfos.forEach(ycfPriceInfo -> {
@@ -226,7 +237,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         });
         priceInfoPOs.addAll(newPriceInfos);
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
-        priceDao.updateBySupplierProductId(pricePO);
+        priceDao.updateByProductCode(pricePO);
     }
 
     @Override
@@ -239,7 +250,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.error("同步价格日历，根据供应商产品id={} 没有查到相关产品", ycfPrice.getProductID());
             return;
         }
-        priceDao.updateBySupplierProductId(pricePO);
+        priceDao.updateByProductCode(pricePO);
     }
 
     private List<YcfPriceInfo> syncPrice(YcfGetPriceRequest request){

@@ -54,10 +54,4 @@ public class YcfProductReceiveController {
         }
         return YcfBaseResult.success();
     }
-
-    @PostMapping(value = "/test/getpoi")
-    public String test(@RequestBody List<String> ids){
-        ycfSyncService.syncProductItem(ids);
-        return "ok";
-    }
 }

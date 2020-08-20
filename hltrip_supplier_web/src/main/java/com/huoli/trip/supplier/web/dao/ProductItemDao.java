@@ -18,7 +18,7 @@ public interface ProductItemDao {
      * 同步产品项目
      * @param productItemPO
      */
-    void updateBySupplierItemId(ProductItemPO productItemPO);
+    void updateByCode(ProductItemPO productItemPO);
 
     /**
      * 根据城市和类型查项目

@@ -24,7 +24,7 @@
             <DefaultRolloverStrategy>
                 <Delete basePath="logs" maxDepth="5">
                     <IfFileName glob="info-*.log.gz" />
-                    <IfLastModified age="20d" />
+                    <IfLastModified age="7d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
@@ -41,7 +41,7 @@
             <DefaultRolloverStrategy>
                 <Delete basePath="logs" maxDepth="5">
                     <IfFileName glob="error-*.log.gz" />
-                    <IfLastModified age="30d" />
+                    <IfLastModified age="7d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>

@@ -18,7 +18,7 @@ public interface ProductDao {
      * 同步产品
      * @param productPO
      */
-    void updateBySupplierProductId(ProductPO productPO);
+    void updateByCode(ProductPO productPO);
 
     /**
      * 根据item查产品

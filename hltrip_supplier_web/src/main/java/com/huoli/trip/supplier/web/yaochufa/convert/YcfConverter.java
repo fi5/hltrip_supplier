@@ -74,6 +74,9 @@ public class YcfConverter {
         productPO.setSupplierProductId(product.getProductID());
         productPO.setTicket(convertToTicketPO(product));
         productPO.setValidTime(parseDate(product.getStartDate()));
+        productPO.setUpdateTime(new Date());
+        productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         return productPO;
     }
 
@@ -245,6 +248,9 @@ public class YcfConverter {
         productItemPO.setScore(productItem.getRate());
         productItemPO.setSubTitle(productItem.getPcSub());
         productItemPO.setTags(productItem.getTags());
+        productItemPO.setUpdateTime(new Date());
+        productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         return productItemPO;
     }
 

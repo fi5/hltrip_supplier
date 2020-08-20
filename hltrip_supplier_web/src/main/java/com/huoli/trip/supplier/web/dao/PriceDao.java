@@ -16,7 +16,7 @@ public interface PriceDao {
      * 同步价格
      * @param pricePO
      */
-    void updateBySupplierProductId(PricePO pricePO);
+    void updateByProductCode(PricePO pricePO);
 
     /**
      * 根据产品码获取价格

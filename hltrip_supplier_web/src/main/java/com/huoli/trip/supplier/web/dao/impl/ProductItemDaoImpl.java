@@ -28,7 +28,7 @@ public class ProductItemDaoImpl implements ProductItemDao {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public void updateBySupplierItemId(ProductItemPO productItemPO){
+    public void updateByCode(ProductItemPO productItemPO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(productItemPO.getCode()));
         Document document = new Document();
