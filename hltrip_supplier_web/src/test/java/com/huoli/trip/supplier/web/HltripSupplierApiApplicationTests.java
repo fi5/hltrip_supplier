@@ -60,17 +60,17 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
-//    @Test
+    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
-        request.setEndDate("2020-09-30");
-        request.setProductID("902560_2094217");
-        request.setPartnerProductID("yaochufa_902560_2094217");
-        request.setStartDate("2020-08-30");
+        request.setEndDate("2020-11-30");
+        request.setProductID("912745_2040122");
+        request.setPartnerProductID("yaochufa_912745_2040122");
+        request.setStartDate("2020-08-15");
         ycfSyncService.getPrice(request);
     }
 
-    @Test
+//    @Test
     public void test2(){
         List<ProductItemPO> items = mongoTemplate.findAll(ProductItemPO.class);
         items.forEach(item -> {

@@ -34,7 +34,7 @@ public class SyncPriceTask {
     @Autowired
     private ProductDao productDao;
 
-    @Scheduled(cron = "0 0 2 ? * 1")
+    @Scheduled(cron = "0 0 2 ? * 5")
     public void syncFullPrice(){
         long begin = System.currentTimeMillis();
         log.info("开始执行定时任务，同步要出发价格日历。。");

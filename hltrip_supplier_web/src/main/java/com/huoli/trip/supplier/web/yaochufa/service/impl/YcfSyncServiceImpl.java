@@ -227,7 +227,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setSupplierProductId(ycfProductId);
             pricePO.setCreateTime(new Date());
         }
-        pricePO.setUpdateTime(new Date());
+        pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
