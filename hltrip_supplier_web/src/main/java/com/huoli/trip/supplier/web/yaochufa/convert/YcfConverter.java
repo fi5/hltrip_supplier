@@ -7,9 +7,14 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.util.Date;
 import java.util.List;
@@ -322,6 +327,11 @@ public class YcfConverter {
         }
         ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
         itemFeaturePO.setDetail(itemFeature.getDetail());
+        if(itemFeature.getType() != null
+                && itemFeature.getType() == YcfConstants.POI_FEATURE_BOOK_NOTE
+                && StringUtils.isNotBlank(itemFeature.getDetail())){
+            itemFeaturePO.setDetail(format(itemFeature.getDetail()));
+        }
         itemFeaturePO.setType(itemFeature.getType());
         return itemFeaturePO;
     }
@@ -362,5 +372,34 @@ public class YcfConverter {
             return DateTimeUtil.parseDate(date);
         }
         return null;
+    }
+
+    /**
+     * 删除购买须知里的"图文详情"，样式展示有问题
+     * @param htmlStr
+     * @return
+     */
+    private static String format(String htmlStr){
+        Document document = Jsoup.parse(htmlStr);
+        Elements elements0 = document.getElementsContainingOwnText("图文详情");
+        if(elements0 == null){
+            return htmlStr;
+        }
+        Elements elements1 = elements0.parents();
+        if(elements1 == null){
+            return htmlStr;
+        }
+        Elements elements2 = elements1.parents();
+        if(elements2 == null){
+            return htmlStr;
+        }
+        Element element = elements2.first();
+        if(element == null){
+            return htmlStr;
+        }
+        if(StringUtils.equals(element.tagName(), "div")){
+            element.remove();
+        }
+        return document.toString();
     }
 }

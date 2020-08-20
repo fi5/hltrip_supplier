@@ -98,4 +98,17 @@ public class YcfConstants {
      */
     public static final int POI_TYPE_FOOD = 3;
 
+    // poi特色类型
+    /**
+     * 购买须知
+     */
+    public static final int POI_FEATURE_BOOK_NOTE= 1;
+    /**
+     * 交通指南
+     */
+    public static final int POI_FEATURE_TRAFFIC_NOTE = 2;
+    /**
+     * 图文详情
+     */
+    public static final int POI_FEATURE_DETAIL = 3;
 }

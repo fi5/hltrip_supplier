@@ -70,7 +70,7 @@ class HltripSupplierApiApplicationTests {
         ycfSyncService.getPrice(request);
     }
 
-//    @Test
+    @Test
     public void test2(){
         List<ProductItemPO> items = mongoTemplate.findAll(ProductItemPO.class);
         items.forEach(item -> {
@@ -82,7 +82,7 @@ class HltripSupplierApiApplicationTests {
                             String s = format(f.getDetail());
                             if(StringUtils.isNotBlank(s)){
                                 sb.append("true");
-                                f.setDetail(format(f.getDetail()));
+                                f.setDetail(s);
                             }
                         });
             }
@@ -94,7 +94,7 @@ class HltripSupplierApiApplicationTests {
         log.info("完。。。。。。。。。。。。");
     }
 
-    @Test
+//    @Test
     public void test3(){
         PricePO pricePO = priceDao.getByProductCode("yaochufa_909604_2094577");
 
@@ -102,6 +102,11 @@ class HltripSupplierApiApplicationTests {
        log.info("前。。。。{}", JSON.toJSONString(priceInfoPOs));
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         log.info("后。。。。。。。。。。。。。。。。。。。{}", JSON.toJSONString(priceInfoPOs));
+    }
+
+    public static void main(String[] args){
+        HltripSupplierApiApplicationTests test = new HltripSupplierApiApplicationTests();
+        log.info(test.format(htmlStr));
     }
 
     private String format(String htmlStr){
