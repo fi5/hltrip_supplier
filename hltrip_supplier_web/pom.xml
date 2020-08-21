@@ -161,7 +161,7 @@
     </dependencies>
 
     <build>
-        <finalName>hltrip_supplier_web</finalName>
+        <finalName>hltrip_supplier</finalName>
         <plugins>
         <plugin>
             <groupId>org.springframework.boot</groupId>
