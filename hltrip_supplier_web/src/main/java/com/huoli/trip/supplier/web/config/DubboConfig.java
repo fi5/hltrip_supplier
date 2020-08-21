@@ -37,7 +37,6 @@ public class DubboConfig {
         registryConfig.setAddress(dubboProperties.getAddress());
         registryConfig.setClient(dubboProperties.getClient());
         registryConfig.setTimeout(10000);
-        registryConfig.setCheck(false);
         return registryConfig;
     }
 
