@@ -45,14 +45,14 @@ public class SyncPriceTask {
         List<ProductPO> productPOs =  productDao.getCodeBySupplierId(Constants.SUPPLIER_CODE_YCF);
         productPOs.forEach(productPO -> {
             YcfGetPriceRequest request = new YcfGetPriceRequest();
-            request.setFull(true);
+//            request.setFull(true);
             request.setPartnerProductID(productPO.getCode());
             request.setProductID(productPO.getSupplierProductId());
             request.setStartDate(start);
             request.setEndDate(end);
             ycfSyncService.getPrice(request);
             try {
-                Thread.sleep(100);
+                Thread.sleep(310);
             } catch (InterruptedException e) {
                 log.error("线程暂停失败", e);
             }

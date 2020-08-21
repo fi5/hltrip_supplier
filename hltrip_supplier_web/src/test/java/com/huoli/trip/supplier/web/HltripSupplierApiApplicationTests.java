@@ -12,6 +12,7 @@ import com.huoli.trip.common.vo.ProductItem;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.yaochufa.task.SyncPriceTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -43,6 +44,9 @@ class HltripSupplierApiApplicationTests {
     @Autowired
     private PriceDao priceDao;
 
+    @Autowired
+    private SyncPriceTask syncPriceTask;
+
 //    @Test
     void contextLoads() {
     }
@@ -66,10 +70,10 @@ class HltripSupplierApiApplicationTests {
 //    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
-        request.setEndDate("2020-11-30");
-        request.setProductID("912745_2040122");
-        request.setPartnerProductID("yaochufa_912745_2040122");
-        request.setStartDate("2020-08-15");
+        request.setEndDate("2020-10-20");
+        request.setProductID("914581_2108355");
+        request.setPartnerProductID("yaochufa_914581_2108355");
+        request.setStartDate("2020-08-20");
         ycfSyncService.getPrice(request);
     }
 
@@ -112,6 +116,11 @@ class HltripSupplierApiApplicationTests {
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), PricePO.class);
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductPO.class);
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductItemPO.class);
+    }
+
+    @Test
+    public void test5(){
+        syncPriceTask.syncFullPrice();
     }
 
     public static void main(String[] args){

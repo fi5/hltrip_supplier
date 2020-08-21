@@ -289,6 +289,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         priceInfoPO.setStock(ycfPriceInfo.getStock());
         priceInfoPO.setSalePrice(ycfPriceInfo.getPrice());
         priceInfoPO.setSettlePrice(ycfPriceInfo.getSettlementPrice());
+        priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(ycfPriceInfo.getDate()));
     }
 
     private boolean filterProduct(YcfProduct ycfProduct){
