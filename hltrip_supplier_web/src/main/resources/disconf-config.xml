@@ -50,6 +50,9 @@
 			<list>
 				<value>classpath:/common.properties</value>
 				<value>classpath:/supplier_yaochufa.properties</value>
+				<value>classpath:/dubbo.properties</value>
+				<value>classpath:/kafka.properties</value>
+				<value>classpath:/mongo.properties</value>
 			</list>
 
 		</property>
