@@ -5,7 +5,9 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.CoordinateUtil;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.common.vo.ProductItem;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
@@ -25,6 +27,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @SpringBootTest
@@ -60,7 +63,7 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
-    @Test
+//    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setEndDate("2020-11-30");
@@ -102,6 +105,13 @@ class HltripSupplierApiApplicationTests {
        log.info("前。。。。{}", JSON.toJSONString(priceInfoPOs));
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         log.info("后。。。。。。。。。。。。。。。。。。。{}", JSON.toJSONString(priceInfoPOs));
+    }
+
+    @Test
+    public void test4(){
+        mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), PricePO.class);
+        mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductPO.class);
+        mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductItemPO.class);
     }
 
     public static void main(String[] args){
