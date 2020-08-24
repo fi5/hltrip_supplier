@@ -67,12 +67,12 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
-//    @Test
+    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setEndDate("2020-10-20");
-        request.setProductID("914581_2108355");
-        request.setPartnerProductID("yaochufa_914581_2108355");
+        request.setProductID("913850_2101767");
+        request.setPartnerProductID("yaochufa_913850_2101767");
         request.setStartDate("2020-08-20");
         ycfSyncService.getPrice(request);
     }
@@ -111,14 +111,14 @@ class HltripSupplierApiApplicationTests {
         log.info("后。。。。。。。。。。。。。。。。。。。{}", JSON.toJSONString(priceInfoPOs));
     }
 
-    @Test
+//    @Test
     public void test4(){
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), PricePO.class);
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductPO.class);
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductItemPO.class);
     }
 
-    @Test
+//    @Test
     public void test5(){
         syncPriceTask.syncFullPrice();
     }
