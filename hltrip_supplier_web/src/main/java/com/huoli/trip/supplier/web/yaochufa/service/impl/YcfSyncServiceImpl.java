@@ -117,6 +117,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            } else {
+                productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
             }
             productDao.updateByCode(productPO);
         });
@@ -153,6 +155,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    } else {
+                        productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                     }
                     productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
@@ -226,6 +230,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setPriceInfos(Lists.newArrayList());
             pricePO.setSupplierProductId(ycfProductId);
             pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        } else {
+            pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
         }
         pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
