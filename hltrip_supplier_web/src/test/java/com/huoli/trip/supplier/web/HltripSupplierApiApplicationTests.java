@@ -67,7 +67,7 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
-    @Test
+//    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setEndDate("2020-10-20");
@@ -118,7 +118,7 @@ class HltripSupplierApiApplicationTests {
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductItemPO.class);
     }
 
-//    @Test
+    @Test
     public void test5(){
         syncPriceTask.syncFullPrice();
     }
