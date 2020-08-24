@@ -45,7 +45,7 @@ public class SyncPriceTask {
         List<ProductPO> productPOs =  productDao.getCodeBySupplierId(Constants.SUPPLIER_CODE_YCF);
         productPOs.forEach(productPO -> {
             YcfGetPriceRequest request = new YcfGetPriceRequest();
-            request.setFull(true);
+//            request.setFull(true);
             request.setPartnerProductID(productPO.getCode());
             request.setProductID(productPO.getSupplierProductId());
             request.setStartDate(start);
