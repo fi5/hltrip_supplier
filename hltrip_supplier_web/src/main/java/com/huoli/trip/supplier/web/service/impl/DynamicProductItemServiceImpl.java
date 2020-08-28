@@ -10,6 +10,7 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * 描述：<br/>
@@ -30,6 +31,7 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
     private ProductItemDao productItemDao;
 
     @Override
+    @Async
     public void refreshItemByProductCode(String productCode){
         log.info("开始根据产品码{}刷新item低价产品。。。", productCode);
         ProductPO productPO = productDao.getByCode(productCode);
@@ -42,6 +44,7 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
     }
 
     @Override
+    @Async
     public void refreshItemByCode(String code){
         log.info("开始根据item编码{}刷新item低价产品。。。", code);
         refreshItem(code);

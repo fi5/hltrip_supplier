@@ -44,4 +44,10 @@ public interface ProductItemDao {
      * @param productPO
      */
     void updateProductAndPriceByCode(String code, ProductPO productPO);
+
+    /**
+     * 查询所有code
+     * @return
+     */
+    List<ProductItemPO> selectCodes();
 }
