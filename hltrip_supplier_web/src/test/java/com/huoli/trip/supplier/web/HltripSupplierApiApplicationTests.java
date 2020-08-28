@@ -47,7 +47,7 @@ class HltripSupplierApiApplicationTests {
     private RefreshItemTask refreshItemTask;
 
     @Autowired
-            private DynamicProductItemService dynamicProductItemService;
+    private DynamicProductItemService dynamicProductItemService;
 
 //    @Test
     void contextLoads() {
