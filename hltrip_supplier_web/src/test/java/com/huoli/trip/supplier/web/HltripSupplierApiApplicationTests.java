@@ -7,9 +7,12 @@ import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.vo.ProductItem;
+import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.service.impl.DynamicProductItemServiceImpl;
+import com.huoli.trip.supplier.web.task.RefreshItemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -40,6 +43,12 @@ class HltripSupplierApiApplicationTests {
     @Autowired
     private PriceDao priceDao;
 
+    @Autowired
+    private RefreshItemTask refreshItemTask;
+
+    @Autowired
+            private DynamicProductItemService dynamicProductItemService;
+
 //    @Test
     void contextLoads() {
     }
@@ -60,7 +69,7 @@ class HltripSupplierApiApplicationTests {
        });
     }
 
-    @Test
+//    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setEndDate("2020-11-30");
@@ -102,6 +111,16 @@ class HltripSupplierApiApplicationTests {
        log.info("前。。。。{}", JSON.toJSONString(priceInfoPOs));
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         log.info("后。。。。。。。。。。。。。。。。。。。{}", JSON.toJSONString(priceInfoPOs));
+    }
+
+//    @Test
+    public void test4(){
+        dynamicProductItemService.refreshItem("yaochufa_188031");
+    }
+
+    @Test
+    public void test5(){
+        refreshItemTask.refreshItemProduct();
     }
 
     public static void main(String[] args){

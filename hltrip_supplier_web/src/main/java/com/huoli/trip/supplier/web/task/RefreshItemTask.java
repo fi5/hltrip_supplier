@@ -36,11 +36,13 @@ public class RefreshItemTask {
         log.info("开始执行刷新item低价产品任务。。。");
         List<ProductItemPO> items = productItemDao.selectCodes();
         items.forEach(item -> {
-            dynamicProductItemService.refreshItemByCode(item.getCode());
             try {
+                dynamicProductItemService.refreshItemByCode(item.getCode());
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 log.error("刷新item定时任务线程休眠失败", e);
+            } catch (Exception e) {
+                log.error("刷新item异常，itemCode={}", item.getCode(), e);
             }
         });
         long t = System.currentTimeMillis() - s;

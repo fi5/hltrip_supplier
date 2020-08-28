@@ -62,7 +62,7 @@ public class ProductItemDaoImpl implements ProductItemDao {
 
     @Override
     public List<ProductItemPO> selectCodes(){
-        Query query = new Query(Criteria.where("status").is(1));
+        Query query = new Query();
         query.fields().include("code").exclude("_id");
         List<ProductItemPO> productItems = mongoTemplate.find(query, ProductItemPO.class);
         return productItems;

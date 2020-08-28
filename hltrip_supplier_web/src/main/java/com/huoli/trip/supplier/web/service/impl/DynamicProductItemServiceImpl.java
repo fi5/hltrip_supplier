@@ -44,17 +44,17 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
     }
 
     @Override
-    @Async
+//    @Async
     public void refreshItemByCode(String code){
         log.info("开始根据item编码{}刷新item低价产品。。。", code);
         refreshItem(code);
         log.info("根据item编码{}刷新item低价产品完成。", code);
     }
 
-    private void refreshItem(String code){
+    public void refreshItem(String code){
         ProductPO productPO =  productDao.getProductListByItemId(code);
         if(productPO == null){
-            log.error("刷新item，没有查到item={}相关的产品", code);
+            log.error("刷新item，没有查到item={}符合条件的相关的产品∑", code);
             return;
         }
         ProductItemPO productItemPO = productItemDao.selectByCode(code);
@@ -63,19 +63,23 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
             return;
         }
         ProductPO oriPro = productItemPO.getProduct();
+        String oriCode = null;
+        String oriSalePrice = null;
         if(oriPro != null){
             PriceInfoPO oriPrice = productItemPO.getProduct().getPriceCalendar().getPriceInfos();
             if(oriPrice != null
                     && StringUtils.isNotBlank(oriPro.getCode()) && oriPrice.getSalePrice() != null
                     && StringUtils.equals(oriPro.getCode(), productPO.getCode())
                     && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()){
-                log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}", code, oriPro.getCode(), oriPrice.getSalePrice().toString());
+                log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}", code, oriPro.getCode(), oriPrice.getSalePrice().toPlainString());
                 return;
             }
+            oriCode = oriPro.getCode();
+            oriSalePrice = oriPrice.getSalePrice().toPlainString();
         }
         log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}，新productCode={}, 新salePrice={}",
-                code, oriPro.getCode(), oriPro.getPriceCalendar().getPriceInfos().getSalePrice().toString(),
-                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toString());
+                code, oriCode, oriSalePrice,
+                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toPlainString());
         try {
             productItemDao.updateProductAndPriceByCode(code, productPO);
         } catch (Exception e) {
