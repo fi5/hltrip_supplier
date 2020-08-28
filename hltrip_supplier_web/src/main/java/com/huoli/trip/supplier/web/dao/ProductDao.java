@@ -40,4 +40,19 @@ public interface ProductDao {
      * @return
      */
     List<ProductPO> getCodeBySupplierId(String supplierId);
+
+    /**
+     * 根据itemid获取最低价产品
+     * @param itemId
+     * @return
+     */
+    ProductPO getProductListByItemId(String itemId);
+
+    /**
+     * 根据编码获取产品
+     * @param code
+     * @return
+     */
+    ProductPO getByCode(String code);
+
 }

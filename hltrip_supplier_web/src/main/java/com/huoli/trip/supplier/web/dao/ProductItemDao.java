@@ -1,6 +1,8 @@
 package com.huoli.trip.supplier.web.dao;
 
+import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
 
 import java.util.List;
 
@@ -35,4 +37,11 @@ public interface ProductItemDao {
      * @return
      */
     ProductItemPO selectByCode(String code);
+
+    /**
+     * 更新产品和价格
+     * @param code
+     * @param productPO
+     */
+    void updateProductAndPriceByCode(String code, ProductPO productPO);
 }

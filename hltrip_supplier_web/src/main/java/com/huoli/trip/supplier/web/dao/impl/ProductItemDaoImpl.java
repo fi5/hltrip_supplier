@@ -1,7 +1,9 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,13 @@ public class ProductItemDaoImpl implements ProductItemDao {
         Query query = new Query(Criteria.where("code").is(code));
         ProductItemPO productItem = mongoTemplate.findOne(query, ProductItemPO.class);
         return productItem;
+    }
+
+    @Override
+    public void updateProductAndPriceByCode(String code, ProductPO productPO){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("code").is(code));
+        mongoTemplate.upsert(query, Update.update("product", productPO), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
     }
 
 }
