@@ -39,7 +39,7 @@ public class SyncPriceTask {
         long begin = System.currentTimeMillis();
         log.info("开始执行定时任务，同步要出发价格日历。。");
         Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
-        days = days == null ? 90 : days;
+        days = days == null ? 30 : days;
         String start = DateTimeUtil.formatDate(new Date());
         String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
         List<ProductPO> productPOs =  productDao.getCodeBySupplierId(Constants.SUPPLIER_CODE_YCF);

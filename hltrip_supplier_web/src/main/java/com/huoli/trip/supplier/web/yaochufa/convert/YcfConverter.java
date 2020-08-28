@@ -3,10 +3,7 @@ package com.huoli.trip.supplier.web.yaochufa.convert;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.CoordinateUtil;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -52,22 +49,22 @@ public class YcfConverter {
         productPO.setMainItemCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), product.getPoiId()));
         productPO.setDelayType(product.getAdvanceOrDelayType());
         productPO.setDescription(product.getProductDescription());
-        productPO.setDisplayEnd(parseDate(product.getGlobalSaleDisplayDateEnd()));
-        productPO.setDisplayStart(parseDate(product.getGlobalSaleDisplayDateBegin()));
+        productPO.setDisplayEnd(MongoDateUtils.handleTimezoneInput(parseDate(product.getGlobalSaleDisplayDateEnd())));
+        productPO.setDisplayStart(MongoDateUtils.handleTimezoneInput(parseDate(product.getGlobalSaleDisplayDateBegin())));
         productPO.setExcludeDesc(product.getFeeExclude());
         productPO.setFood(convertToFoodPO(product));
         if(ListUtils.isNotEmpty(product.getProductImageList())){
             productPO.setImages(product.getProductImageList().stream().map(imageBase -> convertToImageBasePO(imageBase)).collect(Collectors.toList()));
         }
         productPO.setIncludeDesc(product.getFeeInclude());
-        productPO.setInvalidTime(parseDate(product.getEndDate()));
+        productPO.setInvalidTime(MongoDateUtils.handleTimezoneInput(parseDate(product.getEndDate())));
         if(ListUtils.isNotEmpty(product.getLimitBuyRules())){
             productPO.setLimitRules(product.getLimitBuyRules().stream().map(rule -> convertToLimitRulePO(rule)).collect(Collectors.toList()));
         }
         productPO.setName(product.getProductName());
         productPO.setPreSaleDescription(product.getPreSaleDescription());
-        productPO.setPreSaleEnd(parseDate(product.getPreSaleDateEnd()));
-        productPO.setPreSaleStart(parseDate(product.getPreSaleDateBegin()));
+        productPO.setPreSaleEnd(MongoDateUtils.handleTimezoneInput(parseDate(product.getPreSaleDateEnd())));
+        productPO.setPreSaleStart(MongoDateUtils.handleTimezoneInput(parseDate(product.getPreSaleDateBegin())));
         productPO.setPrice(product.getMarketPrice());
         productPO.setRefundAheadMin(product.getRefundPreMinute());
         productPO.setRefundDesc(product.getRefundNote());
@@ -78,8 +75,8 @@ public class YcfConverter {
         productPO.setSupplierName(Constants.SUPPLIER_NAME_YCF);
         productPO.setSupplierProductId(product.getProductID());
         productPO.setTicket(convertToTicketPO(product));
-        productPO.setValidTime(parseDate(product.getStartDate()));
-        productPO.setUpdateTime(new Date());
+        productPO.setValidTime(MongoDateUtils.handleTimezoneInput(parseDate(product.getStartDate())));
+        productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
         productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         return productPO;
@@ -253,7 +250,7 @@ public class YcfConverter {
         productItemPO.setScore(productItem.getRate());
         productItemPO.setSubTitle(productItem.getPcSub());
         productItemPO.setTags(productItem.getTags());
-        productItemPO.setUpdateTime(new Date());
+        productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         return productItemPO;

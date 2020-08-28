@@ -4,7 +4,6 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 描述: <br>可预订检查请求
@@ -20,9 +19,9 @@ public class YcfBookCheckReq implements Serializable {
     private String productId;
     //开始日期
     @NotNull(message = "开始日期为空")
-    private Date beginDate;
+    private String beginDate;
     //结束日期
     @NotNull(message = "结束日期为空")
-    private Date endDate;
+    private String endDate;
 
 }

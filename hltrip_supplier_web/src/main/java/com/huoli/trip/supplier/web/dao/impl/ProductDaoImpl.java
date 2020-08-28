@@ -2,15 +2,20 @@ package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.DateTimeUtil;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -54,5 +59,46 @@ public class ProductDaoImpl implements ProductDao {
         Query query = new Query(Criteria.where("supplierId").is(supplierId));
         query.fields().include("code").include("supplierProductId");
         return mongoTemplate.find(query, ProductPO.class);
+    }
+
+    @Override
+    public ProductPO getProductListByItemId(String itemId){
+        // 连价格日历表
+        LookupOperation priceLookup = LookupOperation.newLookup().from(Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR)
+                .localField("code")
+                .foreignField("productCode")
+                .as("priceCalendar");
+        // 拆价格日历
+        UnwindOperation unwindOperation = Aggregation.unwind("priceCalendar");
+        UnwindOperation unwindOperation1 = Aggregation.unwind("priceCalendar.priceInfos");
+        // 按价格正序
+        SortOperation priceSort = Aggregation.sort(Sort.Direction.ASC, "priceCalendar.priceInfos.salePrice");
+        // 查询条件
+        Criteria criteria = Criteria.where("mainItemCode").is(itemId)
+                .and("status").is(1)
+                .and("priceCalendar.priceInfos.stock").gt(0)
+                .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+        MatchOperation matchOperation = Aggregation.match(criteria);
+        // 指定字段
+        ProjectionOperation projectionOperation = Aggregation.project(ProductPO.class).andExclude("_id");
+        // 分组后排序
+        Aggregation aggregation = Aggregation.newAggregation(priceLookup,
+                unwindOperation,
+                unwindOperation1,
+                matchOperation,
+                priceSort,
+                projectionOperation,
+                Aggregation.limit(1));
+        AggregationResults<ProductPO> output = mongoTemplate.aggregate(aggregation, Constants.COLLECTION_NAME_TRIP_PRODUCT, ProductPO.class);
+        if(output.getMappedResults() == null){
+            return null;
+        }
+        return output.getMappedResults().get(0);
+    }
+
+    @Override
+    public ProductPO getByCode(String code){
+        Query query = new Query(Criteria.where("code").is(code));
+        return mongoTemplate.findOne(query, ProductPO.class);
     }
 }
