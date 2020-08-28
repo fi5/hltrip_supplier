@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.yaochufa.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
@@ -31,6 +32,9 @@ public class YcfProductReceiveController {
 
     @Autowired
     private YcfSyncService ycfSyncService;
+
+    @Autowired
+    private DynamicProductItemService dynamicProductItemService;
 
     @PostMapping("/receive/product")
     public YcfBaseResult<YcfPushProductResponse> receiveProduct(@RequestBody List<YcfProduct> products){

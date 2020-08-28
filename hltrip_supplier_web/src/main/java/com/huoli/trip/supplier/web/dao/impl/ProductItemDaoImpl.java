@@ -54,10 +54,10 @@ public class ProductItemDaoImpl implements ProductItemDao {
     }
 
     @Override
-    public void updateProductAndPriceByCode(String code, ProductPO productPO){
+    public void updateItemProductByCode(String code, ProductPO productPO){
         Query query = new Query();
         query.addCriteria(Criteria.where("code").is(code));
-        mongoTemplate.upsert(query, Update.update("product", productPO), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
+        mongoTemplate.updateFirst(query, Update.update("product", productPO), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
@@ -33,58 +34,68 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
     @Override
     @Async
     public void refreshItemByProductCode(String productCode){
-        log.info("开始根据产品码{}刷新item低价产品。。。", productCode);
-        ProductPO productPO = productDao.getByCode(productCode);
-        if(productPO != null && productPO.getMainItemCode() != null){
-            refreshItem(productPO.getMainItemCode());
-            log.info("根据产品码{}刷新item低价产品完成。", productCode);
-            return;
+        try {
+            log.info("开始根据产品码{}刷新item低价产品。。。", productCode);
+            ProductPO productPO = productDao.getByCode(productCode);
+            if(productPO != null && productPO.getMainItemCode() != null){
+                refreshItem(productPO.getMainItemCode());
+                log.info("根据产品码{}刷新item低价产品完成。", productCode);
+                return;
+            }
+            log.error("根据产品码{}刷新item低价产品失败，产品或者产品主项目编码为空", productCode);
+        } catch (Exception e) {
+            log.error("根据产品码{}刷新item低价产品异常！", productCode, e);
         }
-        log.error("根据产品码{}刷新item低价产品失败，产品或者产品主项目编码为空", productCode);
     }
 
     @Override
-//    @Async
+    @Async
     public void refreshItemByCode(String code){
-        log.info("开始根据item编码{}刷新item低价产品。。。", code);
-        refreshItem(code);
-        log.info("根据item编码{}刷新item低价产品完成。", code);
+        try {
+            log.info("开始根据item编码{}刷新item低价产品。。。", code);
+            refreshItem(code);
+            log.info("根据item编码{}刷新item低价产品完成。", code);
+        } catch (Exception e) {
+            log.error("根据item编码{}刷新item低价产品异常！", code, e);
+        }
     }
 
-    public void refreshItem(String code){
-        ProductPO productPO =  productDao.getProductListByItemId(code);
-        if(productPO == null){
-            log.error("刷新item，没有查到item={}符合条件的相关的产品∑", code);
-            return;
-        }
+    private void refreshItem(String code){
         ProductItemPO productItemPO = productItemDao.selectByCode(code);
         if(productItemPO == null){
             log.error("刷新item，没有查到item={}", code);
             return;
         }
+        ProductPO productPO =  productDao.getProductListByItemId(code);
+        if(productPO == null){
+            log.error("刷新item，没有查到item={}符合条件的相关的产品", code);
+            return;
+        }
         ProductPO oriPro = productItemPO.getProduct();
         String oriCode = null;
         String oriSalePrice = null;
+        String oriSaleDate = null;
         if(oriPro != null){
             PriceInfoPO oriPrice = productItemPO.getProduct().getPriceCalendar().getPriceInfos();
             if(oriPrice != null
-                    && StringUtils.isNotBlank(oriPro.getCode()) && oriPrice.getSalePrice() != null
+                    && StringUtils.isNotBlank(oriPro.getCode())
+                    && oriPrice.getSalePrice() != null
+                    && oriPrice.getSaleDate() != null
                     && StringUtils.equals(oriPro.getCode(), productPO.getCode())
-                    && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()){
-                log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}", code, oriPro.getCode(), oriPrice.getSalePrice().toPlainString());
+                    && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()
+                    && oriPrice.getSaleDate().getTime() == productPO.getPriceCalendar().getPriceInfos().getSaleDate().getTime()){
+                oriCode = oriPro.getCode();
+                oriSalePrice = oriPrice.getSalePrice().toPlainString();
+                oriSaleDate = DateTimeUtil.formatDate(oriPrice.getSaleDate());
+                log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}, saleDate={}",
+                        code, oriCode, oriSalePrice, oriSaleDate);
                 return;
             }
-            oriCode = oriPro.getCode();
-            oriSalePrice = oriPrice.getSalePrice().toPlainString();
         }
-        log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}，新productCode={}, 新salePrice={}",
-                code, oriCode, oriSalePrice,
-                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toPlainString());
-        try {
-            productItemDao.updateProductAndPriceByCode(code, productPO);
-        } catch (Exception e) {
-            log.error("刷新item失败", e);
-            return;
-        }
+        log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}, 原saleDate={}, 新productCode={}, 新salePrice={}, 新saleDate={}",
+                code, oriCode, oriSalePrice, oriSaleDate,
+                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toPlainString(),
+                DateTimeUtil.formatDate(productPO.getPriceCalendar().getPriceInfos().getSaleDate()));
+        productItemDao.updateItemProductByCode(code, productPO);
     }
 }
