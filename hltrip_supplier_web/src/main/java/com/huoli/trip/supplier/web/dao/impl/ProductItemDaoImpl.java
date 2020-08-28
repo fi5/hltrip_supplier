@@ -60,4 +60,12 @@ public class ProductItemDaoImpl implements ProductItemDao {
         mongoTemplate.upsert(query, Update.update("product", productPO), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
     }
 
+    @Override
+    public List<ProductItemPO> selectCodes(){
+        Query query = new Query();
+        query.fields().include("code").exclude("_id");
+        List<ProductItemPO> productItems = mongoTemplate.find(query, ProductItemPO.class);
+        return productItems;
+    }
+
 }

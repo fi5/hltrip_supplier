@@ -21,4 +21,6 @@ public interface DynamicProductItemService {
      * @param productCode
      */
     void refreshItemByProductCode(String productCode);
+    void refreshItem(String code);
+
 }

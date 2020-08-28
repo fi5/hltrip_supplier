@@ -9,10 +9,13 @@ import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.common.vo.ProductItem;
+import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.yaochufa.task.SyncPriceTask;
+import com.huoli.trip.supplier.web.service.impl.DynamicProductItemServiceImpl;
+import com.huoli.trip.supplier.web.task.RefreshItemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -46,6 +49,12 @@ class HltripSupplierApiApplicationTests {
 
     @Autowired
     private SyncPriceTask syncPriceTask;
+
+    @Autowired
+    private RefreshItemTask refreshItemTask;
+
+    @Autowired
+    private DynamicProductItemService dynamicProductItemService;
 
 //    @Test
     void contextLoads() {
@@ -121,6 +130,16 @@ class HltripSupplierApiApplicationTests {
     @Test
     public void test5(){
         syncPriceTask.syncFullPrice();
+    }
+
+//    @Test
+    public void test6(){
+        dynamicProductItemService.refreshItem("yaochufa_188031");
+    }
+
+    @Test
+    public void test7(){
+        refreshItemTask.refreshItemProduct();
     }
 
     public static void main(String[] args){

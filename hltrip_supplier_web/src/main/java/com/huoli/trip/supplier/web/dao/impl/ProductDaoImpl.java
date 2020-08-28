@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao.impl;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.DateTimeUtil;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.bson.Document;
@@ -90,10 +91,10 @@ public class ProductDaoImpl implements ProductDao {
                 projectionOperation,
                 Aggregation.limit(1));
         AggregationResults<ProductPO> output = mongoTemplate.aggregate(aggregation, Constants.COLLECTION_NAME_TRIP_PRODUCT, ProductPO.class);
-        if(output.getMappedResults() == null){
-            return null;
+        if(ListUtils.isNotEmpty(output.getMappedResults())){
+            return output.getMappedResults().get(0);
         }
-        return output.getMappedResults().get(0);
+        return null;
     }
 
     @Override

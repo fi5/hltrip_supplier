@@ -13,6 +13,7 @@ import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
@@ -26,6 +27,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableHystrix
 @EnableSwagger2
 @EnableScheduling
+@EnableAsync
 public class HltripSupplierWebApplication {
 
     public static void main(String[] args) {
