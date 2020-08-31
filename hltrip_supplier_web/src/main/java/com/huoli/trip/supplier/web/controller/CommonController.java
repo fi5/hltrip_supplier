@@ -25,7 +25,7 @@ public class CommonController {
     private RefreshItemTask refreshItemTask;
 
     @PostMapping("/refresh/item")
-    public BaseResponse receivePrice(@RequestParam @NotBlank String user){
+    public BaseResponse receivePrice(@RequestParam @NotBlank(message = "user不能为空") String user){
         try {
             log.info("开始刷新item。。word={}", user);
             refreshItemTask.refreshItemProduct();
