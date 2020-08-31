@@ -43,7 +43,7 @@ public interface ProductItemDao {
      * @param code
      * @param productPO
      */
-    void updateProductAndPriceByCode(String code, ProductPO productPO);
+    void updateItemProductByCode(String code, ProductPO productPO);
 
     /**
      * 查询所有code

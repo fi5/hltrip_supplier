@@ -81,7 +81,7 @@ public class ProductDaoImpl implements ProductDao {
                 .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
         MatchOperation matchOperation = Aggregation.match(criteria);
         // 指定字段
-        ProjectionOperation projectionOperation = Aggregation.project(ProductPO.class).andExclude("_id");
+        ProjectionOperation projectionOperation = Aggregation.project(getProductListFields()).andExclude("_id");
         // 分组后排序
         Aggregation aggregation = Aggregation.newAggregation(priceLookup,
                 unwindOperation,
@@ -95,6 +95,20 @@ public class ProductDaoImpl implements ProductDao {
             return output.getMappedResults().get(0);
         }
         return null;
+    }
+
+    private Fields getProductListFields(){
+        return Fields.from(Fields.field("mainItemCode"),
+                Fields.field("code"),
+                Fields.field("name"),
+                Fields.field("status"),
+                Fields.field("productType"),
+                Fields.field("images"),
+                Fields.field("price"),
+                Fields.field("salePrice"),
+                Fields.field("city"),
+                Fields.field("count"),
+                Fields.field("priceCalendar"));
     }
 
     @Override

@@ -1,20 +1,17 @@
 package com.huoli.trip.supplier.web;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.MongoDateUtils;
-import com.huoli.trip.common.vo.ProductItem;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.yaochufa.task.SyncPriceTask;
-import com.huoli.trip.supplier.web.service.impl.DynamicProductItemServiceImpl;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -137,8 +134,28 @@ class HltripSupplierApiApplicationTests {
         dynamicProductItemService.refreshItem("yaochufa_188031");
     }
 
-    @Test
+    //    @Test
     public void test7(){
+        dynamicProductItemService.refreshItemByCode("yaochufa_188031");
+    }
+
+    //    @Test
+    public void test8(){
+        refreshItemTask.refreshItemProduct();
+    }
+
+    @Test
+    public void test9(){
+        dynamicProductItemService.refreshItemByCode("yaochufa_188031");
+        try {
+            Thread.sleep(1000 * 10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //    @Test
+    public void test10(){
         refreshItemTask.refreshItemProduct();
     }
 

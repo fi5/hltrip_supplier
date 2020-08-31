@@ -13,6 +13,7 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
@@ -54,6 +55,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private IYaoChuFaClient yaoChuFaClient;
+
+    @Autowired
+    private DynamicProductItemService dynamicProductItemService;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -244,6 +248,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         priceInfoPOs.addAll(newPriceInfos);
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         priceDao.updateByProductCode(pricePO);
+        // 更新价格要刷新item的低价产品(异步)
+        dynamicProductItemService.refreshItemByProductCode(productCode);
     }
 
     @Override
@@ -257,6 +263,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return;
         }
         priceDao.updateByProductCode(pricePO);
+        // 更新价格要刷新item的低价产品(异步)
+        dynamicProductItemService.refreshItemByCode(productPO.getMainItemCode());
     }
 
     private List<YcfPriceInfo> syncPrice(YcfGetPriceRequest request){
