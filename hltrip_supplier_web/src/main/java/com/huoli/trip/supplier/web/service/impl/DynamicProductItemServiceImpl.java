@@ -76,20 +76,21 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
         String oriSalePrice = null;
         String oriSaleDate = null;
         if(oriPro != null){
-            PriceInfoPO oriPrice = productItemPO.getProduct().getPriceCalendar().getPriceInfos();
+            PriceInfoPO oriPrice = oriPro.getPriceCalendar().getPriceInfos();
             if(oriPrice != null
                     && StringUtils.isNotBlank(oriPro.getCode())
                     && oriPrice.getSalePrice() != null
-                    && oriPrice.getSaleDate() != null
-                    && StringUtils.equals(oriPro.getCode(), productPO.getCode())
-                    && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()
-                    && oriPrice.getSaleDate().getTime() == productPO.getPriceCalendar().getPriceInfos().getSaleDate().getTime()){
+                    && oriPrice.getSaleDate() != null){
                 oriCode = oriPro.getCode();
                 oriSalePrice = oriPrice.getSalePrice().toPlainString();
                 oriSaleDate = DateTimeUtil.formatDate(oriPrice.getSaleDate());
-                log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}, saleDate={}",
-                        code, oriCode, oriSalePrice, oriSaleDate);
-                return;
+                if(StringUtils.equals(oriPro.getCode(), productPO.getCode())
+                        && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()
+                        && oriPrice.getSaleDate().getTime() == productPO.getPriceCalendar().getPriceInfos().getSaleDate().getTime()){
+                    log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}, saleDate={}",
+                            code, oriCode, oriSalePrice, oriSaleDate);
+                    return;
+                }
             }
         }
         log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}, 原saleDate={}, 新productCode={}, 新salePrice={}, 新saleDate={}",
