@@ -124,39 +124,24 @@ class HltripSupplierApiApplicationTests {
         mongoTemplate.updateMulti(Query.query(Criteria.where("createTime").is(null)), Update.update("createTime", MongoDateUtils.handleTimezoneInput(new Date())), ProductItemPO.class);
     }
 
-    @Test
+//    @Test
     public void test5(){
         syncPriceTask.syncFullPrice();
     }
 
-//    @Test
+    //    @Test
     public void test6(){
-        dynamicProductItemService.refreshItem("yaochufa_188031");
-    }
-
-    //    @Test
-    public void test7(){
-        dynamicProductItemService.refreshItemByCode("yaochufa_188031");
-    }
-
-    //    @Test
-    public void test8(){
         refreshItemTask.refreshItemProduct();
     }
 
-    @Test
-    public void test9(){
+//    @Test
+    public void test7(){
         dynamicProductItemService.refreshItemByCode("yaochufa_188031");
         try {
             Thread.sleep(1000 * 10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    //    @Test
-    public void test10(){
-        refreshItemTask.refreshItemProduct();
     }
 
     public static void main(String[] args){
