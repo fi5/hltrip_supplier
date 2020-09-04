@@ -68,7 +68,8 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
         }
         ProductPO productPO =  productDao.getProductListByItemId(code);
         if(productPO == null){
-            log.error("刷新item，没有查到item={}符合条件的相关的产品", code);
+            log.error("刷新item，没有查到item={}符合条件的相关的产品，将此item关联的product置位空。", code);
+            productItemDao.updateItemProductByCode(code, null);
             return;
         }
         ProductPO oriPro = productItemPO.getProduct();
