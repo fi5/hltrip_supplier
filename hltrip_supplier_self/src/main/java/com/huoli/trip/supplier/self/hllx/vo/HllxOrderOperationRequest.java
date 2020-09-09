@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.self.hllx.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class HllxOrderOperationRequest implements Serializable {
@@ -30,4 +31,9 @@ public class HllxOrderOperationRequest implements Serializable {
      * 说明
      */
     private String explain;
+
+    private List<HllxVoucher> vochers;
+
+
+
 }
