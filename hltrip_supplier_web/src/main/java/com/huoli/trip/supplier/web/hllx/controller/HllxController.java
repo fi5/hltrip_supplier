@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.web.hllx.controller;
 
 
-import com.huoli.trip.supplier.self.hllx.vo.HllxBaseResult;
+import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.web.hllx.service.HllxSyncService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,13 +19,13 @@ public class HllxController {
     HllxSyncService hllxSyncService;
 
     @PostMapping(path = "/pushOrderStatus")
-    HllxBaseResult<Boolean> pushOrderStatus(@RequestBody HllxOrderOperationRequest request) {
+    BaseResponse<Boolean> pushOrderStatus(@RequestBody HllxOrderOperationRequest request) {
         try{
             hllxSyncService.getOrderStatus(request);
         }catch (Exception e){
-            return new HllxBaseResult(true,200,true);
+            return  BaseResponse.withSuccess(true);
         }
-        return new HllxBaseResult(true,200,false);
+        return  BaseResponse.withFail(1,"推送信息失败");
     }
 
 }

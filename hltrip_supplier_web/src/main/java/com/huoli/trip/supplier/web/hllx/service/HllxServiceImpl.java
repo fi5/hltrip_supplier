@@ -4,11 +4,13 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
+import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderOperationLog;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.api.HllxService;
 import com.huoli.trip.supplier.self.hllx.vo.*;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ public class HllxServiceImpl implements HllxService {
     private PriceDao priceDao;
     @Autowired
     TripOrderOperationLogMapper tripOrderOperationLogMapper;
+    @Autowired
+    TripOrderMapper tripOrderMapper;
 
 
     @Override
@@ -123,7 +127,8 @@ public class HllxServiceImpl implements HllxService {
      */
     @Override
     public HllxBaseResult<HllxOrderStatusResult> getOrder(String orderId) {
-        return new HllxBaseResult(true, 200,null);
+        TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(orderId);
+        return new HllxBaseResult(true, 200,tripOrder);
     }
 
     /**
