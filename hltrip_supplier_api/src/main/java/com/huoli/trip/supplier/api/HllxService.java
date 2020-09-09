@@ -1,8 +1,6 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.hllx.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 public interface HllxService {
     /**
@@ -35,4 +33,10 @@ public interface HllxService {
      * @return
      */
     HllxBaseResult<HllxOrderStatusResult> getOrder(String orderId);
+
+    /**
+     * 申请退款
+     */
+    HllxBaseResult<HllxOrderStatusResult> drawback(String orderId);
+
 }

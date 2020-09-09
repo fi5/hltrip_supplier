@@ -4,10 +4,12 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
+import com.huoli.trip.common.entity.TripOrderOperationLog;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.api.HllxService;
 import com.huoli.trip.supplier.self.hllx.vo.*;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +24,8 @@ import java.util.Optional;
 public class HllxServiceImpl implements HllxService {
     @Autowired
     private PriceDao priceDao;
+    @Autowired
+    TripOrderOperationLogMapper tripOrderOperationLogMapper;
 
 
     @Override
@@ -119,6 +123,24 @@ public class HllxServiceImpl implements HllxService {
      */
     @Override
     public HllxBaseResult<HllxOrderStatusResult> getOrder(String orderId) {
+        return new HllxBaseResult(true, 200,null);
+    }
+
+    /**
+     * 申请退款
+     * @param orderId
+     * @return
+     */
+    @Override
+    public HllxBaseResult<HllxOrderStatusResult> drawback(String orderId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
+        tripOrderOperationLog.setOrderId(orderId);
+        tripOrderOperationLog.setExplain("系统机器人");
+        tripOrderOperationLog.setNewStatus(OrderStatus.APPLYING_FOR_REFUND.getCode());
+        tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
+        tripOrderOperationLog.setExplain("发起退款申请,订单需要更新状态为:申请退款中");
+        tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         return new HllxBaseResult(true, 200,null);
     }
 
