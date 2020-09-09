@@ -3,15 +3,27 @@ package com.huoli.trip.supplier.self.hllx.vo;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Map;
 
 @Data
 public class HllxVoucher implements Serializable {
-    //电子凭证码
-    private String vocherNo;
-    //二维码地址
-    private String vocherUrl;
-    //凭证其他信息(1-手机尾号四位）
-    private Map<String,String> vocherExtendInfos;
+    /**
+     * 凭证信息
+     */
+    private String voucherInfo;
+    /**
+     * 凭证类型
+     * 1.纯文本  2.二维码 3.PDF 4.手机尾号
+     */
+    private int type;
+
+    /**
+     * 创建时间
+     */
+    private String createTime;
+    /**
+     * 更新时间
+     */
+    private String updateTime;
+
 
 }
