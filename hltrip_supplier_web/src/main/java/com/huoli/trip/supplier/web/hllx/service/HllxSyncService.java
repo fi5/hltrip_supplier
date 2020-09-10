@@ -50,6 +50,7 @@ public class HllxSyncService {
             if(StringUtils.isEmpty(updateTime)){
                 updateTime = simpleDateFormat.format(new Date());
             }
+            tripOrderOperationLog.setUpdateTime(updateTime);
             tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         }catch (Exception exception){
             log.error("写入操作日志出现异常：",exception);
