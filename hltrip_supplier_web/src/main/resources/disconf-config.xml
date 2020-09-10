@@ -53,6 +53,7 @@
 				<value>classpath:/dubbo.properties</value>
 				<value>classpath:/kafka.properties</value>
 				<value>classpath:/mongo.properties</value>
+				<value>classpath:/druid-primary-db-huolitrip.properties</value>
 			</list>
 
 		</property>
