@@ -41,4 +41,14 @@ public class PriceDaoImpl implements PriceDao {
         return mongoTemplate.findOne(new Query(criteria), PricePO.class);
     }
 
+    @Override
+    public void updateStocksByProductCode(PricePO pricePO) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("productCode").is(pricePO.getProductCode()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(pricePO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRICE_CALENDAR);
+    }
+
 }

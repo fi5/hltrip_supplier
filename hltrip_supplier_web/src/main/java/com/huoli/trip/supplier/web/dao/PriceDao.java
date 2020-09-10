@@ -24,4 +24,10 @@ public interface PriceDao {
      * @return
      */
     PricePO getByProductCode(String productCode);
+
+    /**
+     * 更新价格库存
+     * @param pricePO
+     */
+    void updateStocksByProductCode(PricePO pricePO);
 }
