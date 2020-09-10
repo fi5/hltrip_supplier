@@ -72,8 +72,8 @@ public class HllxSyncService {
         try {
             String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(request), 10000, null);
         } catch (Exception e) {
-        }
 
+        }
     }
 
 
