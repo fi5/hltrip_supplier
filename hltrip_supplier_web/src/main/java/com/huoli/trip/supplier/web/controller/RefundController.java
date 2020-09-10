@@ -25,6 +25,10 @@ public class RefundController {
 	public BaseResponse doRefund(@RequestBody RefundNoticeReq req)  {
 		return supplierRefundService.doRefund(req);
 	}
+	@RequestMapping("/tt")
+	public BaseResponse tt()  {
+		return BaseResponse.withSuccess();
+	}
 //
 //	@RequestMapping("/refuse")
 //	public BaseResponse refuseRefund(@RequestBody RefundNoticeReq req)  {
