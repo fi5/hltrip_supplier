@@ -47,10 +47,14 @@ public class HllxSyncService {
             TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
             BeanUtils.copyProperties(request,tripOrderOperationLog);
             String updateTime = request.getUpdateTime();
+            String explain = request.getExplain();
             if(StringUtils.isEmpty(updateTime)){
                 updateTime = simpleDateFormat.format(new Date());
             }
             tripOrderOperationLog.setUpdateTime(updateTime);
+            if(StringUtils.isNotEmpty(explain)){
+                tripOrderOperationLog.setRemark(explain);
+            }
             tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         }catch (Exception exception){
             log.error("写入操作日志出现异常：",exception);
