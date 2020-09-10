@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Mapper
 public interface TripOrderMapper {
-    @Select("SELECT status FROM trip_order WHERE orderId = #{orderId}")
+    @Select("SELECT channelStatus FROM trip_order WHERE orderId = #{orderId}")
     TripOrder getOrderStatusByOrderId(@Param("orderId") String orderId);
 }
