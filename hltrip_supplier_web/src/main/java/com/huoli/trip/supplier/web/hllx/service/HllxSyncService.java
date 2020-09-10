@@ -9,12 +9,14 @@ import com.huoli.trip.common.vo.request.central.OrderStatusKafka;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.self.hllx.vo.HllxRefundNoticeRequest;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class HllxSyncService {
     @Autowired
     TripOrderOperationLogMapper tripOrderOperationLogMapper;
@@ -42,7 +44,7 @@ public class HllxSyncService {
             BeanUtils.copyProperties(request,tripOrderOperationLog);
             tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         }catch (Exception exception){
-
+            log.error("写入操作日志出现异常：",exception);
         }
         return true;
     }
