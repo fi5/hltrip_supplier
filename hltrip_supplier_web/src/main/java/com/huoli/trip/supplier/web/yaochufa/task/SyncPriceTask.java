@@ -51,11 +51,6 @@ public class SyncPriceTask {
             request.setStartDate(start);
             request.setEndDate(end);
             ycfSyncService.getPrice(request);
-            try {
-                Thread.sleep(310);
-            } catch (InterruptedException e) {
-                log.error("线程暂停失败", e);
-            }
         });
         log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
     }

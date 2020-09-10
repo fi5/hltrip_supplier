@@ -176,6 +176,12 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     public YcfBaseResult<YcfGetPriceResponse> getPrice(YcfGetPriceRequest request){
         YcfGetPriceResponse ycfGetPriceResponse = new YcfGetPriceResponse();
         ycfGetPriceResponse.setPartnerProductID(request.getPartnerProductID());
+        if(StringUtils.isBlank(request.getProductID())){
+            ProductPO productPO = productDao.getByCode(request.getPartnerProductID());
+            if(productPO != null){
+                request.setProductID(productPO.getSupplierProductId());
+            }
+        }
         ycfGetPriceResponse.setProductID(request.getProductID());
         List<YcfPriceInfo> ycfPriceInfos = Lists.newArrayList();
         ycfGetPriceResponse.setSaleInfos(ycfPriceInfos);
@@ -208,6 +214,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 log.info("开始同步价格，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
                 list = syncPrice(newRequest);
                 log.info("同步价格完成，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                // 要出发限制1分钟最多请求200次
+                Thread.sleep(310);
             } catch (Exception e) {
                 log.info("同步价异常，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate(), e);
                 continue;
