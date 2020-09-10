@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value = {"/api/service/hltrip/order"})
+@RequestMapping(value = {"/api/service/hltrip"})
 @Slf4j
 public class HllxController {
     @Autowired
