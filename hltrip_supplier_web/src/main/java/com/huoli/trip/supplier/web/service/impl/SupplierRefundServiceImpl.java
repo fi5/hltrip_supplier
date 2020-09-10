@@ -64,7 +64,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 			request.setOldStatus(oldSt);
 			request.setNewStatus(newSt);
 			request.setUpdateTime(DateTimeUtil.formatFullDate(new Date()));
-			request.setExplain("操作退款"+req.getHandleRemark());
+			request.setExplain(explain);
 			hllxSyncService.getOrderStatus(request);
 
 //			TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
