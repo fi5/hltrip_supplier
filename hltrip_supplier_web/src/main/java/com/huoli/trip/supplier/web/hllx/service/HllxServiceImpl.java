@@ -2,11 +2,9 @@ package com.huoli.trip.supplier.web.hllx.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.common.constant.OrderStatus;
-import com.huoli.trip.common.entity.PriceInfoPO;
-import com.huoli.trip.common.entity.PricePO;
-import com.huoli.trip.common.entity.TripOrder;
-import com.huoli.trip.common.entity.TripOrderOperationLog;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.HllxService;
 import com.huoli.trip.supplier.self.hllx.vo.*;
 import com.huoli.trip.supplier.web.dao.PriceDao;
@@ -131,6 +129,29 @@ public class HllxServiceImpl implements HllxService {
         return new HllxBaseResult(true, 200,tripOrder);
     }
 
+    @Override
+    public HllxBaseResult<HllxOrderVoucherResult> getVochers(String orderId) {
+        final List<TripOrderVoucher> voucherInfos = tripOrderMapper.getVoucherInfoByOrderId(orderId);
+
+        HllxOrderVoucherResult result= new HllxOrderVoucherResult();
+        List<OrderDetailRep.Voucher> vochers=new ArrayList<>();
+        result.setOrderId(orderId);
+
+        for(TripOrderVoucher entry : voucherInfos){
+            OrderDetailRep.Voucher oneVoucher=new OrderDetailRep.Voucher();
+            oneVoucher.setType(entry.getType());
+            if(entry.getType()==1){
+                oneVoucher.setVocherNo(entry.getVoucherInfo());
+            }
+            if(entry.getType()==2){
+                oneVoucher.setVocherUrl(entry.getVoucherInfo());
+            }
+            vochers.add(oneVoucher);
+        }
+        result.setVochers(vochers);
+        return new HllxBaseResult(true, 200,result);
+    }
+
     /**
      * 申请退款
      * @param orderId
@@ -148,5 +169,6 @@ public class HllxServiceImpl implements HllxService {
         tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         return new HllxBaseResult(true, 200,null);
     }
+
 
 }

@@ -39,4 +39,11 @@ public interface HllxService {
      */
     HllxBaseResult<HllxOrderStatusResult> drawback(String orderId);
 
+	/**
+	 * 查询凭证
+     * @param orderId
+     * @return
+     */
+    HllxBaseResult<HllxOrderVoucherResult> getVochers(String orderId);
+
 }
