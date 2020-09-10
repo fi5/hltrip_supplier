@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 @Mapper
 public interface TripOrderOperationLogMapper {
     @Insert("INSERT INTO  trip_order_operation_log (orderId,oldStatus,newStatus,operator,updateTime,remark) VALUE(#{orderId},#{oldStatus},#{newStatus},#{operator},#{updateTime, jdbcType=TIMESTAMP},#{remark})")
-    TripOrderOperationLog  insertOperationLog(TripOrderOperationLog tripOrderOperationLog);
+    void  insertOperationLog(TripOrderOperationLog tripOrderOperationLog);
 }
