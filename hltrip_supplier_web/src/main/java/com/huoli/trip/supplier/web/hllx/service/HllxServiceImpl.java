@@ -126,6 +126,11 @@ public class HllxServiceImpl implements HllxService {
     @Override
     public HllxBaseResult<HllxOrderStatusResult> getOrder(String orderId) {
         TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(orderId);
+        if(tripOrder != null) {
+            HllxOrderStatusResult hllxOrderStatusResult = new HllxOrderStatusResult();
+            hllxOrderStatusResult.setOrderId(tripOrder.getOrderId());
+            hllxOrderStatusResult.setOrderStatus(tripOrder.getChannelStatus());
+        }
         return new HllxBaseResult(true, 200,tripOrder);
     }
 
