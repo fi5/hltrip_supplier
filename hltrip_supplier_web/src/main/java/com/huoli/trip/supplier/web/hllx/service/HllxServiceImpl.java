@@ -141,10 +141,10 @@ public class HllxServiceImpl implements HllxService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
         tripOrderOperationLog.setOrderId(orderId);
-        tripOrderOperationLog.setExplain("系统机器人");
+        tripOrderOperationLog.setOperator("系统机器人");
         tripOrderOperationLog.setNewStatus(OrderStatus.APPLYING_FOR_REFUND.getCode());
         tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
-        tripOrderOperationLog.setExplain("发起退款申请,订单需要更新状态为:申请退款中");
+        tripOrderOperationLog.setRemark("发起退款申请,订单需要更新状态为:申请退款中");
         tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
         return new HllxBaseResult(true, 200,null);
     }
