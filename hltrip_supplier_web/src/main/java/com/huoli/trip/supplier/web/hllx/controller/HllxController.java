@@ -7,12 +7,14 @@ import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.hllx.service.HllxSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+
+@RestController
 @RequestMapping(value = {"/api/service/hltrip"})
 @Slf4j
 public class HllxController {
