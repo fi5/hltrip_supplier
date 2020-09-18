@@ -5,9 +5,12 @@ import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrderOperationLog;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.HttpUtil;
+import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.central.OrderStatusKafka;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.self.hllx.vo.HllxRefundNoticeRequest;
+import com.huoli.trip.supplier.self.hllx.vo.HllxVoucher;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -36,6 +41,20 @@ public class HllxSyncService {
         String remark = request.getExplain();
         if(StringUtils.isNotEmpty(remark)) {
             req.setRemark(remark);
+        }
+        List<HllxVoucher> vouchers =  request.getVochers();
+        if(ListUtils.isNotEmpty(vouchers)){
+            List<PushOrderStatusReq.Voucher> list = new ArrayList<>();
+            vouchers.forEach(hllxVoucher -> {
+                PushOrderStatusReq.Voucher voucher = new PushOrderStatusReq.Voucher();
+                if(hllxVoucher.getType() == 2 || hllxVoucher.getType() ==3){
+                    voucher.setVocherUrl(hllxVoucher.getVoucherInfo());
+                }else{
+                    voucher.setVocherNo(hllxVoucher.getVoucherInfo());
+                }
+                list.add(voucher);
+            });
+            req.setVochers(list);
         }
         req.setPartnerOrderId(request.getOrderId());
         try {
