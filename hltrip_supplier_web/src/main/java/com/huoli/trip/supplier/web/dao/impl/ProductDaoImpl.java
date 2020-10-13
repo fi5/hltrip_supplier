@@ -78,7 +78,8 @@ public class ProductDaoImpl implements ProductDao {
         Criteria criteria = Criteria.where("mainItemCode").is(itemId)
                 .and("status").is(1)
                 .and("priceCalendar.priceInfos.stock").gt(0)
-                .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+                .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())))
+                .and("priceCalendar.priceInfos.salePrice").ne(null);
         MatchOperation matchOperation = Aggregation.match(criteria);
         // 指定字段
         ProjectionOperation projectionOperation = Aggregation.project(getProductListFields()).andExclude("_id");
