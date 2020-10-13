@@ -46,27 +46,27 @@ class HltripSupplierApiApplicationTests {
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
 
-//    @Test
+    //    @Test
     void contextLoads() {
     }
 
-//    @Test
+    //    @Test
     public void test0(){
-       List<ProductItemPO> productItemPOList =  mongoTemplate.find(Query.query(Criteria.where("itemCoordinate").ne("").ne(null)), ProductItemPO.class);
-       productItemPOList.forEach(productItemPO -> {
-           if(productItemPO.getItemCoordinate() != null && productItemPO.getItemCoordinate().length == 2){
-               try {
-                   double[] d = CoordinateUtil.bd09_To_Gcj02(productItemPO.getItemCoordinate()[1], productItemPO.getItemCoordinate()[0]);
-                   mongoTemplate.updateFirst(Query.query(Criteria.where("code").is(productItemPO.getCode())),
-                           Update.update("itemCoordinate", new Double[]{d[1],d[0]}), productItemPO.getClass());
-               } catch (Exception e) {
-                   log.error("异常", e);
-               }
-           }
-       });
+        List<ProductItemPO> productItemPOList =  mongoTemplate.find(Query.query(Criteria.where("itemCoordinate").ne("").ne(null)), ProductItemPO.class);
+        productItemPOList.forEach(productItemPO -> {
+            if(productItemPO.getItemCoordinate() != null && productItemPO.getItemCoordinate().length == 2){
+                try {
+                    double[] d = CoordinateUtil.bd09_To_Gcj02(productItemPO.getItemCoordinate()[1], productItemPO.getItemCoordinate()[0]);
+                    mongoTemplate.updateFirst(Query.query(Criteria.where("code").is(productItemPO.getCode())),
+                            Update.update("itemCoordinate", new Double[]{d[1],d[0]}), productItemPO.getClass());
+                } catch (Exception e) {
+                    log.error("异常", e);
+                }
+            }
+        });
     }
 
-//    @Test
+    //    @Test
     public void test1(){
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setEndDate("2020-11-30");
@@ -76,7 +76,7 @@ class HltripSupplierApiApplicationTests {
         ycfSyncService.getPrice(request);
     }
 
-//    @Test
+    //    @Test
     public void test2(){
         List<ProductItemPO> items = mongoTemplate.findAll(ProductItemPO.class);
         items.forEach(item -> {
@@ -84,13 +84,13 @@ class HltripSupplierApiApplicationTests {
             if(item.getFeatures() != null){
                 item.getFeatures().stream().filter(f ->
                         f.getType() == 1 && StringUtils.isNotBlank(f.getDetail())).findFirst().ifPresent(f ->
-                        {
-                            String s = format(f.getDetail());
-                            if(StringUtils.isNotBlank(s)){
-                                sb.append("true");
-                                f.setDetail(s);
-                            }
-                        });
+                {
+                    String s = format(f.getDetail());
+                    if(StringUtils.isNotBlank(s)){
+                        sb.append("true");
+                        f.setDetail(s);
+                    }
+                });
             }
             if(StringUtils.equals("true", sb.toString())){
                 log.info("更新{}。。。。。。。", item.getCode());
@@ -100,22 +100,22 @@ class HltripSupplierApiApplicationTests {
         log.info("完。。。。。。。。。。。。");
     }
 
-//    @Test
+    //    @Test
     public void test3(){
         PricePO pricePO = priceDao.getByProductCode("yaochufa_909604_2094577");
 
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
-       log.info("前。。。。{}", JSON.toJSONString(priceInfoPOs));
+        log.info("前。。。。{}", JSON.toJSONString(priceInfoPOs));
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         log.info("后。。。。。。。。。。。。。。。。。。。{}", JSON.toJSONString(priceInfoPOs));
     }
 
-//    @Test
+    //    @Test
     public void test4(){
         dynamicProductItemService.refreshItemByCode("yaochufa_188031");
     }
 
-//    @Test
+    //    @Test
     public void test5(){
         refreshItemTask.refreshItemProduct();
     }
@@ -130,7 +130,7 @@ class HltripSupplierApiApplicationTests {
         }
     }
 
-//    @Test
+    //    @Test
     public void test7(){
         refreshItemTask.refreshItemProduct();
     }
