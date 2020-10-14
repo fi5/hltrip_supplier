@@ -59,7 +59,7 @@ public class HllxServiceImpl implements HllxService {
                         HllxBookSaleInfo hllxBookSaleInfo = new HllxBookSaleInfo();
                         hllxBookSaleInfo.setDate(priceInfoPO.getSaleDate());
                         hllxBookSaleInfo.setPrice(priceInfoPO.getSalePrice());
-                        hllxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
+                        //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
                         hllxBookSaleInfo.setTotalStock(priceInfoPO.getStock());
                         saleInfos.add(hllxBookSaleInfo);
                         return new HllxBaseResult(true, 200, hllxBookCheckRes);
