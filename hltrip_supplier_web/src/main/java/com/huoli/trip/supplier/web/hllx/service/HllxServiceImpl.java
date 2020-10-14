@@ -37,6 +37,8 @@ public class HllxServiceImpl implements HllxService {
     public HllxBaseResult<HllxBookCheckRes> getCheckInfos(HllxBookCheckReq req) {
         log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
+        log.info("hllx checkinfo PricePO is:{}", JSON.toJSONString(pricePO));
+
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
