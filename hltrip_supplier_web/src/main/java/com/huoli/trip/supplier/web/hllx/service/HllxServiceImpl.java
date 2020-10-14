@@ -37,8 +37,6 @@ public class HllxServiceImpl implements HllxService {
     public HllxBaseResult<HllxBookCheckRes> getCheckInfos(HllxBookCheckReq req) {
         log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
-        log.info("hllx checkinfo PricePO is:{}", JSON.toJSONString(pricePO));
-
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
@@ -50,6 +48,7 @@ public class HllxServiceImpl implements HllxService {
                 }).findFirst();
                 if (optionalT.isPresent()) {
                     PriceInfoPO priceInfoPO = optionalT.get();
+                    log.info("hllx checkinfo PricePO is:{}", JSON.toJSONString(priceInfoPO));
                     Integer stock = priceInfoPO.getStock();
                     if (stock != null && stock > 0) {
                         HllxBookCheckRes hllxBookCheckRes = new HllxBookCheckRes();
@@ -62,6 +61,7 @@ public class HllxServiceImpl implements HllxService {
                         //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
                         hllxBookSaleInfo.setTotalStock(priceInfoPO.getStock());
                         saleInfos.add(hllxBookSaleInfo);
+                        log.info("hllx checkinfo resp is :{}",JSON.toJSONString(hllxBookCheckRes));
                         return new HllxBaseResult(true, 200, hllxBookCheckRes);
                     }
                 }
