@@ -88,14 +88,13 @@ public class HllxServiceImpl implements HllxService {
 
         List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
         if (ListUtils.isNotEmpty(priceInfos)) {
-            priceInfos.stream().filter(priceInfoPO -> {
+            priceInfos.forEach(priceInfoPO -> {
                 Date saleDate = priceInfoPO.getSaleDate();
                 String saleDates = formatter.format(saleDate);
                 if (StringUtils.equals(req.getDate(), saleDates)) {
                     log.info("创建订单匹配到的原始库存数据为：{}",JSON.toJSONString(priceInfoPO));
                     priceInfoPO.setStock(priceInfoPO.getStock() - 1);
                 }
-                return false;
             });
         }
 
