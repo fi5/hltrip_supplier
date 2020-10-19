@@ -78,7 +78,9 @@ public class HllxServiceImpl implements HllxService {
      */
     @Override
     public HllxBaseResult<HllxCreateOrderRes> createOrder(HllxCreateOrderReq req) {
+        log.info("创建订单请求为：{}",JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
+        log.info("创建订单查询到的原始库存数据为：{}",JSON.toJSONString(pricePO));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO == null) {
             return new HllxBaseResult(false, 200, "无价格库存信息");
@@ -90,12 +92,15 @@ public class HllxServiceImpl implements HllxService {
                 Date saleDate = priceInfoPO.getSaleDate();
                 String saleDates = formatter.format(saleDate);
                 if (StringUtils.equals(req.getDate(), saleDates)) {
+                    log.info("创建订单匹配到的原始库存数据为：{}",JSON.toJSONString(priceInfoPO));
                     priceInfoPO.setStock(priceInfoPO.getStock() - 1);
                 }
                 return false;
             });
         }
+
         pricePO.setPriceInfos(priceInfos);
+        log.info("创建订单更新后的库存数据为：{}",JSON.toJSONString(pricePO));
         priceDao.updateByProductCode(pricePO);
         HllxCreateOrderRes hllxCreateOrderRes = new HllxCreateOrderRes();
         hllxCreateOrderRes.setOrderStatus(OrderStatus.TO_BE_PAID.getCode());
