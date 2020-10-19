@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.hllx.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.ListUtils;
@@ -10,6 +11,7 @@ import com.huoli.trip.supplier.self.hllx.vo.*;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 
 @Service(timeout = 10000,group = "hltrip")
+@Slf4j
 public class HllxServiceImpl implements HllxService {
     @Autowired
     private PriceDao priceDao;
@@ -32,6 +35,7 @@ public class HllxServiceImpl implements HllxService {
 
     @Override
     public HllxBaseResult<HllxBookCheckRes> getCheckInfos(HllxBookCheckReq req) {
+        log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
@@ -44,6 +48,7 @@ public class HllxServiceImpl implements HllxService {
                 }).findFirst();
                 if (optionalT.isPresent()) {
                     PriceInfoPO priceInfoPO = optionalT.get();
+                    log.info("hllx checkinfo PricePO is:{}", JSON.toJSONString(priceInfoPO));
                     Integer stock = priceInfoPO.getStock();
                     if (stock != null && stock > 0) {
                         HllxBookCheckRes hllxBookCheckRes = new HllxBookCheckRes();
@@ -53,9 +58,10 @@ public class HllxServiceImpl implements HllxService {
                         HllxBookSaleInfo hllxBookSaleInfo = new HllxBookSaleInfo();
                         hllxBookSaleInfo.setDate(priceInfoPO.getSaleDate());
                         hllxBookSaleInfo.setPrice(priceInfoPO.getSalePrice());
-                        hllxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
+                        //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
                         hllxBookSaleInfo.setTotalStock(priceInfoPO.getStock());
                         saleInfos.add(hllxBookSaleInfo);
+                        log.info("hllx checkinfo resp is :{}",JSON.toJSONString(hllxBookCheckRes));
                         return new HllxBaseResult(true, 200, hllxBookCheckRes);
                     }
                 }
