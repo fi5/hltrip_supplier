@@ -76,7 +76,7 @@ public class ProductDaoImpl implements ProductDao {
         SortOperation priceSort = Aggregation.sort(Sort.Direction.ASC, "priceCalendar.priceInfos.salePrice");
         // 查询条件
         Criteria criteria = Criteria.where("mainItemCode").is(itemId)
-//                .and("status").is(1)   // 如果从管理后台改价格，status一定不是1，刷新会失败
+                .and("status").is(1)
                 .and("priceCalendar.priceInfos.stock").gt(0)
                 .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())))
                 .and("priceCalendar.priceInfos.salePrice").ne(null);
