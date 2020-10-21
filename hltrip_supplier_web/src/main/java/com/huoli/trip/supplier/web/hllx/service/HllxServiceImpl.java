@@ -25,6 +25,7 @@ import java.util.Optional;
 @Service(timeout = 10000,group = "hltrip")
 @Slf4j
 public class HllxServiceImpl implements HllxService {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
     private PriceDao priceDao;
     @Autowired
@@ -81,7 +82,6 @@ public class HllxServiceImpl implements HllxService {
         log.info("创建订单请求为：{}",JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
         log.info("创建订单查询到的原始库存数据为：{}",JSON.toJSONString(pricePO));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO == null) {
             return new HllxBaseResult(false, 200, "无价格库存信息");
         }
@@ -93,7 +93,7 @@ public class HllxServiceImpl implements HllxService {
                 String saleDates = formatter.format(saleDate);
                 if (StringUtils.equals(req.getDate(), saleDates)) {
                     log.info("创建订单匹配到的原始库存数据为：{}",JSON.toJSONString(priceInfoPO));
-                    priceInfoPO.setStock(priceInfoPO.getStock() - 1);
+                    priceInfoPO.setStock(priceInfoPO.getStock() - req.getQunatity());
                 }
             });
         }
@@ -125,6 +125,38 @@ public class HllxServiceImpl implements HllxService {
     @Override
     public HllxBaseResult<HllxCancelOrderRes> cancelOrder(HllxCancelOrderReq req) {
         HllxCancelOrderRes hllxCancelOrderRes = new HllxCancelOrderRes(OrderStatus.CANCELLED.getCode());
+        TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(req.getPartnerOrderId());
+        if(tripOrder != null){
+            int total = tripOrder.getQuantity()+tripOrder.getChildQuantity();
+            PricePO pricePO = priceDao.getByProductCode(tripOrder.getProductId());
+            if(pricePO != null){
+                List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
+                if (ListUtils.isNotEmpty(priceInfos)) {
+                    priceInfos.forEach(priceInfoPO -> {
+                        Date saleDate = priceInfoPO.getSaleDate();
+                        String saleDates = formatter.format(saleDate);
+                        if (StringUtils.equals(tripOrder.getBeginDate(), saleDates)) {
+                            log.info("创建订单匹配到的原始库存数据为：{}",JSON.toJSONString(priceInfoPO));
+                            priceInfoPO.setStock(priceInfoPO.getStock() + total);
+                            priceInfoPO.setStock(priceInfoPO.getSales() - total);
+                        }
+                    });
+                }
+                pricePO.setPriceInfos(priceInfos);
+            }
+            priceDao.updateByProductCode(pricePO);
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
+            tripOrderOperationLog.setOrderId(tripOrder.getOrderId());
+            tripOrderOperationLog.setOperator("订单客户");
+            tripOrderOperationLog.setNewStatus(OrderStatus.CANCELLED.getCode());
+            tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
+            tripOrderOperationLog.setRemark("客户发起请求取消订单");
+            tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
+
+        }
+
         return new HllxBaseResult(true, 200, hllxCancelOrderRes);
     }
 
@@ -140,8 +172,11 @@ public class HllxServiceImpl implements HllxService {
             HllxOrderStatusResult hllxOrderStatusResult = new HllxOrderStatusResult();
             hllxOrderStatusResult.setOrderId(tripOrder.getOrderId());
             hllxOrderStatusResult.setOrderStatus(tripOrder.getChannelStatus());
+            return new HllxBaseResult(true, 200,hllxOrderStatusResult);
+        }else{
+            return new HllxBaseResult(false, 500,"未查询到订单信息");
+
         }
-        return new HllxBaseResult(true, 200,tripOrder);
     }
 
     @Override
