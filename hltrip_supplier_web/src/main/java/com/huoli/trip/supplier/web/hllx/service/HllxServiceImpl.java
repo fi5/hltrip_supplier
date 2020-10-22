@@ -171,7 +171,7 @@ public class HllxServiceImpl implements HllxService {
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
-            tripOrderOperationLog.setOrderId(tripOrder.getOrderId());
+            tripOrderOperationLog.setOrderId(req.getPartnerOrderId());
             tripOrderOperationLog.setOperator("订单客户");
             tripOrderOperationLog.setNewStatus(OrderStatus.CANCELLED.getCode());
             tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
