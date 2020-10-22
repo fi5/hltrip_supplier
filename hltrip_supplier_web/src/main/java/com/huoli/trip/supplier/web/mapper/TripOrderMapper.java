@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 @Mapper
 public interface TripOrderMapper {
-    @Select("SELECT channelStatus FROM trip_order WHERE orderId = #{orderId}")
+    @Select("SELECT channelStatus,quantity,childQuantity,beginDate,endDate,productCode,productId FROM trip_order WHERE orderId = #{orderId}")
     TripOrder getOrderStatusByOrderId(@Param("orderId") String orderId);
 
     @Select("select * from trip_order_voucher where orderId = #{orderId}")

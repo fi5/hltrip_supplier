@@ -44,4 +44,10 @@ public class HllxBaseResult <T> implements Serializable {
         this.setSuccess(success);
         this.setData(data);
     }
+
+    public HllxBaseResult(Boolean success, int code, String message){
+        this.setStatusCode(code);
+        this.setSuccess(success);
+        this.setMessage(message);
+    }
 }

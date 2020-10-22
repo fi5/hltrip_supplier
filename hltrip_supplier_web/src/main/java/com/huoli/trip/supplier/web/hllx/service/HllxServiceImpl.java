@@ -13,6 +13,7 @@ import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.velocity.app.event.implement.EscapeXmlReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
@@ -22,9 +23,10 @@ import java.util.List;
 import java.util.Optional;
 
 
-@Service(timeout = 10000,group = "hltrip")
+@Service(timeout = 10000, group = "hltrip")
 @Slf4j
 public class HllxServiceImpl implements HllxService {
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
     private PriceDao priceDao;
     @Autowired
@@ -61,7 +63,7 @@ public class HllxServiceImpl implements HllxService {
                         //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
                         hllxBookSaleInfo.setTotalStock(priceInfoPO.getStock());
                         saleInfos.add(hllxBookSaleInfo);
-                        log.info("hllx checkinfo resp is :{}",JSON.toJSONString(hllxBookCheckRes));
+                        log.info("hllx checkinfo resp is :{}", JSON.toJSONString(hllxBookCheckRes));
                         return new HllxBaseResult(true, 200, hllxBookCheckRes);
                     }
                 }
@@ -78,10 +80,9 @@ public class HllxServiceImpl implements HllxService {
      */
     @Override
     public HllxBaseResult<HllxCreateOrderRes> createOrder(HllxCreateOrderReq req) {
-        log.info("创建订单请求为：{}",JSON.toJSONString(req));
+        log.info("创建订单请求为：{}", JSON.toJSONString(req));
         PricePO pricePO = priceDao.getByProductCode(req.getProductId());
-        log.info("创建订单查询到的原始库存数据为：{}",JSON.toJSONString(pricePO));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        log.info("创建订单查询到的原始库存数据为：{}", JSON.toJSONString(pricePO));
         if (pricePO == null) {
             return new HllxBaseResult(false, 200, "无价格库存信息");
         }
@@ -92,14 +93,19 @@ public class HllxServiceImpl implements HllxService {
                 Date saleDate = priceInfoPO.getSaleDate();
                 String saleDates = formatter.format(saleDate);
                 if (StringUtils.equals(req.getDate(), saleDates)) {
-                    log.info("创建订单匹配到的原始库存数据为：{}",JSON.toJSONString(priceInfoPO));
-                    priceInfoPO.setStock(priceInfoPO.getStock() - 1);
+                    log.info("创建订单匹配到的原始库存数据为：{}", JSON.toJSONString(priceInfoPO));
+                    priceInfoPO.setStock(priceInfoPO.getStock() - req.getQunatity());
+                    if (priceInfoPO.getSales() != null) {
+                        priceInfoPO.setSales(priceInfoPO.getSales() + req.getQunatity());
+                    } else {
+                        priceInfoPO.setSales(req.getQunatity());
+
+                    }
                 }
             });
         }
-
         pricePO.setPriceInfos(priceInfos);
-        log.info("创建订单更新后的库存数据为：{}",JSON.toJSONString(pricePO));
+        log.info("创建订单更新后的库存数据为：{}", JSON.toJSONString(pricePO));
         priceDao.updateByProductCode(pricePO);
         HllxCreateOrderRes hllxCreateOrderRes = new HllxCreateOrderRes();
         hllxCreateOrderRes.setOrderStatus(OrderStatus.TO_BE_PAID.getCode());
@@ -108,6 +114,7 @@ public class HllxServiceImpl implements HllxService {
 
     /**
      * 支付
+     *
      * @param req
      * @return
      */
@@ -119,56 +126,113 @@ public class HllxServiceImpl implements HllxService {
 
     /**
      * 取消订单
+     *
      * @param req
      * @return
      */
     @Override
     public HllxBaseResult<HllxCancelOrderRes> cancelOrder(HllxCancelOrderReq req) {
+        log.info("客户调用取消订单：{}", JSON.toJSONString(req));
         HllxCancelOrderRes hllxCancelOrderRes = new HllxCancelOrderRes(OrderStatus.CANCELLED.getCode());
+        TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(req.getPartnerOrderId());
+        log.info("取消订单查到的订单数据为：{}", JSON.toJSONString(tripOrder));
+        if (tripOrder != null) {
+            try {
+                int total = tripOrder.getQuantity() + tripOrder.getChildQuantity();
+                PricePO pricePO = priceDao.getByProductCode(tripOrder.getProductId());
+                if (pricePO != null) {
+                    List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
+                    if (ListUtils.isNotEmpty(priceInfos)) {
+                        priceInfos.forEach(priceInfoPO -> {
+                            Date saleDate = priceInfoPO.getSaleDate();
+                            String saleDates = formatter.format(saleDate);
+                            if (StringUtils.equals(tripOrder.getBeginDate(), saleDates)) {
+                                log.info("取消订单匹配到的原始库存数据为：{}", JSON.toJSONString(priceInfoPO));
+                                if (priceInfoPO.getStock() != null) {
+                                    priceInfoPO.setStock(priceInfoPO.getStock() + total);
+                                } else {
+                                    priceInfoPO.setStock(total);
+                                }
+                                if (priceInfoPO.getSales() != null) {
+                                    priceInfoPO.setSales(priceInfoPO.getSales() - total);
+                                } else {
+                                    priceInfoPO.setSales(0);
+                                }
+                            }
+                        });
+                    }
+                    pricePO.setPriceInfos(priceInfos);
+                }
+                priceDao.updateByProductCode(pricePO);
+            } catch (Exception ex) {
+                log.error("取消订单修改库存出现异常,订单号为：{}", req.getPartnerOrderId(), ex);
+
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
+            tripOrderOperationLog.setOrderId(req.getPartnerOrderId());
+            tripOrderOperationLog.setOperator("订单客户");
+            tripOrderOperationLog.setNewStatus(OrderStatus.CANCELLED.getCode());
+            tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
+            tripOrderOperationLog.setRemark("客户发起请求取消订单");
+            try {
+                tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
+            } catch (Exception ex) {
+                log.error("取消订单写入日志出现异常,订单号为：{}", req.getPartnerOrderId(), ex);
+            }
+
+        }
+
         return new HllxBaseResult(true, 200, hllxCancelOrderRes);
     }
 
     /**
      * 查询订单
+     *
      * @param orderId
      * @return
      */
     @Override
     public HllxBaseResult<HllxOrderStatusResult> getOrder(String orderId) {
         TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(orderId);
-        if(tripOrder != null) {
+        if (tripOrder != null) {
             HllxOrderStatusResult hllxOrderStatusResult = new HllxOrderStatusResult();
             hllxOrderStatusResult.setOrderId(tripOrder.getOrderId());
             hllxOrderStatusResult.setOrderStatus(tripOrder.getChannelStatus());
+            return new HllxBaseResult(true, 200, hllxOrderStatusResult);
+        } else {
+            return new HllxBaseResult(false, 500, "未查询到订单信息");
+
         }
-        return new HllxBaseResult(true, 200,tripOrder);
     }
 
     @Override
     public HllxBaseResult<HllxOrderVoucherResult> getVochers(String orderId) {
         final List<TripOrderVoucher> voucherInfos = tripOrderMapper.getVoucherInfoByOrderId(orderId);
 
-        HllxOrderVoucherResult result= new HllxOrderVoucherResult();
-        List<OrderDetailRep.Voucher> vochers=new ArrayList<>();
+        HllxOrderVoucherResult result = new HllxOrderVoucherResult();
+        List<OrderDetailRep.Voucher> vochers = new ArrayList<>();
         result.setOrderId(orderId);
 
-        for(TripOrderVoucher entry : voucherInfos){
-            OrderDetailRep.Voucher oneVoucher=new OrderDetailRep.Voucher();
+        for (TripOrderVoucher entry : voucherInfos) {
+            OrderDetailRep.Voucher oneVoucher = new OrderDetailRep.Voucher();
             oneVoucher.setType(entry.getType());
-            if(entry.getType()==1){
+            if (entry.getType() == 1) {
                 oneVoucher.setVocherNo(entry.getVoucherInfo());
             }
-            if(entry.getType()==2){
+            if (entry.getType() == 2) {
                 oneVoucher.setVocherUrl(entry.getVoucherInfo());
             }
             vochers.add(oneVoucher);
         }
         result.setVochers(vochers);
-        return new HllxBaseResult(true, 200,result);
+        return new HllxBaseResult(true, 200, result);
     }
 
     /**
      * 申请退款
+     *
      * @param orderId
      * @return
      */
@@ -182,7 +246,7 @@ public class HllxServiceImpl implements HllxService {
         tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
         tripOrderOperationLog.setRemark("发起退款申请,订单需要更新状态为:申请退款中");
         tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
-        return new HllxBaseResult(true, 200,null);
+        return new HllxBaseResult(true, 200, null);
     }
 
 
