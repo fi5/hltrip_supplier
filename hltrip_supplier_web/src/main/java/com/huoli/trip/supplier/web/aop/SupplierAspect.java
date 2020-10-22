@@ -53,7 +53,7 @@ public class SupplierAspect {
     /**
      * dubbo 切面
      */
-    @Pointcut("(execution(* com.huoli.trip.supplier.web.yaochufa.service..*.*(..)))) && (@within(com.alibaba.dubbo.config.annotation.Service))")
+    @Pointcut("(execution(* com.huoli.trip.supplier.web..service..*.*(..)))) && (@within(com.alibaba.dubbo.config.annotation.Service))")
     public void yaochufaService() {
     }
 
