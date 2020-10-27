@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.aop;
 
+import brave.Span;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.BraveTrace;
@@ -65,6 +66,7 @@ public class SupplierAspect {
         eventBuilder.withIndex(huoliAtrace.getAppname(), "service");
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+        Span span = null;
         try {
             Object args[] = joinPoint.getArgs();
             Object result;
@@ -72,8 +74,14 @@ public class SupplierAspect {
             if(ArrayUtils.isNotEmpty(args) && args[0] != null){
                 for (Object arg : args) {
                     try {
-                        log.info("直接打印参数  {}", arg);
-                        params = JSON.toJSONString(arg);
+                        params = JSON.toJSONString(args[0]);
+                        JSONObject param = JSONObject.parseObject(params);
+                        if(StringUtils.isBlank(param.getString("traceId"))){
+                            log.error("方法 {} 参数不包含traceId", function);
+                        } else {
+                            // 设置traceId
+                            span = (Span) TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
+                        }
                     } catch (Exception e) {
                         log.error("反序列化方法 {} 的请求参数异常", function, e);
                         params = "参数不能序列化";
@@ -107,6 +115,12 @@ public class SupplierAspect {
         } catch (Throwable e) {
             log.error("切面执行异常：", e);
             return BaseResponse.withFail(SupplierError.UNKNOWN_ERROR.getCode(), SupplierError.UNKNOWN_ERROR.getError());
+        }finally {
+            Event event = eventBuilder.build();
+            huoliAtrace.reportEvent(event);
+            if(span != null){
+                this.huoliTrace.close(span);
+            }
         }
     }
 
