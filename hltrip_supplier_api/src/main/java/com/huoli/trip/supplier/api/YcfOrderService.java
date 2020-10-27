@@ -9,17 +9,17 @@ import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 public interface YcfOrderService {
     /**
      * 主动获取要出发订单相关信息
-     * @param orderId
+     * @param request
      * @return
      */
-    YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId);
+    YcfBaseResult<YcfOrderStatusResult> getOrder(BaseOrderRequest request);
 
     /**
      * 重新获取凭证
-     * @param orderId
+     * @param request
      * @return
      */
-    YcfBaseResult<YcfVouchersResult> getVochers(String orderId);
+    YcfBaseResult<YcfVouchersResult> getVochers(BaseOrderRequest request);
     /**
      * 可预订检查
      * @param= bookCheckReq

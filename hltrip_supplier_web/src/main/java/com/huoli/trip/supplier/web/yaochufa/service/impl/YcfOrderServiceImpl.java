@@ -18,21 +18,21 @@ public class YcfOrderServiceImpl implements YcfOrderService {
     private IYaoChuFaClient iYaoChuFaClient;
 
     @Override
-    public YcfBaseResult<YcfOrderStatusResult> getOrder(String orderId) {
-            YcfBaseRequest request = new YcfBaseRequest();
+    public YcfBaseResult<YcfOrderStatusResult> getOrder(BaseOrderRequest request) {
+            YcfBaseRequest ycfBaseRequest = new YcfBaseRequest();
             YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
-            orderBaSeRequest.setPartnerOrderId(orderId);
-            request.setData(orderBaSeRequest);
-            return iYaoChuFaClient.getOrderStatus(request);
+            orderBaSeRequest.setPartnerOrderId(request.getOrderId());
+            ycfBaseRequest.setData(orderBaSeRequest);
+            return iYaoChuFaClient.getOrderStatus(ycfBaseRequest);
     }
 
     @Override
-    public YcfBaseResult<YcfVouchersResult> getVochers(String orderId) {
-        YcfBaseRequest request = new YcfBaseRequest();
+    public YcfBaseResult<YcfVouchersResult> getVochers(BaseOrderRequest request) {
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest();
         YcfOrderBaSeRequest orderBaSeRequest = new YcfOrderBaSeRequest();
-        orderBaSeRequest.setPartnerOrderId(orderId);
-        request.setData(orderBaSeRequest);
-        return iYaoChuFaClient.getVouchers(request);
+        orderBaSeRequest.setPartnerOrderId(request.getOrderId());
+        ycfBaseRequest.setData(orderBaSeRequest);
+        return iYaoChuFaClient.getVouchers(ycfBaseRequest);
     }
 
     @Override
