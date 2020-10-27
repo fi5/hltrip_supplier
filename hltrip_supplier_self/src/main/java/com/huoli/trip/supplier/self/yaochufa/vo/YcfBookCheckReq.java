@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.yaochufa.vo;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -14,7 +15,7 @@ import java.io.Serializable;
  * 创建日期：2020/6/18<br>
  */
 @Data
-public class YcfBookCheckReq implements Serializable {
+public class YcfBookCheckReq extends TraceRequest implements Serializable {
     //产品编号
     private String productId;
     //开始日期

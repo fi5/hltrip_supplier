@@ -1,12 +1,13 @@
 package com.huoli.trip.supplier.self.hllx.vo;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class HllxOrderOperationRequest implements Serializable {
+public class HllxOrderOperationRequest  extends TraceRequest implements Serializable {
     /**
      * 订单编号
      */
