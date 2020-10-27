@@ -9,7 +9,9 @@ import com.huoli.trip.supplier.self.yaochufa.constant.YcfConfigConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,9 @@ import java.util.List;
 @Slf4j
 public class SyncPriceTask {
 
+    @Value("${schedule.executor}")
+    private String schedule;
+
     @Autowired
     private YcfSyncService ycfSyncService;
 
@@ -36,6 +41,9 @@ public class SyncPriceTask {
 
     @Scheduled(cron = "0 0 2 ? * 6")
     public void syncFullPrice(){
+        if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+            return;
+        }
         long begin = System.currentTimeMillis();
         log.info("开始执行定时任务，同步要出发价格日历。。");
         Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);

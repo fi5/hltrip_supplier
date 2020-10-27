@@ -5,7 +5,9 @@ import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,9 @@ import java.util.List;
 @Slf4j
 public class RefreshItemTask {
 
+    @Value("${schedule.executor}")
+    private String schedule;
+
     @Autowired
     private ProductItemDao productItemDao;
 
@@ -32,6 +37,9 @@ public class RefreshItemTask {
 
     @Scheduled(cron = "0 10 0 * * ?")
     public void refreshItemProduct(){
+        if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+            return;
+        }
         long s = System.currentTimeMillis();
         log.info("开始执行刷新item低价产品任务。。。");
         List<ProductItemPO> items = productItemDao.selectCodes();
