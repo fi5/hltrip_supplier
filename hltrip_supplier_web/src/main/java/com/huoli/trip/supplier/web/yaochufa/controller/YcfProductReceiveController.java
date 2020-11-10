@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPrice;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfPushProductResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
+import com.huoli.trip.supplier.web.yaochufa.task.SyncPriceTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,9 @@ public class YcfProductReceiveController {
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
 
+    @Autowired
+    private SyncPriceTask syncPriceTask;
+
     @PostMapping("/receive/product")
     public YcfBaseResult<YcfPushProductResponse> receiveProduct(@RequestBody List<YcfProduct> products){
         try {
@@ -54,6 +59,30 @@ public class YcfProductReceiveController {
             log.info("开始接收价格。。{}", JSON.toJSONString(price));
             ycfSyncService.syncPrice(price);
         } catch (Exception e) {
+            return YcfBaseResult.fail();
+        }
+        return YcfBaseResult.success();
+    }
+
+    @PostMapping("/sync/price")
+    public YcfBaseResult syncPrice(@RequestBody YcfGetPriceRequest request){
+        try {
+            log.info("开始手动同步价格。。{}", JSON.toJSONString(request));
+            ycfSyncService.getPrice(request);
+        } catch (Exception e) {
+            log.error("手动同步价格失败", e);
+            return YcfBaseResult.fail();
+        }
+        return YcfBaseResult.success();
+    }
+
+    @PostMapping("/sync/full/price")
+    public YcfBaseResult syncFullPrice(){
+        try {
+            log.info("开始手动同步全量价格。。");
+            syncPriceTask.syncFullPrice();
+        } catch (Exception e) {
+            log.error("手动同步全量价格失败", e);
             return YcfBaseResult.fail();
         }
         return YcfBaseResult.success();
