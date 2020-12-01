@@ -187,6 +187,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.huoli.flight</groupId>
+            <artifactId>server_api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

@@ -17,4 +17,7 @@ public interface TripOrderMapper {
 
     @Select("select * from trip_order_voucher where orderId = #{orderId}")
     List<TripOrderVoucher> getVoucherInfoByOrderId(String orderId);
+
+    @Select("select channel from trip_order where orderId = #{orderId}")
+    TripOrder getChannelByOrderId(String orderId);
 }
