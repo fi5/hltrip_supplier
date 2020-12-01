@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.api;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -18,8 +20,8 @@ public interface DynamicProductItemService {
 
     /**
      * 刷新item低价产品
-     * @param productCode
+     * @param productCodes
      */
-    void refreshItemByProductCode(String productCode);
+    void refreshItemByProductCode(List<String> productCodes);
 
 }

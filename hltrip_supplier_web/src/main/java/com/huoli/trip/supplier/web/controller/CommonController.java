@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -53,12 +56,12 @@ public class CommonController {
     }
 
     @PostMapping("/refresh/item/productcode")
-    public BaseResponse refreshItemByProductCode(@RequestParam @NotBlank(message = "user不能为空") String user, @NotBlank(message = "productCode不能为空") String productCode){
+    public BaseResponse refreshItemByProductCode(@RequestParam @NotBlank(message = "user不能为空") String user, @NotNull(message = "productCode不能为空") List<String> productCode){
         try {
-            log.info("开始刷新item。。word={}, productCode={}", user, productCode);
+            log.info("开始刷新item。。word={}, productCode={}", user, JSON.toJSONString(productCode));
             dynamicProductItemService.refreshItemByProductCode(productCode);
         } catch (Exception e) {
-            log.error("刷新item异常，word={}, productCode={}", user, productCode, e);
+            log.error("刷新item异常，word={}, productCode={}", user, JSON.toJSONString(productCode), e);
             return BaseResponse.withFail(-1, "刷新item失败");
         }
         return BaseResponse.withSuccess();
