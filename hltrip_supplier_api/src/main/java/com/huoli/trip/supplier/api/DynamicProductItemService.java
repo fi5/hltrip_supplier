@@ -24,4 +24,10 @@ public interface DynamicProductItemService {
      */
     void refreshItemByProductCode(List<String> productCodes);
 
+    /**
+     * 刷新item低价产品
+     * @param codes
+     */
+    void refreshItemByCode(List<String> codes);
+
 }

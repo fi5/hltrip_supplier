@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
@@ -44,9 +45,9 @@ public class CommonController {
     }
 
     @PostMapping("/refresh/item/code")
-    public BaseResponse refreshItemByCode(@RequestParam @NotBlank(message = "user不能为空") String user, @NotBlank(message = "code不能为空") String code){
+    public BaseResponse refreshItemByCode(@RequestParam @NotBlank(message = "user不能为空") String user, @RequestParam @NotBlank(message = "code不能为空") List<String> code){
         try {
-            log.info("开始刷新item。。word={}, code={}", user, code);
+            log.info("开始刷新item。。word={}, code={}", user, JSON.toJSONString(code));
             dynamicProductItemService.refreshItemByCode(code);
         } catch (Exception e) {
             log.error("刷新item异常，word={}, code={}", user, code, e);
@@ -56,7 +57,7 @@ public class CommonController {
     }
 
     @PostMapping("/refresh/item/productcode")
-    public BaseResponse refreshItemByProductCode(@RequestParam @NotBlank(message = "user不能为空") String user, @NotNull(message = "productCode不能为空") List<String> productCode){
+    public BaseResponse refreshItemByProductCode(@RequestParam @NotBlank(message = "user不能为空") String user, @RequestParam @NotNull(message = "productCode不能为空") List<String> productCode){
         try {
             log.info("开始刷新item。。word={}, productCode={}", user, JSON.toJSONString(productCode));
             dynamicProductItemService.refreshItemByProductCode(productCode);

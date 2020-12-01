@@ -69,6 +69,12 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
         }
     }
 
+    @Override
+    @Async
+    public void refreshItemByCode(List<String> codes){
+        codes.forEach(code -> refreshItemByCode(code));
+    }
+
     private void refreshItem(String code){
         ProductItemPO productItemPO = productItemDao.selectByCode(code);
         if(productItemPO == null){

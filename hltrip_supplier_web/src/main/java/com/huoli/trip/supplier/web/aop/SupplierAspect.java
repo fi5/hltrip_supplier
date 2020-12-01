@@ -83,7 +83,7 @@ public class SupplierAspect {
                             span = (Span) TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
                         }
                     } catch (Exception e) {
-                        log.error("反序列化方法 {} 的请求参数异常", function, e);
+                        log.error("反序列化方法 {} 的请求参数 {} 异常", function, arg, e);
                         params = "参数不能序列化";
                     }
                 }
