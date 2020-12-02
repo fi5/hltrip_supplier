@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.web.service.impl;
+package com.huoli.trip.supplier.web.util;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.huoli.flight.server.api.SmsService;
@@ -15,10 +15,9 @@ import org.springframework.stereotype.Service;
  * @Description: 封装短信发送服务
  * @date 2020/12/214:48
  */
-@Service
 @Slf4j
 @Component
-public class SendMessageService {
+public class SendMessageUtil {
 
     @Reference(group = "${dubbo_group}", timeout = 30000, /*check = false,*/ retries = 3)
     private SmsService smsService;

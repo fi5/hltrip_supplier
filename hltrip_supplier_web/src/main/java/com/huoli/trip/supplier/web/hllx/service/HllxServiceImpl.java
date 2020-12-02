@@ -1,10 +1,7 @@
 package com.huoli.trip.supplier.web.hllx.service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
-import com.huoli.flight.server.api.SmsService;
-import com.huoli.flight.server.api.vo.SmsReq;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.ListUtils;
@@ -15,7 +12,7 @@ import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
-import com.huoli.trip.supplier.web.service.impl.SendMessageService;
+import com.huoli.trip.supplier.web.util.SendMessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,7 @@ public class HllxServiceImpl implements HllxService {
     @Autowired
     private BackChannelMapper backChannelMapper;
     @Autowired
-    private SendMessageService sendMessageService;
+    private SendMessageUtil sendMessageUtil;
 
 
 
@@ -136,7 +133,7 @@ public class HllxServiceImpl implements HllxService {
             if(StringUtils.isNotEmpty(payNoticePhone)){
                 String[] phone = payNoticePhone.split(",");
                 for(String s: phone){
-                    sendMessageService.sendMSG(s,req.getChannelOrderId(),1);
+                    sendMessageUtil.sendMSG(s,req.getChannelOrderId(),1);
                 }
             }
         }
@@ -267,7 +264,7 @@ public class HllxServiceImpl implements HllxService {
                 if (StringUtils.isNotEmpty(payNoticePhone)) {
                     String[] phone = payNoticePhone.split(",");
                     for (String s : phone) {
-                        sendMessageService.sendMSG(s,orderId,2);
+                        sendMessageUtil.sendMSG(s,orderId,2);
 
                     }
                 }
