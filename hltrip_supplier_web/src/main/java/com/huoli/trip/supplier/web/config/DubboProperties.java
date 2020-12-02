@@ -19,5 +19,4 @@ public class DubboProperties implements Serializable {
     private String protocolName;
     @Value("${dubbo.server.protocolPort}")
     private Integer protocolPort;
-
 }
