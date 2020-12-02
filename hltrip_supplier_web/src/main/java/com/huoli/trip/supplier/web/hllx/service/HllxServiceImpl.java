@@ -1,7 +1,10 @@
 package com.huoli.trip.supplier.web.hllx.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.huoli.flight.server.api.SmsService;
+import com.huoli.flight.server.api.vo.SmsReq;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.ListUtils;
@@ -9,6 +12,7 @@ import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.HllxService;
 import com.huoli.trip.supplier.self.hllx.vo.*;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +37,11 @@ public class HllxServiceImpl implements HllxService {
     TripOrderOperationLogMapper tripOrderOperationLogMapper;
     @Autowired
     TripOrderMapper tripOrderMapper;
+    @Autowired
+    BackChannelMapper backChannelMapper;
+
+    @Reference(group = "${flight_dubbo_group}", timeout = 30000, check = false, retries = 3)
+    SmsService smsService;
 
 
     @Override
@@ -121,6 +130,22 @@ public class HllxServiceImpl implements HllxService {
     @Override
     public HllxBaseResult<HllxPayOrderRes> payOrder(HllxPayOrderReq req) {
         HllxPayOrderRes hllxPayOrderRes = new HllxPayOrderRes(OrderStatus.TO_BE_CONFIRMED.getCode());
+        BackChannelEntry channelInfoByChannelCode = backChannelMapper.getChannelInfoByChannelCode(req.getChannelCode());
+        if(channelInfoByChannelCode != null){
+            String payNoticePhone = channelInfoByChannelCode.getPayNoticePhone();
+            if(StringUtils.isNotEmpty(payNoticePhone)){
+                String[] phone = payNoticePhone.split(",");
+                SmsReq smsReq = new SmsReq();
+                SmsReq.Sms sms = new SmsReq.Sms();
+                 final String  content = "您好，您有新的旅游产品支付订单，订单号：%S；请尽快前往后台管理系统处理，谢谢";
+                sms.setContent(String.format(content,req.getChannelOrderId()));
+                smsReq.setSms(sms);
+                for(String s: phone){
+                    smsReq.setPhone(s);
+                    smsService.sendSms(smsReq);
+                }
+            }
+        }
         return new HllxBaseResult(true, 200, hllxPayOrderRes);
     }
 
@@ -239,13 +264,38 @@ public class HllxServiceImpl implements HllxService {
     @Override
     public HllxBaseResult<HllxOrderStatusResult> drawback(String orderId) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        TripOrder tripChannel = tripOrderMapper.getChannelByOrderId(orderId);
+        if(tripChannel != null) {
+            String channel = tripChannel.getChannel();
+            BackChannelEntry channelInfoByChannelCode = backChannelMapper.getChannelInfoByChannelCode(channel);
+            if (channelInfoByChannelCode != null) {
+                String payNoticePhone = channelInfoByChannelCode.getPayNoticePhone();
+                if (StringUtils.isNotEmpty(payNoticePhone)) {
+                    String[] phone = payNoticePhone.split(",");
+                    SmsReq smsReq = new SmsReq();
+                    SmsReq.Sms sms = new SmsReq.Sms();
+                    final String content = "您好，您有旅游产品退款申请订单，订单号：%S；请尽快前往后台管理系统处理，谢谢。";
+                    sms.setContent(String.format(content,orderId));
+                    smsReq.setSms(sms);
+                    for (String s : phone) {
+                        smsReq.setPhone(s);
+                        smsService.sendSms(smsReq);
+                    }
+                }
+            }
+        }
+
         TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
         tripOrderOperationLog.setOrderId(orderId);
         tripOrderOperationLog.setOperator("系统机器人");
         tripOrderOperationLog.setNewStatus(OrderStatus.APPLYING_FOR_REFUND.getCode());
         tripOrderOperationLog.setUpdateTime(dateFormat.format(new Date()));
         tripOrderOperationLog.setRemark("发起退款申请,订单需要更新状态为:申请退款中");
-        tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
+        try {
+            tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
+        }catch (Exception ex){
+            log.error("写入退款申请操作记录失败，请求信息为：{}",JSON.toJSONString(tripOrderOperationLog),ex);
+        }
         return new HllxBaseResult(true, 200, null);
     }
 
