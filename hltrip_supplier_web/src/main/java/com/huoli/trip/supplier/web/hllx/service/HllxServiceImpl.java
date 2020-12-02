@@ -260,12 +260,11 @@ public class HllxServiceImpl implements HllxService {
             String channel = tripChannel.getChannel();
             BackChannelEntry channelInfoByChannelCode = backChannelMapper.getChannelInfoByChannelCode(channel);
             if (channelInfoByChannelCode != null) {
-                String payNoticePhone = channelInfoByChannelCode.getPayNoticePhone();
-                if (StringUtils.isNotEmpty(payNoticePhone)) {
-                    String[] phone = payNoticePhone.split(",");
+                String refundNoticePhone = channelInfoByChannelCode.getRefundNoticePhone();
+                if (StringUtils.isNotEmpty(refundNoticePhone)) {
+                    String[] phone = refundNoticePhone.split(",");
                     for (String s : phone) {
                         sendMessageUtil.sendMSG(s,orderId,2);
-
                     }
                 }
             }

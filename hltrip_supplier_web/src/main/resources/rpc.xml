@@ -6,7 +6,7 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd
        http://code.alibabatech.com/schema/dubbo
        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
-    
+
     <dubbo:reference interface="com.huoli.flight.server.api.SmsService" id="smsService"
                    group="${dubbo.group}" timeout="10000" connections="2"/>
 </beans>
