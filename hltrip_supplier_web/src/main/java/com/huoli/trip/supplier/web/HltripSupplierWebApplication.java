@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.web;
 
-import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
+import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
@@ -20,9 +20,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class,
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
-@ImportResource({"classpath:disconf-config.xml"})
+@ImportResource({"classpath:disconf-config.xml","classpath:rpc.xml"})
 @ComponentScan({"com.huoli.trip"})
-@EnableDubbo(scanBasePackages = "com.huoli.trip.supplier.web")
+@DubboComponentScan(value = "com.huoli.trip.supplier.web")
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client.yaochufa.client")
 @EnableHystrix
 @EnableSwagger2

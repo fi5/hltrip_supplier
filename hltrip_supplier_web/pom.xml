@@ -90,11 +90,11 @@
         </dependency>
 
         <!--dubbo-->
-       <!-- <dependency>
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
             <version>2.5.7</version>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
@@ -194,7 +194,7 @@
         </dependency>
 
         <!--dubbo-->
-        <dependency>
+     <!--   <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <version>2.7.0</version>
@@ -231,7 +231,7 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <version>2.11.1</version>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 

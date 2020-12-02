@@ -1,11 +1,11 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.supplier.api.YcfOrderService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
@@ -25,7 +26,6 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.annotation.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
