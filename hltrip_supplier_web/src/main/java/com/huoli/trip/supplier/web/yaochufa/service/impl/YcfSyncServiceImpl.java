@@ -257,7 +257,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         priceDao.updateByProductCode(pricePO);
         // 更新价格要刷新item的低价产品(异步)
-        dynamicProductItemService.refreshItemByProductCode(productCode);
+        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productCode));
     }
 
     @Override

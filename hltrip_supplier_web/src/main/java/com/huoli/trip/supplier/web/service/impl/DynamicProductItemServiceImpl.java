@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -33,18 +36,24 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
 
     @Override
     @Async
-    public void refreshItemByProductCode(String productCode){
+    public void refreshItemByProductCode(List<String> productCodes){
         try {
-            log.info("开始根据产品码{}刷新item低价产品。。。", productCode);
-            ProductPO productPO = productDao.getByCode(productCode);
-            if(productPO != null && productPO.getMainItemCode() != null){
-                refreshItem(productPO.getMainItemCode());
-                log.info("根据产品码{}刷新item低价产品完成。", productCode);
-                return;
-            }
-            log.error("根据产品码{}刷新item低价产品失败，产品或者产品主项目编码为空", productCode);
+            log.info("开始根据产品码{}刷新item低价产品。。。", JSON.toJSONString(productCodes));
+            productCodes.forEach(productCode -> {
+                try {
+                    ProductPO productPO = productDao.getByCode(productCode);
+                    if(productPO != null && productPO.getMainItemCode() != null){
+                        refreshItem(productPO.getMainItemCode());
+                        log.info("根据产品码{}刷新item低价产品完成。", productCode);
+                        return;
+                    }
+                    log.error("根据产品码{}刷新item低价产品失败，产品或者产品主项目编码为空", productCode);
+                } catch (Exception e) {
+                    log.error("根据产品码{}刷新item低价产品异常！", productCode, e);
+                }
+            });
         } catch (Exception e) {
-            log.error("根据产品码{}刷新item低价产品异常！", productCode, e);
+            log.error("根据产品码{}刷新item低价产品异常！", JSON.toJSONString(productCodes), e);
         }
     }
 
@@ -58,6 +67,12 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
         } catch (Exception e) {
             log.error("根据item编码{}刷新item低价产品异常！", code, e);
         }
+    }
+
+    @Override
+    @Async
+    public void refreshItemByCode(List<String> codes){
+        codes.forEach(code -> refreshItemByCode(code));
     }
 
     private void refreshItem(String code){
