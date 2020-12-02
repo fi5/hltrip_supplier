@@ -15,9 +15,9 @@ import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
+import com.huoli.trip.supplier.web.service.impl.SendMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.velocity.app.event.implement.EscapeXmlReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
@@ -34,14 +34,14 @@ public class HllxServiceImpl implements HllxService {
     @Autowired
     private PriceDao priceDao;
     @Autowired
-    TripOrderOperationLogMapper tripOrderOperationLogMapper;
+    private TripOrderOperationLogMapper tripOrderOperationLogMapper;
     @Autowired
-    TripOrderMapper tripOrderMapper;
+    private TripOrderMapper tripOrderMapper;
     @Autowired
-    BackChannelMapper backChannelMapper;
+    private BackChannelMapper backChannelMapper;
+    @Autowired
+    private SendMessageService sendMessageService;
 
-    @Reference(group = "${flight_dubbo_group}", timeout = 30000, check = false, retries = 3)
-    SmsService smsService;
 
 
     @Override
@@ -135,14 +135,8 @@ public class HllxServiceImpl implements HllxService {
             String payNoticePhone = channelInfoByChannelCode.getPayNoticePhone();
             if(StringUtils.isNotEmpty(payNoticePhone)){
                 String[] phone = payNoticePhone.split(",");
-                SmsReq smsReq = new SmsReq();
-                SmsReq.Sms sms = new SmsReq.Sms();
-                 final String  content = "您好，您有新的旅游产品支付订单，订单号：%S；请尽快前往后台管理系统处理，谢谢";
-                sms.setContent(String.format(content,req.getChannelOrderId()));
-                smsReq.setSms(sms);
                 for(String s: phone){
-                    smsReq.setPhone(s);
-                    smsService.sendSms(smsReq);
+                    sendMessageService.sendMSG(s,req.getChannelOrderId(),1);
                 }
             }
         }
@@ -272,14 +266,9 @@ public class HllxServiceImpl implements HllxService {
                 String payNoticePhone = channelInfoByChannelCode.getPayNoticePhone();
                 if (StringUtils.isNotEmpty(payNoticePhone)) {
                     String[] phone = payNoticePhone.split(",");
-                    SmsReq smsReq = new SmsReq();
-                    SmsReq.Sms sms = new SmsReq.Sms();
-                    final String content = "您好，您有旅游产品退款申请订单，订单号：%S；请尽快前往后台管理系统处理，谢谢。";
-                    sms.setContent(String.format(content,orderId));
-                    smsReq.setSms(sms);
                     for (String s : phone) {
-                        smsReq.setPhone(s);
-                        smsService.sendSms(smsReq);
+                        sendMessageService.sendMSG(s,orderId,2);
+
                     }
                 }
             }
