@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class SendMessageService {
-    @Reference(group = "${flight_dubbo_group}", timeout = 30000, /*check = false,*/ retries = 3)
+    @Reference(group = "flight-dubbo-qa", timeout = 30000, /*check = false,*/ retries = 3)
     private SmsService smsService;
 
     private static final String content1 = "您好，您有新的旅游产品支付订单，订单号：%S；请尽快前往后台管理系统处理，谢谢";
