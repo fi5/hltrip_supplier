@@ -5,6 +5,7 @@ import com.huoli.flight.server.api.SmsService;
 import com.huoli.flight.server.api.vo.SmsReq;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@Component
 public class SendMessageService {
 
     @Reference(group = "${dubbo_group}", timeout = 30000, /*check = false,*/ retries = 3)
