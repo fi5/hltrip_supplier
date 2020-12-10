@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.feign.client.yaochufa.Interceptor;
+package com.huoli.trip.supplier.feign.client.difengyun.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

@@ -1,12 +1,11 @@
-package com.huoli.trip.supplier.feign.client.yaochufa.client;
+package com.huoli.trip.supplier.feign.client.difengyun.client;
 
-import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.DiFengYunFeignInterceptor;
-import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.DiFengYunClientFallback;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyOrderStatusResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,4 +57,28 @@ public interface IDiFengYunClient {
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/orderDetail")
     DfyBaseResult<DfyOrderDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
 
+    /**
+     * 创建订单
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/createOrderNew")
+    DfyBaseResult createOrder(@RequestBody DfyBaseRequest<DfyCreateOrderRequest> request);
+
+    /**
+     * 取消订单申请
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/cancelOrder")
+    DfyBaseResult cancelOrder(@RequestBody DfyBaseRequest<DfyCreateOrderRequest> request);
+
+
+    /**
+     * 获取订单状态
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/orderStatus")
+    DfyOrderStatusResponse orderStatus(@RequestBody DfyBaseRequest<DfyOrderStatusRequest> request);
 }

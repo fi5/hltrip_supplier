@@ -2,7 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.supplier.feign.client.yaochufa.client.IDiFengYunClient;
+import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
