@@ -80,6 +80,19 @@ public class DfyConverter {
         productPO.setPrice(StringUtils.isBlank(ticketDetail.getWebPrice()) ? null : new BigDecimal(ticketDetail.getWebPrice()));
         productPO.setSalePrice(StringUtils.isBlank(ticketDetail.getSalePrice()) ? null : new BigDecimal(ticketDetail.getSalePrice()));
         // todo 票信息要创建个ticketpo
+        TicketPO ticketPO = new TicketPO();
+        if(ticketDetail.getDrawType() != null){
+            switch (ticketDetail.getDrawType()){
+                case 1:
+                    ticketPO.setObtainTicketMode("实体票");
+                    break;
+                case 8:
+                    ticketPO.setObtainTicketMode("预付电子票");
+                    break;
+                default:
+                    break;
+            }
+        }
         return null;
     }
 }
