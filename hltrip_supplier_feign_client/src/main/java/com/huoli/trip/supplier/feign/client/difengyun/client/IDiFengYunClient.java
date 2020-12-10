@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.feign.client.difengyun.client;
 
+import com.huoli.trip.supplier.feign.client.difengyun.client.impl.DiFengYunClientFallback;
+import com.huoli.trip.supplier.feign.client.difengyun.interceptor.DiFengYunFeignInterceptor;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
