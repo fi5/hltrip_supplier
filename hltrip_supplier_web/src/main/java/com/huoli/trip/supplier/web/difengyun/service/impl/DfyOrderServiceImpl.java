@@ -6,10 +6,9 @@ import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicDetailRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +49,29 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
         }
 
+    }
+
+    @Override
+    public DfyBaseResult getCheckInfos(DfyBookCheckRequest bookCheckReq) {
+        return new DfyBaseResult("success",true);
+    }
+
+    @Override
+    public DfyBaseResult payOrder(DfyPayOrderRequest payOrderRequest) {
+        return new DfyBaseResult("success",true);
+    }
+
+    @Override
+    public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCancelOrderRequest createOrderReq) {
+        DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setData(createOrderReq);
+        return diFengYunClient.createOrder(dfyBaseRequest);
+    }
+
+    @Override
+    public DfyBaseResult cancelOrder(DfyCancelOrderRequest cancelOrderReq) {
+        DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setData(cancelOrderReq);
+        return diFengYunClient.cancelOrder(dfyBaseRequest);
     }
 }

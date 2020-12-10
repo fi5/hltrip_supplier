@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.difengyun.vo.response;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,25 @@ import lombok.Data;
  * 创建日期：2020/12/8<br>
  */
 @Data
-public class DfyBaseResult<T> {
+public class DfyBaseResult<T> implements Serializable {
+    private static final long serialVersionUID = 3957777073403240039L;
+    private String errorCode;
+    private String msg;
+    private boolean success;
 
     private T data;
+
+    public DfyBaseResult() {
+    }
+
+    public DfyBaseResult(String msg, boolean success) {
+        this.msg = msg;
+        this.success = success;
+    }
+
+    public DfyBaseResult(String errorCode, String msg, boolean success) {
+        this.errorCode = errorCode;
+        this.msg = msg;
+        this.success = success;
+    }
 }
