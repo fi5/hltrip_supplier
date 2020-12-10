@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.difengyun.vo;
+package com.huoli.trip.supplier.web.difengyun.service;
 
 /**
  * 描述：<br/>
@@ -6,7 +6,7 @@ package com.huoli.trip.supplier.self.difengyun.vo;
  * 公司：活力天汇<br>
  * 作者：冯志强<br>
  * 版本：1.0<br>
- * 创建日期：2020/6/19<br>
+ * 创建日期：2020/12/9<br>
  */
-public class DfyTempVo {
+public interface DfySyncService {
 }
