@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.feign.client.yaochufa.client;
 
 import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.DiFengYunFeignInterceptor;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.DiFengYunClientFallback;
+import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
@@ -55,6 +56,6 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/orderDetail")
-    DfyBaseResult<DfyTicketDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
+    DfyBaseResult<DfyOrderDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
 
 }
