@@ -60,7 +60,7 @@ public class DfyOrderDetail {
 	@Data
 	public static class EnterCertificate {
 		private String enterCertificateType;
-		private EnterCertificateTypeInfo enterCertificateTypeInfo;
+		private List<EnterCertificateTypeInfo> enterCertificateTypeInfo;
 		private String enterCertificateTxt;
 	}
 
@@ -71,7 +71,7 @@ public class DfyOrderDetail {
 	}
 	@Data
 	public static class TicketCertInfo {
-		private String certType;
+		private int certType;
 		private String[] fileUrls;
 	}
 	@Data
