@@ -4,10 +4,7 @@ import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.DiFengYunFeignI
 import com.huoli.trip.supplier.feign.client.yaochufa.client.impl.DiFengYunClientFallback;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicDetailRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyTicketDetailRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -51,4 +48,13 @@ public interface IDiFengYunClient {
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/detail")
     DfyBaseResult<DfyTicketDetail> getTicketDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
+
+    /**
+     * 获取订单详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/orderDetail")
+    DfyBaseResult<DfyTicketDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
+
 }
