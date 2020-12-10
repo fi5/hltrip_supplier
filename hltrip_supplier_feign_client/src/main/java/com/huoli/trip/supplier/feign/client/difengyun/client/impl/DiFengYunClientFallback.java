@@ -6,6 +6,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyOrderStatusResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +66,11 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
 
             @Override
             public DfyOrderStatusResponse orderStatus(DfyBaseRequest<DfyOrderStatusRequest> request) {
+                return null;
+            }
+
+            @Override
+            public DfyBaseResult<DfyRefundTicketResponse> refundTicket(DfyBaseRequest<DfyRefundTicketRequest> request) {
                 return null;
             }
         };
