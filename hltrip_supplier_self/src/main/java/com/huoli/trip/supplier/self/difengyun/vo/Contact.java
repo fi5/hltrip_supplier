@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @author lunatic
  * @Title:
  * @Package
- * @Description:
+ * @Description: 取票人信息
  * @date 2020/12/119:39
  */
 @Data
