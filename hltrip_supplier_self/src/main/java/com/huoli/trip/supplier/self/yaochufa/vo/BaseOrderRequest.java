@@ -18,4 +18,7 @@ public class BaseOrderRequest extends TraceRequest {
      * 订单号
      */
     public String orderId;
+
+    private String supplierOrderId;//supplier订单id
+
 }

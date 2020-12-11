@@ -1,20 +1,33 @@
 package com.huoli.trip.supplier.web.difengyun.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.entity.PricePO;
+import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.*;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicDetailRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyTicketDetailRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
+import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.dao.ProductDao;
+import com.huoli.trip.supplier.web.dao.ProductItemDao;
+import com.huoli.trip.supplier.web.difengyun.convert.DfyConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,26 +45,130 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Autowired
     private IDiFengYunClient diFengYunClient;
 
-    public void syncScenicList(DfyScenicListRequest request){
-        DfyBaseRequest<DfyScenicListRequest> listRequest = new DfyBaseRequest<>(request);
-        DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
-        DfyScenicListResponse response = baseResult.getData();
-        if(response != null && ListUtils.isNotEmpty(response.getRows())){
-            List<DfyScenic> scenics= response.getRows();
-            scenics.forEach(s -> {
-                DfyScenicDetailRequest detailRequest = new DfyScenicDetailRequest();
-                detailRequest.setScenicId(s.getScenicId());
-                DfyBaseRequest detailBaseRequest = new DfyBaseRequest<>(detailRequest);
-                DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
-                if(detailBaseResult != null && detailBaseResult.getData() != null){
-                    DfyScenicDetail scenicDetail = detailBaseResult.getData();
-                } else {
-                    log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
-                }
-            });
-        } else {
-            log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
-        }
+    @Autowired
+    private ProductItemDao productItemDao;
 
+    @Autowired
+    private ProductDao productDao;
+
+    @Autowired
+    private PriceDao priceDao;
+
+    @Override
+    public boolean syncScenicList(DfyScenicListRequest request){
+        try {
+            DfyBaseRequest<DfyScenicListRequest> listRequest = new DfyBaseRequest<>(request);
+            DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
+            DfyScenicListResponse response = baseResult.getData();
+            if(response != null && ListUtils.isNotEmpty(response.getRows())){
+                List<DfyScenic> scenics= response.getRows();
+                scenics.forEach(s -> syncScenicDetail(s.getScenicId()));
+                return true;
+            } else {
+                log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public void syncScenicDetail(String scenicId){
+        DfyScenicDetailRequest detailRequest = new DfyScenicDetailRequest();
+        detailRequest.setScenicId(scenicId);
+        DfyBaseRequest detailBaseRequest = new DfyBaseRequest<>(detailRequest);
+        DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
+        if(detailBaseResult != null && detailBaseResult.getData() != null){
+            DfyScenicDetail scenicDetail = detailBaseResult.getData();
+            ProductItemPO productItem = DfyConverter.convertToProductItemPO(scenicDetail);
+            ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
+            if(productItemPO == null){
+                productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            }
+            productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            productItem.setOperator(Constants.SUPPLIER_CODE_DFY);
+            productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+            productItemDao.updateByCode(productItem);
+            productItemPO = productItemDao.selectByCode(productItem.getCode());
+            // todo 专属门票，本地是不是要标记一下
+            List<DfyTicket> allTickets = Lists.newArrayList();
+            if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
+                allTickets.addAll(scenicDetail.getTicketList());
+            }
+            if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
+                allTickets.addAll(scenicDetail.getDisTickets());
+            }
+            if(ListUtils.isNotEmpty(allTickets)){
+                for (DfyTicket dfyTicket : allTickets) {
+                    syncProduct(dfyTicket.getProductId(), productItemPO);
+                }
+            }
+        } else {
+            log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
+        }
+    }
+
+    @Override
+    public void syncProduct(String productId, ProductItemPO productItemPO){
+        DfyTicketDetailRequest ticketDetailRequest = new DfyTicketDetailRequest();
+        ticketDetailRequest.setProductId(Integer.valueOf(productId));
+        DfyBaseRequest ticketDetailBaseRequest = new DfyBaseRequest<>(ticketDetailRequest);
+        DfyBaseResult<DfyTicketDetail> ticketDetailDfyBaseResult = diFengYunClient.getTicketDetail(ticketDetailBaseRequest);
+
+        if(ticketDetailDfyBaseResult != null && ticketDetailDfyBaseResult.getData() != null){
+            DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
+            // 当通知更新的时候这个item是空的
+            if(productItemPO == null){
+                String scenicId = dfyTicketDetail.getScenicId();
+                // 如果没有景点id更新不了产品，因为产品是绑在景点下的
+                if(StringUtils.isBlank(scenicId)){
+                    log.error("门票productId={}，没有景点id", productId);
+                    return;
+                }
+                // 如果景点不存在就去更新景点，更新景点的同时会更新门票，所以下面就不用走了。
+                productItemPO = productItemDao.selectByCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, scenicId));
+                if(productItemPO == null){
+                    syncScenicDetail(scenicId);
+                    return;
+                }
+            }
+            ProductPO product = DfyConverter.convertToProductPO(dfyTicketDetail);
+            ProductPO productPO = productDao.getByCode(product.getCode());
+            product.setMainItemCode(productItemPO.getCode());
+            product.setMainItem(productItemPO);
+            product.setCity(productItemPO.getCity());
+            product.setDesCity(productItemPO.getDesCity());
+            product.setOriCity(productItemPO.getOriCity());
+            if(productPO == null){
+                product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            }
+            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            product.setOperator(Constants.SUPPLIER_CODE_DFY);
+            product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+            productDao.updateByCode(product);
+            if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
+                syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
+            }
+        } else {
+            log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
+        }
+    }
+
+    /**
+     * 设置价格日历
+     * @param productCode
+     * @param priceCalendar
+     */
+    private void syncPrice(String productCode, List<DfyPriceCalendar> priceCalendar){
+        PricePO pricePO = priceDao.getByProductCode(productCode);
+        PricePO price = DfyConverter.convertToPricePO(priceCalendar);
+        if(pricePO == null){
+            price.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        }
+        price.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        price.setOperator(Constants.SUPPLIER_CODE_DFY);
+        price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+        priceDao.updateByProductCode(price);
     }
 }
