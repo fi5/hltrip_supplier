@@ -1,5 +1,8 @@
 package com.huoli.trip.supplier.self.difengyun.vo.request;
 
+import com.huoli.trip.supplier.self.difengyun.vo.Contact;
+import com.huoli.trip.supplier.self.difengyun.vo.Delivery;
+import com.huoli.trip.supplier.self.difengyun.vo.Tourist;
 import lombok.Data;
 
 import java.io.Serializable;
