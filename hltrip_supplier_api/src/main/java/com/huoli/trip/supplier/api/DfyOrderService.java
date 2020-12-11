@@ -4,17 +4,11 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfOrderStatusResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfVouchersResult;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBookCheckRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyCancelOrderRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyPayOrderRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 
 /**
  * @author :zhouwenbin
