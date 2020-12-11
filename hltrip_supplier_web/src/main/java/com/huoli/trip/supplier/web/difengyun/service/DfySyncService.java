@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 
 /**
@@ -31,4 +32,10 @@ public interface DfySyncService {
      * @param productItemPO
      */
     void syncProduct(String productId, ProductItemPO productItemPO);
+
+    /**
+     * 接收产品通知更新
+     * @param request
+     */
+    void productUpdate(DfyProductNoticeRequest request);
 }

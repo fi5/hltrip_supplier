@@ -10,11 +10,9 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.*;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicDetailRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyTicketDetailRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import com.huoli.trip.supplier.web.dao.PriceDao;
@@ -25,6 +23,7 @@ import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -69,6 +68,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 return false;
             }
         } catch (Exception e) {
+            log.error("笛风云同步景点、产品异常", e);
             return false;
         }
     }
@@ -170,5 +170,38 @@ public class DfySyncServiceImpl implements DfySyncService {
         price.setOperator(Constants.SUPPLIER_CODE_DFY);
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
         priceDao.updateByProductCode(price);
+    }
+
+    @Override
+    @Async
+    public void productUpdate(DfyProductNoticeRequest request){
+        try {
+            List<DfyProductNotice> productNotices = request.getProductNotices();
+            if(ListUtils.isEmpty(productNotices)){
+                log.error("笛风云通知更新产品列表为空");
+                return;
+            }
+            productNotices.forEach(p -> {
+                if(p.getClassBrandParentId() == DfyConstants.BRAND_GROUP){
+                    log.error("笛风云更新产品 {} 是跟团，跳过。", p.getProductId());
+                    return;
+                }
+                // 如果只是更新状态直接在这里改就行
+                if(p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID || p.getNoticeType() == DfyConstants.NOTICE_TYPE_VALID){
+                    ProductPO productPO = productDao.getByCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, p.getProductId().toString()));
+                    // 如果本地有就直接更新
+                    if(productPO != null){
+                        productPO.setStatus(p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID ? Constants.PRODUCT_STATUS_INVALID : Constants.PRODUCT_STATUS_VALID);
+                        productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                        productDao.updateByCode(productPO);
+                        return;
+                    }
+                }
+                // 如果本地没有就走同步产品流程
+                syncProduct(p.getProductId().toString(), null);
+            });
+        } catch (Exception e) {
+            log.error("笛风云接收通知更新产品异常，", e);
+        }
     }
 }

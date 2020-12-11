@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.feign.client.difengyun.client.impl;
 
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
+import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
@@ -50,7 +51,7 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
-            public DfyBaseResult<DfyTicketDetail> orderDetail(DfyBaseRequest<DfyOrderDetailRequest> request) {
+            public DfyBaseResult<DfyOrderDetail> orderDetail(DfyBaseRequest<DfyOrderDetailRequest> request) {
                 return null;
             }
 

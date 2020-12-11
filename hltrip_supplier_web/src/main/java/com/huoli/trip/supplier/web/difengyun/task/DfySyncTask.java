@@ -29,18 +29,22 @@ public class DfySyncTask {
 
     @Scheduled(cron = "0 0 6-12 ? * *")
     public void syncFullPrice(){
-        if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
-            return;
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步要出发价格日历。。");
+            DfyScenicListRequest request = new DfyScenicListRequest();
+            request.setPage(1);
+            request.setPageSize(100);
+            // todo 这里需要确认是否能一次大量获取
+            while (dfySyncService.syncScenicList(request)){
+                request.setPage(request.getPage() + 1);
+            }
+            log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新景点、产品任务异常", e);
         }
-        long begin = System.currentTimeMillis();
-        log.info("开始执行定时任务，同步要出发价格日历。。");
-        DfyScenicListRequest request = new DfyScenicListRequest();
-        request.setPage(1);
-        request.setPageSize(100);
-        // todo 这里需要确认是否能一次大量获取
-        while (dfySyncService.syncScenicList(request)){
-            request.setPage(request.getPage() + 1);
-        }
-        log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
     }
 }

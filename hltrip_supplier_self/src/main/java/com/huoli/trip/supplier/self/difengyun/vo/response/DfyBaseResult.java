@@ -17,6 +17,9 @@ public class DfyBaseResult<T> implements Serializable {
     private static final long serialVersionUID = 3957777073403240039L;
     private String errorCode;
     private String msg;
+    /**
+     * 系统参数。是否请求成功
+     */
     private boolean success;
 
     private T data;
@@ -33,5 +36,24 @@ public class DfyBaseResult<T> implements Serializable {
         this.errorCode = errorCode;
         this.msg = msg;
         this.success = success;
+    }
+
+    public DfyBaseResult(boolean success, String errorCode, String msg, T data){
+        this.success = success;
+        this.errorCode = errorCode;
+        this.msg = msg;
+        this.data = data;
+    }
+
+    public static <T> DfyBaseResult<T> success(){
+        return new DfyBaseResult<T>(true, "200", "success", null);
+    }
+
+    public static <T> DfyBaseResult<T> success(T data){
+        return new DfyBaseResult<T>(true, "200", "success", data);
+    }
+
+    public static <T> DfyBaseResult<T> fail(){
+        return new DfyBaseResult<T>(false, "500", "fail", null);
     }
 }

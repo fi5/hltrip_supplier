@@ -8,6 +8,7 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
@@ -32,7 +33,7 @@ public class DfyConverter {
     public static ProductItemPO convertToProductItemPO(DfyScenicDetail scenicDetail){
         ProductItemPO productItemPO = new ProductItemPO();
         productItemPO.setItemType(ProductType.SCENIC_TICKET.getCode());
-        productItemPO.setStatus(1);
+        productItemPO.setStatus(Constants.PRODUCT_STATUS_VALID);
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_DFY);
         productItemPO.setSupplierItemId(scenicDetail.getScenicId());
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), scenicDetail.getScenicId()));
@@ -100,10 +101,10 @@ public class DfyConverter {
         TicketPO ticketPO = new TicketPO();
         if(ticketDetail.getDrawType() != null){
             switch (ticketDetail.getDrawType()){
-                case 1:
+                case DfyConstants.DRAW_TYPE_PAPER:
                     ticketPO.setObtainTicketMode("实体票");
                     break;
-                case 8:
+                case DfyConstants.DRAW_TYPE_ELECT:
                     ticketPO.setObtainTicketMode("预付电子票");
                     break;
                 default:
@@ -114,16 +115,16 @@ public class DfyConverter {
         Integer type = null;
         if(ticketDetail.getSubType() != null){
             switch (ticketDetail.getSubType()){
-                case 1:
+                case DfyConstants.TICKET_TYPE_NORMAL:
                     type = 1;
                     break;
-                case 2:
+                case DfyConstants.TICKET_TYPE_COUPON:
                     type = 16;
                     break;
-                case 3:
+                case DfyConstants.TICKET_TYPE_PACKAGE:
                     type = 17;
                     break;
-                case 4:
+                case DfyConstants.TICKET_TYPE_SPECIAL:
                     type = 18;
                     break;
                 default:
@@ -143,25 +144,25 @@ public class DfyConverter {
             BookRulePO passengerPhoneAndID = convertBookRulePO("1", true, ticketDetail.getCertificateType(), 0);
             List<BookRulePO> bookRules = Lists.newArrayList();
             switch (ticketDetail.getCustInfoLimit()){
-                case 1:
+                case DfyConstants.BOOK_RULE_1:
                     bookRules.add(contactPhone);
                     break;
-                case 2:
+                case DfyConstants.BOOK_RULE_2:
                     bookRules.add(contactPhone);
                     bookRules.add(passengerPhone);
                     break;
-                case 3:
+                case DfyConstants.BOOK_RULE_3:
                     bookRules.add(contactPhone);
                     bookRules.add(passengerPhoneAndID);
                     break;
-                case 4:
+                case DfyConstants.BOOK_RULE_4:
                     bookRules.add(contactPhoneAndID);
                     break;
-                case 6:
+                case DfyConstants.BOOK_RULE_6:
                     bookRules.add(contactPhoneAndID);
                     bookRules.add(passengerPhone);
                     break;
-                case 7:
+                case DfyConstants.BOOK_RULE_7:
                     bookRules.add(contactPhoneAndID);
                     bookRules.add(passengerPhoneAndID);
                     break;
@@ -172,7 +173,6 @@ public class DfyConverter {
                 productPO.setBookRules(bookRules);
             }
         }
-
         return null;
     }
 
@@ -209,15 +209,15 @@ public class DfyConverter {
         if(StringUtils.isNotBlank(credentialList)){
             List<Integer> creds = Lists.newArrayList(credentialList.split(",")).stream().map(c -> {
                 switch (Integer.parseInt(c)){
-                    case 1:
+                    case DfyConstants.CRED_TYPE_ID:
                         return Certificate.ID_CARD.getCode();
-                    case 2:
+                    case DfyConstants.CRED_TYPE_PP:
                         return Certificate.PASSPORT.getCode();
-                    case 3:
+                    case DfyConstants.CRED_TYPE_OF:
                         return Certificate.OFFICER.getCode();
-                    case 4:
+                    case DfyConstants.CRED_TYPE_HK:
                         return Certificate.HKM_PASS.getCode();
-                    case 7:
+                    case DfyConstants.CRED_TYPE_TW:
                         return Certificate.SOLDIERS.getCode();
                     default:
                         return Certificate.ID_CARD.getCode();
