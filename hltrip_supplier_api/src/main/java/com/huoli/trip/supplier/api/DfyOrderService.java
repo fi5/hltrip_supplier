@@ -3,10 +3,9 @@ package com.huoli.trip.supplier.api;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBookCheckRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyCancelOrderRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyPayOrderRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
 
@@ -42,10 +41,17 @@ public interface DfyOrderService {
     /**
      * 创建订单
      */
-    DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCancelOrderRequest createOrderReq);
+    DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCreateOrderRequest createOrderReq);
     /**
      * 取消订单
      */
     DfyBaseResult cancelOrder(DfyCancelOrderRequest cancelOrderReq);
+
+	/**
+	 * 退票申请
+	 * @param request
+	 * @return
+	 */
+	DfyBaseResult<DfyRefundTicketResponse> rufundTicket(DfyRefundTicketRequest request);
 
 }

@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.difengyun.vo.request;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.Contact;
 import com.huoli.trip.supplier.self.difengyun.vo.Delivery;
 import com.huoli.trip.supplier.self.difengyun.vo.Tourist;
@@ -16,7 +17,7 @@ import java.util.List;
  * @date 2020/12/1010:47
  */
 @Data
-public class DfyCreateOrderRequest implements Serializable {
+public class DfyCreateOrderRequest extends TraceRequest implements Serializable {
     private static final long serialVersionUID = -7706569465744965399L;
     /**
      * NO

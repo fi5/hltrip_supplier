@@ -24,6 +24,8 @@ public class DfyBaseResult<T> implements Serializable {
 
     private T data;
 
+    private int statusCode = 200;
+
     public DfyBaseResult() {
     }
 

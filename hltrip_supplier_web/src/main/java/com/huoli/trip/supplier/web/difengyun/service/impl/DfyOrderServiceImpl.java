@@ -14,6 +14,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyOrderDetailRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     @Override
-    public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCancelOrderRequest createOrderReq) {
+    public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCreateOrderRequest createOrderReq) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(createOrderReq);
         return diFengYunClient.createOrder(dfyBaseRequest);
@@ -92,5 +93,12 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(cancelOrderReq);
         return diFengYunClient.cancelOrder(dfyBaseRequest);
+    }
+
+    @Override
+    public DfyBaseResult<DfyRefundTicketResponse> rufundTicket(DfyRefundTicketRequest request) {
+        DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setData(request);
+        return diFengYunClient.refundTicket(dfyBaseRequest);
     }
 }

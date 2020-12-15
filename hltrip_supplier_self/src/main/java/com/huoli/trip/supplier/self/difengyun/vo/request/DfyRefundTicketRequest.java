@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.difengyun.vo.request;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.io.Serializable;
  * @date 2020/12/1016:09
  */
 @Data
-public class DfyRefundTicketRequest implements Serializable {
+public class DfyRefundTicketRequest extends TraceRequest implements Serializable {
     private static final long serialVersionUID = -1629752195634863484L;
     private String orderId;
     /**

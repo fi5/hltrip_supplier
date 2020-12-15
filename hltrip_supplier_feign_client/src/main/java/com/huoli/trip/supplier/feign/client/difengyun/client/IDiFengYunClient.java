@@ -6,10 +6,7 @@ import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyOrderStatusResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -92,5 +89,14 @@ public interface IDiFengYunClient {
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/tuiPiao")
     DfyBaseResult<DfyRefundTicketResponse> refundTicket(@RequestBody DfyBaseRequest<DfyRefundTicketRequest> request);
+
+    /**
+     * 出票(代扣)接口
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/submitOrder")
+    DfyBaseResult<DfySubmitOrderResponse> submitOrder(@RequestBody DfyBaseRequest<DfySubmitOrderRequest> request);
+
 
 }
