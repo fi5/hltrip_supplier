@@ -30,8 +30,8 @@ public class RefundController {
 		return BaseResponse.withSuccess();
 	}
 //
-//	@RequestMapping("/refuse")
-//	public BaseResponse refuseRefund(@RequestBody RefundNoticeReq req)  {
-//		return supplierRefundService.refuseRefund(req);
-//	}
+	@RequestMapping("/refuse")
+	public BaseResponse refuseRefund(@RequestBody RefundNoticeReq req)  {
+		return supplierRefundService.refuseRefund(req);
+	}
 }
