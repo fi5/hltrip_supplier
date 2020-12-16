@@ -98,8 +98,8 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 		String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
 		try {
 
-			log.info("refuseRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
 			req.setRefundStatus(2);//表示拒绝退订
+			log.info("refuseRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
 			log.info("中台refundNotice返回:"+res);
 		} catch (Exception e) {
