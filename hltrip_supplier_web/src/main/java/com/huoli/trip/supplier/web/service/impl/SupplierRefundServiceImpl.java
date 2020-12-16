@@ -62,10 +62,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 			log.info("中台refundNotice返回:"+res);
 			int newSt=OrderStatus.REFUNDED.getCode();
 			String explain="退款";
-//			if(req.getRefundStatus()!=1){
-//				newSt=OrderStatus.WAITING_TO_TRAVEL.getCode();
-//				explain="拒绝退订";
-//			}
+
 			TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(req.getPartnerOrderId());
 			int oldSt=tripOrder.getChannelStatus();
 
@@ -101,7 +98,20 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 			req.setRefundStatus(2);//表示拒绝退订
 			log.info("refuseRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+
 			log.info("中台refundNotice返回:"+res);
+
+			TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(req.getPartnerOrderId());
+			int oldSt=tripOrder.getChannelStatus();
+
+			HllxOrderOperationRequest request=new HllxOrderOperationRequest();
+			request.setOrderId(req.getPartnerOrderId());
+			request.setOperator(req.getOperator());
+			request.setOldStatus(oldSt);
+			request.setNewStatus(OrderStatus.WAITING_TO_TRAVEL.getCode());
+			request.setUpdateTime(DateTimeUtil.formatFullDate(new Date()));
+			request.setExplain("拒绝退订");
+			hllxSyncService.getOrderStatus(request);
 		} catch (Exception e) {
 			log.error("信息{}",e);
 			return BaseResponse.fail(CentralError.ERROR_UNKNOWN);
