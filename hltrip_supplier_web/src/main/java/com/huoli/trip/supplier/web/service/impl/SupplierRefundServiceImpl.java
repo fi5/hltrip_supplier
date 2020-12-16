@@ -62,10 +62,10 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 			log.info("中台refundNotice返回:"+res);
 			int newSt=OrderStatus.REFUNDED.getCode();
 			String explain="退款";
-			if(req.getRefundStatus()!=1){
-				newSt=OrderStatus.WAITING_TO_TRAVEL.getCode();
-				explain="拒绝退订";
-			}
+//			if(req.getRefundStatus()!=1){
+//				newSt=OrderStatus.WAITING_TO_TRAVEL.getCode();
+//				explain="拒绝退订";
+//			}
 			TripOrder tripOrder = tripOrderMapper.getOrderStatusByOrderId(req.getPartnerOrderId());
 			int oldSt=tripOrder.getChannelStatus();
 
