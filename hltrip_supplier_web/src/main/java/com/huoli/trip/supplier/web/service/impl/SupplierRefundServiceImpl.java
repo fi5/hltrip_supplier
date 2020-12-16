@@ -7,6 +7,7 @@ import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderOperationLog;
+import com.huoli.trip.common.entity.TripOrderRefund;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
@@ -16,6 +17,7 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.web.hllx.service.HllxSyncService;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
+import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import com.huoli.trip.supplier.web.service.SupplierRefundService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +42,20 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 	HllxSyncService hllxSyncService;
 	@Autowired
 	TripOrderMapper tripOrderMapper;
+	@Autowired
+	TripOrderRefundMapper tripOrderRefundMapper;
 
 	@Override
 	public BaseResponse doRefund(@RequestBody RefundNoticeReq req) {
 		String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
 		try {
+
+			TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderByOrderId(req.getPartnerOrderId());
+			if(refundOrder==null)
+				return BaseResponse.fail(CentralError.ERROR_ORDER_TRIP_ORDER_RRFUND_ERROR);
+			if(refundOrder.getStatus()!=0)
+				return BaseResponse.fail(CentralError.ERROR_ORDER_TRIP_ORDER_RRFUND_STATUS_ERROR);
+
 
 			log.info("请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
