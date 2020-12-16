@@ -106,7 +106,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 
 			HllxOrderOperationRequest request=new HllxOrderOperationRequest();
 			request.setOrderId(req.getPartnerOrderId());
-			request.setOperator(req.getOperator());]
+			request.setOperator(req.getOperator());
 			request.setOldStatus(oldSt);
 			request.setNewStatus(OrderStatus.WAITING_TO_TRAVEL.getCode());
 			request.setUpdateTime(DateTimeUtil.formatFullDate(new Date()));
