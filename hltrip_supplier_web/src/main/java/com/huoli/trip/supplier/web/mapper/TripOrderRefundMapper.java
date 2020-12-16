@@ -16,4 +16,7 @@ public interface TripOrderRefundMapper {
 
     @Select("select * from trip_order_refund where orderId = #{orderId} order by createTime desc limit 1")
     TripOrderRefund getRefundOrderByOrderId(String orderId);
+
+    @Select("select * from trip_order_refund where id = #{refundId}")
+    TripOrderRefund getRefundOrderById(Integer refundId);
 }

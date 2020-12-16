@@ -50,7 +50,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 		String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
 		try {
 
-			TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderByOrderId(req.getPartnerOrderId());
+			TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(req.getRefundId());
 			if(refundOrder==null)
 				return BaseResponse.fail(CentralError.ERROR_ORDER_TRIP_ORDER_RRFUND_ERROR);
 			if(refundOrder.getStatus()!=0)
@@ -106,7 +106,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 
 			HllxOrderOperationRequest request=new HllxOrderOperationRequest();
 			request.setOrderId(req.getPartnerOrderId());
-			request.setOperator(req.getOperator());
+			request.setOperator(req.getOperator());]
 			request.setOldStatus(oldSt);
 			request.setNewStatus(OrderStatus.WAITING_TO_TRAVEL.getCode());
 			request.setUpdateTime(DateTimeUtil.formatFullDate(new Date()));
