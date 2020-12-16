@@ -88,6 +88,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 		try {
 
 			log.info("请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
+			req.setRefundStatus(2);//表示拒绝退订
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
 			log.info("中台refundNotice返回:"+res);
 		} catch (Exception e) {
