@@ -57,7 +57,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 				return BaseResponse.fail(CentralError.ERROR_ORDER_TRIP_ORDER_RRFUND_STATUS_ERROR);
 
 
-			log.info("请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
+			log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
 			log.info("中台refundNotice返回:"+res);
 			int newSt=OrderStatus.REFUNDED.getCode();
@@ -98,7 +98,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 		String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
 		try {
 
-			log.info("请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
+			log.info("refuseRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
 			req.setRefundStatus(2);//表示拒绝退订
 			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
 			log.info("中台refundNotice返回:"+res);
