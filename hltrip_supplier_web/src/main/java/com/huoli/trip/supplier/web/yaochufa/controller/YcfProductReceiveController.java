@@ -28,7 +28,7 @@ import java.util.List;
  * 创建日期：2020/6/24<br>
  */
 @RestController()
-@RequestMapping(value = "/product", produces = "application/json")
+@RequestMapping(value = "/", produces = "application/json")
 @Slf4j
 public class YcfProductReceiveController {
 

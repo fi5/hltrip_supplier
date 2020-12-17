@@ -9,6 +9,7 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
@@ -133,10 +134,16 @@ public class DfyConverter {
         }
         ticketPO.setTicketType(type);
         // todo indate  advanceDay advanceHour 这几个东西是不是可以拼到哪个说明里
-        // todo admissionVoucher 入园方式现在没有。怎么处理
-
+        DfyAdmissionVoucher dfyAdmissionVoucher = ticketDetail.getAdmissionVoucher();
+        ticketPO.setAdmissionVoucherCode(dfyAdmissionVoucher.getAdmissionVoucherCode());
+        ticketPO.setAdmissionVoucherDesc(dfyAdmissionVoucher.getAdmissionVoucherDesc());
         TicketInfoPO ticketInfoPO = new TicketInfoPO();
         ticketInfoPO.setBaseNum(1);
+        ticketInfoPO.setSupplierItemId(ticketDetail.getScenicId());
+        ticketInfoPO.setTitle(ticketDetail.getProductName());
+        ticketInfoPO.setSupplierResourceId(ticketDetail.getResourceId());
+        ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
+        productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){
             BookRulePO contactPhone = convertBookRulePO("0", false, null, 1);
             BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1);
@@ -173,7 +180,7 @@ public class DfyConverter {
                 productPO.setBookRules(bookRules);
             }
         }
-        return null;
+        return productPO;
     }
 
     public static PricePO convertToPricePO(List<DfyPriceCalendar> dfyPriceCalendars){
@@ -181,16 +188,16 @@ public class DfyConverter {
         if(ListUtils.isNotEmpty(dfyPriceCalendars)){
             List<PriceInfoPO> priceInfoPOs = dfyPriceCalendars.stream().map(p -> {
                 PriceInfoPO priceInfoPO = new PriceInfoPO();
+                // 笛风云没有库存，默认99
+                priceInfoPO.setStock(99);
                 if(StringUtils.isBlank(p.getDepartDate())){
                     return null;
                 }
                 priceInfoPO.setSaleDate(DateTimeUtil.parseDate(p.getDepartDate()));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
-                    // TODO 这里没有结算价，可能也会有问题
                     priceInfoPO.setSettlePrice(priceInfoPO.getSalePrice());
                 }
-                // todo 笛风云没有库存，怎么处理
                 return priceInfoPO;
             }).filter(p -> p.getSaleDate() != null).collect(Collectors.toList());
             if(ListUtils.isNotEmpty(priceInfoPOs)){

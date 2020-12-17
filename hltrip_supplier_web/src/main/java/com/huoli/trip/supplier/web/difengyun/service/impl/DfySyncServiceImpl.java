@@ -91,12 +91,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
             productItemDao.updateByCode(productItem);
             productItemPO = productItemDao.selectByCode(productItem.getCode());
-            // todo 专属门票，本地是不是要标记一下
             List<DfyTicket> allTickets = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
                 allTickets.addAll(scenicDetail.getTicketList());
             }
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
+                scenicDetail.getDisTickets().forEach(t -> t.setExclusive(1));
                 allTickets.addAll(scenicDetail.getDisTickets());
             }
             if(ListUtils.isNotEmpty(allTickets)){
@@ -134,12 +134,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
             }
             ProductPO product = DfyConverter.convertToProductPO(dfyTicketDetail);
-            ProductPO productPO = productDao.getByCode(product.getCode());
             product.setMainItemCode(productItemPO.getCode());
             product.setMainItem(productItemPO);
             product.setCity(productItemPO.getCity());
             product.setDesCity(productItemPO.getDesCity());
             product.setOriCity(productItemPO.getOriCity());
+            ProductPO productPO = productDao.getByCode(product.getCode());
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
