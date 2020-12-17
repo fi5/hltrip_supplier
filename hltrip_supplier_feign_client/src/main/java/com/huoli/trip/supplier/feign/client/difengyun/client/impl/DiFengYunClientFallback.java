@@ -5,10 +5,7 @@ import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyOrderStatusResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -72,6 +69,11 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
 
             @Override
             public DfyBaseResult<DfyRefundTicketResponse> refundTicket(DfyBaseRequest<DfyRefundTicketRequest> request) {
+                return null;
+            }
+
+            @Override
+            public DfyBaseResult<DfySubmitOrderResponse> submitOrder(DfyBaseRequest<DfySubmitOrderRequest> request) {
                 return null;
             }
         };
