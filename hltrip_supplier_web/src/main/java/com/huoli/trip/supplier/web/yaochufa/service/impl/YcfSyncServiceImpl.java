@@ -336,17 +336,17 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return false;
         }
         if(ycfProduct.getRoomChoiceNum() != null && ycfProduct.getRoomOptionNum() != null &&
-                ycfProduct.getRoomChoiceNum() != ycfProduct.getRoomOptionNum()){
+                ycfProduct.getRoomChoiceNum().intValue() != ycfProduct.getRoomOptionNum().intValue()){
             log.info("酒店可选和必选不一样（M选N），过滤掉。。");
             return false;
         }
         if(ycfProduct.getFoodChoiceNum() != null && ycfProduct.getFoodOptionNum() != null &&
-                ycfProduct.getFoodChoiceNum() != ycfProduct.getFoodOptionNum()){
+                ycfProduct.getFoodChoiceNum().intValue() != ycfProduct.getFoodOptionNum().intValue()){
             log.info("餐饮可选和必选不一样（M选N），过滤掉。。");
             return false;
         }
         if(ycfProduct.getTicketChoiceNum() != null && ycfProduct.getTicketOptionNum() != null &&
-                ycfProduct.getTicketChoiceNum() != ycfProduct.getTicketOptionNum()){
+                ycfProduct.getTicketChoiceNum().intValue() != ycfProduct.getTicketOptionNum().intValue()){
             log.info("景点可选和必选不一样（M选N），过滤掉。。");
             return false;
         }

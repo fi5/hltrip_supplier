@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.difengyun.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -32,4 +33,10 @@ public class DfyTicket {
      * 单位元,销售价,当价格为0时，需要单独查询门票详情，其中有价格日历内容，获取正确的价格，在下单时也是要使用详情中的价格。非下单价格
      */
     private String salePrice;
+
+    /**
+     * 专属门票 0否 1是
+     */
+    @JsonIgnore
+    private int exclusive = 0;
 }

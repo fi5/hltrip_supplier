@@ -17,6 +17,9 @@ public class DfyOrderPushResponse implements Serializable {
     private String msg = "success";
     private String errorCode;
 
+    public DfyOrderPushResponse() {
+    }
+
     public DfyOrderPushResponse(boolean success, String msg, String errorCode) {
         this.success = success;
         this.msg = msg;

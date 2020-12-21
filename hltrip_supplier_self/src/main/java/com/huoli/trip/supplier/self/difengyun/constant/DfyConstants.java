@@ -45,21 +45,57 @@ public class DfyConstants {
 
     // 门票类型
     /**
-     * 普通
+     * 特惠
      */
-    public static final int TICKET_TYPE_NORMAL = 1;
+    public static final int TICKET_TYPE_0 = 0;
     /**
-     * 联票
+     * 成人票
      */
-    public static final int TICKET_TYPE_COUPON = 2;
+    public static final int TICKET_TYPE_1 = 1;
+    /**
+     * 亲子家庭票
+     */
+    public static final int TICKET_TYPE_2 = 2;
+    /**
+     * 学生票
+     */
+    public static final int TICKET_TYPE_3 = 3;
+    /**
+     * 儿童票
+     */
+    public static final int TICKET_TYPE_4 = 4;
+    /**
+     * 老人票
+     */
+    public static final int TICKET_TYPE_5 = 5;
+    /**
+     * 特殊人群优待票
+     */
+    public static final int TICKET_TYPE_6 = 6;
     /**
      * 套票
      */
-    public static final int TICKET_TYPE_PACKAGE = 3;
+    public static final int TICKET_TYPE_7 = 7;
     /**
-     * 专票
+     * 联票
      */
-    public static final int TICKET_TYPE_SPECIAL = 4;
+    public static final int TICKET_TYPE_8 = 8;
+    /**
+     * 园内餐饮
+     */
+    public static final int TICKET_TYPE_9 = 9;
+    /**
+     * 园内交通
+     */
+    public static final int TICKET_TYPE_10 = 10;
+    /**
+     * 园内其他票
+     */
+    public static final int TICKET_TYPE_11 = 11;
+    /**
+     * 园内演出
+     */
+    public static final int TICKET_TYPE_12 = 12;
 
     // 预定项要求
     /**

@@ -6,6 +6,7 @@ import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBookCheckResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
@@ -42,7 +43,7 @@ public interface DfyOrderService {
     /**
      * 可预订检查
      */
-    DfyBaseResult getCheckInfos(DfyBookCheckRequest bookCheckReq);
+    DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq);
     /**
      * 支付订单
      */

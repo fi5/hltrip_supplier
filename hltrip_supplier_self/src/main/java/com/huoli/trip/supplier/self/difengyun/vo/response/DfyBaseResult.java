@@ -47,6 +47,12 @@ public class DfyBaseResult<T> implements Serializable {
         this.data = data;
     }
 
+    public DfyBaseResult(Boolean success, int code, T data){
+        this.setStatusCode(code);
+        this.setSuccess(success);
+        this.setData(data);
+    }
+
     public static <T> DfyBaseResult<T> success(){
         return new DfyBaseResult<T>(true, "200", "success", null);
     }

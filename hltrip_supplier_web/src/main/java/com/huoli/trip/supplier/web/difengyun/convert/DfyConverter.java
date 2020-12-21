@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
+import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
@@ -98,6 +100,9 @@ public class DfyConverter {
         productPO.setBuyMax(ticketDetail.getLimitNumHigh());
         productPO.setRemark(ticketDetail.getInfo());
         productPO.setRefundDesc(ticketDetail.getMpLossInfo());
+        productPO.setValidTimeDesc(ticketDetail.getIndate());
+        productPO.setAdvanceDay(ticketDetail.getAdvanceDay());
+        productPO.setAdvanceHour(ticketDetail.getAdvanceHour());
         TicketPO ticketPO = new TicketPO();
         if(ticketDetail.getDrawType() != null){
             switch (ticketDetail.getDrawType()){
@@ -113,30 +118,62 @@ public class DfyConverter {
         }
         ticketPO.setDrawAddress(ticketDetail.getDrawAddress());
         Integer type = null;
-        if(ticketDetail.getSubType() != null){
-            switch (ticketDetail.getSubType()){
-                case DfyConstants.TICKET_TYPE_NORMAL:
-                    type = 1;
+        if(StringUtils.isNotBlank(ticketDetail.getMpType())){
+            switch (Integer.valueOf(ticketDetail.getMpType())){
+                case DfyConstants.TICKET_TYPE_0:
+                    type = TicketType.TICKET_TYPE_19.getCode();
                     break;
-                case DfyConstants.TICKET_TYPE_COUPON:
-                    type = 16;
+                case DfyConstants.TICKET_TYPE_1:
+                    type = TicketType.TICKET_TYPE_2.getCode();
                     break;
-                case DfyConstants.TICKET_TYPE_PACKAGE:
-                    type = 17;
+                case DfyConstants.TICKET_TYPE_2:
+                    type = TicketType.TICKET_TYPE_4.getCode();
                     break;
-                case DfyConstants.TICKET_TYPE_SPECIAL:
-                    type = 18;
+                case DfyConstants.TICKET_TYPE_3:
+                    type = TicketType.TICKET_TYPE_9.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_4:
+                    type = TicketType.TICKET_TYPE_7.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_5:
+                    type = TicketType.TICKET_TYPE_8.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_6:
+                    type = TicketType.TICKET_TYPE_14.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_7:
+                    type = TicketType.TICKET_TYPE_17.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_8:
+                    type = TicketType.TICKET_TYPE_16.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_9:
+                    type = TicketType.TICKET_TYPE_20.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_10:
+                    type = TicketType.TICKET_TYPE_21.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_11:
+                    type = TicketType.TICKET_TYPE_23.getCode();
+                    break;
+                case DfyConstants.TICKET_TYPE_12:
+                    type = TicketType.TICKET_TYPE_22.getCode();
                     break;
                 default:
                     break;
             }
         }
         ticketPO.setTicketType(type);
-        // todo indate  advanceDay advanceHour 这几个东西是不是可以拼到哪个说明里
-        // todo admissionVoucher 入园方式现在没有。怎么处理
-
+        DfyAdmissionVoucher dfyAdmissionVoucher = ticketDetail.getAdmissionVoucher();
+        ticketPO.setAdmissionVoucherCode(dfyAdmissionVoucher.getAdmissionVoucherCode());
+        ticketPO.setAdmissionVoucherDesc(dfyAdmissionVoucher.getAdmissionVoucherDesc());
         TicketInfoPO ticketInfoPO = new TicketInfoPO();
         ticketInfoPO.setBaseNum(1);
+        ticketInfoPO.setSupplierItemId(ticketDetail.getScenicId());
+        ticketInfoPO.setTitle(ticketDetail.getProductName());
+        ticketInfoPO.setSupplierResourceId(ticketDetail.getResourceId());
+        ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
+        productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){
             BookRulePO contactPhone = convertBookRulePO("0", false, null, 1);
             BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1);
@@ -173,7 +210,7 @@ public class DfyConverter {
                 productPO.setBookRules(bookRules);
             }
         }
-        return null;
+        return productPO;
     }
 
     public static PricePO convertToPricePO(List<DfyPriceCalendar> dfyPriceCalendars){
@@ -181,16 +218,16 @@ public class DfyConverter {
         if(ListUtils.isNotEmpty(dfyPriceCalendars)){
             List<PriceInfoPO> priceInfoPOs = dfyPriceCalendars.stream().map(p -> {
                 PriceInfoPO priceInfoPO = new PriceInfoPO();
+                // 笛风云没有库存，默认99
+                priceInfoPO.setStock(99);
                 if(StringUtils.isBlank(p.getDepartDate())){
                     return null;
                 }
                 priceInfoPO.setSaleDate(DateTimeUtil.parseDate(p.getDepartDate()));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
-                    // TODO 这里没有结算价，可能也会有问题
                     priceInfoPO.setSettlePrice(priceInfoPO.getSalePrice());
                 }
-                // todo 笛风云没有库存，怎么处理
                 return priceInfoPO;
             }).filter(p -> p.getSaleDate() != null).collect(Collectors.toList());
             if(ListUtils.isNotEmpty(priceInfoPOs)){
