@@ -38,9 +38,10 @@ public class DfySyncTask {
             DfyScenicListRequest request = new DfyScenicListRequest();
             request.setPage(1);
             request.setPageSize(100);
-            // todo 这里需要确认是否能一次大量获取
             while (dfySyncService.syncScenicList(request)){
                 request.setPage(request.getPage() + 1);
+                // 限制一分钟不超过200次
+                Thread.sleep(310);
             }
             log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
