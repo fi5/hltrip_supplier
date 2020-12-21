@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.huoli.trip.common.constant.CentralError;
+import com.huoli.trip.common.entity.TripRefundNotify;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.DfyOrderService;
@@ -12,10 +13,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyOrderDetailRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +70,20 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     @Override
+    public DfyBaseResult<DfyBillResponse> queryBill(DfyBillQueryDataReq billQueryDataReq) {
+        try {
+            DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+            dfyBaseRequest.setData(billQueryDataReq);
+            DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
+
+            return dfyBillResponse;
+        } catch (Exception e) {
+            log.error("信息{}",e);
+            return null;
+        }
+    }
+
+    @Override
     public DfyBaseResult getCheckInfos(DfyBookCheckRequest bookCheckReq) {
         return new DfyBaseResult("success",true);
     }
@@ -100,5 +112,10 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(request);
         return diFengYunClient.refundTicket(dfyBaseRequest);
+    }
+
+    @Override
+    public void processNotify(TripRefundNotify item) {
+
     }
 }
