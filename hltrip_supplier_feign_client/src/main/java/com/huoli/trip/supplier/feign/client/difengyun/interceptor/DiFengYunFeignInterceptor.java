@@ -31,10 +31,10 @@ import java.util.Date;
 @Slf4j
 public class DiFengYunFeignInterceptor implements RequestInterceptor {
 
-    @Value("${dyf.api.key}")
+    @Value("${difengyun.api.key}")
     private String apiKey;
 
-    @Value("${dfy.api.secret.key}")
+    @Value("${difengyun.api.secret.key}")
     private String secretKey;
 
     @Override
