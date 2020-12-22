@@ -42,7 +42,7 @@ import java.util.List;
 @Slf4j
 public class DfySyncServiceImpl implements DfySyncService {
 
-    @Qualifier("diFengYun")
+    @Autowired
     private IDiFengYunClient diFengYunClient;
 
     @Autowired

@@ -54,7 +54,7 @@ import java.util.Optional;
 @Service(timeout = 10000,group = "hltrip")
 public class DfyOrderServiceImpl implements DfyOrderService {
 
-    @Qualifier("diFengYun")
+    @Autowired
     private IDiFengYunClient diFengYunClient;
 
     @Autowired
