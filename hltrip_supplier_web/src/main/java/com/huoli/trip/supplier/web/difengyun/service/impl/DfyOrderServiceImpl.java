@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -53,7 +54,7 @@ import java.util.Optional;
 @Service(timeout = 10000,group = "hltrip")
 public class DfyOrderServiceImpl implements DfyOrderService {
 
-    @Autowired
+    @Qualifier("diFengYun")
     private IDiFengYunClient diFengYunClient;
 
     @Autowired
