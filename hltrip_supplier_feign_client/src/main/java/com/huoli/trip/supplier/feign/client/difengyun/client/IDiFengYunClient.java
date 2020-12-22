@@ -62,6 +62,14 @@ public interface IDiFengYunClient {
      * @param request
      * @return
      */
+    @RequestMapping(method = RequestMethod.POST,path = "/Public/bill/query")
+    DfyBaseResult<DfyBillResponse> queryBill(@RequestBody DfyBaseRequest<DfyBillQueryDataReq> request);
+
+    /**
+     * 创建订单
+     * @param request
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/createOrderNew")
     DfyBaseResult createOrder(@RequestBody DfyBaseRequest<DfyCreateOrderRequest> request);
 

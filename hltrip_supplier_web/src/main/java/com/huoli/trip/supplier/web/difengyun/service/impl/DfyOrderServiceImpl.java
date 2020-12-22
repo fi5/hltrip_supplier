@@ -2,10 +2,18 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.constant.CentralError;
+import com.huoli.trip.common.entity.TripOrderRefund;
+import com.huoli.trip.common.entity.TripRefundNotify;
+import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.PricePO;
+import com.huoli.trip.common.util.ConfigGetter;
+import com.huoli.trip.common.util.DateTimeUtil;
+import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.DfyOrderService;
@@ -23,10 +31,13 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +58,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     @Autowired
     private PriceDao priceDao;
+
+    @Autowired
+    TripOrderRefundMapper tripOrderRefundMapper;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -88,6 +102,19 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     @Override
+    public DfyBaseResult<DfyBillResponse> queryBill(DfyBillQueryDataReq billQueryDataReq) {
+        try {
+            DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+            dfyBaseRequest.setData(billQueryDataReq);
+            DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
+
+            return dfyBillResponse;
+        } catch (Exception e) {
+            log.error("信息{}",e);
+            return null;
+        }
+    }
+
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
 
         PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
@@ -131,6 +158,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         request.setPay(payOrderRequest.getPrice());
         dfyBaseRequest.setData(request);
         //需要支付方式 支付金额
+        request.setPayType("1");
         diFengYunClient.submitOrder(dfyBaseRequest);
         return new DfyBaseResult("success",true);
     }
@@ -138,6 +166,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCreateOrderRequest createOrderReq) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+        createOrderReq.setAcctId(acctid);
         dfyBaseRequest.setData(createOrderReq);
         return diFengYunClient.createOrder(dfyBaseRequest);
     }
@@ -154,5 +184,85 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(request);
         return diFengYunClient.refundTicket(dfyBaseRequest);
+    }
+
+    @Override
+    public void processNotify(TripRefundNotify item) {
+
+        DfyBillQueryDataReq billQueryDataReq=new DfyBillQueryDataReq();
+        billQueryDataReq.setAccType(1);
+        billQueryDataReq.setBillType(2);
+        billQueryDataReq.setStart(0);
+        billQueryDataReq.setLimit(50);
+        Date createDate = DateTimeUtil.parse(item.getCreateTime(), DateTimeUtil.YYYYMMDDHHmmss);
+
+        billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,-1),DateTimeUtil.YYYYMMDDHHmmss));
+        billQueryDataReq.setEndTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,10),DateTimeUtil.YYYYMMDDHHmmss));
+
+        DfyBaseResult<DfyBillResponse> dfyBillResponseDfyBaseResult = queryBill(billQueryDataReq);
+        if(dfyBillResponseDfyBaseResult.getData()!=null && CollectionUtils.isNotEmpty(dfyBillResponseDfyBaseResult.getData().getRows())){
+            log.info("processNotify这里的rows:"+ JSONObject.toJSONString(dfyBillResponseDfyBaseResult.getData().getRows()));
+            for(DfyBillResponse.QueryBillsDto bill :dfyBillResponseDfyBaseResult.getData().getRows()){
+
+                if(bill.getBillType()!=4)
+                    break;
+
+                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
+                String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
+                RefundNoticeReq req=new RefundNoticeReq();
+                req.setPartnerOrderId(item.getOrderId());
+                req.setRefundFrom(2);
+                req.setRefundPrice(new BigDecimal(bill.getAmount()));
+                req.setRefundTime(refundOrder.getCreateTime());
+                req.setResponseTime(bill.getTime());
+                req.setSource("dfy");
+                req.setRefundId(refundOrder.getId());
+                req.setRefundCharge(refundOrder.getRefundCharge());
+
+
+                switch (bill.getStatus()) {//账单处理结果，1处理完成-1处理失败3处理
+                    case 1:
+                        item.setStatus(1);
+                        item.setRefundStatus(bill.getStatus());
+                        item.setRefundTime(bill.getTime());
+                        item.setRefundMoney(bill.getAmount());
+                        item.setBillInfo(JSONObject.toJSONString(bill));
+                        tripOrderRefundMapper.updateRefundNotify(item);
+
+                        req.setRefundStatus(1);
+
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        log.info("中台refundNotice返回:"+res);
+
+
+                        break;
+
+                    case -1:
+
+                        item.setStatus(2);
+                        item.setRefundStatus(bill.getStatus());
+                        item.setRefundTime(bill.getTime());
+                        item.setRefundMoney(bill.getAmount());
+                        item.setBillInfo(JSONObject.toJSONString(bill));
+                        tripOrderRefundMapper.updateRefundNotify(item);
+
+                        req.setRefundStatus(-1);
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        log.info("中台refundNotice返回:"+res2);
+                        break;
+                    case 3:
+
+                        break;
+                    default:
+
+                        break;
+                }
+
+
+            }
+        }
+
     }
 }
