@@ -2,18 +2,17 @@ package com.huoli.trip.supplier.feign.client.difengyun.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.trip.common.constant.ConfigConstants;
+import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.DesUtil;
 import com.huoli.trip.supplier.self.difengyun.util.DfySignature;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import lombok.Singular;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -31,15 +30,17 @@ import java.util.Date;
 @Slf4j
 public class DiFengYunFeignInterceptor implements RequestInterceptor {
 
-    @Value("${dyf.api.key}")
-    private String apiKey;
-
-    @Value("${dfy.api.secret.key}")
-    private String secretKey;
+//    @Value("${difengyun.api.key}")
+//    private String apiKey;
+//
+//    @Value("${difengyun.api.secret.key}")
+//    private String secretKey;
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
         try {
+            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.key");
+            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.secret.key");
             byte[] body = requestTemplate.body();
             if(body != null && body.length > 0){
                 String time = DateTimeUtil.formatFullDate(new Date());

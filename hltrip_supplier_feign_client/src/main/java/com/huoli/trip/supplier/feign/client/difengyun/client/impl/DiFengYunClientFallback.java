@@ -10,6 +10,7 @@ import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -74,6 +75,11 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
 
             @Override
             public DfyBaseResult<DfySubmitOrderResponse> submitOrder(DfyBaseRequest<DfySubmitOrderRequest> request) {
+                return null;
+            }
+
+            @Override
+            public DfyBaseResult<DfyBillResponse> queryBill(@RequestBody DfyBaseRequest<DfyBillQueryDataReq> request){
                 return null;
             }
         };

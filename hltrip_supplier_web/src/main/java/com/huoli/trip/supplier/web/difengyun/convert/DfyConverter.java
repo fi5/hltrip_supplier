@@ -225,6 +225,7 @@ public class DfyConverter {
                 }
                 priceInfoPO.setSaleDate(DateTimeUtil.parseDate(p.getDepartDate()));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
+                    // todo 加价计算公式
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
                     priceInfoPO.setSettlePrice(priceInfoPO.getSalePrice());
                 }

@@ -1,9 +1,11 @@
 package com.huoli.trip.supplier.api;
 
+import com.huoli.trip.common.entity.TripRefundNotify;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBookCheckResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
@@ -31,6 +33,13 @@ public interface DfyOrderService {
 	 */
 	BaseResponse<OrderDetailRep> getVochers(BaseOrderRequest request);
 
+	/**
+	 * 账单查询
+	 * @param billQueryDataReq
+	 * @return
+	 */
+	DfyBaseResult<DfyBillResponse> queryBill(DfyBillQueryDataReq billQueryDataReq);
+
     /**
      * 可预订检查
      */
@@ -55,4 +64,9 @@ public interface DfyOrderService {
 	 */
 	DfyBaseResult<DfyRefundTicketResponse> rufundTicket(DfyRefundTicketRequest request);
 
+	/**
+	 * 处理退款通知
+	 * @param item
+	 */
+	void processNotify(TripRefundNotify item);
 }

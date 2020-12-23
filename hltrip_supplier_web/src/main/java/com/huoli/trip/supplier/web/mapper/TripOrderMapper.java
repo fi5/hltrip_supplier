@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.mapper;
 
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderVoucher;
+import com.huoli.trip.common.entity.TripPayOrder;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -20,4 +21,7 @@ public interface TripOrderMapper {
 
     @Select("select channel from trip_order where orderId = #{orderId}")
     TripOrder getChannelByOrderId(String orderId);
+
+    @Select("select * from trip_pay_order where orderId = #{orderId}")
+    List<TripPayOrder> getOrderPayList(String orderId);
 }
