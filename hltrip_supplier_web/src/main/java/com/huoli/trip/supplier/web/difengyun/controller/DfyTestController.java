@@ -1,9 +1,13 @@
 package com.huoli.trip.supplier.web.difengyun.controller;
 
+import com.huoli.trip.common.vo.response.BaseResponse;
+import com.huoli.trip.supplier.api.DfyOrderService;
+import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,9 @@ public class DfyTestController {
 
     @Autowired
     private DfySyncService dfySyncService;
+    @Autowired
+    DfyOrderService dfyOrderService;
+
 
     /**
      * 接收产品更新通知
@@ -48,5 +55,16 @@ public class DfyTestController {
     DfyBaseResult syncScenic(@RequestBody DfyScenicListRequest request) {
         dfySyncService.syncScenicList(request);
         return DfyBaseResult.success();
+    }
+
+    /**
+     * 订单详情
+     * @param request
+     * @return
+     */
+    @PostMapping(path = "/order/detail")
+    DfyBaseResult orderDetail(@RequestBody BaseOrderRequest request) {
+        final BaseResponse<DfyOrderDetail> dfyOrderDetailBaseResponse = dfyOrderService.orderDetail(request);
+        return DfyBaseResult.success(dfyOrderDetailBaseResponse);
     }
 }

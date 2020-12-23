@@ -69,6 +69,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         DfyBaseRequest<DfyOrderDetailRequest> dfyOrderDetailReq = new DfyBaseRequest<>(dfyOrderDetailBody);
         dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
         try {
+            String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+            dfyOrderDetailBody.setAcctId(acctid);
             DfyBaseResult<DfyOrderDetail> baseResult = diFengYunClient.orderDetail(dfyOrderDetailReq);
 
 
