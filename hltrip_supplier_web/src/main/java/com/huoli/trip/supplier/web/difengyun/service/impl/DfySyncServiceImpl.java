@@ -152,7 +152,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-            product.setValidTime(DateTimeUtil.trancateToDate(new Date()));
+            product.setValidTime(DateTimeUtil.trancateToDate(MongoDateUtils.handleTimezoneInput(new Date())));
             log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
                 log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
