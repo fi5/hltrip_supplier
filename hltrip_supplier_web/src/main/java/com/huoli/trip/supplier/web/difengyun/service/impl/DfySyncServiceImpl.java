@@ -3,11 +3,9 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.entity.PricePO;
-import com.huoli.trip.common.entity.ProductItemPO;
-import com.huoli.trip.common.entity.ProductPO;
-import com.huoli.trip.common.entity.TicketInfoPO;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
@@ -27,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -153,14 +152,20 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-            productDao.updateByCode(product);
+            product.setValidTime(DateTimeUtil.trancateToDate(new Date()));
             log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
                 log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
-                syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
+                PricePO pricePO = syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
+                if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
+                    PriceInfoPO priceInfoPO = pricePO.getPriceInfos().stream().min(Comparator.comparing(PriceInfoPO::getSaleDate)).get();
+                    product.setInvalidTime(priceInfoPO.getSaleDate());
+                }
             } else {
+                product.setInvalidTime(product.getValidTime());
                 log.error("没有价格信息。。。。");
             }
+            productDao.updateByCode(product);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
         }
@@ -171,7 +176,7 @@ public class DfySyncServiceImpl implements DfySyncService {
      * @param productCode
      * @param priceCalendar
      */
-    private void syncPrice(String productCode, List<DfyPriceCalendar> priceCalendar){
+    private PricePO syncPrice(String productCode, List<DfyPriceCalendar> priceCalendar){
         log.info("查询价格。。");
         PricePO pricePO = priceDao.getByProductCode(productCode);
         PricePO price = DfyConverter.convertToPricePO(priceCalendar);
@@ -185,6 +190,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
         priceDao.updateByProductCode(price);
         log.info("价格已更新。。。{}", JSON.toJSONString(price));
+        return price;
     }
 
     @Override
