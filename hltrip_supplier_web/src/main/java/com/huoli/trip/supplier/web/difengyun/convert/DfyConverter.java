@@ -1,5 +1,8 @@
 package com.huoli.trip.supplier.web.difengyun.convert;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
@@ -16,6 +19,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -31,6 +35,7 @@ import java.util.stream.Collectors;
  * 版本：1.0<br>
  * 创建日期：2020/12/9<br>
  */
+@Slf4j
 public class DfyConverter {
 
     public static ProductItemPO convertToProductItemPO(DfyScenicDetail scenicDetail){
@@ -43,10 +48,21 @@ public class DfyConverter {
         productItemPO.setName(scenicDetail.getScenicName());
         List<ItemFeaturePO> featurePOs = Lists.newArrayList();
         if(StringUtils.isNotBlank(scenicDetail.getBookNotice())){
-            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-            itemFeaturePO.setDetail(scenicDetail.getBookNotice());
-            itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
-            featurePOs.add(itemFeaturePO);
+            try {
+                ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+                JSONArray jsonArray = JSON.parseArray(scenicDetail.getBookNotice());
+                StringBuilder sb = new StringBuilder();
+                for (Object o : jsonArray) {
+                    JSONObject obj = (JSONObject) o;
+                    sb.append(obj.get("name")).append("<br>")
+                            .append(obj.get("value")).append("<br>");
+                }
+                itemFeaturePO.setDetail(sb.toString());
+                itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
+                featurePOs.add(itemFeaturePO);
+            } catch (Exception e){
+                log.error("笛风云转换特色列表（购买须知）异常，不影响正常流程。。", e);
+            }
         }
         productItemPO.setCity(scenicDetail.getCityName());
         productItemPO.setDesCity(scenicDetail.getCityName());
