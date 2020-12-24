@@ -144,5 +144,22 @@ public class DfyConstants {
      * 台胞证
      */
     public static final int CRED_TYPE_TW = 7;
+    // 下面这些暂时用不到
+    /**
+     * 回乡证
+     */
+    public static final int CRED_TYPE_HK_2 = 8;
+    /**
+     * 户口簿
+     */
+    public static final int CRED_TYPE_AC = 9;
+    /**
+     * 出生证明
+     */
+    public static final int CRED_TYPE_BC = 10;
+    /**
+     * 台湾通行证
+     */
+    public static final int CRED_TYPE_TW_2 = 11;
 
 }

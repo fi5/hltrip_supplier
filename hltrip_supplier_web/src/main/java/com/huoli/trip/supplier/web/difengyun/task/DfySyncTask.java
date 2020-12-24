@@ -34,7 +34,7 @@ public class DfySyncTask {
                 return;
             }
             long begin = System.currentTimeMillis();
-            log.info("开始执行定时任务，同步要出发价格日历。。");
+            log.info("开始执行定时任务，同步笛风云产品。。");
             DfyScenicListRequest request = new DfyScenicListRequest();
             request.setPage(1);
             request.setPageSize(100);
@@ -43,7 +43,7 @@ public class DfySyncTask {
                 // 限制一分钟不超过200次
                 Thread.sleep(310);
             }
-            log.info("定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步笛风云产品定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行笛风云定时更新景点、产品任务异常", e);
         }
