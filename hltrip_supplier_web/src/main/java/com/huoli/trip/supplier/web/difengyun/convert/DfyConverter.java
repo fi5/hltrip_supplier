@@ -273,7 +273,7 @@ public class DfyConverter {
                     case DfyConstants.CRED_TYPE_HK:
                         return Certificate.HKM_PASS.getCode();
                     case DfyConstants.CRED_TYPE_TW:
-                        return Certificate.SOLDIERS.getCode();
+                        return Certificate.TW_CARD.getCode();
                     default:
                         return Certificate.ID_CARD.getCode();
                 }
