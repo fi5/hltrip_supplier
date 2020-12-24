@@ -15,6 +15,7 @@ import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
@@ -44,7 +45,7 @@ public class DfyCallBackService {
     @Autowired
     DfyOrderService dfyOrderService;
 
-    public BaseResponse orderStatusNotice(DfyOrderPushRequest request) {
+    public DfyBaseResult orderStatusNotice(DfyOrderPushRequest request) {
         String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
         try {
             String string = JSONObject.toJSONString(request);
@@ -52,6 +53,9 @@ public class DfyCallBackService {
             BaseOrderRequest orderDetailReq=new BaseOrderRequest();
             BaseResponse<DfyOrderDetail> dfyOrderDetail = dfyOrderService.orderDetail(orderDetailReq);
             DfyOrderDetail orderDetail = dfyOrderDetail.getData();
+            if(null==orderDetail)
+                return new DfyBaseResult("601","未查询到订单",false);
+
 
             List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(request.getOrderId());
             boolean payed=false;
@@ -85,11 +89,10 @@ public class DfyCallBackService {
             }
 
 
-            return BaseResponse.success(null);
+            return DfyBaseResult.success(null);
         } catch (Exception e) {
             log.info("",e);
-            return BaseResponse.fail(CentralError.ERROR_SERVER_ERROR);
-//            return new DfyOrderPushResponse(false,"内部通信异常","500");
+            return new DfyBaseResult("500","内部通信异常",false);
         }
     }
 
