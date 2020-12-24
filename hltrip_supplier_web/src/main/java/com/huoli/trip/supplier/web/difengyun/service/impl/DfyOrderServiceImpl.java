@@ -72,6 +72,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
             dfyOrderDetailBody.setAcctId(acctid);
             DfyBaseResult<DfyOrderDetail> baseResult = diFengYunClient.orderDetail(dfyOrderDetailReq);
+            log.info("dfy订单详情的返回:"+JSONObject.toJSONString(baseResult));
 
 
             DfyOrderDetail detail = baseResult.getData();

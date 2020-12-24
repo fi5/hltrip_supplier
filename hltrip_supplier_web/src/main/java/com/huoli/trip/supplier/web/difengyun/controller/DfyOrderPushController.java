@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.difengyun.controller;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.push.YcfPushOrderStatusReq;
 import com.huoli.trip.supplier.web.difengyun.service.impl.DfyCallBackService;
@@ -31,7 +32,7 @@ public class DfyOrderPushController {
     DfyCallBackService dfyCallBackService;
 
     @PostMapping(path = "/pushOrderStatus")
-    BaseResponse pushOrderStatus(@RequestBody DfyOrderPushRequest request) {
+    DfyBaseResult pushOrderStatus(@RequestBody DfyOrderPushRequest request) {
         log.info("供应商触发了订单推送 订单号：{}",request.getOrderId());
         return dfyCallBackService.orderStatusNotice(request);
     }
