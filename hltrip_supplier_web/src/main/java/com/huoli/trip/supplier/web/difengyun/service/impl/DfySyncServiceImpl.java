@@ -154,8 +154,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
             productDao.updateByCode(product);
+            log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
+                log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
                 syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
+            } else {
+                log.error("没有价格信息。。。。");
             }
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
@@ -168,15 +172,19 @@ public class DfySyncServiceImpl implements DfySyncService {
      * @param priceCalendar
      */
     private void syncPrice(String productCode, List<DfyPriceCalendar> priceCalendar){
+        log.info("查询价格。。");
         PricePO pricePO = priceDao.getByProductCode(productCode);
         PricePO price = DfyConverter.convertToPricePO(priceCalendar);
         if(pricePO == null){
+            log.info("没有查询到价格，准备新建。。");
             price.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         }
         price.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         price.setOperator(Constants.SUPPLIER_CODE_DFY);
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+
         priceDao.updateByProductCode(price);
+        log.info("价格已更新。。。{}", JSON.toJSONString(price));
     }
 
     @Override
