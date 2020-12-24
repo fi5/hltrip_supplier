@@ -6,6 +6,7 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.TicketInfoPO;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
@@ -139,6 +140,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setCity(productItemPO.getCity());
             product.setDesCity(productItemPO.getDesCity());
             product.setOriCity(productItemPO.getOriCity());
+            if(product.getTicket() != null && ListUtils.isNotEmpty(product.getTicket().getTickets())){
+                for (TicketInfoPO ticket : product.getTicket().getTickets()) {
+                    ticket.setItemId(productItemPO.getCode());
+                    ticket.setProductItem(productItemPO);
+                }
+            }
             ProductPO productPO = productDao.getByCode(product.getCode());
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
