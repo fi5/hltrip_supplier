@@ -56,10 +56,10 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
                 request.setSign(sign);
                 request.setTimestamp(time);
                 // 业务参数data需要单独加密，实际传参的时候传加密后的
-                log.info("笛风云feign拦截器，准备加密业务数据，secretKey = {}, data = {}", secretKey, JSON.toJSONString(request.getData()));
-                String data = new String(Base64.getEncoder().encode(DesUtil.encrypt(JSON.toJSONString(request.getData()).getBytes(StandardCharsets.UTF_8), secretKey)), StandardCharsets.UTF_8);
-                log.info("业务数据加密完成，base64data = {}", data);
-                request.setData(data);
+//                log.info("笛风云feign拦截器，准备加密业务数据，secretKey = {}, data = {}", secretKey, JSON.toJSONString(request.getData()));
+//                String data = new String(Base64.getEncoder().encode(DesUtil.encrypt(JSON.toJSONString(request.getData()).getBytes(StandardCharsets.UTF_8), secretKey)), StandardCharsets.UTF_8);
+//                log.info("业务数据加密完成，base64data = {}", data);
+//                request.setData(data);
                 log.info("笛风云feign拦截器，最终请求参数，request = {}", JSON.toJSONString(request));
                 requestTemplate.body(JSON.toJSONString(request));
             } else {
