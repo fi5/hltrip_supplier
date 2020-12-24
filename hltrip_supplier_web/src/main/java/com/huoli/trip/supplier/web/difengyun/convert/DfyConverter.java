@@ -214,11 +214,11 @@ public class DfyConverter {
                     break;
                 case DfyConstants.BOOK_RULE_6:
                     bookRules.add(contactPhoneAndID);
-                    bookRules.add(passengerPhone);
+                    bookRules.add(passengerPhoneAndID);
                     break;
                 case DfyConstants.BOOK_RULE_7:
                     bookRules.add(contactPhoneAndID);
-                    bookRules.add(passengerPhoneAndID);
+                    bookRules.add(passengerPhone);
                     break;
                 default:
                     break;
@@ -275,10 +275,14 @@ public class DfyConverter {
                     case DfyConstants.CRED_TYPE_TW:
                         return Certificate.TW_CARD.getCode();
                     default:
-                        return Certificate.ID_CARD.getCode();
+                        // 其它类型直接舍弃（笛风云建议这样操作）
+                        return Integer.MIN_VALUE;
                 }
-            }).distinct().collect(Collectors.toList());
+            }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
             bookRulePO.setCredentials(creds);
+        } else {
+            // 如果空的只支持身份证
+            bookRulePO.setCredentials(Lists.newArrayList(Certificate.ID_CARD.getCode()));
         }
         bookRulePO.setEmail(false);
         bookRulePO.setEnName(false);
