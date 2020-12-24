@@ -171,6 +171,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
         createOrderReq.setAcctId(acctid);
+        createOrderReq.setTraceId(null);
         dfyBaseRequest.setData(createOrderReq);
         return diFengYunClient.createOrder(dfyBaseRequest);
     }
