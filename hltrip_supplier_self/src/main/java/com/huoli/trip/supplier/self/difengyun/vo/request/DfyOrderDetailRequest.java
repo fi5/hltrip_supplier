@@ -12,4 +12,5 @@ public class DfyOrderDetailRequest  extends TraceRequest implements Serializable
      * supplier订单IDD
      */
     private String orderId;
+    private String acctId;
 }
