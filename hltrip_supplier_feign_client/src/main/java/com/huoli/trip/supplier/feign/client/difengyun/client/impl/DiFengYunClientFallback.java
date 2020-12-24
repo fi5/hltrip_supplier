@@ -54,7 +54,7 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
-            public DfyBaseResult<DfyTicketDetail> createOrder(DfyBaseRequest<DfyCreateOrderRequest> request) {
+            public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyBaseRequest<DfyCreateOrderRequest> request) {
                 return null;
             }
 
@@ -64,7 +64,7 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
-            public DfyOrderStatusResponse orderStatus(DfyBaseRequest<DfyOrderStatusRequest> request) {
+            public DfyBaseResult<DfyOrderStatusResponse> orderStatus(DfyBaseRequest<DfyOrderStatusRequest> request) {
                 return null;
             }
 

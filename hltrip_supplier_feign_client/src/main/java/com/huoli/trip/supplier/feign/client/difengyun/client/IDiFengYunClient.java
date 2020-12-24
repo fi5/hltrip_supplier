@@ -71,7 +71,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/createOrderNew")
-    DfyBaseResult createOrder(@RequestBody DfyBaseRequest<DfyCreateOrderRequest> request);
+    DfyBaseResult<DfyCreateOrderResponse> createOrder(@RequestBody DfyBaseRequest<DfyCreateOrderRequest> request);
 
     /**
      * 取消订单申请
@@ -88,7 +88,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/orderStatus")
-    DfyOrderStatusResponse orderStatus(@RequestBody DfyBaseRequest<DfyOrderStatusRequest> request);
+    DfyBaseResult<DfyOrderStatusResponse> orderStatus(@RequestBody DfyBaseRequest<DfyOrderStatusRequest> request);
 
     /**
      * 申请退票
