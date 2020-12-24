@@ -175,6 +175,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         log.info("查询价格。。");
         PricePO pricePO = priceDao.getByProductCode(productCode);
         PricePO price = DfyConverter.convertToPricePO(priceCalendar);
+        price.setProductCode(productCode);
         if(pricePO == null){
             log.info("没有查询到价格，准备新建。。");
             price.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -182,7 +183,6 @@ public class DfySyncServiceImpl implements DfySyncService {
         price.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         price.setOperator(Constants.SUPPLIER_CODE_DFY);
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-
         priceDao.updateByProductCode(price);
         log.info("价格已更新。。。{}", JSON.toJSONString(price));
     }
