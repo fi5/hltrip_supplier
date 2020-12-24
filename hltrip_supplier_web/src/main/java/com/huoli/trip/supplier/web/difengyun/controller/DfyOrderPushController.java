@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Api(description = "订单推送相关")
 @Slf4j
-@RequestMapping(value = "/api/push")
+@RequestMapping(value = "/api")
 public class DfyOrderPushController {
     @Autowired
     DfyCallBackService dfyCallBackService;
