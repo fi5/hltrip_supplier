@@ -192,10 +192,10 @@ public class DfyConverter {
         ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
         productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){
-            BookRulePO contactPhone = convertBookRulePO("0", false, null, 1);
-            BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1);
-            BookRulePO passengerPhone = convertBookRulePO("1", false, null, 0);
-            BookRulePO passengerPhoneAndID = convertBookRulePO("1", true, ticketDetail.getCertificateType(), 0);
+            BookRulePO contactPhone = convertBookRulePO("0", false, null, 1, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO passengerPhone = convertBookRulePO("1", false, null, 0, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO passengerPhoneAndID = convertBookRulePO("1", true, ticketDetail.getCertificateType(), 0, dfyAdmissionVoucher.getAdmissionVoucherCode());
             List<BookRulePO> bookRules = Lists.newArrayList();
             switch (ticketDetail.getCustInfoLimit()){
                 case DfyConstants.BOOK_RULE_1:
@@ -255,7 +255,7 @@ public class DfyConverter {
         return pricePO;
     }
 
-    private static BookRulePO convertBookRulePO(String ruleType, boolean credential, String credentialList, int limit){
+    private static BookRulePO convertBookRulePO(String ruleType, boolean credential, String credentialList, int limit, String admissionVoucherCode){
         BookRulePO bookRulePO = new BookRulePO();
         bookRulePO.setRuleType(ruleType);
         bookRulePO.setCnName(true);
@@ -285,6 +285,10 @@ public class DfyConverter {
             bookRulePO.setCredentials(Lists.newArrayList(Certificate.ID_CARD.getCode()));
         }
         bookRulePO.setEmail(false);
+        // 需要邮箱的入园方式，只联系人
+        if("0".equals(ruleType) && Arrays.asList("205", "302").contains(admissionVoucherCode)){
+            bookRulePO.setEmail(true);
+        }
         bookRulePO.setEnName(false);
         bookRulePO.setPeopleLimit(limit);
 //        bookRulePO.setPeopleNum(1);
