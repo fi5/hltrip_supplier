@@ -8,6 +8,7 @@ import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.*;
@@ -52,6 +53,9 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Autowired
     private PriceDao priceDao;
+
+    @Autowired
+    private DynamicProductItemService dynamicProductItemService;
 
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
@@ -104,6 +108,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     syncProduct(dfyTicket.getProductId(), productItemPO);
                 }
             }
+            dynamicProductItemService.refreshItemByCode(productItemPO.getCode());
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }

@@ -277,7 +277,7 @@ public class DfyConverter {
                     default:
                         return Certificate.ID_CARD.getCode();
                 }
-            }).collect(Collectors.toList());
+            }).distinct().collect(Collectors.toList());
             bookRulePO.setCredentials(creds);
         }
         bookRulePO.setEmail(false);
