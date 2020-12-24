@@ -158,7 +158,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
                 PricePO pricePO = syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
                 if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
-                    PriceInfoPO priceInfoPO = pricePO.getPriceInfos().stream().min(Comparator.comparing(PriceInfoPO::getSaleDate)).get();
+                    // 笛风云没有上下架时间，就把最远的销售日期作为下架时间
+                    PriceInfoPO priceInfoPO = pricePO.getPriceInfos().stream().max(Comparator.comparing(PriceInfoPO::getSaleDate)).get();
                     product.setInvalidTime(priceInfoPO.getSaleDate());
                 }
             } else {
