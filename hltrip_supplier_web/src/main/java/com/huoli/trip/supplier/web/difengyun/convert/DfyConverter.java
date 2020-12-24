@@ -9,6 +9,7 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
@@ -223,7 +224,7 @@ public class DfyConverter {
                 if(StringUtils.isBlank(p.getDepartDate())){
                     return null;
                 }
-                priceInfoPO.setSaleDate(DateTimeUtil.parseDate(p.getDepartDate()));
+                priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(p.getDepartDate())));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
                     // todo 加价计算公式
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
