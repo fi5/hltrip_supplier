@@ -72,7 +72,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
             dfyOrderDetailBody.setAcctId(acctid);
             DfyBaseResult<DfyOrderDetail> baseResult = diFengYunClient.orderDetail(dfyOrderDetailReq);
-            log.info("dfy订单详情的返回:"+JSONObject.toJSONString(baseResult));
+            log.info("dfy订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
 
 
             DfyOrderDetail detail = baseResult.getData();
@@ -111,6 +111,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
             dfyBaseRequest.setData(billQueryDataReq);
             DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
+            log.info("dfyqueryBill的返回:"+JSONObject.toJSONString(dfyBillResponse)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest));
 
             return dfyBillResponse;
         } catch (Exception e) {
