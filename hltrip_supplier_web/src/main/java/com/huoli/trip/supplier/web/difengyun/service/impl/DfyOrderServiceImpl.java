@@ -194,6 +194,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     public DfyBaseResult<DfyRefundTicketResponse> rufundTicket(DfyRefundTicketRequest request) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(request);
+        request.setTraceId(null);
         return diFengYunClient.refundTicket(dfyBaseRequest);
     }
 
