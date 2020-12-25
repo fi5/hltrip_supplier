@@ -271,4 +271,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         }
 
     }
+
+    @Override
+    public DfyBaseResult<DfyOrderStatusResponse> orderStatus(DfyOrderStatusRequest request) {
+        String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+        DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setData(request);
+        request.setAcctId(acctid);
+        return diFengYunClient.orderStatus(dfyBaseRequest);
+    }
 }

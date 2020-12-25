@@ -5,12 +5,8 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBookCheckResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyRefundTicketResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyCreateOrderResponse;
 
 /**
  * @author :zhouwenbin
@@ -69,4 +65,6 @@ public interface DfyOrderService {
 	 * @param item
 	 */
 	void processNotify(TripRefundNotify item);
+	DfyBaseResult<DfyOrderStatusResponse> orderStatus(DfyOrderStatusRequest request);
+
 }
