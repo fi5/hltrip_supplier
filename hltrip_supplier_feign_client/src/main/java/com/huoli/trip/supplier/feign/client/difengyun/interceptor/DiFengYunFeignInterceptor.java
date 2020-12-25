@@ -11,6 +11,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,10 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
                 // 签名要把data层的属性和base层的合起来，所以以data为准加上base层的参数，因为base层的参数少这样合方便
                 JSONObject bodyObj = JSONObject.parseObject(JSON.toJSONString(request.getData()));
                 bodyObj.put("apiKey", apiKey);
+                // 不同的业务key不同，如果请求里有就用请求的
+                if(StringUtils.isNotBlank(request.getApiKey())){
+                    bodyObj.put("apiKey", request.getApiKey());
+                }
                 bodyObj.put("timestamp", time);
                 log.info("笛风云feign拦截器，准备获取签名，secretKey = {}, bodyObj = {} ", secretKey, bodyObj.toJSONString());
                 String sign = DfySignature.getSignature(bodyObj, secretKey);
