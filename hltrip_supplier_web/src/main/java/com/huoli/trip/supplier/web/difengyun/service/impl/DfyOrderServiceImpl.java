@@ -181,6 +181,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public DfyBaseResult cancelOrder(DfyCancelOrderRequest cancelOrderReq) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        cancelOrderReq.setTraceId(null);
         dfyBaseRequest.setData(cancelOrderReq);
         return diFengYunClient.cancelOrder(dfyBaseRequest);
     }
