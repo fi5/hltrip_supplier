@@ -212,6 +212,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         billQueryDataReq.setBillType(2);
         billQueryDataReq.setStart(0);
         billQueryDataReq.setLimit(50);
+        billQueryDataReq.setStatus(1);
         Date createDate = DateTimeUtil.parse(item.getCreateTime(), DateTimeUtil.YYYYMMDDHHmmss);
 
         billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,-1),DateTimeUtil.YYYYMMDDHHmmss));

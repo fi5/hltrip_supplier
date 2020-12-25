@@ -83,7 +83,7 @@ public class DfyTestController {
      * @return
      */
     @PostMapping(path = "/order/bill")
-    DfyBaseResult queryBill(@RequestBody BaseOrderRequest request) {
+    DfyBaseResult queryBill(int status) {
         try {
             DfyBillQueryDataReq billQueryDataReq = new DfyBillQueryDataReq();
             billQueryDataReq.setAccType(1);
@@ -91,6 +91,7 @@ public class DfyTestController {
             billQueryDataReq.setStart(0);
             billQueryDataReq.setLimit(50);
             Date createDate = new Date();
+            billQueryDataReq.setStatus(status);
 
             billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate, -1), DateTimeUtil.YYYYMMDDHHmmss));
             billQueryDataReq.setEndTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate, 10), DateTimeUtil.YYYYMMDDHHmmss));
