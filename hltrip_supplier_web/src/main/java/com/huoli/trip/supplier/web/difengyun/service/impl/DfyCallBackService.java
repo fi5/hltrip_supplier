@@ -51,6 +51,7 @@ public class DfyCallBackService {
             String string = JSONObject.toJSONString(request);
             log.info("中台订单推送传参json:"+string);
             BaseOrderRequest orderDetailReq=new BaseOrderRequest();
+            orderDetailReq.setSupplierOrderId(request.getOrderId());
             BaseResponse<DfyOrderDetail> dfyOrderDetail = dfyOrderService.orderDetail(orderDetailReq);
             DfyOrderDetail orderDetail = dfyOrderDetail.getData();
             if(null==orderDetail)
