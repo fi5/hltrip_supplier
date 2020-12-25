@@ -187,6 +187,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public DfyBaseResult cancelOrder(DfyCancelOrderRequest cancelOrderReq) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        cancelOrderReq.setTraceId(null);
         dfyBaseRequest.setData(cancelOrderReq);
         return diFengYunClient.cancelOrder(dfyBaseRequest);
     }
@@ -194,6 +195,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public DfyBaseResult<DfyRefundTicketResponse> rufundTicket(DfyRefundTicketRequest request) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        request.setTraceId(null);
         dfyBaseRequest.setData(request);
         return diFengYunClient.refundTicket(dfyBaseRequest);
     }
