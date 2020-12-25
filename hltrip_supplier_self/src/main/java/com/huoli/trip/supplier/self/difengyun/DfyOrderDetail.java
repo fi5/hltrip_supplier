@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.difengyun;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  * @comment:https://open.difengyun.com/doc/api/all/8/2
  **/
 @Data
-public class DfyOrderDetail {
+public class DfyOrderDetail implements Serializable {
 
 	private String orderId;
 	private String canPay;//支付开关 0.不可支付，1.可以支付；分销商系统需要控制，当canPay="1"时，才调用【出票(代扣)接口】。
