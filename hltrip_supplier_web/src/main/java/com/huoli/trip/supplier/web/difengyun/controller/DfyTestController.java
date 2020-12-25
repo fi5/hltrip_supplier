@@ -79,7 +79,7 @@ public class DfyTestController {
      * @return
      */
     @PostMapping(path = "/order/bill")
-    DfyBaseResult orderDetail(@RequestBody BaseOrderRequest request) {
+    DfyBaseResult queryBill(@RequestBody BaseOrderRequest request) {
         try {
             DfyBillQueryDataReq billQueryDataReq=new DfyBillQueryDataReq();
             billQueryDataReq.setAccType(1);
