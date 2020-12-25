@@ -77,6 +77,10 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+            }else{
+                if(!baseResult.isSuccess()){
+                    return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
+                }
             }
             return BaseResponse.success(detail);
         } catch (Exception e) {
