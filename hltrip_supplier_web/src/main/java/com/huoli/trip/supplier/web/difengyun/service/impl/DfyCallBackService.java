@@ -87,6 +87,7 @@ public class DfyCallBackService {
                 PushOrderStatusReq req =new PushOrderStatusReq();
                 req.setStrStatus(orderDetail.getOrderStatus());
                 req.setPartnerOrderId(tripOrder.getOrderId());
+                req.setType(3);
                 log.info("中台订单推送传参json:"+req);
                 String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                 log.info("中台orderStatusNotice返回:"+res);
