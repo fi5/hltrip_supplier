@@ -81,7 +81,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             return BaseResponse.success(detail);
         } catch (Exception e) {
         	log.error("信息{}",e);
-            return BaseResponse.fail(CentralError.ERROR_UNKNOWN);
+            return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
         }
 
 
