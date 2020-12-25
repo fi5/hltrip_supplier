@@ -42,6 +42,7 @@ public class DfyTestController {
 
     /**
      * 接收产品更新通知
+     *
      * @param productId
      * @return
      */
@@ -53,6 +54,7 @@ public class DfyTestController {
 
     /**
      * 接收产品更新通知
+     *
      * @param request
      * @return
      */
@@ -64,6 +66,7 @@ public class DfyTestController {
 
     /**
      * 订单详情
+     *
      * @param request
      * @return
      */
@@ -75,24 +78,27 @@ public class DfyTestController {
 
     /**
      * 订单详情
+     *
      * @param request
      * @return
      */
     @PostMapping(path = "/order/bill")
     DfyBaseResult queryBill(@RequestBody BaseOrderRequest request) {
         try {
-            DfyBillQueryDataReq billQueryDataReq=new DfyBillQueryDataReq();
+            DfyBillQueryDataReq billQueryDataReq = new DfyBillQueryDataReq();
             billQueryDataReq.setAccType(1);
             billQueryDataReq.setBillType(2);
             billQueryDataReq.setStart(0);
             billQueryDataReq.setLimit(50);
             Date createDate = new Date();
 
-            billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,-1),DateTimeUtil.YYYYMMDDHHmmss));
-            billQueryDataReq.setEndTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,10),DateTimeUtil.YYYYMMDDHHmmss));
+            billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate, -1), DateTimeUtil.YYYYMMDDHHmmss));
+            billQueryDataReq.setEndTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate, 10), DateTimeUtil.YYYYMMDDHHmmss));
             DfyBaseResult<DfyBillResponse> dfyBillResponseDfyBaseResult = dfyOrderService.queryBill(billQueryDataReq);
             return DfyBaseResult.success(dfyBillResponseDfyBaseResult);
         } catch (Exception e) {
-        	log.error("信息{}",e);
+            log.error("信息{}", e);
+            return null;
         }
+    }
 }
