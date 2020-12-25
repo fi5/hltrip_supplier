@@ -1,5 +1,8 @@
 package com.huoli.trip.supplier.web.difengyun.convert;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
@@ -9,12 +12,14 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -30,6 +35,7 @@ import java.util.stream.Collectors;
  * 版本：1.0<br>
  * 创建日期：2020/12/9<br>
  */
+@Slf4j
 public class DfyConverter {
 
     public static ProductItemPO convertToProductItemPO(DfyScenicDetail scenicDetail){
@@ -42,10 +48,21 @@ public class DfyConverter {
         productItemPO.setName(scenicDetail.getScenicName());
         List<ItemFeaturePO> featurePOs = Lists.newArrayList();
         if(StringUtils.isNotBlank(scenicDetail.getBookNotice())){
-            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-            itemFeaturePO.setDetail(scenicDetail.getBookNotice());
-            itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
-            featurePOs.add(itemFeaturePO);
+            try {
+                ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+                JSONArray jsonArray = JSON.parseArray(scenicDetail.getBookNotice());
+                StringBuilder sb = new StringBuilder();
+                for (Object o : jsonArray) {
+                    JSONObject obj = (JSONObject) o;
+                    sb.append(obj.get("name")).append("<br>")
+                            .append(obj.get("value")).append("<br>");
+                }
+                itemFeaturePO.setDetail(sb.toString());
+                itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
+                featurePOs.add(itemFeaturePO);
+            } catch (Exception e){
+                log.error("笛风云转换特色列表（购买须知）异常，不影响正常流程。。", e);
+            }
         }
         productItemPO.setCity(scenicDetail.getCityName());
         productItemPO.setDesCity(scenicDetail.getCityName());
@@ -71,7 +88,8 @@ public class DfyConverter {
         }
         // 这个不是按富文本处理的
 //        productItemPO.setDescription(scenicDetail.getScenicDescription());
-        productItemPO.setAppMainTitle(scenicDetail.getRecommend());
+        productItemPO.setAppMainTitle(productItemPO.getName());
+        productItemPO.setAppSubTitle(scenicDetail.getRecommend());
         if(StringUtils.isNotBlank(scenicDetail.getTrafficBus())){
             ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
             itemFeaturePO.setDetail(scenicDetail.getTrafficBus());
@@ -175,10 +193,10 @@ public class DfyConverter {
         ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
         productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){
-            BookRulePO contactPhone = convertBookRulePO("0", false, null, 1);
-            BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1);
-            BookRulePO passengerPhone = convertBookRulePO("1", false, null, 0);
-            BookRulePO passengerPhoneAndID = convertBookRulePO("1", true, ticketDetail.getCertificateType(), 0);
+            BookRulePO contactPhone = convertBookRulePO("0", false, null, 1, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO contactPhoneAndID = convertBookRulePO("0", true, ticketDetail.getCertificateType(), 1, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO passengerPhone = convertBookRulePO("1", false, null, 0, dfyAdmissionVoucher.getAdmissionVoucherCode());
+            BookRulePO passengerPhoneAndID = convertBookRulePO("1", true, ticketDetail.getCertificateType(), 0, dfyAdmissionVoucher.getAdmissionVoucherCode());
             List<BookRulePO> bookRules = Lists.newArrayList();
             switch (ticketDetail.getCustInfoLimit()){
                 case DfyConstants.BOOK_RULE_1:
@@ -197,11 +215,11 @@ public class DfyConverter {
                     break;
                 case DfyConstants.BOOK_RULE_6:
                     bookRules.add(contactPhoneAndID);
-                    bookRules.add(passengerPhone);
+                    bookRules.add(passengerPhoneAndID);
                     break;
                 case DfyConstants.BOOK_RULE_7:
                     bookRules.add(contactPhoneAndID);
-                    bookRules.add(passengerPhoneAndID);
+                    bookRules.add(passengerPhone);
                     break;
                 default:
                     break;
@@ -223,7 +241,7 @@ public class DfyConverter {
                 if(StringUtils.isBlank(p.getDepartDate())){
                     return null;
                 }
-                priceInfoPO.setSaleDate(DateTimeUtil.parseDate(p.getDepartDate()));
+                priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(p.getDepartDate())));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
                     // todo 加价计算公式
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
@@ -238,7 +256,7 @@ public class DfyConverter {
         return pricePO;
     }
 
-    private static BookRulePO convertBookRulePO(String ruleType, boolean credential, String credentialList, int limit){
+    private static BookRulePO convertBookRulePO(String ruleType, boolean credential, String credentialList, int limit, String admissionVoucherCode){
         BookRulePO bookRulePO = new BookRulePO();
         bookRulePO.setRuleType(ruleType);
         bookRulePO.setCnName(true);
@@ -256,14 +274,22 @@ public class DfyConverter {
                     case DfyConstants.CRED_TYPE_HK:
                         return Certificate.HKM_PASS.getCode();
                     case DfyConstants.CRED_TYPE_TW:
-                        return Certificate.SOLDIERS.getCode();
+                        return Certificate.TW_CARD.getCode();
                     default:
-                        return Certificate.ID_CARD.getCode();
+                        // 其它类型直接舍弃（笛风云建议这样操作）
+                        return Integer.MIN_VALUE;
                 }
-            }).collect(Collectors.toList());
+            }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
             bookRulePO.setCredentials(creds);
+        } else {
+            // 如果空的只支持身份证
+            bookRulePO.setCredentials(Lists.newArrayList(Certificate.ID_CARD.getCode()));
         }
         bookRulePO.setEmail(false);
+        // 需要邮箱的入园方式，只联系人
+        if("0".equals(ruleType) && Arrays.asList("205", "302").contains(admissionVoucherCode)){
+            bookRulePO.setEmail(true);
+        }
         bookRulePO.setEnName(false);
         bookRulePO.setPeopleLimit(limit);
 //        bookRulePO.setPeopleNum(1);
