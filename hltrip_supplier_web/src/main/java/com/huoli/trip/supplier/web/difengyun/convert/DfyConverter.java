@@ -88,7 +88,8 @@ public class DfyConverter {
         }
         // 这个不是按富文本处理的
 //        productItemPO.setDescription(scenicDetail.getScenicDescription());
-        productItemPO.setAppMainTitle(scenicDetail.getRecommend());
+        productItemPO.setAppMainTitle(productItemPO.getName());
+        productItemPO.setAppSubTitle(scenicDetail.getRecommend());
         if(StringUtils.isNotBlank(scenicDetail.getTrafficBus())){
             ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
             itemFeaturePO.setDetail(scenicDetail.getTrafficBus());

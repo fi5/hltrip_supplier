@@ -3,6 +3,8 @@ package com.huoli.trip.supplier.self.yaochufa.vo;
 import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -12,7 +14,7 @@ import lombok.Data;
  * 创建日期：2020/10/27<br>
  */
 @Data
-public class BaseOrderRequest extends TraceRequest {
+public class BaseOrderRequest extends TraceRequest implements Serializable {
 
     /**
      * 订单号

@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.ConfigConstants;
+import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderRefund;
 import com.huoli.trip.common.entity.TripPayOrder;
 import com.huoli.trip.common.entity.TripRefundNotify;
@@ -49,15 +50,16 @@ public class DfyCallBackService {
         String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
         try {
             String string = JSONObject.toJSONString(request);
-            log.info("中台订单推送传参json:"+string);
             BaseOrderRequest orderDetailReq=new BaseOrderRequest();
+            orderDetailReq.setSupplierOrderId(request.getOrderId());
             BaseResponse<DfyOrderDetail> dfyOrderDetail = dfyOrderService.orderDetail(orderDetailReq);
             DfyOrderDetail orderDetail = dfyOrderDetail.getData();
             if(null==orderDetail)
                 return new DfyBaseResult("601","未查询到订单",false);
 
 
-            List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(request.getOrderId());
+            TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(request.getOrderId());
+            List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
             boolean payed=false;
             for(TripPayOrder payOrder:orderPayList){
                 if(payOrder.getStatus()==1){
@@ -65,11 +67,12 @@ public class DfyCallBackService {
                     break;
                 }
             }
+            log.info("这的payed:"+payed);
             //只有当有支付订单并支付成功后 ,订单详情有取消的,才去考虑退款单
             if(payed&&orderDetail.getOrderStatus().equals("已取消")){
-                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(request.getOrderId());
+                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                 if(refundOrder==null){
-                    log.info("未找到待处理的退款单"+request.getOrderId());
+                    log.info("未找到待处理的退款单"+tripOrder.getOrderId());
                 }else{
                     TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
                     TripRefundNotify notify=new TripRefundNotify();
@@ -83,7 +86,9 @@ public class DfyCallBackService {
             }else{
                 PushOrderStatusReq req =new PushOrderStatusReq();
                 req.setStrStatus(orderDetail.getOrderStatus());
-                req.setPartnerOrderId(request.getOrderId());
+                req.setPartnerOrderId(tripOrder.getOrderId());
+                req.setType(3);
+                log.info("中台订单推送传参json:"+req);
                 String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                 log.info("中台orderStatusNotice返回:"+res);
             }

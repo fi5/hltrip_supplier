@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.difengyun;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
  * @comment:https://open.difengyun.com/doc/api/all/8/2
  **/
 @Data
-public class DfyOrderDetail {
+public class DfyOrderDetail implements Serializable {
 
 	private String orderId;
 	private String canPay;//支付开关 0.不可支付，1.可以支付；分销商系统需要控制，当canPay="1"时，才调用【出票(代扣)接口】。
@@ -40,7 +41,7 @@ public class DfyOrderDetail {
 
 
 	@Data
-	public static class Contact {
+	public static class Contact implements Serializable{
 		private String contactName;
 		private String contactEmail;
 		private String contactTel;
@@ -49,7 +50,7 @@ public class DfyOrderDetail {
 	}
 
 	@Data
-	public static class Tourist {
+	public static class Tourist implements Serializable{
 		private String name;
 		private Integer psptType;//证件类型：1、二代身份证2、护照3、军官证4、港澳通行证7、台胞证8、回乡证9、户口簿10、出生证明11、台湾通行证
 		private String psptId;
@@ -58,24 +59,24 @@ public class DfyOrderDetail {
 	}
 
 	@Data
-	public static class EnterCertificate {
+	public static class EnterCertificate implements Serializable{
 		private String enterCertificateType;
 		private List<EnterCertificateTypeInfo> enterCertificateTypeInfo;
 		private String enterCertificateTxt;
 	}
 
 	@Data
-	public static class EnterCertificateTypeInfo {
+	public static class EnterCertificateTypeInfo implements Serializable{
 		private String resourceId;
 		private List<TicketCertInfo> ticketCertInfos;
 	}
 	@Data
-	public static class TicketCertInfo {
+	public static class TicketCertInfo implements Serializable{
 		private int certType;
 		private String[] fileUrls;
 	}
 	@Data
-	public static class Delivery {
+	public static class Delivery implements Serializable{
 		private String deliveryType;
 		private String receiverName;
 		private String telNum;

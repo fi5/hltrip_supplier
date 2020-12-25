@@ -24,4 +24,7 @@ public interface TripOrderMapper {
 
     @Select("select * from trip_pay_order where orderId = #{orderId}")
     List<TripPayOrder> getOrderPayList(String orderId);
+
+    @Select("select * from trip_order where outOrderId = #{outOrderId}")
+    TripOrder getOrderByOutOrderId(String outOrderId);
 }
