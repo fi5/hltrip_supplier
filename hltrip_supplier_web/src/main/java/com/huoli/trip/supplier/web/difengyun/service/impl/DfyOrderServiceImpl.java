@@ -74,8 +74,10 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyBaseResult<DfyOrderDetail> baseResult = diFengYunClient.orderDetail(dfyOrderDetailReq);
             log.info("dfy订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
 
-
             DfyOrderDetail detail = baseResult.getData();
+            if(detail!=null&&detail.getOrderInfo()!=null){
+                detail.setOrderId(detail.getOrderInfo().getOrderId());
+            }
             return BaseResponse.success(detail);
         } catch (Exception e) {
         	log.error("信息{}",e);
@@ -94,11 +96,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyBaseResult<DfyOrderDetail> baseResult = diFengYunClient.orderDetail(dfyOrderDetailReq);
 
 
-            DfyOrderDetail dfyOrderDetail = baseResult.getData();
-            OrderDetailRep detailResp=new OrderDetailRep();
-            detailResp.setOrderId(dfyOrderDetail.getOrderId());
+            log.info("getVochersdfy订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
 
-            return BaseResponse.success(detailResp);
+            DfyOrderDetail detail = baseResult.getData();
+            if(detail!=null&&detail.getOrderInfo()!=null){
+                detail.setOrderId(detail.getOrderInfo().getOrderId());
+            }
+            return BaseResponse.success(detail);
         } catch (Exception e) {
             log.error("信息{}",e);
             return BaseResponse.fail(CentralError.ERROR_UNKNOWN);
