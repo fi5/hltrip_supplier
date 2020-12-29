@@ -77,11 +77,15 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+            }else{
+                if(!baseResult.isSuccess()){
+                    return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
+                }
             }
             return BaseResponse.success(detail);
         } catch (Exception e) {
         	log.error("信息{}",e);
-            return BaseResponse.fail(CentralError.ERROR_UNKNOWN);
+            return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
         }
 
 
@@ -113,9 +117,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     public DfyBaseResult<DfyBillResponse> queryBill(DfyBillQueryDataReq billQueryDataReq) {
         try {
             DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+            String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+            billQueryDataReq.setAcctId(acctid);
             dfyBaseRequest.setData(billQueryDataReq);
+            String apipublicKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.public.key");
+            dfyBaseRequest.setApiKey(apipublicKey);
             DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
-            log.info("dfyqueryBill的返回:"+JSONObject.toJSONString(dfyBillResponse)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest));
+            log.info("dfyqueryBill的返回:"+JSONObject.toJSONString(dfyBillResponse)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest)+","+apipublicKey);
 
             return dfyBillResponse;
         } catch (Exception e) {
@@ -205,6 +213,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         billQueryDataReq.setBillType(2);
         billQueryDataReq.setStart(0);
         billQueryDataReq.setLimit(50);
+        billQueryDataReq.setStatus(1);
         Date createDate = DateTimeUtil.parse(item.getCreateTime(), DateTimeUtil.YYYYMMDDHHmmss);
 
         billQueryDataReq.setBeginTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,-1),DateTimeUtil.YYYYMMDDHHmmss));
