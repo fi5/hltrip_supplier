@@ -176,6 +176,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         dfyBaseRequest.setData(request);
         //需要支付方式 支付金额
         request.setPayType("1");
+        String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+        request.setAcctId(acctid);
         return diFengYunClient.submitOrder(dfyBaseRequest);
     }
 
