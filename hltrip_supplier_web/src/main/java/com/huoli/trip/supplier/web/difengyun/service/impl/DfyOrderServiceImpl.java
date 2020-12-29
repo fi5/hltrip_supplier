@@ -168,8 +168,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         dfyBaseRequest.setData(request);
         //需要支付方式 支付金额
         request.setPayType("1");
-        diFengYunClient.submitOrder(dfyBaseRequest);
-        return new DfyBaseResult("success",true);
+        return diFengYunClient.submitOrder(dfyBaseRequest);
     }
 
     @Override
