@@ -65,6 +65,18 @@ public class DfyTestController {
     }
 
     /**
+     * 更新单个景点
+     *
+     * @param ticketId
+     * @return
+     */
+    @PostMapping(path = "/sync/scenic/detail")
+    DfyBaseResult syncScenicDetail(@RequestBody String ticketId) {
+        dfySyncService.syncScenicDetail(ticketId);
+        return DfyBaseResult.success();
+    }
+
+    /**
      * 订单详情
      *
      * @param request

@@ -27,7 +27,7 @@ public class DfySyncTask {
     @Autowired
     private DfySyncService dfySyncService;
 
-    @Scheduled(cron = "0 0 6-12 ? * *")
+    @Scheduled(cron = "0 0 6-0/2 ? * *")
     public void syncFullPrice(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
