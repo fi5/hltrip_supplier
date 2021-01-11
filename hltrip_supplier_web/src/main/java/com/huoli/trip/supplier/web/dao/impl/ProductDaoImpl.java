@@ -44,6 +44,12 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
+    public void updateStatusByCode(String code, int status){
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
+                Update.update("status", status), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+    }
+
+    @Override
     public List<ProductPO> getProductListByItemIds(List<String> itemIds){
         Query query = new Query(Criteria.where("mainItemCode").in(itemIds));
         return mongoTemplate.find(query, ProductPO.class);
@@ -119,5 +125,11 @@ public class ProductDaoImpl implements ProductDao {
     public ProductPO getByCode(String code){
         Query query = new Query(Criteria.where("code").is(code));
         return mongoTemplate.findOne(query, ProductPO.class);
+    }
+
+    @Override
+    public List<ProductPO> getProductsByStatus(int status){
+        Query query = new Query(Criteria.where("status").is(status));
+        return mongoTemplate.find(query, ProductPO.class);
     }
 }
