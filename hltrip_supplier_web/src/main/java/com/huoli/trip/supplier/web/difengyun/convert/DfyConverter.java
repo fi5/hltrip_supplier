@@ -137,7 +137,7 @@ public class DfyConverter {
         ticketPO.setDrawAddress(ticketDetail.getDrawAddress());
         Integer type = null;
         if(StringUtils.isNotBlank(ticketDetail.getMpType())){
-            switch (Integer.valueOf(ticketDetail.getMpType())){
+            switch (Integer.parseInt(ticketDetail.getMpType())){
                 case DfyConstants.TICKET_TYPE_0:
                     type = TicketType.TICKET_TYPE_19.getCode();
                     break;
