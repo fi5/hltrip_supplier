@@ -13,10 +13,24 @@ import lombok.Data;
 @Data
 public class DfyBaseRequest<T> {
 
+    /**
+     * 接口标识
+     */
     private String apiKey;
 
+    /**
+     * 秘钥
+     */
+    private String secretKey;
+
+    /**
+     * 签名
+     */
     private String sign;
 
+    /**
+     * 时间戳
+     */
     private String timestamp;
 
     private T data;

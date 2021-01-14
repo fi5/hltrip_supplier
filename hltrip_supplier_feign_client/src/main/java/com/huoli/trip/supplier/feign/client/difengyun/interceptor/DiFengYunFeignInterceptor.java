@@ -40,7 +40,7 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         try {
-            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.key");
+            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.key");
             String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.secret.key");
             byte[] body = requestTemplate.body();
             if(body != null && body.length > 0){
@@ -51,6 +51,9 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
                 // 不同的业务key不同，如果请求里有就用请求的
                 if(StringUtils.isNotBlank(request.getApiKey())){
                     apiKey = request.getApiKey();
+                }
+                if(StringUtils.isNotBlank(request.getSecretKey())){
+                    secretKey = request.getSecretKey();
                 }
                 bodyObj.put("apiKey", apiKey);
                 bodyObj.put("timestamp", time);
