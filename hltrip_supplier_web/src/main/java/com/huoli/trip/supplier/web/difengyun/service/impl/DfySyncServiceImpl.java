@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.difengyun.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
@@ -24,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -38,7 +38,7 @@ import java.util.List;
  * 版本：1.0<br>
  * 创建日期：2020/12/9<br>
  */
-@Service
+@Service(timeout = 10000,group = "hltrip")
 @Slf4j
 public class DfySyncServiceImpl implements DfySyncService {
 
