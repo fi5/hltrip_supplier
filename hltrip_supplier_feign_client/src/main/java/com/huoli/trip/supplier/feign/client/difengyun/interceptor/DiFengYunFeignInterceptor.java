@@ -60,6 +60,7 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
                 log.info("笛风云feign拦截器，准备获取签名，secretKey = {}, bodyObj = {} ", secretKey, bodyObj.toJSONString());
                 String sign = DfySignature.getSignature(bodyObj, secretKey);
                 log.info("获取到签名，sign = {}", sign);
+                request.setSecretKey(null);
                 request.setApiKey(apiKey);
                 request.setSign(sign);
                 request.setTimestamp(time);
