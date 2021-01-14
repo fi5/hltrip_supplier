@@ -121,7 +121,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             billQueryDataReq.setAcctId(acctid);
             dfyBaseRequest.setData(billQueryDataReq);
             String apipublicKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.public.key");
+            String apipublicSecretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.public.secret.key");
             dfyBaseRequest.setApiKey(apipublicKey);
+            dfyBaseRequest.setSecretKey(apipublicSecretKey);
             DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
             log.info("dfyqueryBill的返回:"+JSONObject.toJSONString(dfyBillResponse)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest)+","+apipublicKey);
 
