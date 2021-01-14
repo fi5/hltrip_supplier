@@ -104,6 +104,8 @@ public class DfyConverter {
 
     public static ProductPO convertToProductPO(DfyTicketDetail ticketDetail){
         ProductPO productPO = new ProductPO();
+        // 默认条件退
+        productPO.setRefundType(3);
         productPO.setStatus(1);
         productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
         productPO.setSupplierId(Constants.SUPPLIER_CODE_DFY);
