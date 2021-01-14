@@ -41,7 +41,7 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
     public void apply(RequestTemplate requestTemplate) {
         try {
             String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.key");
-            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.secret.key");
+            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.secret.key");
             byte[] body = requestTemplate.body();
             if(body != null && body.length > 0){
                 String time = DateTimeUtil.formatFullDate(new Date());
