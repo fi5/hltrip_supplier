@@ -105,6 +105,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         }
                     }
 
+                    log.info("详情这里的payed:"+payed);
 
                     if(payed){
 
