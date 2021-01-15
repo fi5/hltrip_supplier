@@ -210,6 +210,7 @@ public class YcfConverter {
      */
     public static ProductItemPO convertToProductItemPO(YcfProductItem productItem){
         ProductItemPO productItemPO = new ProductItemPO();
+        productItemPO.setStatus(1);
         productItemPO.setSupplierItemId(productItem.getPoiID());
         productItemPO.setAddress(productItem.getAddress());
         productItemPO.setAppMainTitle(productItem.getAppMain());
