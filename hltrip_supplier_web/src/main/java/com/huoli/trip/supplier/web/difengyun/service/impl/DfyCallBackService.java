@@ -70,23 +70,25 @@ public class DfyCallBackService {
             log.info("这的payed:"+payed);
             //只有当有支付订单并支付成功后 ,订单详情有取消的,才去考虑退款单
             if(payed&&orderDetail.getOrderStatus().equals("已取消")){
-                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
-                if(refundOrder==null){
-                    log.info("未找到待处理的退款单"+tripOrder.getOrderId());
-                    TripRefundNotify notify=new TripRefundNotify();
-                    notify.setOrderId(refundOrder.getOrderId());
-                    notify.setChannel("dfy");
-                    notify.setStatus(0);
-                    tripOrderRefundMapper.saveTripRefundNotify(notify);
-                }else{
-                    TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
-                    TripRefundNotify notify=new TripRefundNotify();
-                    notify.setOrderId(refundOrder.getOrderId());
-                    notify.setRefundId(refundOrder.getId());
-                    notify.setChannel("dfy");
-                    notify.setStatus(0);
-                    tripOrderRefundMapper.saveTripRefundNotify(notify);
-                }
+
+                //这块放订单详情里
+//                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+//                if(refundOrder==null){
+//                    log.info("未找到待处理的退款单"+tripOrder.getOrderId());
+//                    TripRefundNotify notify=new TripRefundNotify();
+//                    notify.setOrderId(refundOrder.getOrderId());
+//                    notify.setChannel("dfy");
+//                    notify.setStatus(0);
+//                    tripOrderRefundMapper.saveTripRefundNotify(notify);
+//                }else{
+//                    TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
+//                    TripRefundNotify notify=new TripRefundNotify();
+//                    notify.setOrderId(refundOrder.getOrderId());
+//                    notify.setRefundId(refundOrder.getId());
+//                    notify.setChannel("dfy");
+//                    notify.setStatus(0);
+//                    tripOrderRefundMapper.saveTripRefundNotify(notify);
+//                }
 
             }else{
                 PushOrderStatusReq req =new PushOrderStatusReq();

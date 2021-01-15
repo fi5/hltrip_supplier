@@ -19,6 +19,8 @@ public interface TripOrderRefundMapper {
     @Select("select * from trip_order_refund where id = #{refundId}")
     TripOrderRefund getRefundOrderById(Integer refundId);
 
+    @Select("select * from trip_order_refund_notify where orderId = #{orderId} limit 1")
+    TripRefundNotify getRefundNotifyByOrderId(String orderId);
     @Select("select * from trip_order_refund_notify where orderId = #{orderId} and refundId= #{refundId} limit 1")
     TripRefundNotify getRefundNotify(String orderId,Integer refundId);
 

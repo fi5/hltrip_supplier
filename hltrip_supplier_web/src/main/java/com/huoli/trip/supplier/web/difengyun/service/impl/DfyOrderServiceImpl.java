@@ -4,11 +4,8 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.constant.CentralError;
-import com.huoli.trip.common.entity.TripOrderRefund;
-import com.huoli.trip.common.entity.TripRefundNotify;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
-import com.huoli.trip.common.entity.PriceInfoPO;
-import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
@@ -31,6 +28,7 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -62,6 +60,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     @Autowired
     TripOrderRefundMapper tripOrderRefundMapper;
+    @Autowired
+    TripOrderMapper tripOrderMapper;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -92,6 +92,49 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     	default:
                     		break;
                     }
+
+                }
+                if(StringUtils.equals(detail.getOrderStatus(),"已取消")){
+                    TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+                    List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
+                    boolean payed=false;
+                    for(TripPayOrder payOrder:orderPayList){
+                        if(payOrder.getStatus()==1){
+                            payed=true;
+                            break;
+                        }
+                    }
+
+
+                    if(payed){
+
+                        TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+                        if(dbRefundNotify!=null){
+                            if(dbRefundNotify.getStatus()==1){
+                                detail.setOrderStatus("已退款");
+                            }
+
+                        }else{
+                            TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+                            TripRefundNotify notify = new TripRefundNotify();
+                            if (refundOrder == null) {
+                                log.info("这未找到待处理的退款单" + tripOrder.getOrderId());
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+
+                            } else {
+                                TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setRefundId(refundOrder.getId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+                            }
+                            tripOrderRefundMapper.saveTripRefundNotify(notify);
+                        }
+
+                    }
+
 
                 }
             }else{
