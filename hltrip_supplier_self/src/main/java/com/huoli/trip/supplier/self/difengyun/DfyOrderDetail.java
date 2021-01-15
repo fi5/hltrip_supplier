@@ -52,7 +52,7 @@ public class DfyOrderDetail implements Serializable {
 
 	@Data
 	public static class OrderInfo implements Serializable {
-		private String statusdesc;//
+		private String statusDesc;//
 		private String orderId;
 		private String canPay;//支付开关 0.不可支付，1.可以支付；分销商系统需要控制，当canPay="1"时，才调用【出票(代扣)接口】。
 		private Integer productId;
