@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.difengyun.controller;
 
+import com.huoli.trip.common.entity.TripRefundNotify;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DfyOrderService;
@@ -12,6 +13,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
+import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -38,6 +41,9 @@ public class DfyTestController {
     private DfySyncService dfySyncService;
     @Autowired
     DfyOrderService dfyOrderService;
+
+    @Autowired
+    TripOrderRefundMapper tripOrderRefundMapper;
 
 
     /**
@@ -114,4 +120,24 @@ public class DfyTestController {
             return null;
         }
     }
+    @PostMapping(path = "/order/doJob")
+    DfyBaseResult testJob(){
+        try {
+            List<TripRefundNotify> pendingNotifys = tripOrderRefundMapper.getPendingNotifys();
+            pendingNotifys.forEach(item -> {
+                try {
+                    dfyOrderService.processNotify(item);
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    log.error("处理退款通知失败", e);
+                } catch (Exception e) {
+                    log.error("处理退款通知失败了，id={}", item.getId(), e);
+                }
+            });
+        } catch (Exception e) {
+        	log.error("信息{}",e);
+        }
+        return null;
+    }
+
 }
