@@ -77,6 +77,23 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+                if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
+                    switch (detail.getOrderInfo().getStatusDesc()){
+                        case "取消订单核损中":
+                        case "取消订单确认中":
+                        case "核损已反馈":
+                        case "取取消订单核损已反馈":
+                            detail.setOrderStatus("申请退款中");
+                            break;
+                        case "已取消":
+
+                            break;
+
+                    	default:
+                    		break;
+                    }
+
+                }
             }else{
                 if(!baseResult.isSuccess()){
                     return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
@@ -231,18 +248,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                 if(bill.getBillType()!=4)
                     break;
 
-                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
                 String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
                 RefundNoticeReq req=new RefundNoticeReq();
                 req.setPartnerOrderId(item.getOrderId());
                 req.setRefundFrom(2);
                 req.setRefundPrice(new BigDecimal(bill.getAmount()));
-                req.setRefundTime(refundOrder.getCreateTime());
                 req.setResponseTime(bill.getTime());
                 req.setSource("dfy");
-                req.setRefundId(refundOrder.getId());
-                req.setRefundCharge(refundOrder.getRefundCharge());
-
 
                 switch (bill.getStatus()) {//账单处理结果，1处理完成-1处理失败3处理
                     case 1:
@@ -253,9 +265,19 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         item.setBillInfo(JSONObject.toJSONString(bill));
                         tripOrderRefundMapper.updateRefundNotify(item);
 
+                        req.setRefundTime(bill.getTime());
+
+                        if(item.getRefundId()>0){
+                            TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
+                            req.setRefundId(refundOrder.getId());
+                            req.setRefundCharge(refundOrder.getRefundCharge());
+                        }else{
+                            log.info("无退款单子但是渠道退款了:"+item);
+                        }
+
                         req.setRefundStatus(1);
 
-                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",refundStatus:"+item.getOrderId());
                         String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                         log.info("中台refundNotice返回:"+res);
 
@@ -272,7 +294,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         tripOrderRefundMapper.updateRefundNotify(item);
 
                         req.setRefundStatus(-1);
-                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
                         String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                         log.info("中台refundNotice返回:"+res2);
                         break;

@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.difengyun.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushResponse;
@@ -33,7 +34,7 @@ public class DfyOrderPushController {
 
     @PostMapping(path = "/pushOrderStatus")
     DfyBaseResult pushOrderStatus(@RequestBody DfyOrderPushRequest request) {
-        log.info("供应商触发了订单推送 订单号：{}",request.getOrderId());
+        log.info("供应商触发了订单推送 订单号：{}", JSONObject.toJSONString(request));
         return dfyCallBackService.orderStatusNotice(request);
     }
 }
