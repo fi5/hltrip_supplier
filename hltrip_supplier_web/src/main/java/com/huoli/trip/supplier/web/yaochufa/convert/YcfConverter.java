@@ -112,7 +112,7 @@ public class YcfConverter {
         ticketPO.setChoiceNum(product.getTicketChoiceNum());
         ticketPO.setOptionNum(product.getFoodOptionNum());
         if(!ListUtils.isEmpty(product.getTicketList())){
-            List<TicketInfoPO> ticketInfoPOs = product.getTicketList().stream().map(ticket -> convertToTicketInfoPO(ticket)).collect(Collectors.toList());
+            List<TicketInfoPO> ticketInfoPOs = product.getTicketList().stream().map(ticket -> convertToTicketInfoPO(ticket, product.getTicketType())).collect(Collectors.toList());
             ticketPO.setTickets(ticketInfoPOs);
             List<String> poiIds = product.getTicketList().stream().map(t -> t.getPoiId()).collect(Collectors.toList());
             buildPoiIds(product, poiIds);
@@ -158,13 +158,14 @@ public class YcfConverter {
      * @param resourceTicket
      * @return
      */
-    public static TicketInfoPO convertToTicketInfoPO(YcfResourceTicket resourceTicket){
+    public static TicketInfoPO convertToTicketInfoPO(YcfResourceTicket resourceTicket, Integer ticketType){
         TicketInfoPO ticketInfoPO = new TicketInfoPO();
         ticketInfoPO.setBaseNum(resourceTicket.getTicketBaseNum());
         ticketInfoPO.setItemId(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, resourceTicket.getPoiId()));
         ticketInfoPO.setSupplierItemId(resourceTicket.getPoiId());
         ticketInfoPO.setSupplierResourceId(resourceTicket.getTicketId());
         ticketInfoPO.setTitle(resourceTicket.getTicketName());
+        ticketInfoPO.setTicketType(ticketType);
         return ticketInfoPO;
     }
 
