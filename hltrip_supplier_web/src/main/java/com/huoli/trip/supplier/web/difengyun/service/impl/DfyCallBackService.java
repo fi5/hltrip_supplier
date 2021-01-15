@@ -49,16 +49,16 @@ public class DfyCallBackService {
     public DfyBaseResult orderStatusNotice(DfyOrderPushRequest request) {
         String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
         try {
-            String string = JSONObject.toJSONString(request);
+            String orderId = request.getData().getOrderId();
             BaseOrderRequest orderDetailReq=new BaseOrderRequest();
-            orderDetailReq.setSupplierOrderId(request.getOrderId());
+            orderDetailReq.setSupplierOrderId(orderId);
             BaseResponse<DfyOrderDetail> dfyOrderDetail = dfyOrderService.orderDetail(orderDetailReq);
             DfyOrderDetail orderDetail = dfyOrderDetail.getData();
             if(null==orderDetail)
                 return new DfyBaseResult("601","未查询到订单",false);
 
 
-            TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(request.getOrderId());
+            TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(orderId);
             List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
             boolean payed=false;
             for(TripPayOrder payOrder:orderPayList){
