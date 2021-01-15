@@ -273,7 +273,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
         DfyBillQueryDataReq billQueryDataReq=new DfyBillQueryDataReq();
         billQueryDataReq.setAccType(1);
-        billQueryDataReq.setBillType(2);
+        billQueryDataReq.setBillType(4);
         billQueryDataReq.setStart(0);
         billQueryDataReq.setLimit(50);
         billQueryDataReq.setStatus(1);
