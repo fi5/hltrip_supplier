@@ -85,9 +85,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "取取消订单核损已反馈":
                             detail.setOrderStatus("申请退款中");
                             break;
-                        case "已取消":
-
-                            break;
 
                     	default:
                     		break;
@@ -108,6 +105,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     log.info("详情这里的payed:"+payed);
 
                     if(payed){
+                        detail.setOrderStatus("申请退款中");
 
                         TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
                         if(dbRefundNotify!=null){
