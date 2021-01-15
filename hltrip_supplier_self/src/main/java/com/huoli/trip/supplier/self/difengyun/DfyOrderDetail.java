@@ -24,6 +24,27 @@ public class DfyOrderDetail implements Serializable {
 	 出票中（已确认）：付款后出票中到此状态；
 	 已完成：表示出票成功；
 	 已取消：订单取消成功，或者退票成功，到此状态；
+
+	 门票订单详情statusDesc的枚举：初始状态
+	 需求确认
+	 占位失败
+	 占位反馈中
+	 已选择
+	 占位成功
+	 待签约付款
+	 确认反馈中
+	 确认失败
+	 使用前
+	 待通知
+	 通知中
+	 使用中
+	 使用后（点评）
+	 取消订单核损中
+	 取消订单确认中
+	 核损已反馈
+	 取消订单核损已反馈
+	 已取消(签约后)
+	 已取消
 	 */
 	private String orderStatus;
 	private OrderInfo orderInfo;
@@ -31,6 +52,7 @@ public class DfyOrderDetail implements Serializable {
 
 	@Data
 	public static class OrderInfo implements Serializable {
+		private String statusdesc;//
 		private String orderId;
 		private String canPay;//支付开关 0.不可支付，1.可以支付；分销商系统需要控制，当canPay="1"时，才调用【出票(代扣)接口】。
 		private Integer productId;
