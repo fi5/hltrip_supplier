@@ -31,7 +31,7 @@ public interface TripOrderRefundMapper {
             "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW())")
     void saveTripRefundNotify(TripRefundNotify notify);
 
-    @Update("update trip_order set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
+    @Update("update trip_order_refund_notify set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
             ",refundMoney = #{refundMoney} ,billInfo = #{billInfo} where id = #{id}")
     void updateRefundNotify(TripRefundNotify notify);
 }
