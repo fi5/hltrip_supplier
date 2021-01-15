@@ -73,6 +73,11 @@ public class DfyCallBackService {
                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                 if(refundOrder==null){
                     log.info("未找到待处理的退款单"+tripOrder.getOrderId());
+                    TripRefundNotify notify=new TripRefundNotify();
+                    notify.setOrderId(refundOrder.getOrderId());
+                    notify.setChannel("dfy");
+                    notify.setStatus(0);
+                    tripOrderRefundMapper.saveTripRefundNotify(notify);
                 }else{
                     TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
                     TripRefundNotify notify=new TripRefundNotify();
