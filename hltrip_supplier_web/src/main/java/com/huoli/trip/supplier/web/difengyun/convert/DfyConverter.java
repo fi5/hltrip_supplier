@@ -192,6 +192,7 @@ public class DfyConverter {
         ticketInfoPO.setSupplierItemId(ticketDetail.getScenicId());
         ticketInfoPO.setTitle(ticketDetail.getProductName());
         ticketInfoPO.setSupplierResourceId(ticketDetail.getResourceId());
+        ticketInfoPO.setTicketType(type);
         ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
         productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){
