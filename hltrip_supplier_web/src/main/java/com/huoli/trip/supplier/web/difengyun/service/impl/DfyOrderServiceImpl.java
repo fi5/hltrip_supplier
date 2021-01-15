@@ -77,6 +77,23 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+                if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
+                    switch (detail.getOrderInfo().getStatusDesc()){
+                        case "取消订单核损中":
+                        case "取消订单确认中":
+                        case "核损已反馈":
+                        case "取取消订单核损已反馈":
+                            detail.setOrderStatus("申请退款中");
+                            break;
+                        case "已取消":
+
+                            break;
+
+                    	default:
+                    		break;
+                    }
+
+                }
             }else{
                 if(!baseResult.isSuccess()){
                     return BaseResponse.fail(CentralError.ERROR_NO_ORDER);

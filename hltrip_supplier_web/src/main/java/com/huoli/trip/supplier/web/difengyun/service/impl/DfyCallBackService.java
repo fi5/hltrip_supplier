@@ -91,7 +91,6 @@ public class DfyCallBackService {
             }else{
                 PushOrderStatusReq req =new PushOrderStatusReq();
                 req.setStrStatus(orderDetail.getOrderStatus());
-                req.setSubStatus(orderDetail.getOrderInfo().getStatusDesc());
                 req.setPartnerOrderId(tripOrder.getOrderId());
                 req.setType(3);
                 log.info("中台订单推送传参json:"+req);
