@@ -67,6 +67,6 @@ public interface ProductDao {
      * @param supplierId
      * @return
      */
-    List<String> getSupplierProductIds(String supplierId);
+    List<ProductPO> getSupplierProductIds(String supplierId);
 
 }

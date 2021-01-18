@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 
@@ -53,5 +54,5 @@ public interface DfySyncService {
      * 获取所欲渠道产品码
      * @return
      */
-    List<String> getSupplierProductIds();
+    List<ProductPO> getSupplierProductIds();
 }

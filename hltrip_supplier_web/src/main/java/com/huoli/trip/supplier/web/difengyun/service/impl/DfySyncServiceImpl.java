@@ -255,7 +255,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     }
 
     @Override
-    public List<String> getSupplierProductIds(){
+    public List<ProductPO> getSupplierProductIds(){
         return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
 }
