@@ -311,7 +311,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                 req.setRefundPrice(new BigDecimal(bill.getAmount()));
                 req.setResponseTime(bill.getTime());
                 req.setSource("dfy");
-                BigDecimal refundCharge=tripOrder.getOutPayPrice().divide(req.getRefundPrice());
+                BigDecimal refundCharge=tripOrder.getOutPayPrice().subtract(req.getRefundPrice());
                 req.setRefundCharge(refundCharge);
 
                 switch (bill.getStatus()) {//账单处理结果，1处理完成-1处理失败3处理
