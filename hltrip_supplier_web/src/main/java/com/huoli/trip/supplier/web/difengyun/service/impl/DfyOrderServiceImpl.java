@@ -295,12 +295,12 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
         DfyBaseResult<DfyBillResponse> dfyBillResponseDfyBaseResult = queryBill(billQueryDataReq);
         if(dfyBillResponseDfyBaseResult.getData()!=null && CollectionUtils.isNotEmpty(dfyBillResponseDfyBaseResult.getData().getRows())){
+            TripOrder tripOrder = tripOrderMapper.getChannelByOrderId(item.getOrderId());
             log.info("processNotify这里的rows:"+ JSONObject.toJSONString(dfyBillResponseDfyBaseResult.getData().getRows()));
             for(DfyBillResponse.QueryBillsDto bill :dfyBillResponseDfyBaseResult.getData().getRows()){
 
                 if(bill.getBillType()!=4 )
                     break;
-                TripOrder tripOrder = tripOrderMapper.getChannelByOrderId(item.getOrderId());
                 if(!StringUtils.equals(tripOrder.getOutOrderId(),bill.getBizOrderId()))//单号不一样则跳过
                     continue;
 
