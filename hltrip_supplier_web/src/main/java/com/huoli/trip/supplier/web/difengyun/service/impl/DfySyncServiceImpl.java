@@ -175,7 +175,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setValidTime(DateTimeUtil.trancateToDate(MongoDateUtils.handleTimezoneInput(new Date())));
             log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
-                log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
+                log.info("有价格信息。。。");
                 PricePO pricePO = syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
                 if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
                     // 笛风云没有上下架时间，就把最远的销售日期作为下架时间
@@ -217,7 +217,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         price.setOperator(Constants.SUPPLIER_CODE_DFY);
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
         priceDao.updateByProductCode(price);
-        log.info("价格已更新。。。{}", JSON.toJSONString(price));
+        log.info("价格已更新。。。");
         return price;
     }
 
