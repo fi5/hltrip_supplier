@@ -97,7 +97,7 @@ public class DfyCallBackService {
                 PushOrderStatusReq req =new PushOrderStatusReq();
                 req.setStrStatus(orderDetail.getOrderStatus());
                 req.setPartnerOrderId(tripOrder.getOrderId());
-                if(orderDetail.getOrderStatus().equals("完成")){
+                if(orderDetail.getOrderStatus().equals("已完成")){
                     List<PushOrderStatusReq.Voucher> vochers = new ArrayList<>();
                         try {
                             if(null!=orderDetail.getOrderInfo().getEnterCertificate()&& CollectionUtils.isNotEmpty(orderDetail.getOrderInfo().getEnterCertificate().getEnterCertificateTypeInfo())){
