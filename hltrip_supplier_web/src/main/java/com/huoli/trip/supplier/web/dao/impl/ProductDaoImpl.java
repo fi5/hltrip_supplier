@@ -128,9 +128,9 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
-    public List<String> getSupplierProductIds(String supplierId){
+    public List<ProductPO> getSupplierProductIds(String supplierId){
         Query query = new Query(Criteria.where("supplierId").is(supplierId));
         query.fields().include("supplierProductId").exclude("_id");
-        return mongoTemplate.find(query, String.class);
+        return mongoTemplate.find(query, ProductPO.class);
     }
 }

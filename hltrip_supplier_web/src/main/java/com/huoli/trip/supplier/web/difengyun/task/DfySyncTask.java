@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.difengyun.task;
 
+import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
@@ -42,14 +43,14 @@ public class DfySyncTask {
             }
             long begin = System.currentTimeMillis();
             log.info("开始执行定时任务，同步笛风云产品（只更新本地已有产品）。。");
-            List<String> ids = dfySyncService.getSupplierProductIds();
-            if(ListUtils.isEmpty(ids)){
+            List<ProductPO> products = dfySyncService.getSupplierProductIds();
+            if(ListUtils.isEmpty(products)){
                 log.error("同步笛风云产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
                 return;
             }
-            ids.forEach(id -> {
+            products.forEach(product -> {
                 try {
-                    dfySyncService.syncProduct(id, null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    dfySyncService.syncProduct(product.getSupplierProductId(), null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
                     // 限制一分钟不超过200次
                     Thread.sleep(310);
                 } catch (Exception e) {
