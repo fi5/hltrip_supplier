@@ -12,6 +12,7 @@ import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.central.OrderStatusKafka;
 import com.huoli.trip.common.vo.response.BaseResponse;
+import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
@@ -21,10 +22,12 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -94,6 +97,48 @@ public class DfyCallBackService {
                 PushOrderStatusReq req =new PushOrderStatusReq();
                 req.setStrStatus(orderDetail.getOrderStatus());
                 req.setPartnerOrderId(tripOrder.getOrderId());
+                if(orderDetail.getOrderStatus().equals("已完成")){
+                    List<PushOrderStatusReq.Voucher> vochers = new ArrayList<>();
+                        try {
+                            if(null!=orderDetail.getOrderInfo().getEnterCertificate()&& CollectionUtils.isNotEmpty(orderDetail.getOrderInfo().getEnterCertificate().getEnterCertificateTypeInfo())){
+                                for(DfyOrderDetail.EnterCertificateTypeInfo typeInfo:orderDetail.getOrderInfo().getEnterCertificate().getEnterCertificateTypeInfo()){
+                                    for(DfyOrderDetail.TicketCertInfo oneInfo:typeInfo.getTicketCertInfos()){
+
+                                        switch (oneInfo.getCertType()){//凭证类型   1.纯文本  2.二维码 3.PDF
+                                            case 1:
+                                                for(String entry:oneInfo.getFileUrls()){
+                                                    PushOrderStatusReq.Voucher oneVoucher=new PushOrderStatusReq.Voucher();
+                                                    oneVoucher.setVocherNo(entry);
+                                                    oneVoucher.setType(1);
+                                                    vochers.add(oneVoucher);
+                                                }
+                                                break;
+
+                                            case 2:
+                                                for(String entry:oneInfo.getFileUrls()){
+                                                    PushOrderStatusReq.Voucher oneVoucher=new PushOrderStatusReq.Voucher();
+                                                    oneVoucher.setVocherUrl(entry);
+                                                    oneVoucher.setType(2);
+                                                    vochers.add(oneVoucher);
+                                                }
+                                                break;
+                                            case 3:
+                                                for(String entry:oneInfo.getFileUrls()){
+                                                    PushOrderStatusReq.Voucher oneVoucher=new PushOrderStatusReq.Voucher();
+                                                    oneVoucher.setVocherUrl(entry);
+                                                    oneVoucher.setType(3);
+                                                    vochers.add(oneVoucher);
+                                                }
+                                                break;
+                                        }
+                                    }
+                                }
+                                req.setVochers(vochers);
+                            }
+                        } catch (Exception e) {
+                            log.error("genVouchers错",e);
+                        }
+                }
                 req.setType(3);
                 log.info("中台订单推送传参json:"+req);
                 String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
