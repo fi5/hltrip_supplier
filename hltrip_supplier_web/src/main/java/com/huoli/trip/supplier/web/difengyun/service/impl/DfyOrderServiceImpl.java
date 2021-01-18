@@ -303,7 +303,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                 if(bill.getBillType()!=4 )
                     break;
                 if(!StringUtils.equals(tripOrder.getOutOrderId(),bill.getBizOrderId())) {//单号不一样则跳过{
-                    log.info(bill.getBizOrderId()+","+tripOrder.getOutOrderId());
                     continue;
                 }
 
