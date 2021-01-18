@@ -62,4 +62,11 @@ public interface ProductDao {
      */
     void updateStatusByCode(String code, int status);
 
+    /**
+     * 根据渠道获取所有渠道的产品码
+     * @param supplierId
+     * @return
+     */
+    List<String> getSupplierProductIds(String supplierId);
+
 }

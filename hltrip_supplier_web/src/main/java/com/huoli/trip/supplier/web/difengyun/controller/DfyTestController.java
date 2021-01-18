@@ -13,6 +13,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
+import com.huoli.trip.supplier.web.difengyun.task.DfySyncTask;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class DfyTestController {
 
     @Autowired
     TripOrderRefundMapper tripOrderRefundMapper;
+
+    @Autowired
+    private DfySyncTask  dfySyncTask;
 
 
     /**
@@ -79,6 +83,28 @@ public class DfyTestController {
     @PostMapping(path = "/sync/scenic/detail")
     DfyBaseResult syncScenicDetail(@RequestBody String ticketId) {
         dfySyncService.syncScenicDetail(ticketId);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/new/product")
+    DfyBaseResult syncNewProduct() {
+        dfySyncTask.syncNewProduct();
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/update/product")
+    DfyBaseResult syncUpdateProduct() {
+        dfySyncTask.syncUpdateProduct();
         return DfyBaseResult.success();
     }
 

@@ -64,7 +64,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
             DfyScenicListResponse response = baseResult.getData();
             if(response != null && ListUtils.isNotEmpty(response.getRows())){
-                List<DfyScenic> scenics= response.getRows();
+                List<DfyScenic> scenics = response.getRows();
                 scenics.forEach(s -> syncScenicDetail(s.getScenicId()));
                 return true;
             } else {
@@ -105,7 +105,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if(ListUtils.isNotEmpty(allTickets)){
                 for (DfyTicket dfyTicket : allTickets) {
-                    syncProduct(dfyTicket.getProductId(), productItemPO);
+                    // 只同步新增产品，同步更新单独有定时任务执行
+                    syncProduct(dfyTicket.getProductId(), productItemPO, DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD);
                 }
             }
             dynamicProductItemService.refreshItemByCode(productItemPO.getCode());
@@ -116,6 +117,11 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public void syncProduct(String productId, ProductItemPO productItemPO){
+        syncProduct(productId, productItemPO, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+    }
+
+    @Override
+    public void syncProduct(String productId, ProductItemPO productItemPO, int syncMode){
         DfyTicketDetailRequest ticketDetailRequest = new DfyTicketDetailRequest();
         ticketDetailRequest.setProductId(Integer.valueOf(productId));
         DfyBaseRequest ticketDetailBaseRequest = new DfyBaseRequest<>(ticketDetailRequest);
@@ -151,6 +157,15 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
             }
             ProductPO productPO = productDao.getByCode(product.getCode());
+            // 是否只同步本地没有的产品
+            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
+                log.error("笛风云，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
+            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
+                log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
@@ -237,5 +252,10 @@ public class DfySyncServiceImpl implements DfySyncService {
         } catch (Exception e) {
             log.error("笛风云接收通知更新产品异常，", e);
         }
+    }
+
+    @Override
+    public List<String> getSupplierProductIds(){
+        return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
 }
