@@ -102,7 +102,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         }
                     }
 
-                    log.info("详情这里的payed:"+payed);
+                    log.info("已取消订单详情这里的payed:"+payed);
 
                     if(payed){
                         detail.setOrderStatus("申请退款中");
@@ -111,6 +111,14 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         if(dbRefundNotify!=null){
                             if(dbRefundNotify.getStatus()==1){
                                 detail.setOrderStatus("已退款");
+                            }else{//这里去实时查一下账单
+                                try {
+                                    processNotify(dbRefundNotify);
+                                    Thread.sleep(100);
+                                }  catch (Exception e) {
+                                    log.info("裡处理退款通知失败了，id={}", dbRefundNotify.getId(), e);
+                                }
+
                             }
 
                         }else{
