@@ -298,8 +298,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             log.info("processNotify这里的rows:"+ JSONObject.toJSONString(dfyBillResponseDfyBaseResult.getData().getRows()));
             for(DfyBillResponse.QueryBillsDto bill :dfyBillResponseDfyBaseResult.getData().getRows()){
 
-                if(bill.getBillType()!=4)
+                if(bill.getBillType()!=4 )
                     break;
+                TripOrder tripOrder = tripOrderMapper.getChannelByOrderId(item.getOrderId());
+                if(!StringUtils.equals(tripOrder.getOutOrderId(),bill.getBizOrderId()))//单号不一样则跳过
+                    continue;
 
                 String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
                 RefundNoticeReq req=new RefundNoticeReq();
@@ -308,6 +311,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                 req.setRefundPrice(new BigDecimal(bill.getAmount()));
                 req.setResponseTime(bill.getTime());
                 req.setSource("dfy");
+                BigDecimal refundCharge=tripOrder.getOutPayPrice().divide(req.getRefundPrice());
+                req.setRefundCharge(refundCharge);
 
                 switch (bill.getStatus()) {//账单处理结果，1处理完成-1处理失败3处理
                     case 1:
