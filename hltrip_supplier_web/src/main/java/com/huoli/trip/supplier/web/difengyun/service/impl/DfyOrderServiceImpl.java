@@ -18,6 +18,7 @@ import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyBookSaleInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.Tourist;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
@@ -257,6 +258,17 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     public DfyBaseResult<DfyCreateOrderResponse> createOrder(DfyCreateOrderRequest createOrderReq) {
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+        String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
+        createOrderReq.setAcctId(acctid);
+        createOrderReq.setTraceId(null);
+        final List<Tourist> touristList = createOrderReq.getTouristList();
+        if(ListUtils.isNotEmpty(touristList)){
+            for (Tourist t:touristList) {
+                if(StringUtils.isNotEmpty(t.getTel()) && StringUtils.isNotEmpty(tel)) {
+                    t.setTel(tel);
+                }
+            }
+        }
         createOrderReq.setAcctId(acctid);
         createOrderReq.setTraceId(null);
         dfyBaseRequest.setData(createOrderReq);
