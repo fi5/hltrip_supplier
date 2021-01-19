@@ -62,9 +62,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         try {
             DfyBaseRequest<DfyScenicListRequest> listRequest = new DfyBaseRequest<>(request);
             DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
-            DfyScenicListResponse response = baseResult.getData();
-            if(response != null && ListUtils.isNotEmpty(response.getRows())){
-                List<DfyScenic> scenics = response.getRows();
+            if(baseResult != null && baseResult.getData() != null && ListUtils.isNotEmpty(baseResult.getData().getRows())){
+                List<DfyScenic> scenics = baseResult.getData().getRows();
                 scenics.forEach(s -> syncScenicDetail(s.getScenicId()));
                 return true;
             } else {

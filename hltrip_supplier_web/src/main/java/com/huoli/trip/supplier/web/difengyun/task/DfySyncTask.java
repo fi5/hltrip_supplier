@@ -100,7 +100,7 @@ public class DfySyncTask {
                     Thread.sleep(310 - useTime);
                 }
             }
-            log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", request.getPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行笛风云定时更新景点、产品任务异常", e);
         }
