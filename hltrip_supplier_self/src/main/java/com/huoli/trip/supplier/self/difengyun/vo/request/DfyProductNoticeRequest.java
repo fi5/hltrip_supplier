@@ -16,5 +16,5 @@ import java.util.List;
 @Data
 public class DfyProductNoticeRequest {
 
-    private List<DfyProductNotice> productNotices;
+    private List<DfyProductNotice> productIds;
 }

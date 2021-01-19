@@ -227,7 +227,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Async
     public void productUpdate(DfyProductNoticeRequest request){
         try {
-            List<DfyProductNotice> productNotices = request.getProductNotices();
+            List<DfyProductNotice> productNotices = request.getProductIds();
             if(ListUtils.isEmpty(productNotices)){
                 log.error("笛风云通知更新产品列表为空");
                 return;
