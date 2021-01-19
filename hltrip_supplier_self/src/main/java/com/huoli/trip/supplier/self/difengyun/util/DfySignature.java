@@ -79,7 +79,7 @@ public class DfySignature {
         } else if (value instanceof JSONArray) {
             jsonArrayPropertyFilter(key, (JSONArray) value, list);
         } else {
-            if (value != null && value.toString().length() > 0) {
+            if (value.toString().length() > 0) {
                 list.add(key.trim() + "=" + value);
             }
         }

@@ -4,11 +4,8 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.constant.CentralError;
-import com.huoli.trip.common.entity.TripOrderRefund;
-import com.huoli.trip.common.entity.TripRefundNotify;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
-import com.huoli.trip.common.entity.PriceInfoPO;
-import com.huoli.trip.common.entity.PricePO;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
@@ -32,6 +29,7 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -63,6 +61,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     @Autowired
     TripOrderRefundMapper tripOrderRefundMapper;
+    @Autowired
+    TripOrderMapper tripOrderMapper;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -78,6 +78,76 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+                if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
+                    switch (detail.getOrderInfo().getStatusDesc()){
+                        case "取消订单核损中":
+                        case "取消订单确认中":
+                        case "核损已反馈":
+                        case "取取消订单核损已反馈":
+                            detail.setOrderStatus("申请退款中");
+                            break;
+
+                    	default:
+                    		break;
+                    }
+
+                }
+                if(StringUtils.equals(detail.getOrderStatus(),"已取消")){
+                    TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+                    List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
+                    boolean payed=false;
+                    for(TripPayOrder payOrder:orderPayList){
+                        if(payOrder.getStatus()==1){
+                            payed=true;
+                            break;
+                        }
+                    }
+
+                    log.info("已取消订单详情这里的payed:"+payed);
+
+                    if(payed){
+                        detail.setOrderStatus("申请退款中");
+
+                        TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+                        if(dbRefundNotify!=null){
+                            if(dbRefundNotify.getStatus()==1){
+                                detail.setOrderStatus("已退款");
+                            }else{//这里去实时查一下账单
+                                try {
+                                    processNotify(dbRefundNotify);
+                                    if(dbRefundNotify.getStatus()==1){
+                                        detail.setOrderStatus("已退款");
+                                    }
+                                    Thread.sleep(100);
+                                }  catch (Exception e) {
+                                    log.info("裡处理退款通知失败了，id={}", dbRefundNotify.getId(), e);
+                                }
+
+                            }
+
+                        }else{
+                            TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+                            TripRefundNotify notify = new TripRefundNotify();
+                            if (refundOrder == null) {
+                                log.info("这未找到待处理的退款单" + tripOrder.getOrderId());
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+
+                            } else {
+                                TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setRefundId(refundOrder.getId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+                            }
+                            tripOrderRefundMapper.saveTripRefundNotify(notify);
+                        }
+
+                    }
+
+
+                }
             }else{
                 if(!baseResult.isSuccess()){
                     return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
@@ -122,7 +192,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             billQueryDataReq.setAcctId(acctid);
             dfyBaseRequest.setData(billQueryDataReq);
             String apipublicKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.public.key");
+            String apipublicSecretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.public.secret.key");
             dfyBaseRequest.setApiKey(apipublicKey);
+            dfyBaseRequest.setSecretKey(apipublicSecretKey);
             DfyBaseResult<DfyBillResponse> dfyBillResponse = diFengYunClient.queryBill(dfyBaseRequest);
             log.info("dfyqueryBill的返回:"+JSONObject.toJSONString(dfyBillResponse)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest)+","+apipublicKey);
 
@@ -224,7 +296,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
         DfyBillQueryDataReq billQueryDataReq=new DfyBillQueryDataReq();
         billQueryDataReq.setAccType(1);
-        billQueryDataReq.setBillType(2);
+        billQueryDataReq.setBillType(4);
         billQueryDataReq.setStart(0);
         billQueryDataReq.setLimit(50);
         billQueryDataReq.setStatus(1);
@@ -235,24 +307,27 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
         DfyBaseResult<DfyBillResponse> dfyBillResponseDfyBaseResult = queryBill(billQueryDataReq);
         if(dfyBillResponseDfyBaseResult.getData()!=null && CollectionUtils.isNotEmpty(dfyBillResponseDfyBaseResult.getData().getRows())){
+            TripOrder tripOrder = tripOrderMapper.getChannelByOrderId(item.getOrderId());
+            log.info("processNotify这时的:"+JSONObject.toJSONString(tripOrder));
             log.info("processNotify这里的rows:"+ JSONObject.toJSONString(dfyBillResponseDfyBaseResult.getData().getRows()));
             for(DfyBillResponse.QueryBillsDto bill :dfyBillResponseDfyBaseResult.getData().getRows()){
 
-                if(bill.getBillType()!=4)
+                if(bill.getBillType()!=4 )
                     break;
+                if(!StringUtils.equals(tripOrder.getOutOrderId(),bill.getBizOrderId())) {//单号不一样则跳过{
+                    continue;
+                }
 
-                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
+
                 String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
                 RefundNoticeReq req=new RefundNoticeReq();
                 req.setPartnerOrderId(item.getOrderId());
                 req.setRefundFrom(2);
                 req.setRefundPrice(new BigDecimal(bill.getAmount()));
-                req.setRefundTime(refundOrder.getCreateTime());
                 req.setResponseTime(bill.getTime());
                 req.setSource("dfy");
-                req.setRefundId(refundOrder.getId());
-                req.setRefundCharge(refundOrder.getRefundCharge());
-
+                BigDecimal refundCharge=tripOrder.getOutPayPrice().subtract(req.getRefundPrice());
+                req.setRefundCharge(refundCharge);
 
                 switch (bill.getStatus()) {//账单处理结果，1处理完成-1处理失败3处理
                     case 1:
@@ -263,9 +338,19 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         item.setBillInfo(JSONObject.toJSONString(bill));
                         tripOrderRefundMapper.updateRefundNotify(item);
 
+                        req.setRefundTime(bill.getTime());
+
+                        if(item.getRefundId()>0){
+                            TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
+                            req.setRefundId(refundOrder.getId());
+                            req.setRefundCharge(refundOrder.getRefundCharge());
+                        }else{
+                            log.info("无退款单子但是渠道退款了:"+item);
+                        }
+
                         req.setRefundStatus(1);
 
-                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",refundStatus:"+item.getOrderId());
                         String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                         log.info("中台refundNotice返回:"+res);
 
@@ -282,7 +367,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         tripOrderRefundMapper.updateRefundNotify(item);
 
                         req.setRefundStatus(-1);
-                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
+                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
                         String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
                         log.info("中台refundNotice返回:"+res2);
                         break;

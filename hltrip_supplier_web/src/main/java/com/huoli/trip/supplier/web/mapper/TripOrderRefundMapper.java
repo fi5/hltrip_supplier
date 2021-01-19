@@ -19,6 +19,8 @@ public interface TripOrderRefundMapper {
     @Select("select * from trip_order_refund where id = #{refundId}")
     TripOrderRefund getRefundOrderById(Integer refundId);
 
+    @Select("select * from trip_order_refund_notify where orderId = #{orderId} limit 1")
+    TripRefundNotify getRefundNotifyByOrderId(String orderId);
     @Select("select * from trip_order_refund_notify where orderId = #{orderId} and refundId= #{refundId} limit 1")
     TripRefundNotify getRefundNotify(String orderId,Integer refundId);
 
@@ -29,7 +31,7 @@ public interface TripOrderRefundMapper {
             "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW())")
     void saveTripRefundNotify(TripRefundNotify notify);
 
-    @Update("update trip_order set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
+    @Update("update trip_order_refund_notify set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
             ",refundMoney = #{refundMoney} ,billInfo = #{billInfo} where id = #{id}")
     void updateRefundNotify(TripRefundNotify notify);
 }

@@ -1,5 +1,8 @@
 package com.huoli.trip.supplier.web.difengyun.task;
 
+import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -27,8 +32,42 @@ public class DfySyncTask {
     @Autowired
     private DfySyncService dfySyncService;
 
+    /**
+     * 只更新本地已有产品
+     */
     @Scheduled(cron = "0 0 0,6-22/2 ? * *")
-    public void syncFullPrice(){
+    public void syncUpdateProduct(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步笛风云产品（只更新本地已有产品）。。");
+            List<ProductPO> products = dfySyncService.getSupplierProductIds();
+            if(ListUtils.isEmpty(products)){
+                log.error("同步笛风云产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
+                return;
+            }
+            products.forEach(product -> {
+                try {
+                    dfySyncService.syncProduct(product.getSupplierProductId(), null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    // 限制一分钟不超过200次
+                    Thread.sleep(310);
+                } catch (Exception e) {
+                    log.error("同步产品supplierProductCode={}异常，", e);
+                }
+            });
+            log.info("同步笛风云产品定时任务执行完成（只更新本地已有产品），用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新景点、产品任务异常（只更新本地已有产品）", e);
+        }
+    }
+
+    /**
+     * 只同步本地没有的产品，每天执行一次
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void syncNewProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
                 return;

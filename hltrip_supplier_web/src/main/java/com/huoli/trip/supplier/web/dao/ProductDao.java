@@ -55,4 +55,18 @@ public interface ProductDao {
      */
     ProductPO getByCode(String code);
 
+    /**
+     * 上下架
+     * @param code
+     * @param status
+     */
+    void updateStatusByCode(String code, int status);
+
+    /**
+     * 根据渠道获取所有渠道的产品码
+     * @param supplierId
+     * @return
+     */
+    List<ProductPO> getSupplierProductIds(String supplierId);
+
 }

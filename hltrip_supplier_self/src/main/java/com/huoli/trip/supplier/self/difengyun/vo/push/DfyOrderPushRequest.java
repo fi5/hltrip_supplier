@@ -14,5 +14,10 @@ import java.io.Serializable;
 @Data
 public class DfyOrderPushRequest implements Serializable {
     private static final long serialVersionUID = 6202899833814899182L;
-    private String orderId;
+    private OrderInfo data;
+
+    @Data
+    public static class OrderInfo implements Serializable {
+        private String orderId;
+    }
 }

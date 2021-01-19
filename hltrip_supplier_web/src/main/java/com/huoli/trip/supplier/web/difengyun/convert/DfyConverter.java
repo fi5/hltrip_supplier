@@ -104,6 +104,8 @@ public class DfyConverter {
 
     public static ProductPO convertToProductPO(DfyTicketDetail ticketDetail){
         ProductPO productPO = new ProductPO();
+        // 默认条件退
+        productPO.setRefundType(3);
         productPO.setStatus(1);
         productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
         productPO.setSupplierId(Constants.SUPPLIER_CODE_DFY);
@@ -137,7 +139,7 @@ public class DfyConverter {
         ticketPO.setDrawAddress(ticketDetail.getDrawAddress());
         Integer type = null;
         if(StringUtils.isNotBlank(ticketDetail.getMpType())){
-            switch (Integer.valueOf(ticketDetail.getMpType())){
+            switch (Integer.parseInt(ticketDetail.getMpType())){
                 case DfyConstants.TICKET_TYPE_0:
                     type = TicketType.TICKET_TYPE_19.getCode();
                     break;
@@ -190,6 +192,7 @@ public class DfyConverter {
         ticketInfoPO.setSupplierItemId(ticketDetail.getScenicId());
         ticketInfoPO.setTitle(ticketDetail.getProductName());
         ticketInfoPO.setSupplierResourceId(ticketDetail.getResourceId());
+        ticketInfoPO.setTicketType(type);
         ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
         productPO.setTicket(ticketPO);
         if(ticketDetail.getCustInfoLimit() != null){

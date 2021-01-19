@@ -162,4 +162,18 @@ public class DfyConstants {
      */
     public static final int CRED_TYPE_TW_2 = 11;
 
+    // 产品同步模式
+    /**
+     * 不限
+     */
+    public static final int PRODUCT_SYNC_MODE_UNLIMITED = 0;
+    /**
+     * 只新增
+     */
+    public static final int PRODUCT_SYNC_MODE_ONLY_ADD = 1;
+    /**
+     * 只更新
+     */
+    public static final int PRODUCT_SYNC_MODE_ONLY_UPDATE = 2;
+
 }

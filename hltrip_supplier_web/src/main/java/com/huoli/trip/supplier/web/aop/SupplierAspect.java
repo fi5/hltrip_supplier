@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.aop;
 
 import brave.Span;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.BraveTrace;
 import com.huoli.eagle.eye.core.HuoliAtrace;
@@ -82,9 +83,11 @@ public class SupplierAspect {
                             // 设置traceId
                             span = (Span) TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
                         }
-                    } catch (Exception e) {
-                        log.error("反序列化方法 {} 的请求参数 {} 异常", function, arg, e);
+                    } catch (JSONException e) {
+                        log.error("反序列化方法 {} 的请求参数 {} 异常", function, arg);
                         params = "参数不能序列化";
+                    }catch (Exception e) {
+                        log.error("切面序列化参数异常", e);
                     }
                 }
             } else {

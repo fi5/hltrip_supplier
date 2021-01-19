@@ -40,8 +40,8 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         try {
-            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.key");
-            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.secret.key");
+            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.key");
+            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.secret.key");
             byte[] body = requestTemplate.body();
             if(body != null && body.length > 0){
                 String time = DateTimeUtil.formatFullDate(new Date());
@@ -52,11 +52,15 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
                 if(StringUtils.isNotBlank(request.getApiKey())){
                     apiKey = request.getApiKey();
                 }
+                if(StringUtils.isNotBlank(request.getSecretKey())){
+                    secretKey = request.getSecretKey();
+                }
                 bodyObj.put("apiKey", apiKey);
                 bodyObj.put("timestamp", time);
                 log.info("笛风云feign拦截器，准备获取签名，secretKey = {}, bodyObj = {} ", secretKey, bodyObj.toJSONString());
                 String sign = DfySignature.getSignature(bodyObj, secretKey);
                 log.info("获取到签名，sign = {}", sign);
+                request.setSecretKey(null);
                 request.setApiKey(apiKey);
                 request.setSign(sign);
                 request.setTimestamp(time);

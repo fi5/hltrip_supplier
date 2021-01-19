@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.difengyun.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
@@ -24,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -38,7 +38,7 @@ import java.util.List;
  * 版本：1.0<br>
  * 创建日期：2020/12/9<br>
  */
-@Service
+@Service(timeout = 10000,group = "hltrip")
 @Slf4j
 public class DfySyncServiceImpl implements DfySyncService {
 
@@ -64,7 +64,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
             DfyScenicListResponse response = baseResult.getData();
             if(response != null && ListUtils.isNotEmpty(response.getRows())){
-                List<DfyScenic> scenics= response.getRows();
+                List<DfyScenic> scenics = response.getRows();
                 scenics.forEach(s -> syncScenicDetail(s.getScenicId()));
                 return true;
             } else {
@@ -105,7 +105,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if(ListUtils.isNotEmpty(allTickets)){
                 for (DfyTicket dfyTicket : allTickets) {
-                    syncProduct(dfyTicket.getProductId(), productItemPO);
+                    // 只同步新增产品，同步更新单独有定时任务执行
+                    syncProduct(dfyTicket.getProductId(), productItemPO, DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD);
                 }
             }
             dynamicProductItemService.refreshItemByCode(productItemPO.getCode());
@@ -116,6 +117,11 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public void syncProduct(String productId, ProductItemPO productItemPO){
+        syncProduct(productId, productItemPO, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+    }
+
+    @Override
+    public void syncProduct(String productId, ProductItemPO productItemPO, int syncMode){
         DfyTicketDetailRequest ticketDetailRequest = new DfyTicketDetailRequest();
         ticketDetailRequest.setProductId(Integer.valueOf(productId));
         DfyBaseRequest ticketDetailBaseRequest = new DfyBaseRequest<>(ticketDetailRequest);
@@ -151,6 +157,15 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
             }
             ProductPO productPO = productDao.getByCode(product.getCode());
+            // 是否只同步本地没有的产品
+            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
+                log.error("笛风云，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
+            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
+                log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
@@ -160,7 +175,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setValidTime(DateTimeUtil.trancateToDate(MongoDateUtils.handleTimezoneInput(new Date())));
             log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
-                log.info("有价格信息。。。{}", JSON.toJSONString(ticketDetailDfyBaseResult.getData().getPriceCalendar()));
+                log.info("有价格信息。。。");
                 PricePO pricePO = syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
                 if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
                     // 笛风云没有上下架时间，就把最远的销售日期作为下架时间
@@ -174,6 +189,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             productDao.updateByCode(product);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
+            // 笛风云的产品下线就不会返回，所以没拿到就认为已下线
+            String code = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, productId);
+            ProductPO productPO = productDao.getByCode(code);
+            if(productPO != null){
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID);
+                log.info("笛风云产品详情返回空，产品已下线，productCode = {}", productPO.getCode());
+            }
         }
     }
 
@@ -195,7 +217,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         price.setOperator(Constants.SUPPLIER_CODE_DFY);
         price.setOperatorName(Constants.SUPPLIER_NAME_DFY);
         priceDao.updateByProductCode(price);
-        log.info("价格已更新。。。{}", JSON.toJSONString(price));
+        log.info("价格已更新。。。");
         return price;
     }
 
@@ -230,5 +252,10 @@ public class DfySyncServiceImpl implements DfySyncService {
         } catch (Exception e) {
             log.error("笛风云接收通知更新产品异常，", e);
         }
+    }
+
+    @Override
+    public List<ProductPO> getSupplierProductIds(){
+        return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
 }
