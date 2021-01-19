@@ -48,16 +48,24 @@ public class DfySyncTask {
                 log.error("同步笛风云产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
                 return;
             }
-            products.forEach(product -> {
+            int i = 1;
+            for (ProductPO product : products) {
                 try {
+                    long sTime = System.currentTimeMillis();
                     dfySyncService.syncProduct(product.getSupplierProductId(), null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
-                    // 限制一分钟不超过200次
-                    Thread.sleep(310);
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}个产品 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
                 } catch (Exception e) {
-                    log.error("同步产品supplierProductCode={}异常，", e);
+                    log.error("同步第{}个产品supplierProductCode={}异常（只更新本地已有产品），", i, product.getSupplierProductId(), e);
                 }
-            });
-            log.info("同步笛风云产品定时任务执行完成（只更新本地已有产品），用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+                i++;
+            }
+            log.info("同步笛风云产品定时任务执行完成（只更新本地已有产品），共{}个，用时{}秒（只更新本地已有产品）", i, (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行笛风云定时更新景点、产品任务异常（只更新本地已有产品）", e);
         }
@@ -77,12 +85,22 @@ public class DfySyncTask {
             DfyScenicListRequest request = new DfyScenicListRequest();
             request.setPage(1);
             request.setPageSize(100);
-            while (dfySyncService.syncScenicList(request)){
+            while (true){
+                long sTime = System.currentTimeMillis();
+                boolean success = dfySyncService.syncScenicList(request);
+                long useTime = System.currentTimeMillis() - sTime;
+                log.info("同步第{}页景点，用时{}毫秒", request.getPage(), useTime);
+                if(!success) {
+                    break;
+                }
                 request.setPage(request.getPage() + 1);
-                // 限制一分钟不超过200次
-                Thread.sleep(310);
+                // 如果执行时间超过310毫秒就不用睡了
+                if(useTime < 310){
+                    // 限制一分钟不超过200次
+                    Thread.sleep(310 - useTime);
+                }
             }
-            log.info("同步笛风云产品定时任务执行完成，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行笛风云定时更新景点、产品任务异常", e);
         }
