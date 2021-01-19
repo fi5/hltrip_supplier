@@ -343,7 +343,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         if(item.getRefundId()>0){
                             TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
                             req.setRefundId(refundOrder.getId());
-                            req.setRefundCharge(refundOrder.getRefundCharge());
                         }else{
                             log.info("无退款单子但是渠道退款了:"+item);
                         }
