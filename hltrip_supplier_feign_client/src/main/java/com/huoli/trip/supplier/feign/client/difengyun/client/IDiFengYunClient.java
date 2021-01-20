@@ -50,6 +50,22 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyTicketDetail> getTicketDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
 
     /**
+     * 获取跟团游列表
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/search")
+    Object getToursList(@RequestBody DfyBaseRequest<DfyToursListRequest> request);
+
+    /**
+     * 获取跟团游详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/search")
+    Object getToursDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
+
+    /**
      * 获取订单详情
      * @param request
      * @return

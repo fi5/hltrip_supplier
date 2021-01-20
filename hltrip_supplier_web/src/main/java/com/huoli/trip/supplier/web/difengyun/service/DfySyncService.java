@@ -4,6 +4,7 @@ import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
 
 import java.util.List;
 
@@ -55,4 +56,8 @@ public interface DfySyncService {
      * @return
      */
     List<ProductPO> getSupplierProductIds();
+
+    Object getToursList(DfyToursListRequest request);
+
+    Object getToursDetail(String productId);
 }

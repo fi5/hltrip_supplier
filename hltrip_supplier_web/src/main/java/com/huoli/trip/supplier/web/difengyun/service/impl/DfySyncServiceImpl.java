@@ -260,4 +260,23 @@ public class DfySyncServiceImpl implements DfySyncService {
     public List<ProductPO> getSupplierProductIds(){
         return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
+
+    @Override
+    public Object getToursList(DfyToursListRequest request){
+        DfyBaseRequest<DfyToursListRequest> listRequest = new DfyBaseRequest<>(request);
+        listRequest.setSecretKey("i882omQijTsEwGBp0VeL");
+        listRequest.setApiKey("244899_Tours");
+        Object obj = diFengYunClient.getToursList(listRequest);
+        return obj;
+    }
+
+    @Override
+    public Object getToursDetail(String productId){
+        DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+        DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
+        detailRequest.setSecretKey("i882omQijTsEwGBp0VeL");
+        detailRequest.setApiKey("244899_Tours");
+        Object obj = diFengYunClient.getToursDetail(detailRequest);
+        return obj;
+    }
 }
