@@ -115,6 +115,11 @@ public class DfyTestController {
         return DfyBaseResult.success(dfySyncService.getToursDetail(productId));
     }
 
+    @PostMapping(path = "/sync/tours/multi/detail")
+    DfyBaseResult syncToursMultiDetail(@RequestBody String productId) {
+        return DfyBaseResult.success(dfySyncService.getToursMultiDetail(productId));
+    }
+
     /**
      * 订单详情
      *

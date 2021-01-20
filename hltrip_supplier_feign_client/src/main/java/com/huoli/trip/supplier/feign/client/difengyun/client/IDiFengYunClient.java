@@ -62,8 +62,16 @@ public interface IDiFengYunClient {
      * @param request
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/Tours/search")
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/detail")
     Object getToursDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
+
+    /**
+     * 获取跟团游详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/multiJourneyInfo")
+    Object getToursMultiDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
 
     /**
      * 获取订单详情

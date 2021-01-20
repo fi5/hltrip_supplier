@@ -60,4 +60,6 @@ public interface DfySyncService {
     Object getToursList(DfyToursListRequest request);
 
     Object getToursDetail(String productId);
+
+    Object getToursMultiDetail(String productId);
 }

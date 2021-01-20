@@ -279,4 +279,14 @@ public class DfySyncServiceImpl implements DfySyncService {
         Object obj = diFengYunClient.getToursDetail(detailRequest);
         return obj;
     }
+
+    @Override
+    public Object getToursMultiDetail(String productId){
+        DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+        DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
+        detailRequest.setSecretKey("i882omQijTsEwGBp0VeL");
+        detailRequest.setApiKey("244899_Tours");
+        Object obj = diFengYunClient.getToursMultiDetail(detailRequest);
+        return obj;
+    }
 }
