@@ -273,6 +273,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Override
     public Object getToursDetail(String productId){
         DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+        request.setProductId(Integer.valueOf(productId));
         DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
         String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
         String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
@@ -285,6 +286,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Override
     public Object getToursMultiDetail(String productId){
         DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+        request.setProductId(Integer.valueOf(productId));
         DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
         String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
         String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
