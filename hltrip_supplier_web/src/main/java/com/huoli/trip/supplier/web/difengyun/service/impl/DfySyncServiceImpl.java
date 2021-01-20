@@ -3,12 +3,10 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
@@ -264,8 +262,10 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Override
     public Object getToursList(DfyToursListRequest request){
         DfyBaseRequest<DfyToursListRequest> listRequest = new DfyBaseRequest<>(request);
-        listRequest.setSecretKey("i882omQijTsEwGBp0VeL");
-        listRequest.setApiKey("244899_Tours");
+        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+        listRequest.setSecretKey(secretKey);
+        listRequest.setApiKey(apiKey);
         Object obj = diFengYunClient.getToursList(listRequest);
         return obj;
     }
@@ -274,8 +274,10 @@ public class DfySyncServiceImpl implements DfySyncService {
     public Object getToursDetail(String productId){
         DfyTicketDetailRequest request = new DfyTicketDetailRequest();
         DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
-        detailRequest.setSecretKey("i882omQijTsEwGBp0VeL");
-        detailRequest.setApiKey("244899_Tours");
+        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+        detailRequest.setSecretKey(secretKey);
+        detailRequest.setApiKey(apiKey);
         Object obj = diFengYunClient.getToursDetail(detailRequest);
         return obj;
     }
@@ -284,8 +286,10 @@ public class DfySyncServiceImpl implements DfySyncService {
     public Object getToursMultiDetail(String productId){
         DfyTicketDetailRequest request = new DfyTicketDetailRequest();
         DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
-        detailRequest.setSecretKey("i882omQijTsEwGBp0VeL");
-        detailRequest.setApiKey("244899_Tours");
+        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+        detailRequest.setSecretKey(secretKey);
+        detailRequest.setApiKey(apiKey);
         Object obj = diFengYunClient.getToursMultiDetail(detailRequest);
         return obj;
     }
