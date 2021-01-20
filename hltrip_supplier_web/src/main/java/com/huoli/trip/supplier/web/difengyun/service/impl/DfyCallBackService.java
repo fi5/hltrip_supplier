@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.difengyun.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrder;
@@ -19,6 +20,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
+import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,9 @@ public class DfyCallBackService {
     TripOrderRefundMapper tripOrderRefundMapper;
     @Autowired
     DfyOrderService dfyOrderService;
+
+    @Autowired
+    private HuoliTrace huoliTrace;
 
     public DfyBaseResult orderStatusNotice(DfyOrderPushRequest request) {
         String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
@@ -141,7 +146,7 @@ public class DfyCallBackService {
                 }
                 req.setType(3);
                 log.info("中台订单推送传参json:"+req);
-                String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                 log.info("中台orderStatusNotice返回:"+res);
             }
 
