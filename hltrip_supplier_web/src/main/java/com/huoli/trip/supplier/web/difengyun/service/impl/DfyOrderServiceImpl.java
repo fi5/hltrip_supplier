@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
@@ -28,6 +29,7 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxBaseResult;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
+import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
@@ -63,6 +65,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     TripOrderRefundMapper tripOrderRefundMapper;
     @Autowired
     TripOrderMapper tripOrderMapper;
+
+    @Autowired
+    private HuoliTrace huoliTrace;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -350,7 +355,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         req.setRefundStatus(1);
 
                         log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",refundStatus:"+item.getOrderId());
-                        String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res);
 
 
@@ -367,7 +372,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
                         req.setRefundStatus(-1);
                         log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
-                        String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res2);
                         break;
                     case 3:
