@@ -77,15 +77,20 @@ public class DfyConverter {
         if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
             ImageBasePO imageBasePO = new ImageBasePO();
             imageBasePO.setUrl(scenicDetail.getDefaultPic());
+            // 列表图不用说明
             productItemPO.setMainImages(Lists.newArrayList(imageBasePO));
+            // 详情图需要说明
+            imageBasePO.setDesc(scenicDetail.getScenicDescription());
+            productItemPO.setImages(Lists.newArrayList(imageBasePO));
         }
+        // 放到images的说明里了
         // 这个是说明是富文本，所以放到特色说明里
-        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
-            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-            itemFeaturePO.setDetail(scenicDetail.getScenicDescription());
-            itemFeaturePO.setType(YcfConstants.POI_FEATURE_DETAIL);
-            featurePOs.add(itemFeaturePO);
-        }
+//        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
+//            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+//            itemFeaturePO.setDetail(scenicDetail.getScenicDescription());
+//            itemFeaturePO.setType(YcfConstants.POI_FEATURE_DETAIL);
+//            featurePOs.add(itemFeaturePO);
+//        }
         // 这个不是按富文本处理的
 //        productItemPO.setDescription(scenicDetail.getScenicDescription());
         productItemPO.setAppMainTitle(productItemPO.getName());
