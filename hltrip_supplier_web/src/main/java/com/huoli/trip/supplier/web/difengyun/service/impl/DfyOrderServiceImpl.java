@@ -11,6 +11,7 @@ import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
@@ -358,6 +359,18 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res);
 
+                        //退款成功后再发个通知
+                        PushOrderStatusReq statusReq =new PushOrderStatusReq();
+                        statusReq.setStrStatus("已退款");
+                        statusReq.setPartnerOrderId(tripOrder.getOrderId());
+                        statusReq.setType(3);
+
+                        log.info("processNotify中台订单推送传参json:"+req);
+                        String statusUrl=ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
+                        String res3 = HttpUtil.doPostWithTimeout(statusUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, statusUrl));
+                        log.info("processNotify中台orderStatusNotice返回:"+res3);
+
+
 
                         break;
 
@@ -374,6 +387,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
                         String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res2);
+
+
+
                         break;
                     case 3:
 
