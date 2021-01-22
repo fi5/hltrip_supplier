@@ -50,7 +50,6 @@ public class YcfPushOrderController {
     @PostMapping(path = "/refundNotice")
     YcfBaseResult<Boolean> refundNotice(@RequestBody YcfRefundNoticeRequest req) {
         log.info("供应商触发了推送退款通知：{}", JSONObject.toJSONString(req));
-        YcfBaseResult<Boolean> result = new YcfBaseResult<>();
         yaoChuFaCallBackService.refundNotice(req);
         return YcfBaseResult.success();
     }

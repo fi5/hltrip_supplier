@@ -9,8 +9,10 @@ import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.YcfGetPriceRequest;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import com.huoli.trip.supplier.web.yaochufa.task.SyncPriceTask;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +54,9 @@ class HltripSupplierApiApplicationTests {
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
+
+    @Autowired
+    private DfySyncService dfySyncService;
 
     //    @Test
     void contextLoads() {
@@ -142,6 +147,15 @@ class HltripSupplierApiApplicationTests {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test8(){
+        DfyScenicListRequest request = new DfyScenicListRequest();
+        request.setPage(1);
+        request.setPageSize(2);
+        request.setKey("ceshi..");
+        dfySyncService.syncScenicList(request);
     }
 
     public static void main(String[] args){

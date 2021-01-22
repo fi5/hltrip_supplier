@@ -1,0 +1,108 @@
+package com.huoli.trip.supplier.web.difengyun.task;
+
+import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+/**
+ * 描述：<br/>
+ * 版权：Copyright (c) 2011-2020<br>
+ * 公司：活力天汇<br>
+ * 作者：冯志强<br>
+ * 版本：1.0<br>
+ * 创建日期：2020/12/10<br>
+ */
+@Slf4j
+@Component
+public class DfySyncTask {
+
+    @Value("${schedule.executor}")
+    private String schedule;
+
+    @Autowired
+    private DfySyncService dfySyncService;
+
+    /**
+     * 只更新本地已有产品
+     */
+    @Scheduled(cron = "0 0 0,6-22/2 ? * *")
+    public void syncUpdateProduct(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步笛风云产品（只更新本地已有产品）。。");
+            List<ProductPO> products = dfySyncService.getSupplierProductIds();
+            if(ListUtils.isEmpty(products)){
+                log.error("同步笛风云产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
+                return;
+            }
+            int i = 1;
+            for (ProductPO product : products) {
+                try {
+                    long sTime = System.currentTimeMillis();
+                    dfySyncService.syncProduct(product.getSupplierProductId(), null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}个产品 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
+                } catch (Exception e) {
+                    log.error("同步第{}个产品supplierProductCode={}异常（只更新本地已有产品），", i, product.getSupplierProductId(), e);
+                }
+                i++;
+            }
+            log.info("同步笛风云产品定时任务执行完成（只更新本地已有产品），共{}个，用时{}秒（只更新本地已有产品）", i, (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新景点、产品任务异常（只更新本地已有产品）", e);
+        }
+    }
+
+    /**
+     * 只同步本地没有的产品，每天执行一次
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void syncNewProduct(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步笛风云产品。。");
+            DfyScenicListRequest request = new DfyScenicListRequest();
+            request.setPage(1);
+            request.setPageSize(100);
+            while (true){
+                long sTime = System.currentTimeMillis();
+                boolean success = dfySyncService.syncScenicList(request);
+                long useTime = System.currentTimeMillis() - sTime;
+                log.info("同步第{}页景点，用时{}毫秒", request.getPage(), useTime);
+                if(!success) {
+                    break;
+                }
+                request.setPage(request.getPage() + 1);
+                // 如果执行时间超过310毫秒就不用睡了
+                if(useTime < 310){
+                    // 限制一分钟不超过200次
+                    Thread.sleep(310 - useTime);
+                }
+            }
+            log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", request.getPage(), (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新景点、产品任务异常", e);
+        }
+    }
+}

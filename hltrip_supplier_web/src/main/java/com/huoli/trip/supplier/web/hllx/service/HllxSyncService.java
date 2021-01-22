@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.hllx.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrderOperationLog;
 import com.huoli.trip.common.util.ConfigGetter;
@@ -11,6 +12,7 @@ import com.huoli.trip.common.vo.request.central.OrderStatusKafka;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.self.hllx.vo.HllxRefundNoticeRequest;
 import com.huoli.trip.supplier.self.hllx.vo.HllxVoucher;
+import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +30,9 @@ import java.util.List;
 public class HllxSyncService {
     @Autowired
     TripOrderOperationLogMapper tripOrderOperationLogMapper;
+
+    @Autowired
+    private HuoliTrace huoliTrace;
 
     /**
      * 推送订单状态
@@ -58,7 +63,7 @@ public class HllxSyncService {
         }
         req.setPartnerOrderId(request.getOrderId());
         try {
-            String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+            String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
         } catch (Exception e) {
 
         }
@@ -89,7 +94,7 @@ public class HllxSyncService {
     public void refundNotice(HllxRefundNoticeRequest request){
         String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
         try {
-            String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(request), 10000, null);
+            String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(request), 10000, TraceConfig.traceHeaders(huoliTrace, url));
         } catch (Exception e) {
 
         }

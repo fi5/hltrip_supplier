@@ -23,7 +23,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @ImportResource({"classpath:disconf-config.xml","classpath:rpc.xml"})
 @ComponentScan({"com.huoli.trip"})
 @DubboComponentScan(value = "com.huoli.trip.supplier.web")
-@EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client.yaochufa.client")
+@EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client")
 @EnableHystrix
 @EnableSwagger2
 @EnableScheduling
