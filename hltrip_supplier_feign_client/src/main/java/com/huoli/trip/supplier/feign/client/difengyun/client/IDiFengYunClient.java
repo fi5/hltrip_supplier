@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 创建日期：2020/12/8<br>
  */
 @FeignClient(name = "diFengYun", url = "${difengyun.host.server}"
+        , qualifier = "diFengYunClient"
         , configuration = DiFengYunFeignInterceptor.class
         , fallbackFactory = DiFengYunClientFallback.class)
 public interface IDiFengYunClient {

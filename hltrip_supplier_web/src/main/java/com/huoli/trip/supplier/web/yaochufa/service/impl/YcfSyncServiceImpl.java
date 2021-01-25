@@ -54,8 +54,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private PriceDao priceDao;
 
-    @Qualifier("yaoChuFa")
-    private IYaoChuFaClient yaoChuFaClient;
+    @Qualifier("iYaoChuFaClient")
+    private IYaoChuFaClient iYaoChuFaClient;
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
