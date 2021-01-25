@@ -88,6 +88,7 @@ public class SupplierAspect {
                         params = "参数不能序列化";
                     }catch (Exception e) {
                         log.error("切面序列化参数异常", e);
+                        params = "参数不能序列化";
                     }
                 }
             } else {
@@ -158,8 +159,11 @@ public class SupplierAspect {
                         // 设置traceId
                         TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
                     }
-                } catch (Exception e) {
-                    log.error("反序列化方法 {} 的请求参数异常，这是为了获取traceId，不影响主流程。", function, e);
+                }  catch (JSONException e) {
+                    log.error("反序列化方法 {} 的请求参数异常，这是为了获取traceId，不影响主流程。", function);
+                    params = "参数不能序列化";
+                }catch (Exception e) {
+                    log.error("切面序列化参数异常", e);
                     params = "参数不能序列化";
                 }
             } else {
