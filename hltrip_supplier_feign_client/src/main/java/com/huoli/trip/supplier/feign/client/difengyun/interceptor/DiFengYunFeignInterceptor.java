@@ -27,15 +27,9 @@ import java.util.Date;
  * 版本：1.0<br>
  * 创建日期：2020/12/8<br>
  */
-@Component
+//@Component
 @Slf4j
 public class DiFengYunFeignInterceptor implements RequestInterceptor {
-
-//    @Value("${difengyun.api.key}")
-//    private String apiKey;
-//
-//    @Value("${difengyun.api.secret.key}")
-//    private String secretKey;
 
     @Override
     public void apply(RequestTemplate requestTemplate) {
