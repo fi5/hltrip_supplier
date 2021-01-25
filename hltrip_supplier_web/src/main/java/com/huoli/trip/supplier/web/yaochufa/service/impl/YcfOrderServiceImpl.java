@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 @Service(timeout = 10000,group = "hltrip")
 public class YcfOrderServiceImpl implements YcfOrderService {
-    @Qualifier("iYaoChuFaClient")
+    @Autowired
     private IYaoChuFaClient iYaoChuFaClient;
 
     @Override

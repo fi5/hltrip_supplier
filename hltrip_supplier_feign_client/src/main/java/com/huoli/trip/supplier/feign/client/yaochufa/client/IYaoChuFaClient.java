@@ -21,7 +21,6 @@ import java.util.Map;
  * 创建日期：2020/6/18<br>
  */
 @FeignClient(name = "yaoChuFa", url = "${yaochufa.host.server}"
-        , qualifier = "iYaoChuFaClient"
         ,configuration = YaoChuFaFeignInterceptor.class
         ,fallbackFactory = YaoChuFaClientFallback.class)
 public interface IYaoChuFaClient {
