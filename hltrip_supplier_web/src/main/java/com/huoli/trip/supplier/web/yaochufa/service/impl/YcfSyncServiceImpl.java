@@ -27,6 +27,7 @@ import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -53,7 +54,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private PriceDao priceDao;
 
-    @Autowired
+    @Qualifier("yaoChuFa")
     private IYaoChuFaClient yaoChuFaClient;
 
     @Autowired

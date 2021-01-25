@@ -7,6 +7,7 @@ import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * 要出发订单dubbo服务接口实现
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Service(timeout = 10000,group = "hltrip")
 public class YcfOrderServiceImpl implements YcfOrderService {
-    @Autowired
+    @Qualifier("yaoChuFa")
     private IYaoChuFaClient iYaoChuFaClient;
 
     @Override
