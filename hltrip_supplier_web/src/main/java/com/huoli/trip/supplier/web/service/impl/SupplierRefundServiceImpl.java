@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.OrderStatus;
@@ -14,6 +15,7 @@ import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
+import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.hllx.service.HllxSyncService;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
@@ -44,6 +46,8 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 	TripOrderMapper tripOrderMapper;
 	@Autowired
 	TripOrderRefundMapper tripOrderRefundMapper;
+	@Autowired
+	private HuoliTrace huoliTrace;
 
 	@Override
 	public BaseResponse doRefund(@RequestBody RefundNoticeReq req) {
@@ -58,7 +62,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 
 
 			log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+"refundStatus:"+refundOrder.getStatus());
-			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
 			log.info("中台refundNotice返回:"+res);
 			int newSt=OrderStatus.REFUNDED.getCode();
 			String explain="退款";
@@ -97,7 +101,7 @@ public class SupplierRefundServiceImpl implements SupplierRefundService {
 
 			req.setRefundStatus(2);//表示拒绝退订
 			log.info("refuseRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req));
-			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+			String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
 
 			log.info("中台refundNotice返回:"+res);
 

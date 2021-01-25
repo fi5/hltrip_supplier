@@ -22,6 +22,7 @@ import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.Comparator;
@@ -193,6 +194,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO productPO = productDao.getByCode(code);
             if(productPO != null){
                 productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID);
+                dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productPO.getCode()));
                 log.info("笛风云产品详情返回空，产品已下线，productCode = {}", productPO.getCode());
             }
         }

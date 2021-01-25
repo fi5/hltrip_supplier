@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.difengyun.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
@@ -10,6 +11,7 @@ import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
@@ -28,6 +30,7 @@ import com.huoli.trip.supplier.self.hllx.vo.HllxBaseResult;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
 import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
+import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
@@ -63,6 +66,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     TripOrderRefundMapper tripOrderRefundMapper;
     @Autowired
     TripOrderMapper tripOrderMapper;
+
+    @Autowired
+    private HuoliTrace huoliTrace;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -343,7 +349,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         if(item.getRefundId()>0){
                             TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundOrderById(item.getRefundId());
                             req.setRefundId(refundOrder.getId());
-                            req.setRefundCharge(refundOrder.getRefundCharge());
                         }else{
                             log.info("无退款单子但是渠道退款了:"+item);
                         }
@@ -351,8 +356,20 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         req.setRefundStatus(1);
 
                         log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",refundStatus:"+item.getOrderId());
-                        String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        String res = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res);
+
+                        //退款成功后再发个通知
+                        PushOrderStatusReq statusReq =new PushOrderStatusReq();
+                        statusReq.setStrStatus("已退款");
+                        statusReq.setPartnerOrderId(tripOrder.getOrderId());
+                        statusReq.setType(3);
+
+                        log.info("processNotify中台订单推送传参json:"+req);
+                        String statusUrl=ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
+                        String res3 = HttpUtil.doPostWithTimeout(statusUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, statusUrl));
+                        log.info("processNotify中台orderStatusNotice返回:"+res3);
+
 
 
                         break;
@@ -368,8 +385,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
                         req.setRefundStatus(-1);
                         log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
-                        String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, null);
+                        String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res2);
+
+
+
                         break;
                     case 3:
 
