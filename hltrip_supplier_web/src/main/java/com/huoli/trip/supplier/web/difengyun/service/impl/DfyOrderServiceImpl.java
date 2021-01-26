@@ -94,6 +94,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "通知中":
                         case "使用后（点评）":
 
+
+                            detail.setOrderStatus("申请退款中");
                             TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                             TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                             if(refundOrder.getChannelRefundStatus()==0){//写退款失败
