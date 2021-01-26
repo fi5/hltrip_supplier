@@ -186,7 +186,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.error("没有价格信息。。。。");
             }
             productDao.updateByCode(product);
-            dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productPO.getCode()));
+            dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
             // 笛风云的产品下线就不会返回，所以没拿到就认为已下线

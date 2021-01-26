@@ -17,10 +17,7 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyBookSaleInfo;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
-import com.huoli.trip.supplier.self.difengyun.vo.Tourist;
+import com.huoli.trip.supplier.self.difengyun.vo.*;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
@@ -89,8 +86,44 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "取消订单核损中":
                         case "取消订单确认中":
                         case "核损已反馈":
-                        case "取取消订单核损已反馈":
+                        case "取消订单核损已反馈":
                             detail.setOrderStatus("申请退款中");
+                            break;
+                        case "使用前":
+                        case "待通知":
+                        case "通知中":
+                        case "使用后（点评）":
+
+
+                            detail.setOrderStatus("申请退款中");
+                            try {
+                                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+                                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+                                if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
+                                    log.info("进入写退款失败这:"+tripOrder.getOrderId());
+                                    TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+                                    if(dbRefundNotify!=null){
+                                        dbRefundNotify.setStatus(2);
+                                        dbRefundNotify.setRefundStatus(-1);
+                                        tripOrderRefundMapper.updateRefundNotify(dbRefundNotify);
+                                    }
+
+                                    RefundNoticeReq req=new RefundNoticeReq();
+                                    req.setPartnerOrderId(tripOrder.getOrderId());
+                                    req.setRefundFrom(2);
+                                    req.setRefundPrice(new BigDecimal(0));
+                                    req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
+                                    req.setSource("dfy");
+                                    req.setRefundStatus(-1);
+                                    String refundUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
+                                    log.info("退款失败doRefund请求的地址:"+refundUrl+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+tripOrder.getOrderId());
+                                    String res2 = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
+                                    log.info("中台refundNotice返回:"+res2);
+                                }
+                            } catch (Exception e) {
+                            	log.error("信息{}",e);
+                            }
+
                             break;
 
                     	default:
@@ -267,12 +300,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
         createOrderReq.setAcctId(acctid);
         createOrderReq.setTraceId(null);
-        final List<Tourist> touristList = createOrderReq.getTouristList();
-        if(ListUtils.isNotEmpty(touristList)){
-            for (Tourist t:touristList) {
-                if(StringUtils.isNotEmpty(t.getTel()) && StringUtils.isNotEmpty(tel)) {
-                    t.setTel(tel);
-                }
+        Contact contact = createOrderReq.getContact();
+        if(contact != null){
+            final String contactTel = contact.getContactTel();
+            if(StringUtils.isNotEmpty(contactTel) && StringUtils.isNotEmpty(tel)){
+                contact.setContactTel(tel);
             }
         }
         createOrderReq.setAcctId(acctid);
@@ -384,7 +416,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         tripOrderRefundMapper.updateRefundNotify(item);
 
                         req.setRefundStatus(-1);
-                        log.info("doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
+                        log.info("退款失败doRefund请求的地址:"+url+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+item.getOrderId());
                         String res2 = HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, url));
                         log.info("中台refundNotice返回:"+res2);
 

@@ -122,6 +122,12 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
+    public List<ProductPO> getProductsByStatus(int status){
+        Query query = new Query(Criteria.where("status").is(status));
+        return mongoTemplate.find(query, ProductPO.class);
+    }
+
+    @Override
     public ProductPO getByCode(String code){
         Query query = new Query(Criteria.where("code").is(code));
         return mongoTemplate.findOne(query, ProductPO.class);
