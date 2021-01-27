@@ -32,7 +32,7 @@ public class DfyJourneyInfo {
     /**
      * 行程内容JSON格式
      */
-    private String journeyDescJson;
+    private DfyJourneyDetail journeyDescJson;
 
     /**
      * 重要信息_成团方式 组团形式:1,途牛独家发团;0,联合发团;2,无

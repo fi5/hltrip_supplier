@@ -6,17 +6,20 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
-import com.huoli.trip.common.entity.ImageBasePO;
-import com.huoli.trip.common.entity.ItemFeaturePO;
-import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.constant.TicketType;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyImage;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +45,10 @@ public class DfyToursConverter {
         if(ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())){
             String city = dfyToursDetail.getDepartCitys().stream().map(c ->
                     c.getDepartCityName()).distinct().collect(Collectors.joining(","));
+            String cityCode = dfyToursDetail.getDepartCitys().stream().map(c ->
+                    c.getDepartCityCode()).distinct().collect(Collectors.joining(","));
             productItemPO.setOriCity(city);
+            productItemPO.setOriCityCode(cityCode);
         }
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
             String city = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
@@ -69,33 +75,59 @@ public class DfyToursConverter {
             productItemPO.setMainImages(images);
         }
         productItemPO.setAppMainTitle(productItemPO.getName());
-        List<ItemFeaturePO> featurePOs = Lists.newArrayList();
-        if(dfyToursDetail.getJourneyInfo().getBookNotice() != null){
-//            try {
-//                ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-//                JSONArray jsonArray = JSON.parseArray(scenicDetail.getBookNotice());
-//                StringBuilder sb = new StringBuilder();
-//                for (Object o : jsonArray) {
-//                    JSONObject obj = (JSONObject) o;
-//                    sb.append(obj.get("name")).append("<br>")
-//                            .append(obj.get("value")).append("<br>");
-//                }
-//                itemFeaturePO.setDetail(sb.toString());
-//                itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
-//                featurePOs.add(itemFeaturePO);
-//            } catch (Exception e){
-//                log.error("笛风云转换特色列表（购买须知）异常，不影响正常流程。。", e);
-//            }
-        }
-//        if(StringUtils.isNotBlank(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getTourTrafficInfo())){
-//            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-//            itemFeaturePO.setDetail(scenicDetail.getTrafficBus());
-//            itemFeaturePO.setType(YcfConstants.POI_FEATURE_TRAFFIC_NOTE);
-//            featurePOs.add(itemFeaturePO);
-//        }
-//        if(ListUtils.isNotEmpty(featurePOs)){
-//            productItemPO.setFeatures(featurePOs);
-//        }
         return productItemPO;
+    }
+
+    public static ProductPO convertToProductPO(DfyToursDetailResponse dfyToursDetail, String productId){
+        ProductPO productPO = new ProductPO();
+        // 默认条件退
+        productPO.setRefundType(3);
+        productPO.setStatus(1);
+        productPO.setProductType(ProductType.TRIP_GROUP.getCode());
+        productPO.setSupplierId(Constants.SUPPLIER_CODE_DFY);
+        productPO.setSupplierName(Constants.SUPPLIER_NAME_DFY);
+        productPO.setSupplierProductId(productId);
+        productPO.setCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), productId));
+        productPO.setName(dfyToursDetail.getProductName());
+        // todo 跟团游没有价格
+//        productPO.setPrice(StringUtils.isBlank(ticketDetail.getWebPrice()) ? null : new BigDecimal(ticketDetail.getWebPrice()));
+//        productPO.setSalePrice(StringUtils.isBlank(ticketDetail.getSalePrice()) ? null : new BigDecimal(ticketDetail.getSalePrice()));
+        // todo 预定须知拼接
+        productPO.setBookDesc(ticketDetail.getBookNotice());
+        productPO.setBuyMin(0);
+        productPO.setBuyMax(0);
+        DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
+        if(ListUtils.isNotEmpty(journeyInfo.getImportantAddition())){
+            productPO.setRemark(String.join("<br>", journeyInfo.getImportantAddition()));
+        }
+        if(StringUtils.isNotBlank(journeyInfo.getPeopleLimitDesc())){
+            productPO.setRemark(String.join("<br>", productPO.getBookDesc(), journeyInfo.getPeopleLimitDesc()));
+        }
+        // todo 没有整体退改说明
+        productPO.setRefundDesc(ticketDetail.getMpLossInfo());
+        // 预定规则根据下单证件规则
+        List<BookRulePO> bookRules = Lists.newArrayList();
+        BookRulePO contact = new BookRulePO();
+        contact.setRuleType("0");
+        contact.setCnName(true);
+        contact.setPhone(true);
+        contact.setEmail(true);
+        BookRulePO passenger = new BookRulePO();
+        passenger.setRuleType("1");
+        passenger.setCnName(true);
+        passenger.setPhone(true);
+        passenger.setCredential(true);
+        bookRules.add(contact);
+        bookRules.add(passenger);
+        productPO.setBookRules(bookRules);
+        if(journeyInfo.getIndependentTeam() != null){
+            if(journeyInfo.getIndependentTeam() == 1){
+                productPO.setProductFrom(String.valueOf(Constants.PRODUCT_FROM_SELF));
+            } else if(journeyInfo.getIndependentTeam() == 0){
+                productPO.setProductFrom(String.valueOf(Constants.PRODUCT_FROM_OUT));
+            }
+        }
+        productPO.set;
+        return productPO;
     }
 }

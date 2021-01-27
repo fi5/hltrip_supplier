@@ -20,6 +20,7 @@ import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
+import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -174,7 +175,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-            product.setValidTime(DateTimeUtil.trancateToDate(MongoDateUtils.handleTimezoneInput(new Date())));
+            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
             log.info("准备更新价格。。。");
             if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
                 log.info("有价格信息。。。");
@@ -182,10 +183,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                 if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
                     // 笛风云没有上下架时间，就把最远的销售日期作为下架时间
                     PriceInfoPO priceInfoPO = pricePO.getPriceInfos().stream().max(Comparator.comparing(PriceInfoPO::getSaleDate)).get();
-                    product.setInvalidTime(priceInfoPO.getSaleDate());
+                    product.setInvalidTime(MongoDateUtils.handleTimezoneInput(priceInfoPO.getSaleDate()));
                 }
             } else {
-                product.setInvalidTime(product.getValidTime());
+                product.setInvalidTime(MongoDateUtils.handleTimezoneInput(product.getValidTime()));
                 log.error("没有价格信息。。。。");
             }
             productDao.updateByCode(product);
@@ -329,6 +330,29 @@ public class DfySyncServiceImpl implements DfySyncService {
             return;
         }
         DfyToursDetailResponse dfyToursDetail = baseResult.getData();
-
+        if(dfyToursDetail.getBrandId() == null){
+            log.error("笛风云跟团游产品{}不是牛人专线[{}]，跳过。。", productInfo.getProductId(), dfyToursDetail.getBrandName());
+            return;
+        }
+        if(ListUtils.isEmpty(dfyToursDetail.getDepartCitys())){
+            log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productInfo.getProductId());
+            return;
+        }
+        ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productInfo.getProductId());
+        ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
+        if(productItemPO == null){
+            productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        }
+        productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        productItem.setOperator(Constants.SUPPLIER_CODE_DFY);
+        productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+        productItemDao.updateByCode(productItem);
+        productItemPO = productItemDao.selectByCode(productItem.getCode());
+        List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
+        for (String city : citys) {
+            
+        }
     }
+
+
 }

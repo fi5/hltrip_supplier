@@ -125,17 +125,34 @@ public class DfyJourneyDetail {
          * 景点---是否为并关系 0-或，1-并
          */
         private Integer relative;
-
-        private String scenicList;
-
-//        private String moduleType;
-//
-//        private String moduleType;
-//
-//        private String moduleType;
-//
-//        private String moduleType;
-
+        /**
+         * 景点
+         */
+        private List<ModuleScenic> scenicList;
+        /**
+         * 酒店
+         */
+        private List<ModuleHotel> hotelList;
+        /**
+         * 交通
+         */
+        private ModuleTraffic traffic;
+        /**
+         * 餐饮
+         */
+        private ModuleFood food;
+        /**
+         * 购物
+         */
+        private List<ModuleShop> shopList;
+        /**
+         * 活动
+         */
+        private ModuleActivity activity;
+        /**
+         * 温馨提示
+         */
+        private ModuleRemind remind;
 
     }
 
@@ -224,11 +241,11 @@ public class DfyJourneyDetail {
         /**
          * 出发地id
          */
-        private String fromId;
+        private Integer fromId;
         /**
          * 方式 1-无，2-水飞，3-内飞，4-飞机，5-快艇，6-轮船，7-汽车，8-火车，9-自行安排
          */
-        private String meansType;
+        private Integer meansType;
         /**
          * 目的地
          */
@@ -236,12 +253,105 @@ public class DfyJourneyDetail {
         /**
          * 目的地ID
          */
-        private String toId;
+        private Integer toId;
         /**
          * 交通经历时间
          */
-        private String times;
+        private Integer times;
 
+    }
+
+    @Getter
+    @Setter
+    public class ModuleFood{
+        /**
+         * 餐饮id
+         */
+        private Integer id;
+        /**
+         * 餐饮标题
+         */
+        private String title;
+        /**
+         * 用餐时间
+         */
+        private Integer times;
+        /**
+         * 用餐时间
+         */
+        private Integer hour;
+        /**
+         * 用餐时间
+         */
+        private Integer min;
+        /**
+         * 餐食
+         */
+        private List<HasFood> hasList;
+    }
+
+    @Getter
+    @Setter
+    public class ModuleShop{
+        /**
+         * 购物点poi（必填）
+         */
+        private Integer id;
+        /**
+         * 购物点名称（必填）
+         */
+        private String title;
+        /**
+         * 停留时间（必填）
+         */
+        private String times;
+        /**
+         * 营业产品（必填）
+         */
+        private String product;
+        /**
+         * 说明（必填）
+         */
+        private String instruction;
+    }
+
+    @Getter
+    @Setter
+    public class ModuleActivity{
+        /**
+         * 活动标题（必填）
+         */
+        private String title;
+        /**
+         * 活动时间
+         */
+        private String times;
+    }
+
+    @Getter
+    @Setter
+    public class ModuleRemind{
+        /**
+         * 提醒内容
+         */
+        private String content;
+        /**
+         * 温馨提示，当日概览
+         */
+        private String type;
+    }
+
+    @Getter
+    @Setter
+    public class HasFood{
+        /**
+         * breakfast 早餐 lunch 中餐 dinner 晚餐
+         */
+        private String type;
+        /**
+         * 0否 1是
+         */
+        private Integer has;
     }
 
     @Getter
