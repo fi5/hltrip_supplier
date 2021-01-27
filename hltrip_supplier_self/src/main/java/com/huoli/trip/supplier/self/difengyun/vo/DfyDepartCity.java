@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.difengyun.vo.request;
+package com.huoli.trip.supplier.self.difengyun.vo;
 
 import lombok.Data;
 
@@ -11,10 +11,15 @@ import lombok.Data;
  * 创建日期：2021/1/26<br>
  */
 @Data
-public class DfyToursDetailRequest {
+public class DfyDepartCity {
 
     /**
-     * 产品id
+     * 出发城市编码
      */
-    private Integer productId;
+    private String departCityCode;
+
+    /**
+     * 出发城市名称
+     */
+    private String departCityName;
 }

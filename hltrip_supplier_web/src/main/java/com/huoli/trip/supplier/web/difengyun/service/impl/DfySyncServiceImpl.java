@@ -14,20 +14,23 @@ import com.huoli.trip.supplier.self.difengyun.vo.*;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursListResponse;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
-import com.huoli.trip.supplier.web.difengyun.convert.DfyConverter;
+import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
 
 /**
  * 描述：<br/>
@@ -83,7 +86,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
         if(detailBaseResult != null && detailBaseResult.getData() != null){
             DfyScenicDetail scenicDetail = detailBaseResult.getData();
-            ProductItemPO productItem = DfyConverter.convertToProductItemPO(scenicDetail);
+            ProductItemPO productItem = DfyTicketConverter.convertToProductItemPO(scenicDetail);
             ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
             if(productItemPO == null){
                 productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -143,7 +146,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     return;
                 }
             }
-            ProductPO product = DfyConverter.convertToProductPO(dfyTicketDetail);
+            ProductPO product = DfyTicketConverter.convertToProductPO(dfyTicketDetail);
             product.setMainItemCode(productItemPO.getCode());
             product.setMainItem(productItemPO);
             product.setCity(productItemPO.getCity());
@@ -208,7 +211,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     private PricePO syncPrice(String productCode, List<DfyPriceCalendar> priceCalendar){
         log.info("查询价格。。");
         PricePO pricePO = priceDao.getByProductCode(productCode);
-        PricePO price = DfyConverter.convertToPricePO(priceCalendar);
+        PricePO price = DfyTicketConverter.convertToPricePO(priceCalendar);
         price.setProductCode(productCode);
         if(pricePO == null){
             log.info("没有查询到价格，准备新建。。");
@@ -261,40 +264,71 @@ public class DfySyncServiceImpl implements DfySyncService {
         return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
 
+
     @Override
-    public Object getToursList(DfyToursListRequest request){
-        DfyBaseRequest<DfyToursListRequest> listRequest = new DfyBaseRequest<>(request);
-        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
-        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
-        listRequest.setSecretKey(secretKey);
-        listRequest.setApiKey(apiKey);
-        Object obj = diFengYunClient.getToursList(listRequest);
-        return obj;
+    public DfyBaseResult<DfyToursListResponse> getToursList(DfyToursListRequest request){
+        try {
+            DfyBaseRequest<DfyToursListRequest> listRequest = new DfyBaseRequest<>(request);
+            setToursApiKey(listRequest);
+            DfyBaseResult<DfyToursListResponse> baseResult = diFengYunClient.getToursList(listRequest);
+            if(baseResult == null || baseResult.getData() == null || ListUtils.isNotEmpty(baseResult.getData().getProductList())){
+                log.error("笛风云跟团游列表返回空，request = {}", JSON.toJSONString(listRequest));
+                return null;
+            }
+            return baseResult;
+        } catch (Exception e) {
+            log.error("笛风云获取跟团游列表异常，", e);
+            return null;
+        }
     }
 
     @Override
-    public Object getToursDetail(String productId){
-        DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+    public DfyBaseResult<DfyToursDetailResponse> getToursDetail(String productId){
+        DfyToursDetailRequest request = new DfyToursDetailRequest();
         request.setProductId(Integer.valueOf(productId));
-        DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
-        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
-        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
-        detailRequest.setSecretKey(secretKey);
-        detailRequest.setApiKey(apiKey);
-        Object obj = diFengYunClient.getToursDetail(detailRequest);
-        return obj;
+        DfyBaseRequest<DfyToursDetailRequest> detailRequest = new DfyBaseRequest<>(request);
+        setToursApiKey(detailRequest);
+        DfyBaseResult<DfyToursDetailResponse> baseResult = diFengYunClient.getToursDetail(detailRequest);
+        if(baseResult == null || baseResult.getData() == null){
+            log.error("笛风云跟团游详情没有返回数据，productId={}", productId);
+            return null;
+        }
+        return baseResult;
     }
 
     @Override
-    public Object getToursMultiDetail(String productId){
-        DfyTicketDetailRequest request = new DfyTicketDetailRequest();
+    public DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(String productId){
+        DfyToursDetailRequest request = new DfyToursDetailRequest();
         request.setProductId(Integer.valueOf(productId));
-        DfyBaseRequest<DfyTicketDetailRequest> detailRequest = new DfyBaseRequest<>(request);
-        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
-        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
-        detailRequest.setSecretKey(secretKey);
-        detailRequest.setApiKey(apiKey);
-        Object obj = diFengYunClient.getToursMultiDetail(detailRequest);
-        return obj;
+        DfyBaseRequest<DfyToursDetailRequest> detailRequest = new DfyBaseRequest<>(request);
+        setToursApiKey(detailRequest);
+        DfyBaseResult<DfyToursDetailResponse> baseResult = diFengYunClient.getToursMultiDetail(detailRequest);
+        return baseResult;
+    }
+
+    private void setToursApiKey(DfyBaseRequest request){
+        String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN, CONFIG_ITEM_API_TOURS_KEY);
+        String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,CONFIG_ITEM_API_TOURS_SECRET_KEY);
+        request.setSecretKey(secretKey);
+        request.setApiKey(apiKey);
+    }
+
+    public boolean syncToursList(DfyToursListRequest request){
+        DfyBaseResult<DfyToursListResponse> baseResult = getToursList(request);
+        if(baseResult == null){
+            return false;
+        }
+        List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
+        productInfos.forEach(p -> syncToursDetail(p));
+        return true;
+    }
+
+    public void syncToursDetail(DfyProductInfo productInfo){
+        DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productInfo.getProductId());
+        if(baseResult == null){
+            return;
+        }
+        DfyToursDetailResponse dfyToursDetail = baseResult.getData();
+
     }
 }

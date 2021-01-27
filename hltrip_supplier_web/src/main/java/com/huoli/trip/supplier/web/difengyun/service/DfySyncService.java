@@ -2,9 +2,13 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursListResponse;
 
 import java.util.List;
 
@@ -57,9 +61,24 @@ public interface DfySyncService {
      */
     List<ProductPO> getSupplierProductIds();
 
-    Object getToursList(DfyToursListRequest request);
+    /**
+     * 获取跟团游列表
+     * @param request
+     * @return
+     */
+    DfyBaseResult<DfyToursListResponse> getToursList(DfyToursListRequest request);
 
-    Object getToursDetail(String productId);
+    /**
+     * 获取跟团游详情
+     * @param productId
+     * @return
+     */
+    DfyBaseResult<DfyToursDetailResponse> getToursDetail(String productId);
 
-    Object getToursMultiDetail(String productId);
+    /**
+     * 获取跟团游多程详情
+     * @param productId
+     * @return
+     */
+    DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(String productId);
 }

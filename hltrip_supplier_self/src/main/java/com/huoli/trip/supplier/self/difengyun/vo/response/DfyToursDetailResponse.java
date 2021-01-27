@@ -1,9 +1,6 @@
 package com.huoli.trip.supplier.self.difengyun.vo.response;
 
-import com.huoli.trip.supplier.self.difengyun.vo.DfyCustomerCondition;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyImage;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyPosition;
+import com.huoli.trip.supplier.self.difengyun.vo.*;
 import lombok.Data;
 
 import java.util.List;
@@ -42,7 +39,7 @@ public class DfyToursDetailResponse {
     /**
      * 出发城市
      */
-    private List<String> departCitys;
+    private List<DfyDepartCity> departCitys;
 
     /**
      * 去程交通方式 1 飞机2 火车卧铺3 火车硬卧4 火车软座5 火车硬座6 汽车7 邮轮8 火车9 动车组10 游船11 高铁二等座12 高铁一等座13 高铁商务座14 自行安排

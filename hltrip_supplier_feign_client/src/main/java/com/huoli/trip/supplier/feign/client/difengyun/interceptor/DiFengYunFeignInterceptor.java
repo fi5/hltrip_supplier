@@ -6,6 +6,7 @@ import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.DesUtil;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants;
 import com.huoli.trip.supplier.self.difengyun.util.DfySignature;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import feign.RequestInterceptor;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
+
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.CONFIG_ITEM_API_TICKET_KEY;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.CONFIG_ITEM_API_TICKET_SECRET_KEY;
 
 /**
  * 描述：<br/>
@@ -34,8 +38,8 @@ public class DiFengYunFeignInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         try {
-            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.key");
-            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.ticket.secret.key");
+            String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN, CONFIG_ITEM_API_TICKET_KEY);
+            String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,CONFIG_ITEM_API_TICKET_SECRET_KEY);
             byte[] body = requestTemplate.body();
             if(body != null && body.length > 0){
                 String time = DateTimeUtil.formatFullDate(new Date());

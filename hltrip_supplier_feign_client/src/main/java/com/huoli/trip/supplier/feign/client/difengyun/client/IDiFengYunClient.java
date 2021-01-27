@@ -55,7 +55,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Tours/search")
-    Object getToursList(@RequestBody DfyBaseRequest<DfyToursListRequest> request);
+    DfyBaseResult<DfyToursListResponse> getToursList(@RequestBody DfyBaseRequest<DfyToursListRequest> request);
 
     /**
      * 获取跟团游详情
@@ -63,7 +63,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Tours/detail")
-    Object getToursDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
+    DfyBaseResult<DfyToursDetailResponse> getToursDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
 
     /**
      * 获取跟团游详情
@@ -71,7 +71,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Tours/multiJourneyInfo")
-    Object getToursMultiDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
+    DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
 
     /**
      * 获取订单详情
