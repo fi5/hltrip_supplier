@@ -14,6 +14,7 @@ import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyImage;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * 版本：1.0<br>
  * 创建日期：2021/1/26<br>
  */
+@Slf4j
 public class DfyToursConverter {
 
     public static ProductItemPO convertToProductItemPO(DfyToursDetailResponse dfyToursDetail, String productId){
@@ -69,31 +71,31 @@ public class DfyToursConverter {
         productItemPO.setAppMainTitle(productItemPO.getName());
         List<ItemFeaturePO> featurePOs = Lists.newArrayList();
         if(dfyToursDetail.getJourneyInfo().getBookNotice() != null){
-            try {
-                ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-                JSONArray jsonArray = JSON.parseArray(scenicDetail.getBookNotice());
-                StringBuilder sb = new StringBuilder();
-                for (Object o : jsonArray) {
-                    JSONObject obj = (JSONObject) o;
-                    sb.append(obj.get("name")).append("<br>")
-                            .append(obj.get("value")).append("<br>");
-                }
-                itemFeaturePO.setDetail(sb.toString());
-                itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
-                featurePOs.add(itemFeaturePO);
-            } catch (Exception e){
-                log.error("笛风云转换特色列表（购买须知）异常，不影响正常流程。。", e);
-            }
+//            try {
+//                ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+//                JSONArray jsonArray = JSON.parseArray(scenicDetail.getBookNotice());
+//                StringBuilder sb = new StringBuilder();
+//                for (Object o : jsonArray) {
+//                    JSONObject obj = (JSONObject) o;
+//                    sb.append(obj.get("name")).append("<br>")
+//                            .append(obj.get("value")).append("<br>");
+//                }
+//                itemFeaturePO.setDetail(sb.toString());
+//                itemFeaturePO.setType(YcfConstants.POI_FEATURE_BOOK_NOTE);
+//                featurePOs.add(itemFeaturePO);
+//            } catch (Exception e){
+//                log.error("笛风云转换特色列表（购买须知）异常，不影响正常流程。。", e);
+//            }
         }
-        if(StringUtils.isNotBlank(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getTourTrafficInfo())){
-            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-            itemFeaturePO.setDetail(scenicDetail.getTrafficBus());
-            itemFeaturePO.setType(YcfConstants.POI_FEATURE_TRAFFIC_NOTE);
-            featurePOs.add(itemFeaturePO);
-        }
-        if(ListUtils.isNotEmpty(featurePOs)){
-            productItemPO.setFeatures(featurePOs);
-        }
+//        if(StringUtils.isNotBlank(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getTourTrafficInfo())){
+//            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+//            itemFeaturePO.setDetail(scenicDetail.getTrafficBus());
+//            itemFeaturePO.setType(YcfConstants.POI_FEATURE_TRAFFIC_NOTE);
+//            featurePOs.add(itemFeaturePO);
+//        }
+//        if(ListUtils.isNotEmpty(featurePOs)){
+//            productItemPO.setFeatures(featurePOs);
+//        }
         return productItemPO;
     }
 }
