@@ -5,6 +5,7 @@ import com.huoli.trip.supplier.feign.client.difengyun.interceptor.DiFengYunFeign
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyToursOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -74,7 +75,7 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
 
     /**
-     * 获取订单详情
+     * 获取门票订单详情
      * @param request
      * @return
      */
@@ -82,7 +83,15 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyOrderDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
 
     /**
-     * 创建订单
+     * 获取跟团游订单详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/orderDetail")
+    DfyBaseResult<DfyToursOrderDetail> toursOrderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
+
+    /**
+     * 查询账单
      * @param request
      * @return
      */
