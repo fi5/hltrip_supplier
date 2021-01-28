@@ -65,6 +65,11 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
+            public DfyBaseResult<DfyToursDetailResponse> getToursCalendar(DfyBaseRequest<DfyToursDetailRequest> request) {
+                return null;
+            }
+
+            @Override
             public DfyBaseResult<DfyOrderDetail> orderDetail(DfyBaseRequest<DfyOrderDetailRequest> request) {
                 return null;
             }
