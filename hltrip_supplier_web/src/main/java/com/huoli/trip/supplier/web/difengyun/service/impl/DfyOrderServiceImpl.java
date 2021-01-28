@@ -94,12 +94,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "通知中":
                         case "使用后（点评）":
 
-
-                            detail.setOrderStatus("申请退款中");
                             try {
                                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                                 if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
+                                    detail.setOrderStatus("申请退款中");
                                     log.info("进入写退款失败这:"+tripOrder.getOrderId());
                                     TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
                                     if(dbRefundNotify!=null){
@@ -174,7 +173,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                                 notify.setStatus(0);
 
                             } else {
-                                TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
                                 notify.setOrderId(refundOrder.getOrderId());
                                 notify.setRefundId(refundOrder.getId());
                                 notify.setChannel("dfy");
