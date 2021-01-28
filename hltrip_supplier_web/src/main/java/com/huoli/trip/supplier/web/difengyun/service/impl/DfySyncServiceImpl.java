@@ -350,7 +350,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
         for (String city : citys) {
-            
+            ProductPO productPO = DfyToursConverter.convertToProductPO(dfyToursDetail, productInfo.getProductId(), city);
+//            productDao.getCodeBySupplierId()
         }
     }
 
