@@ -75,6 +75,14 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
 
     /**
+     * 获取跟团游价格日历
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/priceStockCalendar")
+    DfyBaseResult<DfyToursDetailResponse> getToursCalendar(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
+
+    /**
      * 获取门票订单详情
      * @param request
      * @return

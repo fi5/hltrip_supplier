@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
 
 /**
  * 描述：<br/>
@@ -108,7 +110,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(allTickets)){
                 for (DfyTicket dfyTicket : allTickets) {
                     // 只同步新增产品，同步更新单独有定时任务执行
-                    syncProduct(dfyTicket.getProductId(), productItemPO, DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD);
+                    syncProduct(dfyTicket.getProductId(), productItemPO, PRODUCT_SYNC_MODE_ONLY_ADD);
                 }
             }
             // 产品同步有刷新。这里先不刷了。
@@ -161,11 +163,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ProductPO productPO = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
-            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
+            if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
                 log.error("笛风云，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
-            if(DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
+            if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
                 log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
@@ -320,11 +322,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             return false;
         }
         List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
-        productInfos.forEach(p -> syncToursDetail(p));
+        productInfos.forEach(p -> syncToursDetail(p, PRODUCT_SYNC_MODE_ONLY_ADD));
         return true;
     }
 
-    public void syncToursDetail(DfyProductInfo productInfo){
+    public void syncToursDetail(DfyProductInfo productInfo, int syncMode){
         DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productInfo.getProductId());
         if(baseResult == null){
             return;
@@ -350,10 +352,30 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
         for (String city : citys) {
-            ProductPO productPO = DfyToursConverter.convertToProductPO(dfyToursDetail, productInfo.getProductId(), city);
-//            productDao.getCodeBySupplierId()
+            ProductPO product = DfyToursConverter.convertToProductPO(dfyToursDetail, productInfo.getProductId(), city);
+            product.setMainItemCode(productItemPO.getCode());
+            product.setMainItem(productItemPO);
+            product.setCity(productItemPO.getCity());
+            product.setDesCity(productItemPO.getDesCity());
+            product.setOriCity(city);
+            ProductPO productPO = productDao.getByCode(product.getCode());
+            // 是否只同步本地没有的产品
+            if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
+                log.error("笛风云跟团游，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
+            if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
+                log.error("笛风云跟团游，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
+                return;
+            }
+            if(productPO == null){
+                product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            }
+            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            product.setOperator(Constants.SUPPLIER_CODE_DFY);
+            product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
         }
     }
-
 
 }
