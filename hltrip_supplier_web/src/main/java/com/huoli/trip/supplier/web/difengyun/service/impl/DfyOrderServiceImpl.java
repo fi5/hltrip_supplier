@@ -94,12 +94,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "通知中":
                         case "使用后（点评）":
 
-
-                            detail.setOrderStatus("申请退款中");
                             try {
                                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                                 if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
+                                    detail.setOrderStatus("申请退款中");
                                     log.info("进入写退款失败这:"+tripOrder.getOrderId());
                                     TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
                                     if(dbRefundNotify!=null){
@@ -174,7 +173,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                                 notify.setStatus(0);
 
                             } else {
-                                TripRefundNotify refundNotify = tripOrderRefundMapper.getRefundNotify(refundOrder.getOrderId(), refundOrder.getId());
                                 notify.setOrderId(refundOrder.getOrderId());
                                 notify.setRefundId(refundOrder.getId());
                                 notify.setChannel("dfy");
@@ -195,6 +193,139 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             return BaseResponse.success(detail);
         } catch (Exception e) {
         	log.error("信息{}",e);
+            return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
+        }
+
+
+    }
+
+
+    public BaseResponse<DfyToursOrderDetail> toursOrderDetail(BaseOrderRequest request){
+
+        DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
+        DfyBaseRequest<DfyOrderDetailRequest> dfyOrderDetailReq = new DfyBaseRequest<>(dfyOrderDetailBody);
+        dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
+        try {
+            String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+            dfyOrderDetailBody.setAcctId(acctid);
+            DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyOrderDetailReq);
+            log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
+
+            DfyToursOrderDetail detail = baseResult.getData();
+            if(detail!=null&&detail.getOrderInfo()!=null){
+                detail.setOrderId(detail.getOrderInfo().getOrderId());
+                if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
+                    switch (detail.getOrderInfo().getStatusDesc()){
+                        case "取消订单核损中":
+                        case "取消订单确认中":
+                        case "核损已反馈":
+                        case "取消订单核损已反馈":
+                            detail.setOrderStatus("申请退款中");
+                            break;
+                        case "使用前":
+                        case "待通知":
+                        case "通知中":
+                        case "使用后（点评）":
+
+                            try {
+                                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+                                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+                                if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
+                                    detail.setOrderStatus("申请退款中");
+                                    log.info("toursOrderDetail进入写退款失败这:"+tripOrder.getOrderId());
+                                    TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+                                    if(dbRefundNotify!=null){
+                                        dbRefundNotify.setStatus(2);
+                                        dbRefundNotify.setRefundStatus(-1);
+                                        tripOrderRefundMapper.updateRefundNotify(dbRefundNotify);
+                                    }
+
+                                    RefundNoticeReq req=new RefundNoticeReq();
+                                    req.setPartnerOrderId(tripOrder.getOrderId());
+                                    req.setRefundFrom(2);
+                                    req.setRefundPrice(new BigDecimal(0));
+                                    req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
+                                    req.setSource("dfy");
+                                    req.setRefundStatus(-1);
+                                    String refundUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
+                                    log.info("退款失败doRefund请求的地址:"+refundUrl+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+tripOrder.getOrderId());
+                                    String res2 = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
+                                    log.info("中台refundNotice返回:"+res2);
+                                }
+                            } catch (Exception e) {
+                                log.error("信息{}",e);
+                            }
+
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                }
+                if(StringUtils.equals(detail.getOrderStatus(),"已取消")){
+                    TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+                    List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
+                    boolean payed=false;
+                    for(TripPayOrder payOrder:orderPayList){
+                        if(payOrder.getStatus()==1){
+                            payed=true;
+                            break;
+                        }
+                    }
+
+                    log.info("跟团游已取消订单详情这里的payed:"+payed);
+
+                    if(payed){
+                        detail.setOrderStatus("申请退款中");
+
+                        TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+                        if(dbRefundNotify!=null){
+                            if(dbRefundNotify.getStatus()==1){
+                                detail.setOrderStatus("已退款");
+                            }else{//这里去实时查一下账单
+                                try {
+                                    processNotify(dbRefundNotify);
+                                    if(dbRefundNotify.getStatus()==1){
+                                        detail.setOrderStatus("已退款");
+                                    }
+                                    Thread.sleep(100);
+                                }  catch (Exception e) {
+                                    log.info("裡处理退款通知失败了，id={}", dbRefundNotify.getId(), e);
+                                }
+
+                            }
+
+                        }else{
+                            TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+                            TripRefundNotify notify = new TripRefundNotify();
+                            if (refundOrder == null) {
+                                log.info("这未找到待处理的退款单" + tripOrder.getOrderId());
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+
+                            } else {
+                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setRefundId(refundOrder.getId());
+                                notify.setChannel("dfy");
+                                notify.setStatus(0);
+                            }
+                            tripOrderRefundMapper.saveTripRefundNotify(notify);
+                        }
+
+                    }
+
+
+                }
+            }else{
+                if(!baseResult.isSuccess()){
+                    return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
+                }
+            }
+            return BaseResponse.success(detail);
+        } catch (Exception e) {
+            log.error("信息{}",e);
             return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
         }
 
