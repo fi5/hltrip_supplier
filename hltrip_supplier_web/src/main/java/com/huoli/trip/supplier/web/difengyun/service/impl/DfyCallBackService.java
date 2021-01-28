@@ -203,23 +203,21 @@ public class DfyCallBackService {
     //看代码里就两类：行程（仅供参考）  和   出团通知
     private List<PushOrderStatusReq.Voucher> genToursVoucher(DfyToursOrderDetail orderDetail) {
 
-        if(orderDetail.getOrderStatus().equals("已完成")){
-            List<PushOrderStatusReq.Voucher> vochers = new ArrayList<>();
-            try {
-                if(CollectionUtils.isNotEmpty(orderDetail.getAttachments())){
-                    for(DfyToursOrderDetail.OrderAttachment oneInfo:orderDetail.getAttachments()){
-                            //凭证类型   1.纯文本  2.二维码 3.PDF
-                        PushOrderStatusReq.Voucher oneVoucher=new PushOrderStatusReq.Voucher();
-                        oneVoucher.setVocherUrl(oneInfo.getUrl());
-                        oneVoucher.setType(3);
-                        vochers.add(oneVoucher);
-                    }
-                    return  vochers;
+        try {
+            if (CollectionUtils.isNotEmpty(orderDetail.getAttachments())) {
+                List<PushOrderStatusReq.Voucher> vochers = new ArrayList<>();
+                for (DfyToursOrderDetail.OrderAttachment oneInfo : orderDetail.getAttachments()) {
+                    //凭证类型   1.纯文本  2.二维码 3.PDF
+                    PushOrderStatusReq.Voucher oneVoucher = new PushOrderStatusReq.Voucher();
+                    oneVoucher.setVocherUrl(oneInfo.getUrl());
+                    oneVoucher.setType(3);
+                    vochers.add(oneVoucher);
                 }
-            } catch (Exception e) {
-                log.error("genToursVouchers错",e);
+                return vochers;
             }
+        } catch (Exception e) {
+            log.error("genToursVouchers错", e);
         }
-        return  null;
+        return null;
     }
 }

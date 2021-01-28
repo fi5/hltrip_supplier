@@ -227,13 +227,12 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "通知中":
                         case "使用后（点评）":
 
-
-                            detail.setOrderStatus("申请退款中");
                             try {
                                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                                 if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
-                                    log.info("进入写退款失败这:"+tripOrder.getOrderId());
+                                    detail.setOrderStatus("申请退款中");
+                                    log.info("toursOrderDetail进入写退款失败这:"+tripOrder.getOrderId());
                                     TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
                                     if(dbRefundNotify!=null){
                                         dbRefundNotify.setStatus(2);
