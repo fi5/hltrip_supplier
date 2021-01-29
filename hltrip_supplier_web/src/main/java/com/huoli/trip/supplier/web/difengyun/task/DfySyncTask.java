@@ -1,9 +1,12 @@
 package com.huoli.trip.supplier.web.difengyun.task;
 
+import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +38,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 0,6-22/2 ? * *")
+    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     public void syncUpdateProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -43,7 +46,7 @@ public class DfySyncTask {
             }
             long begin = System.currentTimeMillis();
             log.info("开始执行定时任务，同步笛风云产品（只更新本地已有产品）。。");
-            List<ProductPO> products = dfySyncService.getSupplierProductIds();
+            List<ProductPO> products = dfySyncService.getSupplierProductIds(ProductType.SCENIC_TICKET.getCode());
             if(ListUtils.isEmpty(products)){
                 log.error("同步笛风云产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
                 return;
@@ -103,6 +106,82 @@ public class DfySyncTask {
             log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", request.getPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行笛风云定时更新景点、产品任务异常", e);
+        }
+    }
+
+    /**
+     * 只更新本地已有产品
+     */
+    @Scheduled(cron = "0 0 0,5-22/3 ? * *")
+    public void syncUpdateToursProduct(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步笛风云跟团游产品（只更新本地已有产品）。。");
+            List<ProductPO> products = dfySyncService.getSupplierProductIds(ProductType.TRIP_GROUP.getCode());
+            if(ListUtils.isEmpty(products)){
+                log.error("同步笛风云跟团游产品定时任务执行完成（只更新本地已有产品），没有找到笛风云的产品。");
+                return;
+            }
+            int i = 1;
+            for (ProductPO product : products) {
+                try {
+                    long sTime = System.currentTimeMillis();
+                    dfySyncService.syncToursDetail(product.getSupplierProductId(), DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}个跟团游产品 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
+                } catch (Exception e) {
+                    log.error("同步第{}个跟团游产品supplierProductCode={}异常（只更新本地已有产品），", i, product.getSupplierProductId(), e);
+                }
+                i++;
+            }
+            log.info("同步笛风云跟团游产品定时任务执行完成（只更新本地已有产品），共{}个，用时{}秒（只更新本地已有产品）", i, (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新跟团游产品任务异常（只更新本地已有产品）", e);
+        }
+    }
+
+    /**
+     * 只同步本地没有的产品，每天执行一次
+     */
+    @Scheduled(cron = "0 0 3 * * ?")
+    public void syncNewToursProduct(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步笛风云跟团游产品。。");
+            DfyToursListRequest request = new DfyToursListRequest();
+            int start = 0;
+            while (true){
+                request.setStart(start);
+                request.setLimit((start + 1) * 100);
+                long sTime = System.currentTimeMillis();
+                boolean success = dfySyncService.syncToursList(request);
+                long useTime = System.currentTimeMillis() - sTime;
+
+                log.info("同步第{}页跟团游，用时{}毫秒", (start + 1), useTime);
+                if(!success) {
+                    break;
+                }
+                // 如果执行时间超过310毫秒就不用睡了
+                if(useTime < 310){
+                    // 限制一分钟不超过200次
+                    Thread.sleep(310 - useTime);
+                }
+                start++;
+            }
+            log.info("同步笛风云跟团游产品定时任务执行完成，共同步{}页，用时{}秒", (start + 1), (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行笛风云定时更新跟团游产品任务异常", e);
         }
     }
 }

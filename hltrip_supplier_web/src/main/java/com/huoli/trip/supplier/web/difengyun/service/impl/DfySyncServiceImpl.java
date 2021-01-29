@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
@@ -20,6 +21,7 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
@@ -265,8 +268,8 @@ public class DfySyncServiceImpl implements DfySyncService {
     }
 
     @Override
-    public List<ProductPO> getSupplierProductIds(){
-        return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
+    public List<ProductPO> getSupplierProductIds(Integer productType){
+        return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY, productType);
     }
 
     @Override
@@ -325,21 +328,23 @@ public class DfySyncServiceImpl implements DfySyncService {
         request.setApiKey(apiKey);
     }
 
+    @Override
     public boolean syncToursList(DfyToursListRequest request){
         DfyBaseResult<DfyToursListResponse> baseResult = getToursList(request);
         if(baseResult == null){
             return false;
         }
         List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
-        productInfos.forEach(p -> syncToursDetail(p, PRODUCT_SYNC_MODE_ONLY_ADD));
+        productInfos.forEach(p -> syncToursDetail(p.getProductId(), PRODUCT_SYNC_MODE_ONLY_ADD));
         return true;
     }
 
-    public void syncToursDetail(DfyProductInfo productInfo, int syncMode) {
-        DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productInfo.getProductId());
+    @Override
+    public void syncToursDetail(String productId, int syncMode) {
+        DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productId);
         if (baseResult == null) {
             // 笛风云的产品下线就不会返回，所以没拿到就认为已下线
-            List<ProductPO> productPOs = productDao.getBySupplierProductIdAndSupplierId(productInfo.getProductId(), Constants.SUPPLIER_CODE_DFY_TOURS);
+            List<ProductPO> productPOs = productDao.getBySupplierProductIdAndSupplierId(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
             if (ListUtils.isNotEmpty(productPOs)) {
                 for (ProductPO productPO : productPOs) {
                     productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID);
@@ -351,21 +356,21 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         DfyToursDetailResponse dfyToursDetail = baseResult.getData();
         if (dfyToursDetail.getBrandId() == null) {
-            log.error("笛风云跟团游产品{}不是牛人专线[{}]，跳过。。", productInfo.getProductId(), dfyToursDetail.getBrandName());
+            log.error("笛风云跟团游产品{}不是牛人专线[{}]，跳过。。", productId, dfyToursDetail.getBrandName());
             return;
         }
         if (ListUtils.isEmpty(dfyToursDetail.getDepartCitys())) {
-            log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productInfo.getProductId());
+            log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productId);
             return;
         }
         if (dfyToursDetail.getJourneyInfo() == null ||
                 dfyToursDetail.getJourneyInfo().getJourneyDescJson() == null ||
                 dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() == null ||
                 ListUtils.isEmpty(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData().getData())) {
-            log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productInfo.getProductId());
+            log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productId);
             return;
         }
-        ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productInfo.getProductId());
+        ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productId);
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -377,49 +382,102 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
         for (String city : citys) {
-            ProductPO product = DfyToursConverter.convertToProductPO(dfyToursDetail, productInfo.getProductId(), city);
+            ProductPO product = DfyToursConverter.convertToProductPO(dfyToursDetail, productId, city);
             product.setMainItemCode(productItemPO.getCode());
             product.setMainItem(productItemPO);
             product.setCity(productItemPO.getCity());
             product.setDesCity(productItemPO.getDesCity());
             product.setOriCity(city);
-            ProductPO productPO = productDao.getByCode(product.getCode());
+            ProductPO oldProduct = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
-            if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null) {
+            if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null) {
                 log.error("笛风云跟团游，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
-            if (PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null) {
+            if (PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && oldProduct == null) {
                 log.error("笛风云跟团游，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
-            if (productPO == null) {
+            if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
-
-            DfyToursCalendarRequest calendarRequest = new DfyToursCalendarRequest();
-            calendarRequest.setProductId(Integer.valueOf(productInfo.getProductId()));
-            calendarRequest.setDepartCityCode(Integer.valueOf(city));
-            DfyBaseResult<List<DfyToursCalendarResponse>> toursBaseResult = getToursCalendar(calendarRequest);
-            if (toursBaseResult != null && ListUtils.isNotEmpty(toursBaseResult.getData())) {
-                for (DfyToursCalendarResponse data : toursBaseResult.getData()) {
-                    PriceInfoPO priceInfoPO = new PriceInfoPO();
-                    priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
-                    priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
-                    if(data.getStockSign() != null){
-
-                    }
-//                    priceInfoPO.setStock();
-                }
-            }
-            HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), productPO.getCode());
+            productDao.updateByCode(product);
+            syncToursPrice(productId, city);
+            HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), product.getCode());
             hodometerDao.updateByCode(hodometerPO);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         }
     }
+
+    @Override
+    public void syncToursPrice(String supplierProductId, String city){
+        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, supplierProductId, city);
+        ProductPO product = productDao.getByCode(productCode);
+        if(product == null){
+            log.error("同步笛风云跟团游价格失败，产品{}不存在", productCode);
+            return;
+        }
+        DfyToursCalendarRequest calendarRequest = new DfyToursCalendarRequest();
+        calendarRequest.setProductId(Integer.valueOf(supplierProductId));
+        calendarRequest.setDepartCityCode(Integer.valueOf(city));
+        DfyBaseResult<List<DfyToursCalendarResponse>> priceBaseResult = getToursCalendar(calendarRequest);
+        if (priceBaseResult == null || ListUtils.isEmpty(priceBaseResult.getData())){
+            log.error("同步笛风云跟团游价格失败，产品码={}，接口没有返回数据", productCode);
+            return;
+        }
+        PricePO pricePO = new PricePO();
+        pricePO.setProductCode(product.getCode());
+        pricePO.setSupplierProductId(product.getSupplierProductId());
+        pricePO.setOperator(Constants.SUPPLIER_CODE_DFY);
+        pricePO.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+        List<PriceInfoPO> priceInfoPOs = priceBaseResult.getData().stream().map(data -> {
+            PriceInfoPO priceInfoPO = new PriceInfoPO();
+            priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
+            priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
+            if(data.getStockSign() != null){
+                switch (data.getStockSign()){
+                    case DfyConstants.STOCK_TYPE_NOM:
+                        priceInfoPO.setStock(data.getStockNum());
+                        break;
+                    case DfyConstants.STOCK_TYPE_UNLIMITED:
+                        priceInfoPO.setStock(999);
+                        break;
+                    case DfyConstants.STOCK_TYPE_OFFLINE:
+                        priceInfoPO.setStock(0);
+                        break;
+                }
+            }
+            if(data.getExcludeChildFlag() != null && data.getExcludeChildFlag() == 0){
+                priceInfoPO.setChdSettlePrice(BigDecimal.valueOf(data.getDistributeChildPrice() == null ? 0 : data.getDistributeChildPrice()));
+                priceInfoPO.setChdSalePrice(priceInfoPO.getChdSettlePrice());
+            }
+            priceInfoPO.setRoomDiffPrice(data.getRoomChargeprice() == null ? null : BigDecimal.valueOf(data.getRoomChargeprice()));
+            priceInfoPO.setDeadline(data.getDeadlineTime());
+            return priceInfoPO;
+        }).collect(Collectors.toList());
+        pricePO.setPriceInfos(priceInfoPOs);
+        priceDao.updateByProductCode(pricePO);
+        List<PriceInfoPO> priceList = priceInfoPOs.stream().sorted(Comparator.comparing(p -> p.getSaleDate().getTime())).filter(p ->
+                p.getSaleDate().getTime() >= DateTimeUtil.trancateToDate(new Date()).getTime() &&
+                        p.getSalePrice() != null && p.getSalePrice().compareTo(BigDecimal.valueOf(0)) == 1 &&
+                        p.getStock() != null && p.getStock() > 0).collect(Collectors.toList());
+        if(priceList.size() > 0){
+            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+            PriceInfoPO endPrice = priceList.get(priceList.size() - 1);
+            if(StringUtils.isNotBlank(endPrice.getDeadline())){
+                Date deadline = DateTimeUtil.parseDate(endPrice.getDeadline());
+                if(deadline.getTime() >= DateTimeUtil.trancateToDate(new Date()).getTime()){
+                    product.setInvalidTime(MongoDateUtils.handleTimezoneInput(deadline));
+                }
+            } else {
+                product.setInvalidTime(MongoDateUtils.handleTimezoneInput(endPrice.getSaleDate()));
+            }
+        }
+    }
+
 
 }

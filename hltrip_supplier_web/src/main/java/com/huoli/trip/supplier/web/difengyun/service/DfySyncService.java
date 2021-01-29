@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyProductInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursCalendarResponse;
@@ -57,7 +58,7 @@ public interface DfySyncService {
      * 获取所欲渠道产品码
      * @return
      */
-    List<ProductPO> getSupplierProductIds();
+    List<ProductPO> getSupplierProductIds(Integer productType);
 
     /**
      * 获取跟团游列表
@@ -86,4 +87,25 @@ public interface DfySyncService {
      * @return
      */
     DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(DfyToursCalendarRequest request);
+
+    /**
+     * 同步跟团游列表
+     * @param request
+     * @return
+     */
+    boolean syncToursList(DfyToursListRequest request);
+
+    /**
+     * 同步跟团游产品
+     * @param productId
+     * @param syncMode
+     */
+    void syncToursDetail(String productId, int syncMode);
+
+    /**
+     * 同步跟团游价格
+     * @param supplierProductId
+     * @param city
+     */
+    void syncToursPrice(String supplierProductId, String city);
 }

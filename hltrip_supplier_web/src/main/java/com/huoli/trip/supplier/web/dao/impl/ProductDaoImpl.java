@@ -63,7 +63,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<ProductPO> getBySupplierProductIdAndSupplierId(String supplierProductId, String supplierId){
-        Query query = new Query(Criteria.where("supplierProductId").is(supplierProductId).is("supplierId").is(supplierId));
+        Query query = new Query(Criteria.where("supplierProductId").is(supplierProductId).and("supplierId").is(supplierId));
         return mongoTemplate.find(query, ProductPO.class);
     }
 
@@ -146,8 +146,8 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
-    public List<ProductPO> getSupplierProductIds(String supplierId){
-        Query query = new Query(Criteria.where("supplierId").is(supplierId));
+    public List<ProductPO> getSupplierProductIds(String supplierId, Integer productType){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("productType").is(productType));
         query.fields().include("supplierProductId").exclude("_id");
         return mongoTemplate.find(query, ProductPO.class);
     }

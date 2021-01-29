@@ -46,7 +46,7 @@ public class DfyToursListRequest {
     /**
      * 分页查询起始条目
      */
-    private String start;
+    private Integer start;
 
     /**
      * 分页查询一页显示条目
@@ -56,6 +56,6 @@ public class DfyToursListRequest {
      * 第三页 start:20 limit:10
      * 以此类推
      */
-    private String limit;
+    private Integer limit;
 
 }
