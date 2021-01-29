@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 
 /**
  * 描述：<br/>
@@ -65,7 +67,7 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
-            public DfyBaseResult<DfyToursDetailResponse> getToursCalendar(DfyBaseRequest<DfyToursDetailRequest> request) {
+            public DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(@RequestBody DfyBaseRequest<DfyToursCalendarRequest> request) {
                 return null;
             }
 

@@ -110,4 +110,8 @@ public class DfyJourneyInfo {
      */
     private List<DfyPosition> desPoiNameList;
 
+    /**
+     * 产品推荐
+     */
+    private List<DfyTourRecommend> tourRecommend;
 }

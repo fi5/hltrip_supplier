@@ -3,16 +3,22 @@ package com.huoli.trip.supplier.web.difengyun.convert;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
+import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.ImageBase;
+import com.huoli.trip.common.vo.ToursRecommend;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyBookNotice;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyImage;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,19 +90,52 @@ public class DfyToursConverter {
         productPO.setName(dfyToursDetail.getProductName());
         productPO.setBuyMin(99);
         productPO.setBuyMax(99);
+        productPO.setMinProfitRate(dfyToursDetail.getMinProfitRate());
+        productPO.setAvgProfitRate(dfyToursDetail.getAvgProfitRate());
+        productPO.setMaxProfitRate(dfyToursDetail.getMaxProfitRate());
+        productPO.setTripDays(dfyToursDetail.getDuration());
+        productPO.setTripNights(dfyToursDetail.getProductNight());
+        // todo 需要转换
+//        productPO.setGoTraffic();
+        // todo 需要转换
+//        productPO.setReturnTraffic();
+        productPO.setSite(dfyToursDetail.getTeamType() == null ? null : String.valueOf(dfyToursDetail.getTeamType()));
         DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
+        if(ListUtils.isNotEmpty(journeyInfo.getTourRecommend())){
+            productPO.setRecommendDesc(journeyInfo.getTourRecommend().stream().map(r -> {
+                ToursRecommendPO toursRecommend = new ToursRecommendPO();
+                toursRecommend.setDescription(r.getDescription());
+                toursRecommend.setType(r.getType());
+                toursRecommend.setSort(r.getSort());
+                return toursRecommend;
+            }).collect(Collectors.toList()));
+        }
+        productPO.setIncludeDesc(journeyInfo.getCostInclude());
+        productPO.setExcludeDesc(journeyInfo.getCostExclude());
         if(journeyInfo.getBookNotice() != null){
             String bookNotice = buildBookNotice(journeyInfo);
             if(StringUtils.isNotBlank(bookNotice)){
                 productPO.setBookDesc(bookNotice);
+            }
+            if(ListUtils.isNotEmpty(journeyInfo.getBookNotice().getDiffPrice())){
+                StringBuffer sb = new StringBuffer();
+                sb.append(productPO.getIncludeDesc()).append("<br>")
+                        .append("差价说明：").append(String.join("<br>", journeyInfo.getBookNotice().getDiffPrice()));
+                productPO.setIncludeDesc(sb.toString());
             }
         }
         if(ListUtils.isNotEmpty(journeyInfo.getImportantAddition())){
             productPO.setRemark(String.join("<br>", journeyInfo.getImportantAddition()));
         }
         if(StringUtils.isNotBlank(journeyInfo.getPeopleLimitDesc())){
-            productPO.setRemark(String.join("<br>", productPO.getBookDesc(), journeyInfo.getPeopleLimitDesc()));
+            StringBuffer sb = new StringBuffer();
+            if(StringUtils.isNotBlank(productPO.getRemark())){
+                sb.append(productPO.getRemark()).append("<br>");
+            }
+            sb.append("特殊人群：").append("<br>").append(journeyInfo.getPeopleLimitDesc());
+            productPO.setRemark(sb.toString());
         }
+
         // todo 没有整体退改说明
 //        productPO.setRefundDesc(ticketDetail.getMpLossInfo());
         // 预定规则根据下单证件规则
@@ -137,6 +176,123 @@ public class DfyToursConverter {
             productPO.setRiskContents(riskContents);
         }
         return productPO;
+    }
+
+    public static HodometerPO convertToHodometerPO(DfyJourneyInfo journeyInfo, String code){
+        HodometerPO hodometerPO = new HodometerPO();
+        hodometerPO.setCode(code);
+        hodometerPO.setType(2);
+        List<Hodometer> hodometers = Lists.newArrayList();
+        journeyInfo.getJourneyDescJson().getData().getData().sort(Comparator.comparing(d -> d.getDay(), Integer::compareTo));
+        for (DfyJourneyDetail.Journey data : journeyInfo.getJourneyDescJson().getData().getData()) {
+            Hodometer hodometer = new Hodometer();
+            if(data.getTraffic() != null){
+                DfyJourneyDetail.JourneyTraffic journeyTraffic = data.getTraffic();
+                hodometer.setDepartureCity(journeyTraffic.getFrom());
+                if(ListUtils.isNotEmpty(journeyTraffic.getToList())){
+                    hodometer.setUrbanTraffics(journeyTraffic.getToList().stream().map(t -> {
+                        UrbanTraffic urbanTraffic = new UrbanTraffic();
+                        urbanTraffic.setArrivalCity(t.getTo());
+                        if("火车".equals(t.getMeans())){
+                            urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_TRAIN);
+                        } else if("飞机".equals(t.getMeans())){
+                            urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_AIRPLANE);
+                        } else if("轮船".equals(t.getMeans())){
+                            urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_SHIP);
+                        } else if("汽车".equals(t.getMeans())){
+                            urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_CAR);
+                        } else if("自行安排".equals(t.getMeans())){
+                            urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_CUSTOM);
+                        }
+                        return urbanTraffic;
+                    }).collect(Collectors.toList()));
+                }
+            }
+            List<Route> routes = Lists.newArrayList();
+            for (DfyJourneyDetail.JourneyModule journeyModule : data.getModuleList()) {
+                int type = journeyModule.getModuleTypeValue();
+                if(type == DfyConstants.MODULE_TYPE_SCENIC &&
+                        ListUtils.isNotEmpty(journeyModule.getScenicList())){
+                    for (DfyJourneyDetail.ModuleScenic scenic : journeyModule.getScenicList()) {
+                        Route route = new Route();
+                        route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode());
+                        route.setName(scenic.getTitle());
+                        route.setTitle(scenic.getTitle());
+                        route.setDuration(scenic.getTimes() == null ? null : scenic.getTimes().toString());
+                        if(ListUtils.isNotEmpty(scenic.getPicture())){
+                            route.setImages(convertToImageBase(scenic.getPicture()));
+                        }
+                        route.setDescribe(scenic.getContent());
+                        routes.add(route);
+                    }
+                }
+                if(type == DfyConstants.MODULE_TYPE_HOTEL
+                        && ListUtils.isNotEmpty(journeyModule.getHotelList())){
+                    for (DfyJourneyDetail.ModuleHotel hotel : journeyModule.getHotelList()) {
+                        Route route = new Route();
+                        route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
+                        route.setName(hotel.getTitle());
+                        route.setTitle(hotel.getTitle());
+                        // todo room 可能需要加个属性
+                        routes.add(route);
+                    }
+                }
+                if(type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null){
+                    Route route = new Route();
+                    route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode());
+                    route.setDeparture(journeyModule.getTraffic().getFrom());
+                    route.setArrival(journeyModule.getTraffic().getTo());
+                    route.setDuration(journeyModule.getTraffic().getTimes() == null ? null : journeyModule.getTraffic().getTimes().toString());
+                    routes.add(route);
+                }
+                if(type == DfyConstants.MODULE_TYPE_FOOD && journeyModule.getFood() != null){
+                    Route route = new Route();
+                    route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode());
+                    route.setTitle(journeyModule.getFood().getTitle());
+                    route.setName(journeyModule.getFood().getTitle());
+                    route.setDuration(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
+                    routes.add(route);
+                }
+                if(type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())){
+                    for (DfyJourneyDetail.ModuleShop shop : journeyModule.getShopList()) {
+                        Route route = new Route();
+                        route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode());
+                        route.setDuration(shop.getTimes() == null ? null : shop.getTimes().toString());
+                        route.setTitle(shop.getTitle());
+                        route.setBusinessProducts(shop.getProduct());
+                        route.setDescribe(shop.getInstruction());
+                        routes.add(route);
+                    }
+                }
+                if(type == DfyConstants.MODULE_TYPE_ACTIVITY && journeyModule.getActivity() != null){
+                    Route route = new Route();
+                    route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode());
+                    route.setTitle(journeyModule.getActivity().getTitle());
+                    route.setDuration(journeyModule.getActivity().getTimes() == null ? null : journeyModule.getActivity().getTimes().toString());
+                    routes.add(route);
+                }
+                if(type == DfyConstants.MODULE_TYPE_REMINDER && journeyModule.getRemind() != null){
+                    Route route = new Route();
+                    route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode());
+                    route.setTitle(journeyModule.getRemind().getType());
+                    route.setDescribe(journeyModule.getRemind().getContent() == null ? null : journeyModule.getRemind().getContent());
+                    routes.add(route);
+                }
+            }
+            hodometer.setRoutes(routes);
+            hodometers.add(hodometer);
+        }
+        hodometerPO.setHodometers(hodometers);
+        return hodometerPO;
+    }
+
+    public static List<ImageBase> convertToImageBase(List<DfyJourneyDetail.JourneyPicture> pics){
+        return pics.stream().map(p -> {
+            ImageBase imageBase = new ImageBase();
+            imageBase.setUrl(p.getUrl());
+            imageBase.setDesc(p.getTitle());
+            return imageBase;
+        }).collect(Collectors.toList());
     }
 
     public static String buildBookNotice(DfyJourneyInfo journeyInfo){

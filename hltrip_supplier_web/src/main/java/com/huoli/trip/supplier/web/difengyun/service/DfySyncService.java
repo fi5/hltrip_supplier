@@ -2,11 +2,9 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursCalendarResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursListResponse;
 
@@ -81,4 +79,11 @@ public interface DfySyncService {
      * @return
      */
     DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(String productId);
+
+    /**
+     * 获取价格日历
+     * @param request
+     * @return
+     */
+    DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(DfyToursCalendarRequest request);
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -80,7 +82,7 @@ public interface IDiFengYunClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST,path = "/Tours/priceStockCalendar")
-    DfyBaseResult<DfyToursDetailResponse> getToursCalendar(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
+    DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(@RequestBody DfyBaseRequest<DfyToursCalendarRequest> request);
 
     /**
      * 获取门票订单详情

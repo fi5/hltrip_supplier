@@ -176,4 +176,38 @@ public class DfyConstants {
      */
     public static final int PRODUCT_SYNC_MODE_ONLY_UPDATE = 2;
 
+    // 库存类型
+    /**
+     * 库存
+     */
+    public static final int STOCK_TYPE_NOM = 1;
+    /**
+     * FS（无限量）
+     */
+    public static final int STOCK_TYPE_UNLIMITED = 2;
+    /**
+     * 现询（人工确认）
+     */
+    public static final int STOCK_TYPE_OFFLINE = 3;
+
+    /*
+     * 资源模块类型 1-景点，2-酒店 3-小交通，4-餐饮，5-购物，6-活动，7-提醒,9-游轮
+     * 资源模块名 scenic-景点 hotel-酒店 traffic-小交通 food-餐饮 shopping-购物 activity-活动 reminder-提醒 ship-游轮
+     */
+    public static final int MODULE_TYPE_SCENIC = 1;
+
+    public static final int MODULE_TYPE_HOTEL = 2;
+
+    public static final int MODULE_TYPE_TRAFFIC = 3;
+
+    public static final int MODULE_TYPE_FOOD = 4;
+
+    public static final int MODULE_TYPE_SHOPPING = 5;
+
+    public static final int MODULE_TYPE_ACTIVITY = 6;
+
+    public static final int MODULE_TYPE_REMINDER = 7;
+
+    public static final int MODULE_TYPE_SHIP = 9;
+
 }

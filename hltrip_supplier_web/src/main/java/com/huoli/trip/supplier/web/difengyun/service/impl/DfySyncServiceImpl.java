@@ -12,10 +12,8 @@ import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.*;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursListResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.*;
+import com.huoli.trip.supplier.web.dao.HodometerDao;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
@@ -27,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -61,6 +60,9 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
+
+    @Autowired
+    private HodometerDao hodometerDao;
 
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
@@ -267,7 +269,6 @@ public class DfySyncServiceImpl implements DfySyncService {
         return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY);
     }
 
-
     @Override
     public DfyBaseResult<DfyToursListResponse> getToursList(DfyToursListRequest request){
         try {
@@ -309,6 +310,14 @@ public class DfySyncServiceImpl implements DfySyncService {
         return baseResult;
     }
 
+    @Override
+    public DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(DfyToursCalendarRequest request){
+        DfyBaseRequest<DfyToursCalendarRequest> detailRequest = new DfyBaseRequest<>(request);
+        setToursApiKey(detailRequest);
+        DfyBaseResult<List<DfyToursCalendarResponse>> baseResult = diFengYunClient.getToursCalendar(detailRequest);
+        return baseResult;
+    }
+
     private void setToursApiKey(DfyBaseRequest request){
         String apiKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN, CONFIG_ITEM_API_TOURS_KEY);
         String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,CONFIG_ITEM_API_TOURS_SECRET_KEY);
@@ -326,23 +335,39 @@ public class DfySyncServiceImpl implements DfySyncService {
         return true;
     }
 
-    public void syncToursDetail(DfyProductInfo productInfo, int syncMode){
+    public void syncToursDetail(DfyProductInfo productInfo, int syncMode) {
         DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productInfo.getProductId());
-        if(baseResult == null){
+        if (baseResult == null) {
+            // 笛风云的产品下线就不会返回，所以没拿到就认为已下线
+            List<ProductPO> productPOs = productDao.getBySupplierProductIdAndSupplierId(productInfo.getProductId(), Constants.SUPPLIER_CODE_DFY_TOURS);
+            if (ListUtils.isNotEmpty(productPOs)) {
+                for (ProductPO productPO : productPOs) {
+                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID);
+                    dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productPO.getCode()));
+                    log.info("笛风云跟团游产品详情返回空，产品已下线，productCode = {}", productPO.getCode());
+                }
+            }
             return;
         }
         DfyToursDetailResponse dfyToursDetail = baseResult.getData();
-        if(dfyToursDetail.getBrandId() == null){
+        if (dfyToursDetail.getBrandId() == null) {
             log.error("笛风云跟团游产品{}不是牛人专线[{}]，跳过。。", productInfo.getProductId(), dfyToursDetail.getBrandName());
             return;
         }
-        if(ListUtils.isEmpty(dfyToursDetail.getDepartCitys())){
+        if (ListUtils.isEmpty(dfyToursDetail.getDepartCitys())) {
             log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productInfo.getProductId());
+            return;
+        }
+        if (dfyToursDetail.getJourneyInfo() == null ||
+                dfyToursDetail.getJourneyInfo().getJourneyDescJson() == null ||
+                dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() == null ||
+                ListUtils.isEmpty(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData().getData())) {
+            log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productInfo.getProductId());
             return;
         }
         ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productInfo.getProductId());
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
-        if(productItemPO == null){
+        if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         }
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -360,21 +385,40 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setOriCity(city);
             ProductPO productPO = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
-            if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
+            if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null) {
                 log.error("笛风云跟团游，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
-            if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
+            if (PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null) {
                 log.error("笛风云跟团游，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
-            if(productPO == null){
+            if (productPO == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setOperator(Constants.SUPPLIER_CODE_DFY);
             product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+
+            DfyToursCalendarRequest calendarRequest = new DfyToursCalendarRequest();
+            calendarRequest.setProductId(Integer.valueOf(productInfo.getProductId()));
+            calendarRequest.setDepartCityCode(Integer.valueOf(city));
+            DfyBaseResult<List<DfyToursCalendarResponse>> toursBaseResult = getToursCalendar(calendarRequest);
+            if (toursBaseResult != null && ListUtils.isNotEmpty(toursBaseResult.getData())) {
+                for (DfyToursCalendarResponse data : toursBaseResult.getData()) {
+                    PriceInfoPO priceInfoPO = new PriceInfoPO();
+                    priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
+                    priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
+                    if(data.getStockSign() != null){
+
+                    }
+//                    priceInfoPO.setStock();
+                }
+            }
+            HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), productPO.getCode());
+            hodometerDao.updateByCode(hodometerPO);
+            dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         }
     }
 

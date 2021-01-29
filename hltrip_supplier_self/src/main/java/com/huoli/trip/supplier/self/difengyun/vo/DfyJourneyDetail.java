@@ -304,7 +304,7 @@ public class DfyJourneyDetail {
         /**
          * 停留时间（必填）
          */
-        private String times;
+        private Integer times;
         /**
          * 营业产品（必填）
          */
@@ -325,7 +325,7 @@ public class DfyJourneyDetail {
         /**
          * 活动时间
          */
-        private String times;
+        private Integer times;
     }
 
     @Getter
