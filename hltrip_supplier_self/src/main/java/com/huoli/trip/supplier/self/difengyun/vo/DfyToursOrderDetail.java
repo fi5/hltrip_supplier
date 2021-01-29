@@ -18,6 +18,34 @@ public class DfyToursOrderDetail implements Serializable {
 
 	/**
 	 * 订单状态:
+	 *
+	 * 订单状态：待确认，待付款，已确认，已完成，已取消
+子状态:初始状态
+	 需求确认
+	 占位成功
+	 待签约付款
+	 确认反馈中
+	 确认失败
+	 待通知
+	 出团通知发送中
+	 出游前
+	 出游中
+	 出游归来
+	 加人加资源占位中
+	 签约后变更
+	 加人加资源占位成功
+	 加人加资源占位失败
+	 加人加资源占位已反馈
+	 加人加资源确认中
+	 核损中
+	 取消订单核损中
+	 核损已反馈
+	 取消订单核损已反馈
+	 加人加资源待付款
+	 已取消
+	 已取消
+
+
 
 	 */
 	private String orderStatus;
@@ -27,7 +55,7 @@ public class DfyToursOrderDetail implements Serializable {
 
 	@Data
 	public static class ToursOrderInfo implements Serializable {
-		private String statusDesc;//
+		private String status;//
 		private String canPay;//支付开关 0.不可支付，1.可以支付；分销商系统需要控制，当canPay="1"时，才调用【出票(代扣)接口】。
 		private String orderId;//途牛订单
 		private String orderTime;//下单时间

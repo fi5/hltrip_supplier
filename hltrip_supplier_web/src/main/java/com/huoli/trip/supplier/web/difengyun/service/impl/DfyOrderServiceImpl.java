@@ -215,18 +215,16 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
                 if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
-                    switch (detail.getOrderInfo().getStatusDesc()){
+                    switch (detail.getOrderInfo().getStatus()){
+                        case "核损中":
                         case "取消订单核损中":
                         case "取消订单确认中":
                         case "核损已反馈":
                         case "取消订单核损已反馈":
                             detail.setOrderStatus("申请退款中");
                             break;
-                        case "使用前":
-                        case "待通知":
-                        case "通知中":
-                        case "使用后（点评）":
 
+                        default://大状态是完成,排除取消流程中
                             try {
                                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
@@ -255,10 +253,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                             } catch (Exception e) {
                                 log.error("信息{}",e);
                             }
-
-                            break;
-
-                        default:
                             break;
                     }
 
