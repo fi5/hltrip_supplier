@@ -279,7 +279,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyBaseRequest<DfyToursListRequest> listRequest = new DfyBaseRequest<>(request);
             setToursApiKey(listRequest);
             DfyBaseResult<DfyToursListResponse> baseResult = diFengYunClient.getToursList(listRequest);
-            if(baseResult == null || baseResult.getData() == null || ListUtils.isNotEmpty(baseResult.getData().getProductList())){
+            if(baseResult == null || baseResult.getData() == null || ListUtils.isEmpty(baseResult.getData().getProductList())){
                 log.error("笛风云跟团游列表返回空，request = {}", JSON.toJSONString(listRequest));
                 return null;
             }
