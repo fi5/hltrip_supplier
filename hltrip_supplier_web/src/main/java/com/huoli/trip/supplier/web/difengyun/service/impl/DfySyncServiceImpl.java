@@ -237,19 +237,20 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Async
     public void productUpdate(DfyProductNoticeRequest request){
         try {
+            log.info("接收到笛风云产品变更通知。。");
             List<DfyProductNotice> productNotices = request.getProductIds();
             if(ListUtils.isEmpty(productNotices)){
                 log.error("笛风云通知更新产品列表为空");
                 return;
             }
             productNotices.forEach(p -> {
-                if(p.getClassBrandParentId() == DfyConstants.BRAND_GROUP){
-                    log.error("笛风云更新产品 {} 是跟团，跳过。", p.getProductId());
+                if(p.getClassBrandParentId() == DfyConstants.BRAND_SELF){
+                    log.error("笛风云通知更新产品 {} 是自助游，跳过。", p.getProductId());
                     return;
                 }
                 // 如果只是更新状态直接在这里改就行
                 if(p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID || p.getNoticeType() == DfyConstants.NOTICE_TYPE_VALID){
-                    ProductPO productPO = productDao.getByCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, p.getProductId().toString()));
+                    ProductPO productPO = productDao.getBySupplierProductId(p.getProductId().toString());
                     // 如果本地有就直接更新
                     if(productPO != null){
                         productPO.setStatus(p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID ? Constants.PRODUCT_STATUS_INVALID : Constants.PRODUCT_STATUS_VALID);
@@ -259,8 +260,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                         return;
                     }
                 }
-                // 如果本地没有就走同步产品流程
-                syncProduct(p.getProductId().toString(), null);
+                // 如不不是改状态或者产品不存在就走同步
+                syncToursDetail(p.getProductId().toString(), DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
             });
         } catch (Exception e) {
             log.error("笛风云接收通知更新产品异常，", e);
