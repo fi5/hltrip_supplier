@@ -448,8 +448,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             priceInfoPO.setSaleDate(DateTimeUtil.parseDate(data.getDepartDate()));
             priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
             priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
-            log.info("库存类型={}",data.getStockSign());
-            log.info("库存数量={}",data.getStockNum());
             if(data.getStockSign() != null){
                 switch (data.getStockSign()){
                     case DfyConstants.STOCK_TYPE_NOM:
