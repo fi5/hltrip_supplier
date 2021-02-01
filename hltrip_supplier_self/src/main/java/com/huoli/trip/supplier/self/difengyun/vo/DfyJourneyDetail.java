@@ -292,7 +292,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleShop{
+    public static class ModuleShop{
         /**
          * 购物点poi（必填）
          */
@@ -317,7 +317,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleActivity{
+    public static class ModuleActivity{
         /**
          * 活动标题（必填）
          */
@@ -330,7 +330,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleRemind{
+    public static class ModuleRemind{
         /**
          * 提醒内容
          */
@@ -343,7 +343,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class HasFood{
+    public static class HasFood{
         /**
          * breakfast 早餐 lunch 中餐 dinner 晚餐
          */
@@ -356,7 +356,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class JourneyPicture{
+    public static class JourneyPicture{
         /**
          * 图片url
          */
