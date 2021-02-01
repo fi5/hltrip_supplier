@@ -5,6 +5,7 @@ import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
@@ -107,17 +108,19 @@ public class DfyTestController {
 
     @PostMapping(path = "/sync/tours/list")
     DfyBaseResult syncToursList(@RequestBody DfyToursListRequest request) {
-        return DfyBaseResult.success(dfySyncService.getToursList(request));
+        return DfyBaseResult.success(dfySyncService.syncToursList(request));
     }
 
     @PostMapping(path = "/sync/tours/detail")
     DfyBaseResult syncToursDetail(@RequestBody String productId) {
-        return DfyBaseResult.success(dfySyncService.getToursDetail(productId));
+        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        return DfyBaseResult.success();
     }
 
     @PostMapping(path = "/sync/tours/multi/detail")
     DfyBaseResult syncToursMultiDetail(@RequestBody String productId) {
-        return DfyBaseResult.success(dfySyncService.getToursMultiDetail(productId));
+        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        return DfyBaseResult.success();
     }
 
     @PostMapping(path = "/sync/tours/price")
