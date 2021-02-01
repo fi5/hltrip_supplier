@@ -486,6 +486,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             } else {
                 product.setInvalidTime(MongoDateUtils.handleTimezoneInput(endPrice.getSaleDate()));
             }
+            productDao.updateByCode(product);
         }
     }
 }
