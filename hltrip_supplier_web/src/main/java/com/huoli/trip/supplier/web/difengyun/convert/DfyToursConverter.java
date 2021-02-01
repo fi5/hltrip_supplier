@@ -95,10 +95,12 @@ public class DfyToursConverter {
         productPO.setMaxProfitRate(dfyToursDetail.getMaxProfitRate());
         productPO.setTripDays(dfyToursDetail.getDuration());
         productPO.setTripNights(dfyToursDetail.getProductNight());
-        // todo 需要转换
-//        productPO.setGoTraffic();
-        // todo 需要转换
-//        productPO.setReturnTraffic();
+        if(dfyToursDetail.getTrafficGo() != null){
+            productPO.setGoTraffic(convertToTraffic(dfyToursDetail.getTrafficGo()));
+        }
+        if(dfyToursDetail.getTrafficBack() != null ){
+            productPO.setReturnTraffic(convertToTraffic(dfyToursDetail.getTrafficBack()));
+        }
         productPO.setSite(dfyToursDetail.getTeamType() == null ? null : String.valueOf(dfyToursDetail.getTeamType()));
         DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
         if(ListUtils.isNotEmpty(journeyInfo.getTourRecommend())){
@@ -374,5 +376,39 @@ public class DfyToursConverter {
                     .append("<br>");
         }
         return sb.toString();
+    }
+
+    public static Integer convertToTraffic(Integer dfyTraffic){
+        switch (dfyTraffic){
+            case DfyConstants.TRAFFIC_TYPE_1:
+                return Constants.TRIP_TRAFFIC_1;
+            case DfyConstants.TRAFFIC_TYPE_2:
+                return Constants.TRIP_TRAFFIC_14;
+            case DfyConstants.TRAFFIC_TYPE_3:
+                return Constants.TRIP_TRAFFIC_4;
+            case DfyConstants.TRAFFIC_TYPE_4:
+                return Constants.TRIP_TRAFFIC_6;
+            case DfyConstants.TRAFFIC_TYPE_5:
+                return Constants.TRIP_TRAFFIC_5;
+            case DfyConstants.TRAFFIC_TYPE_6:
+                return Constants.TRIP_TRAFFIC_2;
+            case DfyConstants.TRAFFIC_TYPE_7:
+                return Constants.TRIP_TRAFFIC_11;
+            case DfyConstants.TRAFFIC_TYPE_8:
+                return Constants.TRIP_TRAFFIC_3;
+            case DfyConstants.TRAFFIC_TYPE_9:
+                return Constants.TRIP_TRAFFIC_7;
+            case DfyConstants.TRAFFIC_TYPE_10:
+                return Constants.TRIP_TRAFFIC_12;
+            case DfyConstants.TRAFFIC_TYPE_11:
+                return Constants.TRIP_TRAFFIC_8;
+            case DfyConstants.TRAFFIC_TYPE_12:
+                return Constants.TRIP_TRAFFIC_9;
+            case DfyConstants.TRAFFIC_TYPE_13:
+                return Constants.TRIP_TRAFFIC_10;
+            case DfyConstants.TRAFFIC_TYPE_14:
+                return Constants.TRIP_TRAFFIC_13;
+        }
+        return null;
     }
 }

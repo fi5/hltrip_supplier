@@ -382,13 +382,16 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItemDao.updateByCode(productItem);
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
+        List<String> cityNames = Lists.newArrayList(productItemPO.getOriCity().split(","));
+        int i = 0;
         for (String city : citys) {
             ProductPO product = DfyToursConverter.convertToProductPO(dfyToursDetail, productId, city);
             product.setMainItemCode(productItemPO.getCode());
             product.setMainItem(productItemPO);
             product.setCity(productItemPO.getCity());
             product.setDesCity(productItemPO.getDesCity());
-            product.setOriCity(city);
+            product.setOriCity(cityNames.get(i++));
+            product.setOriCityCode(city);
             ProductPO oldProduct = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
             if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null) {
@@ -411,6 +414,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), product.getCode());
             hodometerDao.updateByCode(hodometerPO);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
+
         }
     }
 
