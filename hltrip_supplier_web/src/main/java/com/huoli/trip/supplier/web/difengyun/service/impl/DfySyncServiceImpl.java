@@ -270,7 +270,11 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public List<ProductPO> getSupplierProductIds(Integer productType){
-        return productDao.getSupplierProductIds(Constants.SUPPLIER_CODE_DFY, productType);
+        String supplier = Constants.SUPPLIER_CODE_DFY;
+        if(productType == ProductType.TRIP_GROUP.getCode()){
+            supplier = Constants.SUPPLIER_CODE_DFY_TOURS;
+        }
+        return productDao.getSupplierProductIds(supplier, productType);
     }
 
     @Override
@@ -377,8 +381,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         }
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        productItem.setOperator(Constants.SUPPLIER_CODE_DFY);
-        productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+        productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+        productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         productItemDao.updateByCode(productItem);
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
@@ -406,8 +410,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            product.setOperator(Constants.SUPPLIER_CODE_DFY);
-            product.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+            product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+            product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
             productDao.updateByCode(product);
             syncToursPrice(productId, city);
@@ -420,7 +424,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public void syncToursPrice(String supplierProductId, String city){
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY, supplierProductId, city);
+        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY_TOURS, supplierProductId, city);
         ProductPO product = productDao.getByCode(productCode);
         if(product == null){
             log.error("同步笛风云跟团游价格失败，产品{}不存在", productCode);
@@ -437,8 +441,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         PricePO pricePO = new PricePO();
         pricePO.setProductCode(product.getCode());
         pricePO.setSupplierProductId(product.getSupplierProductId());
-        pricePO.setOperator(Constants.SUPPLIER_CODE_DFY);
-        pricePO.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+        pricePO.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+        pricePO.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         List<PriceInfoPO> priceInfoPOs = priceBaseResult.getData().stream().map(data -> {
             PriceInfoPO priceInfoPO = new PriceInfoPO();
             priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
