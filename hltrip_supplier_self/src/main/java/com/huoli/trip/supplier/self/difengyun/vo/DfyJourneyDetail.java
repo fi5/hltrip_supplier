@@ -33,7 +33,7 @@ public class DfyJourneyDetail {
      */
     @Getter
     @Setter
-    public class JourneyDetail{
+    public static class JourneyDetail{
         /**
          * 行程附注
          */
@@ -44,7 +44,7 @@ public class DfyJourneyDetail {
 
     @Setter
     @Getter
-    public class Journey{
+    public static class Journey{
         /**
          * 第几天 资源类不存在天数 为0
          */
@@ -59,7 +59,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class JourneyTraffic{
+    public static class JourneyTraffic{
         /**
          * 地点 poi id，自行输入时，id为0,（必填）
          */
@@ -74,7 +74,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class JourneyDestination{
+    public static class JourneyDestination{
         /**
          * 地点 poi id，自行输入时，id为0（means不为‘无’时，必填）
          */
@@ -91,7 +91,7 @@ public class DfyJourneyDetail {
 
     @Setter
     @Getter
-    public class JourneyModule{
+    public static class JourneyModule{
         /**
          * 资源模块名 scenic-景点 hotel-酒店 traffic-小交通 food-餐饮 shopping-购物 activity-活动 reminder-提醒 ship-游轮
          */
@@ -158,7 +158,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleScenic{
+    public static class ModuleScenic{
         /**
          * 景点 poi id（必填）
          */
@@ -183,7 +183,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleHotel{
+    public static class ModuleHotel{
         /**
          * 酒店POI id，自行输入时，id为0（必填）
          */
@@ -216,7 +216,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleHotelRoom{
+    public static class ModuleHotelRoom{
         /**
          * 房型标题
          */
@@ -233,7 +233,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleTraffic{
+    public static class ModuleTraffic{
         /**
          * 出发地
          */
@@ -263,7 +263,7 @@ public class DfyJourneyDetail {
 
     @Getter
     @Setter
-    public class ModuleFood{
+    public static class ModuleFood{
         /**
          * 餐饮id
          */
