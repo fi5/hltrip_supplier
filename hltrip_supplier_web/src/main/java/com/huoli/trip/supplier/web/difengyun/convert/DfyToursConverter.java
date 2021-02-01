@@ -43,9 +43,9 @@ public class DfyToursConverter {
         productItemPO.setName(dfyToursDetail.getProductName());
         if(ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())){
             String city = dfyToursDetail.getDepartCitys().stream().map(c ->
-                    c.getDepartCityName()).distinct().collect(Collectors.joining(","));
+                    c.getName()).distinct().collect(Collectors.joining(","));
             String cityCode = dfyToursDetail.getDepartCitys().stream().map(c ->
-                    c.getDepartCityCode()).distinct().collect(Collectors.joining(","));
+                    c.getCode()).distinct().collect(Collectors.joining(","));
             productItemPO.setOriCity(city);
             productItemPO.setOriCityCode(cityCode);
         }
