@@ -326,6 +326,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     }
 
+
     @Override
     public BaseResponse<OrderDetailRep> getVochers(BaseOrderRequest request) {
         DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
@@ -569,5 +570,18 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         dfyBaseRequest.setData(request);
         request.setAcctId(acctid);
         return diFengYunClient.orderStatus(dfyBaseRequest);
+    }
+
+
+    @Override
+    public DfyBaseResult<DfyCreateOrderResponse> createToursOrder(DfyCreateToursOrderRequest createOrderReq) {
+        String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
+        String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
+        createOrderReq.setAcctId(acctid);
+        createOrderReq.setContactTel(tel);
+
+        DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setData(createOrderReq);
+        return null;
     }
 }

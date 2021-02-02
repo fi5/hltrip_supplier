@@ -149,5 +149,12 @@ public interface IDiFengYunClient {
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/submitOrder")
     DfyBaseResult<DfySubmitOrderResponse> submitOrder(@RequestBody DfyBaseRequest<DfySubmitOrderRequest> request);
 
+    /**
+     * 创建跟团游订单
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "//Tours/createOrder")
+    DfyBaseResult<DfyCreateOrderResponse> createToursOrder(@RequestBody DfyBaseRequest<DfyCreateToursOrderRequest> request);
 
 }
