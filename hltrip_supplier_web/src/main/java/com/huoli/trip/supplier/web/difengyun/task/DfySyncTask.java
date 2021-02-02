@@ -162,8 +162,8 @@ public class DfySyncTask {
             DfyToursListRequest request = new DfyToursListRequest();
             int start = 0;
             while (true){
-                request.setStart(start);
-                request.setLimit((start + 1) * 100);
+                request.setStart(start * 100);
+                request.setLimit(100);
                 long sTime = System.currentTimeMillis();
                 boolean success = dfySyncService.syncToursList(request);
                 long useTime = System.currentTimeMillis() - sTime;

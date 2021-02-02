@@ -445,7 +445,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         List<PriceInfoPO> priceInfoPOs = priceBaseResult.getData().stream().map(data -> {
             PriceInfoPO priceInfoPO = new PriceInfoPO();
-            priceInfoPO.setSaleDate(DateTimeUtil.parseDate(data.getDepartDate()));
+            priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(data.getDepartDate())));
             priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
             priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
             if(data.getStockSign() != null){
