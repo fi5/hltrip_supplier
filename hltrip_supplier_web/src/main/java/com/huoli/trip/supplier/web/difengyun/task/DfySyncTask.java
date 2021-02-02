@@ -35,7 +35,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 0,6-22/2 ? * *")
+    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     public void syncUpdateProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
