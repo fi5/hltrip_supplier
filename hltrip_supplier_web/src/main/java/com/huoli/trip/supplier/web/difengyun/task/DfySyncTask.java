@@ -112,7 +112,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 0,5-22/3 ? * *")
+    @Scheduled(cron = "0 0 5-23/3 ? * *")
     public void syncUpdateToursProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
