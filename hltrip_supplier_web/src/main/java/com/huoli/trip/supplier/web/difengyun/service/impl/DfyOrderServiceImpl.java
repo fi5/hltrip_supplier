@@ -202,13 +202,19 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     public BaseResponse<DfyToursOrderDetail> toursOrderDetail(BaseOrderRequest request){
 
-        DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
-        DfyBaseRequest<DfyOrderDetailRequest> dfyOrderDetailReq = new DfyBaseRequest<>(dfyOrderDetailBody);
-        dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
         try {
+            DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
+            dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
+            String tours_key = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+            String tours_secret = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+            DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+            dfyBaseRequest.setApiKey(tours_key);
+            dfyBaseRequest.setSecretKey(tours_secret);
+            dfyBaseRequest.setData(dfyOrderDetailBody);
+
             String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
             dfyOrderDetailBody.setAcctId(acctid);
-            DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyOrderDetailReq);
+            DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyBaseRequest);
             log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
 
             DfyToursOrderDetail detail = baseResult.getData();
