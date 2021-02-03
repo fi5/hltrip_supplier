@@ -202,14 +202,20 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     public BaseResponse<DfyToursOrderDetail> toursOrderDetail(BaseOrderRequest request){
 
-        DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
-        DfyBaseRequest<DfyOrderDetailRequest> dfyOrderDetailReq = new DfyBaseRequest<>(dfyOrderDetailBody);
-        dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
         try {
+            DfyOrderDetailRequest dfyOrderDetailBody=new DfyOrderDetailRequest();
+            dfyOrderDetailBody.setOrderId(request.getSupplierOrderId());
+            String tours_key = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+            String tours_secret = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+            DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+            dfyBaseRequest.setApiKey(tours_key);
+            dfyBaseRequest.setSecretKey(tours_secret);
+            dfyBaseRequest.setData(dfyOrderDetailBody);
+
             String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
             dfyOrderDetailBody.setAcctId(acctid);
-            DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyOrderDetailReq);
-            log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
+            DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyBaseRequest);
+            log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest));
 
             DfyToursOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
@@ -579,12 +585,17 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
         String email = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.email");
         String name = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.name");
+        String tours_key = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+        String tours_secret = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
         createOrderReq.setAcctId(acctid);
         createOrderReq.setContactTel(tel);
         createOrderReq.setContactEmail(email);
         createOrderReq.setContactName(name);
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setApiKey(tours_key);
+        dfyBaseRequest.setSecretKey(tours_secret);
         dfyBaseRequest.setData(createOrderReq);
-        return null;
+
+        return diFengYunClient.createToursOrder(dfyBaseRequest);
     }
 }
