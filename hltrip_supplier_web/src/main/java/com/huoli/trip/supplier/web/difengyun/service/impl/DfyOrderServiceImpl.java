@@ -581,13 +581,15 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         String name = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.name");
         String tours_key = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
         String tours_secret = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
-
         createOrderReq.setAcctId(acctid);
         createOrderReq.setContactTel(tel);
         createOrderReq.setContactEmail(email);
         createOrderReq.setContactName(name);
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
+        dfyBaseRequest.setApiKey(tours_key);
+        dfyBaseRequest.setSecretKey(tours_secret);
         dfyBaseRequest.setData(createOrderReq);
+
         return diFengYunClient.createToursOrder(dfyBaseRequest);
     }
 }
