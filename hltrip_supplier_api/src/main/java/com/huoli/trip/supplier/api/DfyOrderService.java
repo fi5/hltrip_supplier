@@ -76,4 +76,12 @@ public interface DfyOrderService {
 	 */
 	BaseResponse<DfyToursOrderDetail> toursOrderDetail(BaseOrderRequest request);
 
+	/**
+	 * 跟团游订单创建
+	 * @param createOrderReq
+	 * @return
+	 */
+	DfyBaseResult<DfyCreateOrderResponse> createToursOrder(DfyCreateToursOrderRequest createOrderReq);
+
+
 }

@@ -107,6 +107,11 @@ public class DiFengYunClientFallback implements FallbackFactory<IDiFengYunClient
             }
 
             @Override
+            public DfyBaseResult<DfyCreateOrderResponse> createToursOrder(DfyBaseRequest<DfyCreateToursOrderRequest> request) {
+                return null;
+            }
+
+            @Override
             public DfyBaseResult<DfyBillResponse> queryBill(@RequestBody DfyBaseRequest<DfyBillQueryDataReq> request){
                 return null;
             }
