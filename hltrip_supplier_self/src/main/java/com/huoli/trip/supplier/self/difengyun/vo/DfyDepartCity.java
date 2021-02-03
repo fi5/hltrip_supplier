@@ -16,10 +16,10 @@ public class DfyDepartCity {
     /**
      * 出发城市编码
      */
-    private String departCityCode;
+    private String code;
 
     /**
      * 出发城市名称
      */
-    private String departCityName;
+    private String name;
 }

@@ -210,4 +210,37 @@ public class DfyConstants {
 
     public static final int MODULE_TYPE_SHIP = 9;
 
+
+    /*
+    交通方式1 飞机，2 火车卧铺，3 火车硬卧，4 火车软座，5 火车硬座，6 汽车，7 邮轮，
+    8 火车，9 动车组，10 游船，11 高铁二等座，12 高铁一等座，13 高铁商务座，14 自行安排
+     */
+    public static final int TRAFFIC_TYPE_1 = 1;
+
+    public static final int TRAFFIC_TYPE_2 = 2;
+
+    public static final int TRAFFIC_TYPE_3 = 3;
+
+    public static final int TRAFFIC_TYPE_4 = 4;
+
+    public static final int TRAFFIC_TYPE_5 = 5;
+
+    public static final int TRAFFIC_TYPE_6 = 6;
+
+    public static final int TRAFFIC_TYPE_7 = 7;
+
+    public static final int TRAFFIC_TYPE_8 = 8;
+
+    public static final int TRAFFIC_TYPE_9 = 9;
+
+    public static final int TRAFFIC_TYPE_10 = 10;
+
+    public static final int TRAFFIC_TYPE_11 = 11;
+
+    public static final int TRAFFIC_TYPE_12 = 12;
+
+    public static final int TRAFFIC_TYPE_13 = 13;
+
+    public static final int TRAFFIC_TYPE_14 = 14;
+
 }

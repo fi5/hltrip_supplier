@@ -34,7 +34,7 @@ public class DfyCustomerCondition {
 
     @Getter
     @Setter
-    public class DfySubCondition {
+    public static class DfySubCondition {
         /**
          * 子条件name
          */
