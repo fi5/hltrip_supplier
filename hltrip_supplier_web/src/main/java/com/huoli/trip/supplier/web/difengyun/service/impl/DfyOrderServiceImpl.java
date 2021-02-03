@@ -585,6 +585,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         createOrderReq.setContactName(name);
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setData(createOrderReq);
-        return null;
+        return diFengYunClient.createToursOrder(dfyBaseRequest);
     }
 }
