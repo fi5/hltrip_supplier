@@ -88,7 +88,7 @@ public class DfyToursConverter {
         productPO.setSupplierProductId(productId);
         productPO.setCode(CommonUtils.genCodeBySupplier(productPO.getSupplierId(), productId, city));
         productPO.setName(dfyToursDetail.getProductName());
-        productPO.setBuyMin(99);
+        productPO.setBuyMin(1);
         productPO.setBuyMax(99);
         productPO.setMinProfitRate(dfyToursDetail.getMinProfitRate());
         productPO.setAvgProfitRate(dfyToursDetail.getAvgProfitRate());
