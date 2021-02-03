@@ -8,13 +8,13 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.ImageBase;
-import com.huoli.trip.common.vo.ToursRecommend;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyBookNotice;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyImage;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
+import com.huoli.trip.supplier.self.util.CommonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -35,7 +35,7 @@ public class DfyToursConverter {
 
     public static ProductItemPO convertToProductItemPO(DfyToursDetailResponse dfyToursDetail, String productId){
         ProductItemPO productItemPO = new ProductItemPO();
-        productItemPO.setItemType(ProductType.TRIP_GROUP.getCode());
+        productItemPO.setItemType(Constants.PRODUCT_ITEM_TYPE_TRIP);
         productItemPO.setStatus(Constants.PRODUCT_STATUS_VALID);
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_DFY_TOURS);
         productItemPO.setSupplierItemId(productId);
@@ -46,13 +46,13 @@ public class DfyToursConverter {
                     c.getName()).distinct().collect(Collectors.joining(","));
             String cityCode = dfyToursDetail.getDepartCitys().stream().map(c ->
                     c.getCode()).distinct().collect(Collectors.joining(","));
-            productItemPO.setOriCity(city);
+            productItemPO.setOriCity(CommonUtil.getCity(city));
             productItemPO.setOriCityCode(cityCode);
         }
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
             String city = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesCityName())).map(c ->
-                    c.getDesCityName()).distinct().collect(Collectors.joining(","));
+                    CommonUtil.getCity(c.getDesCityName())).distinct().collect(Collectors.joining(","));
             productItemPO.setCity(city);
             productItemPO.setDesCity(city);
             String province = dfyToursDetail.getDesPoiNameList().stream().filter(c ->

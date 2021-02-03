@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.*;
+import com.huoli.trip.supplier.self.util.CommonUtil;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -215,10 +216,7 @@ public class YcfConverter {
         productItemPO.setAddress(productItem.getAddress());
         productItemPO.setAppMainTitle(productItem.getAppMain());
         productItemPO.setAppSubTitle(productItem.getAppSub());
-        String city = productItem.getCity();
-        if(StringUtils.isNotBlank(city) && city.endsWith("市")){
-            productItemPO.setCity(city.substring(0, city.length() - 1));
-        }
+        productItemPO.setCity(CommonUtil.getCity(productItem.getCity()));
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));
         productItemPO.setCountry(productItem.getCountry());
