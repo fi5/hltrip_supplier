@@ -579,6 +579,9 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
         String email = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.email");
         String name = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.name");
+        String tours_key = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.key");
+        String tours_secret = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.tours.secret.key");
+
         createOrderReq.setAcctId(acctid);
         createOrderReq.setContactTel(tel);
         createOrderReq.setContactEmail(email);
