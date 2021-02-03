@@ -215,7 +215,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             String acctid = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.api.acctId");
             dfyOrderDetailBody.setAcctId(acctid);
             DfyBaseResult<DfyToursOrderDetail> baseResult = diFengYunClient.toursOrderDetail(dfyBaseRequest);
-            log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyOrderDetailReq));
+            log.info("dfy跟团游订单详情的返回:"+JSONObject.toJSONString(baseResult)+",请求参数:"+ JSON.toJSONString(dfyBaseRequest));
 
             DfyToursOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
