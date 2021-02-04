@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.ConfigConstants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderRefund;
 import com.huoli.trip.common.entity.TripPayOrder;
@@ -79,7 +80,7 @@ public class DfyCallBackService {
             	case 2:
                     return  handleTicket(tripOrder,orderDetailReq,payed,url);
 
-                case 3:
+                case 12://ProductType.TRIP_GROUP:
                     return  handleTours(tripOrder,orderDetailReq,payed,url);
 
             	default:
