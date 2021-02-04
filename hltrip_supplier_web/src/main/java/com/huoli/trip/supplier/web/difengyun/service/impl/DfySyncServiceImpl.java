@@ -370,10 +370,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productId);
             return;
         }
-        if (dfyToursDetail.getJourneyInfo() == null ||
-                dfyToursDetail.getJourneyInfo().getJourneyDescJson() == null ||
-                dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() == null ||
-                ListUtils.isEmpty(dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData().getData())) {
+        if (dfyToursDetail.getJourneyInfo() == null) {
             log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productId);
             return;
         }
@@ -417,10 +414,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
             productDao.updateByCode(product);
             syncToursPrice(productId, city);
-            HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), product.getCode());
-            hodometerDao.updateByCode(hodometerPO);
+            if(dfyToursDetail.getJourneyInfo().getJourneyDescJson() != null
+                    && dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() != null
+                    && dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData().getData() != null){
+                HodometerPO hodometerPO = DfyToursConverter.convertToHodometerPO(dfyToursDetail.getJourneyInfo(), product.getCode());
+                hodometerDao.updateByCode(hodometerPO);
+            }
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
-
         }
     }
 
