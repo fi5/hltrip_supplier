@@ -377,9 +377,9 @@ public class DfySyncServiceImpl implements DfySyncService {
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
             DfyPosition position = dfyToursDetail.getDesPoiNameList().stream().filter(d ->
                     StringUtils.isNotBlank(d.getDesCountryName())
-                            && StringUtils.equals("中国", d.getDesCountryName())).findAny().orElse(null);
+                            && !StringUtils.equals("中国", d.getDesCountryName())).findAny().orElse(null);
             if(position != null){
-                log.error("境外产品，跳过。。目的地国家={}", position.getDesCountryName());
+                log.error("境外产品，跳过。。包含境外目的地国家={}", position.getDesCountryName());
                 return;
             }
         }
