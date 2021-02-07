@@ -53,11 +53,15 @@ public class DfyToursConverter {
             String city = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesCityName())).map(c ->
                     CommonUtil.getCity(c.getDesCityName())).distinct().collect(Collectors.joining(","));
-            productItemPO.setCity(city);
-            productItemPO.setDesCity(city);
             String province = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesProvinceName())).map(c ->
                     c.getDesProvinceName()).distinct().collect(Collectors.joining(","));
+            // 直辖市名字有可能会放在省字段上的
+            if(StringUtils.isBlank(city)){
+                city = CommonUtil.getCity(province);
+            }
+            productItemPO.setCity(city);
+            productItemPO.setDesCity(city);
             productItemPO.setProvince(province);
         }
 
