@@ -374,6 +374,15 @@ public class DfySyncServiceImpl implements DfySyncService {
             log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productId);
             return;
         }
+        if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
+            DfyPosition position = dfyToursDetail.getDesPoiNameList().stream().filter(d ->
+                    StringUtils.isNotBlank(d.getDesCountryName())
+                            && StringUtils.equals("中国", d.getDesCountryName())).findAny().orElse(null);
+            if(position != null){
+                log.error("境外产品，跳过。。目的地国家={}", position.getDesCountryName());
+                return;
+            }
+        }
         ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productId);
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
         if (productItemPO == null) {
