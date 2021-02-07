@@ -212,6 +212,10 @@ public class DfyJourneyDetail {
          * 房间
          */
         private List<ModuleHotelRoom> room;
+        /**
+         * 说明
+         */
+        private String description;
     }
 
     @Getter

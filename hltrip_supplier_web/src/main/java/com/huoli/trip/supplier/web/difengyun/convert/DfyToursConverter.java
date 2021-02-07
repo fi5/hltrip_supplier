@@ -234,14 +234,13 @@ public class DfyToursConverter {
                 }
                 if(type == DfyConstants.MODULE_TYPE_HOTEL
                         && ListUtils.isNotEmpty(journeyModule.getHotelList())){
-                    for (DfyJourneyDetail.ModuleHotel hotel : journeyModule.getHotelList()) {
+                    String name = journeyModule.getHotelList().stream().map(m -> m.getTitle()).collect(Collectors.joining(","));
                         Route route = new Route();
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
-                        route.setName(hotel.getTitle());
-                        route.setTitle(hotel.getTitle());
-                        // todo room 可能需要加个属性
+                        route.setName(name);
+                        route.setTitle(name);
+                        route.setDescribe(journeyModule.getDescription());
                         routes.add(route);
-                    }
                 }
                 if(type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null){
                     Route route = new Route();
