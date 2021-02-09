@@ -53,11 +53,15 @@ public class DfyToursConverter {
             String city = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesCityName())).map(c ->
                     CommonUtil.getCity(c.getDesCityName())).distinct().collect(Collectors.joining(","));
-            productItemPO.setCity(city);
-            productItemPO.setDesCity(city);
             String province = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesProvinceName())).map(c ->
                     c.getDesProvinceName()).distinct().collect(Collectors.joining(","));
+            // 直辖市名字有可能会放在省字段上的
+            if(StringUtils.isBlank(city)){
+                city = CommonUtil.getCity(province);
+            }
+            productItemPO.setCity(city);
+            productItemPO.setDesCity(city);
             productItemPO.setProvince(province);
         }
 
@@ -220,7 +224,7 @@ public class DfyToursConverter {
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode());
                         route.setName(scenic.getTitle());
                         route.setTitle(scenic.getTitle());
-                        route.setDuration(scenic.getTimes() == null ? null : scenic.getTimes().toString());
+                        route.setDuration(scenic.getTimes() == null || scenic.getTimes() <= 0 ? null : scenic.getTimes().toString());
                         if(ListUtils.isNotEmpty(scenic.getPicture())){
                             route.setImages(convertToImageBase(scenic.getPicture()));
                         }
@@ -230,21 +234,21 @@ public class DfyToursConverter {
                 }
                 if(type == DfyConstants.MODULE_TYPE_HOTEL
                         && ListUtils.isNotEmpty(journeyModule.getHotelList())){
-                    for (DfyJourneyDetail.ModuleHotel hotel : journeyModule.getHotelList()) {
+                    String name = journeyModule.getHotelList().stream().map(m -> m.getTitle()).collect(Collectors.joining(","));
                         Route route = new Route();
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
-                        route.setName(hotel.getTitle());
-                        route.setTitle(hotel.getTitle());
-                        // todo room 可能需要加个属性
+                        route.setName(name);
+                        route.setTitle(name);
+                        route.setDescribe(journeyModule.getDescription());
                         routes.add(route);
-                    }
                 }
                 if(type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null){
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode());
                     route.setDeparture(journeyModule.getTraffic().getFrom());
                     route.setArrival(journeyModule.getTraffic().getTo());
-                    route.setDuration(journeyModule.getTraffic().getTimes() == null ? null : journeyModule.getTraffic().getTimes().toString());
+                    route.setDuration(journeyModule.getTraffic().getTimes() == null
+                            || journeyModule.getTraffic().getTimes() <= 0 ? null : journeyModule.getTraffic().getTimes().toString());
                     routes.add(route);
                 }
                 if(type == DfyConstants.MODULE_TYPE_FOOD && journeyModule.getFood() != null){
@@ -252,14 +256,15 @@ public class DfyToursConverter {
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode());
                     route.setTitle(journeyModule.getFood().getTitle());
                     route.setName(journeyModule.getFood().getTitle());
-                    route.setDuration(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
+                    route.setDuration(journeyModule.getFood().getTimes() == null
+                            || journeyModule.getFood().getTimes() <= 0 ? null : journeyModule.getFood().getTimes().toString());
                     routes.add(route);
                 }
                 if(type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())){
                     for (DfyJourneyDetail.ModuleShop shop : journeyModule.getShopList()) {
                         Route route = new Route();
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode());
-                        route.setDuration(shop.getTimes() == null ? null : shop.getTimes().toString());
+                        route.setDuration(shop.getTimes() == null || shop.getTimes() <= 0 ? null : shop.getTimes().toString());
                         route.setTitle(shop.getTitle());
                         route.setBusinessProducts(shop.getProduct());
                         route.setDescribe(shop.getInstruction());
@@ -270,7 +275,8 @@ public class DfyToursConverter {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode());
                     route.setTitle(journeyModule.getActivity().getTitle());
-                    route.setDuration(journeyModule.getActivity().getTimes() == null ? null : journeyModule.getActivity().getTimes().toString());
+                    route.setDuration(journeyModule.getActivity().getTimes() == null
+                            || journeyModule.getActivity().getTimes() <= 0 ? null : journeyModule.getActivity().getTimes().toString());
                     routes.add(route);
                 }
                 if(type == DfyConstants.MODULE_TYPE_REMINDER && journeyModule.getRemind() != null){
