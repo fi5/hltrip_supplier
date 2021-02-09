@@ -220,7 +220,15 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyToursOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
-                if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
+
+                switch (detail.getOrderInfo().getStatus()) {
+                    case "出游中":
+                    case "出游归来":
+                        detail.setOrderStatus(detail.getOrderInfo().getStatus());
+                        break;
+                }
+
+                if(StringUtils.equals(detail.getOrderStatus(),"已完成") || StringUtils.equals(detail.getOrderStatus(),"已确认") ){
                     switch (detail.getOrderInfo().getStatus()){
                         case "核损中":
                         case "取消订单核损中":
@@ -476,6 +484,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         billQueryDataReq.setEndTime(DateTimeUtil.format(DateTimeUtil.addDay(createDate,10),DateTimeUtil.YYYYMMDDHHmmss));
 
         DfyBaseResult<DfyBillResponse> dfyBillResponseDfyBaseResult = queryBill(billQueryDataReq);
+        boolean findFlag=false;//如跟团游未查到这个账单也走退款通知.
         if(dfyBillResponseDfyBaseResult.getData()!=null && CollectionUtils.isNotEmpty(dfyBillResponseDfyBaseResult.getData().getRows())){
             TripOrder tripOrder = tripOrderMapper.getChannelByOrderId(item.getOrderId());
             log.info("processNotify这时的:"+JSONObject.toJSONString(tripOrder));
@@ -487,7 +496,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                 if(!StringUtils.equals(tripOrder.getOutOrderId(),bill.getBizOrderId())) {//单号不一样则跳过{
                     continue;
                 }
-
+                findFlag=true;
 
                 String url= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
                 RefundNoticeReq req=new RefundNoticeReq();
