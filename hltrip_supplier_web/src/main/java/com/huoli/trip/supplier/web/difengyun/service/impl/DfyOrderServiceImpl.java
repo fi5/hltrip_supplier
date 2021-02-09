@@ -240,30 +240,30 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
                         default://大状态是完成,排除取消流程中
                             try {
-                                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
-                                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
-                                if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
-                                    detail.setOrderStatus("申请退款中");
-                                    log.info("toursOrderDetail进入写退款失败这:"+tripOrder.getOrderId());
-                                    TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
-                                    if(dbRefundNotify!=null){
-                                        dbRefundNotify.setStatus(2);
-                                        dbRefundNotify.setRefundStatus(-1);
-                                        tripOrderRefundMapper.updateRefundNotify(dbRefundNotify);
-                                    }
-
-                                    RefundNoticeReq req=new RefundNoticeReq();
-                                    req.setPartnerOrderId(tripOrder.getOrderId());
-                                    req.setRefundFrom(2);
-                                    req.setRefundPrice(new BigDecimal(0));
-                                    req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
-                                    req.setSource("dfy");
-                                    req.setRefundStatus(-1);
-                                    String refundUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
-                                    log.info("退款失败doRefund请求的地址:"+refundUrl+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+tripOrder.getOrderId());
-                                    String res2 = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
-                                    log.info("中台refundNotice返回:"+res2);
-                                }
+//                                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
+//                                TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
+//                                if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
+//                                    detail.setOrderStatus("申请退款中");
+//                                    log.info("toursOrderDetail进入写退款失败这:"+tripOrder.getOrderId());
+//                                    TripRefundNotify dbRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(tripOrder.getOrderId());
+//                                    if(dbRefundNotify!=null){
+//                                        dbRefundNotify.setStatus(2);
+//                                        dbRefundNotify.setRefundStatus(-1);
+//                                        tripOrderRefundMapper.updateRefundNotify(dbRefundNotify);
+//                                    }
+//
+//                                    RefundNoticeReq req=new RefundNoticeReq();
+//                                    req.setPartnerOrderId(tripOrder.getOrderId());
+//                                    req.setRefundFrom(2);
+//                                    req.setRefundPrice(new BigDecimal(0));
+//                                    req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
+//                                    req.setSource("dfy");
+//                                    req.setRefundStatus(-1);
+//                                    String refundUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
+//                                    log.info("退款失败doRefund请求的地址:"+refundUrl+",参数:"+ JSONObject.toJSONString(req)+",orderId:"+tripOrder.getOrderId());
+//                                    String res2 = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
+//                                    log.info("中台refundNotice返回:"+res2);
+//                                }
                             } catch (Exception e) {
                                 log.error("信息{}",e);
                             }
