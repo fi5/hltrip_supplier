@@ -141,8 +141,11 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     if(verifyOrderRes!=null&& verifyOrderRes.isSuccess()){
                         DfyVerifyOrderResponse verifyData = verifyOrderRes.getData();
                         log.info("使用数量:"+verifyData.getTotalCount()+","+verifyData.getUsedCount());
-                        if(verifyData.getTotalCount()>0 && verifyData.getTotalCount()== verifyData.getUsedCount()){
-                            detail.setOrderStatus("已消费");
+                        if(verifyData.getTotalCount()>0 ){
+                            if(verifyData.getTotalCount()== verifyData.getUsedCount())
+                                   detail.setOrderStatus("已消费");
+                            if(verifyData.getTotalCount()> verifyData.getUsedCount())
+                                detail.setOrderStatus("已完成");
                         }
                     }
                 }
