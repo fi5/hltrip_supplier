@@ -84,4 +84,7 @@ public interface DfyOrderService {
 	DfyBaseResult<DfyCreateOrderResponse> createToursOrder(DfyCreateToursOrderRequest createOrderReq);
 
 
+	DfyBaseResult<DfyVerifyOrderResponse> verifyOrder(DfyBaseRequest<DfyOrderDetailRequest> request);
+
+
 }

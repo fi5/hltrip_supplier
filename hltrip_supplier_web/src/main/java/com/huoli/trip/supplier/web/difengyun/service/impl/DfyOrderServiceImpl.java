@@ -81,6 +81,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
             DfyOrderDetail detail = baseResult.getData();
             if(detail!=null&&detail.getOrderInfo()!=null){
                 detail.setOrderId(detail.getOrderInfo().getOrderId());
+                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                 if(StringUtils.equals(detail.getOrderStatus(),"已完成")){
                     switch (detail.getOrderInfo().getStatusDesc()){
                         case "取消订单核损中":
@@ -98,7 +99,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
 
                             try {
-                                TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
                                 if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0){//写退款失败
                                     detail.setOrderStatus("申请退款中");
@@ -133,8 +133,18 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     }
 
                 }
+                //查一下核销
+                if(tripOrder!=null&&StringUtils.isNotBlank(tripOrder.getBeginDate())&
+                        DateTimeUtil.formatDate(new Date()).compareTo(tripOrder.getBeginDate())>=0){
+                    DfyBaseResult<DfyVerifyOrderResponse> verifyOrderRes = verifyOrder(dfyOrderDetailReq);
+                    if(verifyOrderRes!=null&& verifyOrderRes.isSuccess()){
+                        DfyVerifyOrderResponse verifyData = verifyOrderRes.getData();
+                        if(verifyData.getTotalCount()>0 && verifyData.getTotalCount()== verifyData.getUsedCount()){
+                            detail.setOrderStatus("已消费");
+                        }
+                    }
+                }
                 if(StringUtils.equals(detail.getOrderStatus(),"已取消")){
-                    TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                     List<TripPayOrder> orderPayList = tripOrderMapper.getOrderPayList(tripOrder.getOrderId());
                     boolean payed=false;
                     for(TripPayOrder payOrder:orderPayList){
@@ -609,5 +619,18 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         dfyBaseRequest.setData(createOrderReq);
 
         return diFengYunClient.createToursOrder(dfyBaseRequest);
+    }
+
+    @Override
+    public DfyBaseResult<DfyVerifyOrderResponse> verifyOrder(DfyBaseRequest<DfyOrderDetailRequest> request) {
+        try {
+            DfyBaseResult<DfyVerifyOrderResponse> dfyVerifyOrderResponseDfyBaseResult = diFengYunClient.verifyOrder(request);
+            log.info("这里的返回:"+JSONObject.toJSONString(dfyVerifyOrderResponseDfyBaseResult));
+            return dfyVerifyOrderResponseDfyBaseResult;
+        } catch (Exception e) {
+        	log.error("信息{}",e);
+            return null;
+        }
+
     }
 }
