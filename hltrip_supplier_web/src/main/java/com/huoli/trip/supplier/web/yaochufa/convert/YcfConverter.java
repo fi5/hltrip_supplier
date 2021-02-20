@@ -16,6 +16,8 @@ import org.jsoup.select.Elements;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -328,6 +330,12 @@ public class YcfConverter {
                 && itemFeature.getType() == YcfConstants.POI_FEATURE_BOOK_NOTE
                 && StringUtils.isNotBlank(itemFeature.getDetail())){
             itemFeaturePO.setDetail(format(itemFeature.getDetail()));
+        }
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(itemFeaturePO.getDetail());
+        // 没有中文就舍掉
+        if (!m.find()) {
+            return null;
         }
         itemFeaturePO.setType(itemFeature.getType());
         return itemFeaturePO;

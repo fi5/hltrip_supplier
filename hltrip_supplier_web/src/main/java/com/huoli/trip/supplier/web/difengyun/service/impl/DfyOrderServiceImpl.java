@@ -89,10 +89,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                         case "取消订单核损已反馈":
                             detail.setOrderStatus("申请退款中");
                             break;
+                        case "使用后（点评）":
+                            detail.setOrderStatus("已消费");
+                            break;
                         case "使用前":
                         case "待通知":
                         case "通知中":
-                        case "使用后（点评）":
+
 
                             try {
                                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
