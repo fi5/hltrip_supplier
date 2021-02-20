@@ -133,7 +133,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     }
 
                 }
-                log.info(tripOrder.getBeginDate()+",这块的:"+DateTimeUtil.formatDate(new Date())+","+DateTimeUtil.formatDate(new Date()).compareTo(tripOrder.getBeginDate()));
+//                log.info(tripOrder.getBeginDate()+",这块的:"+DateTimeUtil.formatDate(new Date())+","+DateTimeUtil.formatDate(new Date()).compareTo(tripOrder.getBeginDate()));
                 //查一下核销
                 if(tripOrder!=null&&StringUtils.isNotBlank(tripOrder.getBeginDate())&
                         DateTimeUtil.formatDate(new Date()).compareTo(tripOrder.getBeginDate())>=0){
