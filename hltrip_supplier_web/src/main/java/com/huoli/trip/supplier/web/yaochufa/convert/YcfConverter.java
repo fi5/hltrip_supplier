@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.*;
+import com.huoli.trip.supplier.self.util.CommonUtil;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.jsoup.select.Elements;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -215,10 +218,7 @@ public class YcfConverter {
         productItemPO.setAddress(productItem.getAddress());
         productItemPO.setAppMainTitle(productItem.getAppMain());
         productItemPO.setAppSubTitle(productItem.getAppSub());
-        String city = productItem.getCity();
-        if(StringUtils.isNotBlank(city) && city.endsWith("市")){
-            productItemPO.setCity(city.substring(0, city.length() - 1));
-        }
+        productItemPO.setCity(CommonUtil.getCity(productItem.getCity()));
         productItemPO.setSupplierId(Constants.SUPPLIER_CODE_YCF);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productItem.getPoiID()));
         productItemPO.setCountry(productItem.getCountry());
@@ -330,6 +330,12 @@ public class YcfConverter {
                 && itemFeature.getType() == YcfConstants.POI_FEATURE_BOOK_NOTE
                 && StringUtils.isNotBlank(itemFeature.getDetail())){
             itemFeaturePO.setDetail(format(itemFeature.getDetail()));
+        }
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(itemFeaturePO.getDetail());
+        // 没有中文就舍掉
+        if (!m.find()) {
+            return null;
         }
         itemFeaturePO.setType(itemFeature.getType());
         return itemFeaturePO;

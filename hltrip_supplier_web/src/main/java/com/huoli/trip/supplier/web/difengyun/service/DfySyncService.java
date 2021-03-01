@@ -2,8 +2,12 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyProductInfo;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursCalendarResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursDetailResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursListResponse;
 
 import java.util.List;
 
@@ -54,5 +58,54 @@ public interface DfySyncService {
      * 获取所欲渠道产品码
      * @return
      */
-    List<ProductPO> getSupplierProductIds();
+    List<ProductPO> getSupplierProductIds(Integer productType);
+
+    /**
+     * 获取跟团游列表
+     * @param request
+     * @return
+     */
+    DfyBaseResult<DfyToursListResponse> getToursList(DfyToursListRequest request);
+
+    /**
+     * 获取跟团游详情
+     * @param productId
+     * @return
+     */
+    DfyBaseResult<DfyToursDetailResponse> getToursDetail(String productId);
+
+    /**
+     * 获取跟团游多程详情
+     * @param productId
+     * @return
+     */
+    DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(String productId);
+
+    /**
+     * 获取价格日历
+     * @param request
+     * @return
+     */
+    DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(DfyToursCalendarRequest request);
+
+    /**
+     * 同步跟团游列表
+     * @param request
+     * @return
+     */
+    boolean syncToursList(DfyToursListRequest request);
+
+    /**
+     * 同步跟团游产品
+     * @param productId
+     * @param syncMode
+     */
+    void syncToursDetail(String productId, int syncMode);
+
+    /**
+     * 同步跟团游价格
+     * @param supplierProductId
+     * @param city
+     */
+    void syncToursPrice(String supplierProductId, String city);
 }

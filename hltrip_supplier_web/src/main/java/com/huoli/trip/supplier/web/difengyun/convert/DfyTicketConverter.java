@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * 创建日期：2020/12/9<br>
  */
 @Slf4j
-public class DfyConverter {
+public class DfyTicketConverter {
 
     public static ProductItemPO convertToProductItemPO(DfyScenicDetail scenicDetail){
         ProductItemPO productItemPO = new ProductItemPO();
@@ -251,7 +251,6 @@ public class DfyConverter {
                 }
                 priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(p.getDepartDate())));
                 if(StringUtils.isNotBlank(p.getSalePrice())){
-                    // todo 加价计算公式
                     priceInfoPO.setSalePrice(new BigDecimal(p.getSalePrice()));
                     priceInfoPO.setSettlePrice(priceInfoPO.getSalePrice());
                 }

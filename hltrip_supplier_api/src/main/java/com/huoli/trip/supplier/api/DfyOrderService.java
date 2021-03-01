@@ -4,6 +4,7 @@ import com.huoli.trip.common.entity.TripRefundNotify;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyToursOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
@@ -16,7 +17,7 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 public interface DfyOrderService {
 
 	/**
-	 * 迪风云订单相关信息
+	 * 迪风云门票订单相关信息
 	 * @param request
 	 * @return
 	 */
@@ -66,5 +67,24 @@ public interface DfyOrderService {
 	 */
 	void processNotify(TripRefundNotify item);
 	DfyBaseResult<DfyOrderStatusResponse> orderStatus(DfyOrderStatusRequest request);
+
+
+	/**
+	 * 迪风云跟团游戏订单详情
+	 * @param request
+	 * @return
+	 */
+	BaseResponse<DfyToursOrderDetail> toursOrderDetail(BaseOrderRequest request);
+
+	/**
+	 * 跟团游订单创建
+	 * @param createOrderReq
+	 * @return
+	 */
+	DfyBaseResult<DfyCreateOrderResponse> createToursOrder(DfyCreateToursOrderRequest createOrderReq);
+
+
+	DfyBaseResult<DfyVerifyOrderResponse> verifyOrder(DfyBaseRequest<DfyOrderDetailRequest> request);
+
 
 }

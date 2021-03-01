@@ -74,6 +74,21 @@ public interface ProductDao {
      * @param supplierId
      * @return
      */
-    List<ProductPO> getSupplierProductIds(String supplierId);
+    List<ProductPO> getSupplierProductIds(String supplierId, Integer productType);
+
+    /**
+     * 根据编码模糊匹配获取产品
+     * @param code
+     * @return
+     */
+    List<ProductPO> getByRegexCode(String code);
+
+    /**
+     * 根据渠道和渠道产品id获取产品
+     * @param supplierProductId
+     * @param supplierId
+     * @return
+     */
+    List<ProductPO> getBySupplierProductIdAndSupplierId(String supplierProductId, String supplierId);
 
 }

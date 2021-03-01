@@ -5,10 +5,8 @@ import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DfyOrderService;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBillQueryDataReq;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyProductNoticeRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBillResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
@@ -105,6 +103,29 @@ public class DfyTestController {
     @PostMapping(path = "/sync/update/product")
     DfyBaseResult syncUpdateProduct() {
         dfySyncTask.syncUpdateProduct();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/list")
+    DfyBaseResult syncToursList(@RequestBody DfyToursListRequest request) {
+        return DfyBaseResult.success(dfySyncService.syncToursList(request));
+    }
+
+    @PostMapping(path = "/sync/tours/detail")
+    DfyBaseResult syncToursDetail(@RequestBody String productId) {
+        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/multi/detail")
+    DfyBaseResult syncToursMultiDetail(@RequestBody String productId) {
+        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/price")
+    DfyBaseResult syncToursPrice(@RequestBody DfyToursCalendarRequest request) {
+        dfySyncService.syncToursPrice(String.valueOf(request.getProductId()), String.valueOf(request.getDepartCityCode()));
         return DfyBaseResult.success();
     }
 

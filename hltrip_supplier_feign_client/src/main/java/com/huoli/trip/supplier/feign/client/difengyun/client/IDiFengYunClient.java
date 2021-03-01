@@ -5,12 +5,15 @@ import com.huoli.trip.supplier.feign.client.difengyun.interceptor.DiFengYunFeign
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyToursOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -50,7 +53,39 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyTicketDetail> getTicketDetail(@RequestBody DfyBaseRequest<DfyTicketDetailRequest> request);
 
     /**
-     * 获取订单详情
+     * 获取跟团游列表
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/search")
+    DfyBaseResult<DfyToursListResponse> getToursList(@RequestBody DfyBaseRequest<DfyToursListRequest> request);
+
+    /**
+     * 获取跟团游详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/detail")
+    DfyBaseResult<DfyToursDetailResponse> getToursDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
+
+    /**
+     * 获取跟团游详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/multiJourneyInfo")
+    DfyBaseResult<DfyToursDetailResponse> getToursMultiDetail(@RequestBody DfyBaseRequest<DfyToursDetailRequest> request);
+
+    /**
+     * 获取跟团游价格日历
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/priceStockCalendar")
+    DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(@RequestBody DfyBaseRequest<DfyToursCalendarRequest> request);
+
+    /**
+     * 获取门票订单详情
      * @param request
      * @return
      */
@@ -58,7 +93,15 @@ public interface IDiFengYunClient {
     DfyBaseResult<DfyOrderDetail> orderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
 
     /**
-     * 创建订单
+     * 获取跟团游订单详情
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/orderDetail")
+    DfyBaseResult<DfyToursOrderDetail> toursOrderDetail(@RequestBody DfyBaseRequest<DfyOrderDetailRequest> request);
+
+    /**
+     * 查询账单
      * @param request
      * @return
      */
@@ -106,5 +149,19 @@ public interface IDiFengYunClient {
     @RequestMapping(method = RequestMethod.POST,path = "/Ticket/submitOrder")
     DfyBaseResult<DfySubmitOrderResponse> submitOrder(@RequestBody DfyBaseRequest<DfySubmitOrderRequest> request);
 
+    /**
+     * 创建跟团游订单
+     * @param request
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Tours/createOrder")
+    DfyBaseResult<DfyCreateOrderResponse> createToursOrder(@RequestBody DfyBaseRequest<DfyCreateToursOrderRequest> request);
 
+	/**
+     * 核销查询接口
+     * @param dfyBaseRequest
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/Ticket/verifyOrder")
+    DfyBaseResult<DfyVerifyOrderResponse> verifyOrder(DfyBaseRequest<DfyOrderDetailRequest> request);
 }

@@ -28,7 +28,7 @@ public class DfyProductReceiveController {
     private DfySyncService dfySyncService;
 
     /**
-     * 接收产品更新通知
+     * 接收产品更新通知（只有跟团游，门票没有通知）
      * @param request
      * @return
      */
