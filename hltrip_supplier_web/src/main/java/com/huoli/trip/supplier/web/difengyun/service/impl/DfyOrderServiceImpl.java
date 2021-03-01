@@ -293,13 +293,13 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         String tel = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_DIFENGYUN,"difengyun.content.phone");
         createOrderReq.setAcctId(acctid);
         createOrderReq.setTraceId(null);
-        Contact contact = createOrderReq.getContact();
+       /* Contact contact = createOrderReq.getContact();
         if(contact != null){
             final String contactTel = contact.getContactTel();
             if(StringUtils.isNotEmpty(contactTel) && StringUtils.isNotEmpty(tel)){
                 contact.setContactTel(tel);
             }
-        }
+        }*/
         createOrderReq.setAcctId(acctid);
         createOrderReq.setTraceId(null);
         dfyBaseRequest.setData(createOrderReq);
