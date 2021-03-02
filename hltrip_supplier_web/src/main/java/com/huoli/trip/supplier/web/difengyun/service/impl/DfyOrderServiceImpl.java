@@ -618,6 +618,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         createOrderReq.setContactTel(tel);
         createOrderReq.setContactEmail(email);
         createOrderReq.setContactName(name);
+        createOrderReq.setTraceId(null);
         DfyBaseRequest dfyBaseRequest = new DfyBaseRequest();
         dfyBaseRequest.setApiKey(tours_key);
         dfyBaseRequest.setSecretKey(tours_secret);
