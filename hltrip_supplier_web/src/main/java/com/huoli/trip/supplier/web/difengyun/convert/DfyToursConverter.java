@@ -228,7 +228,9 @@ public class DfyToursConverter {
                         if(ListUtils.isNotEmpty(scenic.getPicture())){
                             route.setImages(convertToImageBase(scenic.getPicture()));
                         }
-                        route.setDescribe(scenic.getContent());
+                        if(StringUtils.isNotBlank(scenic.getContent())){
+                            route.setDescribe(scenic.getContent().replace("<pre>", "").replace("</pre>", ""));
+                        }
                         routes.add(route);
                     }
                 }
@@ -239,7 +241,9 @@ public class DfyToursConverter {
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
                         route.setName(name);
                         route.setTitle(name);
-                        route.setDescribe(journeyModule.getDescription());
+                        if(StringUtils.isNotBlank(journeyModule.getDescription())){
+                            route.setDescribe(journeyModule.getDescription().replace("<pre>", "").replace("</pre>", ""));
+                        }
                         routes.add(route);
                 }
                 if(type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null){
@@ -267,7 +271,9 @@ public class DfyToursConverter {
                         route.setDuration(shop.getTimes() == null || shop.getTimes() <= 0 ? null : shop.getTimes().toString());
                         route.setTitle(shop.getTitle());
                         route.setBusinessProducts(shop.getProduct());
-                        route.setDescribe(shop.getInstruction());
+                        if(StringUtils.isNotBlank(shop.getInstruction())){
+                            route.setDescribe(shop.getInstruction().replace("<pre>", "").replace("</pre>", ""));
+                        }
                         routes.add(route);
                     }
                 }
@@ -283,7 +289,9 @@ public class DfyToursConverter {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode());
                     route.setTitle(journeyModule.getRemind().getType());
-                    route.setDescribe(journeyModule.getRemind().getContent() == null ? null : journeyModule.getRemind().getContent());
+                    if(StringUtils.isNotBlank(journeyModule.getRemind().getContent())){
+                        route.setDescribe(journeyModule.getRemind().getContent().replace("<pre>", "").replace("</pre>", ""));
+                    }
                     routes.add(route);
                 }
             }
