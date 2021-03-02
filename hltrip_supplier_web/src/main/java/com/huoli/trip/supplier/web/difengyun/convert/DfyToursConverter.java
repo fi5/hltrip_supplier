@@ -119,15 +119,14 @@ public class DfyToursConverter {
         productPO.setIncludeDesc(journeyInfo.getCostInclude());
         productPO.setExcludeDesc(journeyInfo.getCostExclude());
         if(journeyInfo.getBookNotice() != null){
-            String bookNotice = buildBookNotice(journeyInfo);
-            if(StringUtils.isNotBlank(bookNotice)){
-                productPO.setBookDesc(bookNotice);
-            }
+//            String bookNotice = buildBookNotice(journeyInfo);
+//            if(StringUtils.isNotBlank(bookNotice)){
+//                productPO.setBookDesc(bookNotice);
+//            }
+            List<DescriptionPO> descriptionPOs = buildBookNoticeList(journeyInfo);
+            productPO.setBookNoticeList(descriptionPOs);
             if(ListUtils.isNotEmpty(journeyInfo.getBookNotice().getDiffPrice())){
-                StringBuffer sb = new StringBuffer();
-                sb.append(productPO.getIncludeDesc()).append("<br>")
-                        .append("差价说明：").append(String.join("<br>", journeyInfo.getBookNotice().getDiffPrice()));
-                productPO.setIncludeDesc(sb.toString());
+                productPO.setDiffPriceDesc(String.join("<br>", journeyInfo.getBookNotice().getDiffPrice()));
             }
         }
         if(ListUtils.isNotEmpty(journeyInfo.getImportantAddition())){
@@ -382,6 +381,97 @@ public class DfyToursConverter {
                     .append("<br>");
         }
         return sb.toString();
+    }
+
+    public static List<DescriptionPO> buildBookNoticeList(DfyJourneyInfo journeyInfo){
+        DfyBookNotice dfyBookNotice = journeyInfo.getBookNotice();
+        List<DescriptionPO> descList = Lists.newArrayList();
+        /*
+        交通（标题：交通）、住宿（标题：住宿）、游览（标题：游览）、
+        购物（标题：购物）、出团通知（标题：出团）、意见反馈（标题：意见）、
+        活动说明（标题：说明）、附加预订须知（标题：附加）、温馨提示（标题：提示）、
+        特殊信息+childStdInfo（标题：特殊信息）、注意事项（标题：注意事项）、
+        手动须知（标题：其他）、团队用餐（标题：用餐）
+         */
+        if(ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("交通须知");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTrafficInfos()));
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getAccInfos())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("住宿须知");
+            descriptionPO.setContent(dfyBookNotice.getAccInfos());
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getMealInfos())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("用餐须知");
+            descriptionPO.setContent(dfyBookNotice.getMealInfos());
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getShopping())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("购物须知");
+            descriptionPO.setContent(dfyBookNotice.getShopping());
+            descList.add(descriptionPO);
+        }
+        if(ListUtils.isNotEmpty(dfyBookNotice.getTour())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("游览须知");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTour()));
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("出行通知");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTour()));
+            descList.add(descriptionPO);
+        }
+        if(ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("特殊信息");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getSpecialTerms()));
+            descList.add(descriptionPO);
+        }
+        if(ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("注意事项");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getAbroadNotice()));
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("注意事项");
+            descriptionPO.setContent(dfyBookNotice.getWarmAttention());
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getManualAttention())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("其他说明");
+            descriptionPO.setContent(dfyBookNotice.getManualAttention());
+            descList.add(descriptionPO);
+        }
+        if(StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("意见反馈");
+            descriptionPO.setContent(dfyBookNotice.getSuggestionFeedback());
+            descList.add(descriptionPO);
+        }
+        if(ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("活动说明");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getActivityArrangment()));
+            descList.add(descriptionPO);
+        }
+        if(ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())){
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("附加预订须知");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getOrderAttentions()));
+            descList.add(descriptionPO);
+        }
+        return descList;
     }
 
     public static Integer convertToTraffic(Integer dfyTraffic){

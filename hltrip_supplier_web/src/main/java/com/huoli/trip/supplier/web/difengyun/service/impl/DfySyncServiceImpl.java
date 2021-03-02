@@ -405,12 +405,12 @@ public class DfySyncServiceImpl implements DfySyncService {
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            // 笛风云跟团游默认审核通过
+            productItem.setAuditStatus(1);
         }
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
         productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-        // 笛风云跟团游默认审核通过
-        productItem.setAuditStatus(1);
         productItemDao.updateByCode(productItem);
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));

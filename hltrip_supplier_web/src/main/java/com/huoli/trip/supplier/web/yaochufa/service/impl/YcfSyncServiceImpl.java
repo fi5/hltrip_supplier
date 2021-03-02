@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
-import com.huoli.trip.common.entity.PriceInfoPO;
-import com.huoli.trip.common.entity.PricePO;
-import com.huoli.trip.common.entity.ProductItemPO;
-import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -23,6 +20,7 @@ import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
+import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +57,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
+
+    @Autowired
+    private CommonService commonService;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -122,6 +123,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                productPO.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
+                BackChannelEntry backChannelEntry = commonService.getSupplierById(productPO.getSupplierId());
+                if(backChannelEntry == null
+                        || backChannelEntry.getStatus() == null
+                        || backChannelEntry.getStatus() != 1){
+                    productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                }
             } else {
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
             }
@@ -160,6 +169,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                        productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     } else {
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                     }
