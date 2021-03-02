@@ -88,7 +88,9 @@ public class ProductDaoImpl implements ProductDao {
         SortOperation priceSort = Aggregation.sort(Sort.Direction.ASC, "priceCalendar.priceInfos.salePrice");
         // 查询条件
         Criteria criteria = Criteria.where("mainItemCode").is(itemId)
-                .and("status").is(1)
+                .and("status").is(Constants.PRODUCT_STATUS_VALID)
+                .and("supplierStatus").is(Constants.SUPPLIER_STATUS_OPEN)
+                .and("verifyStatus").is(Constants.VERIFY_STATUS_PASSING)
                 .and("remove").is(0)
                 .and("priceCalendar.priceInfos.stock").gt(0)
                 .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())))
@@ -116,6 +118,8 @@ public class ProductDaoImpl implements ProductDao {
                 Fields.field("code"),
                 Fields.field("name"),
                 Fields.field("status"),
+                Fields.field("supplierStatus"),
+                Fields.field("verifyStatus"),
                 Fields.field("productType"),
                 Fields.field("images"),
                 Fields.field("price"),
