@@ -101,10 +101,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
             if(productItemPO == null){
                 productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                BackupProductItemPO itemBackup = new BackupProductItemPO();
-                itemBackup.setCode(productItem.getCode());
-                itemBackup.setData(JSON.toJSONString(scenicDetail));
-                backupProductDao.updateBackupProductItemByCode(itemBackup);
             } else {
                 // 比对信息
                 commonService.compareProductItem(productItem);
