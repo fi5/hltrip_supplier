@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DfyToursConverter {
 
-    public static ProductItemPO convertToProductItemPO(DfyToursDetailResponse dfyToursDetail, String productId){
+    public static ProductItemPO convertToProductItemPO(DfyToursDetailResponse dfyToursDetail, String productId) {
         ProductItemPO productItemPO = new ProductItemPO();
         productItemPO.setItemType(Constants.PRODUCT_ITEM_TYPE_TRIP);
         productItemPO.setStatus(Constants.PRODUCT_STATUS_VALID);
@@ -41,7 +41,7 @@ public class DfyToursConverter {
         productItemPO.setSupplierItemId(productId);
         productItemPO.setCode(CommonUtils.genCodeBySupplier(productItemPO.getSupplierId(), productId));
         productItemPO.setName(dfyToursDetail.getProductName());
-        if(ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())){
+        if (ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())) {
             String city = dfyToursDetail.getDepartCitys().stream().map(c ->
                     c.getName()).distinct().collect(Collectors.joining(","));
             String cityCode = dfyToursDetail.getDepartCitys().stream().map(c ->
@@ -49,7 +49,7 @@ public class DfyToursConverter {
             productItemPO.setOriCity(CommonUtil.getCity(city));
             productItemPO.setOriCityCode(cityCode);
         }
-        if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
+        if (ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())) {
             String city = dfyToursDetail.getDesPoiNameList().stream().filter(c ->
                     StringUtils.isNotBlank(c.getDesCityName())).map(c ->
                     CommonUtil.getCity(c.getDesCityName())).distinct().collect(Collectors.joining(","));
@@ -57,7 +57,7 @@ public class DfyToursConverter {
                     StringUtils.isNotBlank(c.getDesProvinceName())).map(c ->
                     c.getDesProvinceName()).distinct().collect(Collectors.joining(","));
             // 直辖市名字有可能会放在省字段上的
-            if(StringUtils.isBlank(city)){
+            if (StringUtils.isBlank(city)) {
                 city = CommonUtil.getCity(province);
             }
             productItemPO.setCity(city);
@@ -65,7 +65,7 @@ public class DfyToursConverter {
             productItemPO.setProvince(province);
         }
 
-        if(ListUtils.isNotEmpty(dfyToursDetail.getProductPicList())){
+        if (ListUtils.isNotEmpty(dfyToursDetail.getProductPicList())) {
             List<DfyImage> dfyImages = dfyToursDetail.getProductPicList();
             List<ImageBasePO> images = dfyImages.stream().map(i -> {
                 ImageBasePO imageBasePO = new ImageBasePO();
@@ -81,7 +81,7 @@ public class DfyToursConverter {
         return productItemPO;
     }
 
-    public static ProductPO convertToProductPO(DfyToursDetailResponse dfyToursDetail, String productId, String city){
+    public static ProductPO convertToProductPO(DfyToursDetailResponse dfyToursDetail, String productId, String city) {
         ProductPO productPO = new ProductPO();
         // 默认条件退
         productPO.setRefundType(3);
@@ -99,15 +99,15 @@ public class DfyToursConverter {
         productPO.setMaxProfitRate(dfyToursDetail.getMaxProfitRate());
         productPO.setTripDays(dfyToursDetail.getDuration());
         productPO.setTripNights(dfyToursDetail.getProductNight());
-        if(dfyToursDetail.getTrafficGo() != null){
+        if (dfyToursDetail.getTrafficGo() != null) {
             productPO.setGoTraffic(convertToTraffic(dfyToursDetail.getTrafficGo()));
         }
-        if(dfyToursDetail.getTrafficBack() != null ){
+        if (dfyToursDetail.getTrafficBack() != null) {
             productPO.setReturnTraffic(convertToTraffic(dfyToursDetail.getTrafficBack()));
         }
         productPO.setSite(dfyToursDetail.getTeamType() == null ? null : String.valueOf(dfyToursDetail.getTeamType()));
         DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
-        if(ListUtils.isNotEmpty(journeyInfo.getTourRecommend())){
+        if (ListUtils.isNotEmpty(journeyInfo.getTourRecommend())) {
             productPO.setRecommendDesc(journeyInfo.getTourRecommend().stream().map(r -> {
                 ToursRecommendPO toursRecommend = new ToursRecommendPO();
                 toursRecommend.setDescription(r.getDescription());
@@ -118,23 +118,23 @@ public class DfyToursConverter {
         }
         productPO.setIncludeDesc(journeyInfo.getCostInclude());
         productPO.setExcludeDesc(journeyInfo.getCostExclude());
-        if(journeyInfo.getBookNotice() != null){
+        if (journeyInfo.getBookNotice() != null) {
 //            String bookNotice = buildBookNotice(journeyInfo);
 //            if(StringUtils.isNotBlank(bookNotice)){
 //                productPO.setBookDesc(bookNotice);
 //            }
             List<DescriptionPO> descriptionPOs = buildBookNoticeList(journeyInfo);
             productPO.setBookNoticeList(descriptionPOs);
-            if(ListUtils.isNotEmpty(journeyInfo.getBookNotice().getDiffPrice())){
+            if (ListUtils.isNotEmpty(journeyInfo.getBookNotice().getDiffPrice())) {
                 productPO.setDiffPriceDesc(String.join("<br>", journeyInfo.getBookNotice().getDiffPrice()));
             }
         }
-        if(ListUtils.isNotEmpty(journeyInfo.getImportantAddition())){
+        if (ListUtils.isNotEmpty(journeyInfo.getImportantAddition())) {
             productPO.setRemark(String.join("<br>", journeyInfo.getImportantAddition()));
         }
-        if(StringUtils.isNotBlank(journeyInfo.getPeopleLimitDesc())){
+        if (StringUtils.isNotBlank(journeyInfo.getPeopleLimitDesc())) {
             StringBuffer sb = new StringBuffer();
-            if(StringUtils.isNotBlank(productPO.getRemark())){
+            if (StringUtils.isNotBlank(productPO.getRemark())) {
                 sb.append(productPO.getRemark()).append("<br>");
             }
             sb.append("特殊人群：").append("<br>").append(journeyInfo.getPeopleLimitDesc());
@@ -158,10 +158,10 @@ public class DfyToursConverter {
         bookRules.add(contact);
         bookRules.add(passenger);
         productPO.setBookRules(bookRules);
-        if(journeyInfo.getIndependentTeam() != null){
-            if(journeyInfo.getIndependentTeam() == 1){
+        if (journeyInfo.getIndependentTeam() != null) {
+            if (journeyInfo.getIndependentTeam() == 1) {
                 productPO.setProductFrom(String.valueOf(Constants.PRODUCT_FROM_SELF));
-            } else if(journeyInfo.getIndependentTeam() == 0){
+            } else if (journeyInfo.getIndependentTeam() == 0) {
                 productPO.setProductFrom(String.valueOf(Constants.PRODUCT_FROM_OUT));
             }
         }
@@ -169,11 +169,11 @@ public class DfyToursConverter {
         productPO.setJoinGroup(journeyInfo.getJoinGroupItem());
         productPO.setSafeNoticeUrl(journeyInfo.getSafeNoticeUrl());
         productPO.setCivilizedLedge(journeyInfo.getCivilizedLedge());
-        if(ListUtils.isNotEmpty(journeyInfo.getRiskContents())){
+        if (ListUtils.isNotEmpty(journeyInfo.getRiskContents())) {
             List<RiskContentPO> riskContents = journeyInfo.getRiskContents().stream().map(r -> {
                 RiskContentPO riskContentPO = new RiskContentPO();
                 riskContentPO.setTitle(r.getRiskTitle());
-                if(ListUtils.isNotEmpty(r.getRiskDetails())){
+                if (ListUtils.isNotEmpty(r.getRiskDetails())) {
                     riskContentPO.setContent(String.join("<br>", r.getRiskDetails()));
                 }
                 return riskContentPO;
@@ -183,7 +183,7 @@ public class DfyToursConverter {
         return productPO;
     }
 
-    public static HodometerPO convertToHodometerPO(DfyJourneyInfo journeyInfo, String code){
+    public static HodometerPO convertToHodometerPO(DfyJourneyInfo journeyInfo, String code) {
         HodometerPO hodometerPO = new HodometerPO();
         hodometerPO.setCode(code);
         hodometerPO.setType(2);
@@ -191,22 +191,22 @@ public class DfyToursConverter {
         journeyInfo.getJourneyDescJson().getData().getData().sort(Comparator.comparing(d -> d.getDay(), Integer::compareTo));
         for (DfyJourneyDetail.Journey data : journeyInfo.getJourneyDescJson().getData().getData()) {
             Hodometer hodometer = new Hodometer();
-            if(data.getTraffic() != null){
+            if (data.getTraffic() != null) {
                 DfyJourneyDetail.JourneyTraffic journeyTraffic = data.getTraffic();
                 hodometer.setDepartureCity(journeyTraffic.getFrom());
-                if(ListUtils.isNotEmpty(journeyTraffic.getToList())){
+                if (ListUtils.isNotEmpty(journeyTraffic.getToList())) {
                     hodometer.setUrbanTraffics(journeyTraffic.getToList().stream().map(t -> {
                         UrbanTraffic urbanTraffic = new UrbanTraffic();
                         urbanTraffic.setArrivalCity(t.getTo());
-                        if("火车".equals(t.getMeans())){
+                        if ("火车".equals(t.getMeans())) {
                             urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_TRAIN);
-                        } else if("飞机".equals(t.getMeans())){
+                        } else if ("飞机".equals(t.getMeans())) {
                             urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_AIRPLANE);
-                        } else if("轮船".equals(t.getMeans())){
+                        } else if ("轮船".equals(t.getMeans())) {
                             urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_SHIP);
-                        } else if("汽车".equals(t.getMeans())){
+                        } else if ("汽车".equals(t.getMeans())) {
                             urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_CAR);
-                        } else if("自行安排".equals(t.getMeans())){
+                        } else if ("自行安排".equals(t.getMeans())) {
                             urbanTraffic.setTransportation(Constants.TRIP_TRAFFIC_CUSTOM);
                         }
                         return urbanTraffic;
@@ -216,36 +216,36 @@ public class DfyToursConverter {
             List<Route> routes = Lists.newArrayList();
             for (DfyJourneyDetail.JourneyModule journeyModule : data.getModuleList()) {
                 int type = journeyModule.getModuleTypeValue();
-                if(type == DfyConstants.MODULE_TYPE_SCENIC &&
-                        ListUtils.isNotEmpty(journeyModule.getScenicList())){
+                if (type == DfyConstants.MODULE_TYPE_SCENIC &&
+                        ListUtils.isNotEmpty(journeyModule.getScenicList())) {
                     for (DfyJourneyDetail.ModuleScenic scenic : journeyModule.getScenicList()) {
                         Route route = new Route();
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode());
                         route.setName(scenic.getTitle());
                         route.setTitle(scenic.getTitle());
                         route.setDuration(scenic.getTimes() == null || scenic.getTimes() <= 0 ? null : scenic.getTimes().toString());
-                        if(ListUtils.isNotEmpty(scenic.getPicture())){
+                        if (ListUtils.isNotEmpty(scenic.getPicture())) {
                             route.setImages(convertToImageBase(scenic.getPicture()));
                         }
-                        if(StringUtils.isNotBlank(scenic.getContent())){
+                        if (StringUtils.isNotBlank(scenic.getContent())) {
                             route.setDescribe(scenic.getContent().replace("<pre>", "").replace("</pre>", ""));
                         }
                         routes.add(route);
                     }
                 }
-                if(type == DfyConstants.MODULE_TYPE_HOTEL
-                        && ListUtils.isNotEmpty(journeyModule.getHotelList())){
+                if (type == DfyConstants.MODULE_TYPE_HOTEL
+                        && ListUtils.isNotEmpty(journeyModule.getHotelList())) {
                     String name = journeyModule.getHotelList().stream().map(m -> m.getTitle()).collect(Collectors.joining(","));
-                        Route route = new Route();
-                        route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
-                        route.setName(name);
-                        route.setTitle(name);
-                        if(StringUtils.isNotBlank(journeyModule.getDescription())){
-                            route.setDescribe(journeyModule.getDescription().replace("<pre>", "").replace("</pre>", ""));
-                        }
-                        routes.add(route);
+                    Route route = new Route();
+                    route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode());
+                    route.setName(name);
+                    route.setTitle(name);
+                    if (StringUtils.isNotBlank(journeyModule.getDescription())) {
+                        route.setDescribe(journeyModule.getDescription().replace("<pre>", "").replace("</pre>", ""));
+                    }
+                    routes.add(route);
                 }
-                if(type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null){
+                if (type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null) {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode());
                     route.setDeparture(journeyModule.getTraffic().getFrom());
@@ -254,7 +254,7 @@ public class DfyToursConverter {
                             || journeyModule.getTraffic().getTimes() <= 0 ? null : journeyModule.getTraffic().getTimes().toString());
                     routes.add(route);
                 }
-                if(type == DfyConstants.MODULE_TYPE_FOOD && journeyModule.getFood() != null){
+                if (type == DfyConstants.MODULE_TYPE_FOOD && journeyModule.getFood() != null) {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode());
                     route.setTitle(journeyModule.getFood().getTitle());
@@ -263,20 +263,20 @@ public class DfyToursConverter {
                             || journeyModule.getFood().getTimes() <= 0 ? null : journeyModule.getFood().getTimes().toString());
                     routes.add(route);
                 }
-                if(type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())){
+                if (type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())) {
                     for (DfyJourneyDetail.ModuleShop shop : journeyModule.getShopList()) {
                         Route route = new Route();
                         route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode());
                         route.setDuration(shop.getTimes() == null || shop.getTimes() <= 0 ? null : shop.getTimes().toString());
                         route.setTitle(shop.getTitle());
                         route.setBusinessProducts(shop.getProduct());
-                        if(StringUtils.isNotBlank(shop.getInstruction())){
+                        if (StringUtils.isNotBlank(shop.getInstruction())) {
                             route.setDescribe(shop.getInstruction().replace("<pre>", "").replace("</pre>", ""));
                         }
                         routes.add(route);
                     }
                 }
-                if(type == DfyConstants.MODULE_TYPE_ACTIVITY && journeyModule.getActivity() != null){
+                if (type == DfyConstants.MODULE_TYPE_ACTIVITY && journeyModule.getActivity() != null) {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode());
                     route.setTitle(journeyModule.getActivity().getTitle());
@@ -284,11 +284,11 @@ public class DfyToursConverter {
                             || journeyModule.getActivity().getTimes() <= 0 ? null : journeyModule.getActivity().getTimes().toString());
                     routes.add(route);
                 }
-                if(type == DfyConstants.MODULE_TYPE_REMINDER && journeyModule.getRemind() != null){
+                if (type == DfyConstants.MODULE_TYPE_REMINDER && journeyModule.getRemind() != null) {
                     Route route = new Route();
                     route.setMduleType(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode());
                     route.setTitle(journeyModule.getRemind().getType());
-                    if(StringUtils.isNotBlank(journeyModule.getRemind().getContent())){
+                    if (StringUtils.isNotBlank(journeyModule.getRemind().getContent())) {
                         route.setDescribe(journeyModule.getRemind().getContent().replace("<pre>", "").replace("</pre>", ""));
                     }
                     routes.add(route);
@@ -301,7 +301,7 @@ public class DfyToursConverter {
         return hodometerPO;
     }
 
-    public static List<ImageBase> convertToImageBase(List<DfyJourneyDetail.JourneyPicture> pics){
+    public static List<ImageBase> convertToImageBase(List<DfyJourneyDetail.JourneyPicture> pics) {
         return pics.stream().map(p -> {
             ImageBase imageBase = new ImageBase();
             imageBase.setUrl(p.getUrl());
@@ -310,7 +310,7 @@ public class DfyToursConverter {
         }).collect(Collectors.toList());
     }
 
-    public static String buildBookNotice(DfyJourneyInfo journeyInfo){
+    public static String buildBookNotice(DfyJourneyInfo journeyInfo) {
         DfyBookNotice dfyBookNotice = journeyInfo.getBookNotice();
         StringBuffer sb = new StringBuffer();
         /*
@@ -320,70 +320,70 @@ public class DfyToursConverter {
         特殊信息+childStdInfo（标题：特殊信息）、注意事项（标题：注意事项）、
         手动须知（标题：其他）、团队用餐（标题：用餐）
          */
-        if(ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())) {
             sb.append("交通：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getTrafficInfos()))
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getAccInfos())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getAccInfos())) {
             sb.append("住宿：").append("<br>")
                     .append(dfyBookNotice.getAccInfos())
                     .append("<br>");
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getTour())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTour())) {
             sb.append("游览：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getTour()))
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getShopping())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getShopping())) {
             sb.append("购物：").append("<br>")
                     .append(dfyBookNotice.getShopping())
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())) {
             sb.append("出团：").append("<br>")
                     .append(dfyBookNotice.getDepartureNotice())
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())) {
             sb.append("意见：").append("<br>")
                     .append(dfyBookNotice.getSuggestionFeedback())
                     .append("<br>");
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())) {
             sb.append("说明：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getActivityArrangment()))
                     .append("<br>");
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())) {
             sb.append("附加：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getOrderAttentions()))
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())) {
             sb.append("提示：").append("<br>")
                     .append(dfyBookNotice.getWarmAttention())
                     .append("<br>");
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())) {
             sb.append("特殊信息：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getSpecialTerms()))
                     .append("<br>");
-            if(StringUtils.isNotBlank(journeyInfo.getChildStdInfo())){
+            if (StringUtils.isNotBlank(journeyInfo.getChildStdInfo())) {
                 sb.append(journeyInfo.getChildStdInfo()).append("<br>");
             }
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())) {
             sb.append("注意事项：").append("<br>")
                     .append(String.join("<br>", dfyBookNotice.getAbroadNotice()))
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getMealInfos())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getMealInfos())) {
             sb.append("用餐：").append("<br>")
                     .append(dfyBookNotice.getMealInfos())
                     .append("<br>");
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getManualAttention())){
+        if (StringUtils.isNotBlank(dfyBookNotice.getManualAttention())) {
             sb.append("其他：").append("<br>")
                     .append(dfyBookNotice.getManualAttention())
                     .append("<br>");
@@ -391,7 +391,7 @@ public class DfyToursConverter {
         return sb.toString();
     }
 
-    public static List<DescriptionPO> buildBookNoticeList(DfyJourneyInfo journeyInfo){
+    public static List<DescriptionPO> buildBookNoticeList(DfyJourneyInfo journeyInfo) {
         DfyBookNotice dfyBookNotice = journeyInfo.getBookNotice();
         List<DescriptionPO> descList = Lists.newArrayList();
         /*
@@ -401,79 +401,95 @@ public class DfyToursConverter {
         特殊信息+childStdInfo（标题：特殊信息）、注意事项（标题：注意事项）、
         手动须知（标题：其他）、团队用餐（标题：用餐）
          */
-        if(ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("交通须知");
-            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTrafficInfos()));
-            descList.add(descriptionPO);
+        // 这些是固定的，空的也要添加
+        DescriptionPO bookDesc = new DescriptionPO();
+        bookDesc.setTitle("预定须知");
+        descList.add(bookDesc);
+
+        DescriptionPO descriptionPO1 = new DescriptionPO();
+        descriptionPO1.setTitle("交通须知");
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())) {
+            descriptionPO1.setContent(String.join("<br>", dfyBookNotice.getTrafficInfos()));
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getAccInfos())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("住宿须知");
-            descriptionPO.setContent(dfyBookNotice.getAccInfos());
-            descList.add(descriptionPO);
+        descList.add(descriptionPO1);
+
+        DescriptionPO descriptionPO2 = new DescriptionPO();
+        descriptionPO2.setTitle("住宿须知");
+        if (StringUtils.isNotBlank(dfyBookNotice.getAccInfos())) {
+            descriptionPO2.setContent(dfyBookNotice.getAccInfos());
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getMealInfos())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("用餐须知");
-            descriptionPO.setContent(dfyBookNotice.getMealInfos());
-            descList.add(descriptionPO);
+        descList.add(descriptionPO2);
+
+        DescriptionPO descriptionPO3 = new DescriptionPO();
+        descriptionPO3.setTitle("用餐须知");
+        if (StringUtils.isNotBlank(dfyBookNotice.getMealInfos())) {
+            descriptionPO3.setContent(dfyBookNotice.getMealInfos());
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getShopping())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("购物须知");
-            descriptionPO.setContent(dfyBookNotice.getShopping());
-            descList.add(descriptionPO);
+        descList.add(descriptionPO3);
+
+        DescriptionPO descriptionPO4 = new DescriptionPO();
+        descriptionPO4.setTitle("购物须知");
+        if (StringUtils.isNotBlank(dfyBookNotice.getShopping())) {
+            descriptionPO4.setContent(dfyBookNotice.getShopping());
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getTour())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("游览须知");
-            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTour()));
-            descList.add(descriptionPO);
+        descList.add(descriptionPO4);
+
+        DescriptionPO descriptionPO5 = new DescriptionPO();
+        descriptionPO5.setTitle("游览须知");
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTour())) {
+            descriptionPO5.setContent(String.join("<br>", dfyBookNotice.getTour()));
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("出行通知");
-            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getTour()));
-            descList.add(descriptionPO);
+        descList.add(descriptionPO5);
+
+        DescriptionPO descriptionPO6 = new DescriptionPO();
+        descriptionPO6.setTitle("出行通知");
+        if (StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())) {
+            descriptionPO6.setContent(String.join("<br>", dfyBookNotice.getDepartureNotice()));
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("特殊信息");
-            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getSpecialTerms()));
-            descList.add(descriptionPO);
+        descList.add(descriptionPO6);
+
+        DescriptionPO descriptionPO7 = new DescriptionPO();
+        descriptionPO7.setTitle("特殊信息");
+        if (ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())) {
+            descriptionPO7.setContent(String.join("<br>", dfyBookNotice.getSpecialTerms()));
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("注意事项");
-            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getAbroadNotice()));
-            descList.add(descriptionPO);
+        descList.add(descriptionPO7);
+
+        DescriptionPO descriptionPO8 = new DescriptionPO();
+        descriptionPO8.setTitle("注意事项");
+        if (ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())) {
+            descriptionPO8.setContent(String.join("<br>", dfyBookNotice.getAbroadNotice()));
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("注意事项");
-            descriptionPO.setContent(dfyBookNotice.getWarmAttention());
-            descList.add(descriptionPO);
+        descList.add(descriptionPO8);
+
+        DescriptionPO descriptionPO9 = new DescriptionPO();
+        descriptionPO9.setTitle("温馨提示");
+        if (StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())) {
+            descriptionPO9.setContent(dfyBookNotice.getWarmAttention());
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getManualAttention())){
-            DescriptionPO descriptionPO = new DescriptionPO();
-            descriptionPO.setTitle("其他说明");
-            descriptionPO.setContent(dfyBookNotice.getManualAttention());
-            descList.add(descriptionPO);
+        descList.add(descriptionPO9);
+
+        DescriptionPO descriptionPO10 = new DescriptionPO();
+        descriptionPO10.setTitle("其他说明");
+        if (StringUtils.isNotBlank(dfyBookNotice.getManualAttention())) {
+            descriptionPO10.setContent(dfyBookNotice.getManualAttention());
         }
-        if(StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())){
+        descList.add(descriptionPO10);
+
+        // 这些是动态的，没有就不加
+        if (StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())) {
             DescriptionPO descriptionPO = new DescriptionPO();
             descriptionPO.setTitle("意见反馈");
             descriptionPO.setContent(dfyBookNotice.getSuggestionFeedback());
             descList.add(descriptionPO);
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())) {
             DescriptionPO descriptionPO = new DescriptionPO();
             descriptionPO.setTitle("活动说明");
             descriptionPO.setContent(String.join("<br>", dfyBookNotice.getActivityArrangment()));
             descList.add(descriptionPO);
         }
-        if(ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())){
+        if (ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())) {
             DescriptionPO descriptionPO = new DescriptionPO();
             descriptionPO.setTitle("附加预订须知");
             descriptionPO.setContent(String.join("<br>", dfyBookNotice.getOrderAttentions()));
@@ -482,8 +498,8 @@ public class DfyToursConverter {
         return descList;
     }
 
-    public static Integer convertToTraffic(Integer dfyTraffic){
-        switch (dfyTraffic){
+    public static Integer convertToTraffic(Integer dfyTraffic) {
+        switch (dfyTraffic) {
             case DfyConstants.TRAFFIC_TYPE_1:
                 return Constants.TRIP_TRAFFIC_1;
             case DfyConstants.TRAFFIC_TYPE_2:

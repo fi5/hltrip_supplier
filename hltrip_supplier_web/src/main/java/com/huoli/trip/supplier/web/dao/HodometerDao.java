@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.dao;
 
+import com.huoli.trip.common.entity.BackupHodometerPO;
 import com.huoli.trip.common.entity.HodometerPO;
 
 /**
@@ -17,4 +18,24 @@ public interface HodometerDao {
      * @param hodometerPO
      */
     void updateByCode(HodometerPO hodometerPO);
+
+    /**
+     * 获取行程
+     * @param code
+     * @return
+     */
+    HodometerPO getHodometerPO(String code);
+
+    /**
+     * 获取备份行程
+     * @param code
+     * @return
+     */
+    BackupHodometerPO getBackupHodometerPO(String code);
+
+    /**
+     * 更新备份表
+     * @param backupHodometerPO
+     */
+    void updateBackupByCode(BackupHodometerPO backupHodometerPO);
 }

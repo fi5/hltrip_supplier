@@ -91,4 +91,11 @@ public interface ProductDao {
      */
     List<ProductPO> getBySupplierProductIdAndSupplierId(String supplierProductId, String supplierId);
 
+    /**
+     * 更新审核状态
+     * @param code
+     * @param verifyStatus
+     */
+    void updateVerifyStatusByCode(String code, int verifyStatus);
+
 }

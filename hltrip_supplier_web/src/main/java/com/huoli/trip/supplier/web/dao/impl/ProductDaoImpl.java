@@ -156,4 +156,10 @@ public class ProductDaoImpl implements ProductDao {
         return mongoTemplate.find(query, ProductPO.class);
     }
 
+    @Override
+    public void updateVerifyStatusByCode(String code, int verifyStatus){
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
+                Update.update("verifyStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+    }
+
 }

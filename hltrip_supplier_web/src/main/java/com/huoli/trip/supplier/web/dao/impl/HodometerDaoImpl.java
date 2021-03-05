@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.entity.BackupHodometerPO;
 import com.huoli.trip.common.entity.HodometerPO;
 import com.huoli.trip.supplier.web.dao.HodometerDao;
 import org.bson.Document;
@@ -33,5 +34,25 @@ public class HodometerDaoImpl implements HodometerDao {
         mongoTemplate.getConverter().write(hodometerPO, document);
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_PRODUCT_HODOMETER);
+    }
+
+    @Override
+    public HodometerPO getHodometerPO(String code) {
+        return mongoTemplate.findOne(new Query(Criteria.where("code").is(code)), HodometerPO.class);
+    }
+
+    @Override
+    public BackupHodometerPO getBackupHodometerPO(String code) {
+        return mongoTemplate.findOne(new Query(Criteria.where("code").is(code)), BackupHodometerPO.class);
+    }
+
+    @Override
+    public void updateBackupByCode(BackupHodometerPO backupHodometerPO){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("code").is(backupHodometerPO.getCode()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(backupHodometerPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, Constants.COLLECTION_NAME_TRIP_BACK_PRODUCT_HODOMETER);
     }
 }

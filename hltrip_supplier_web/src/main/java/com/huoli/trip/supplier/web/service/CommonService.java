@@ -1,6 +1,9 @@
 package com.huoli.trip.supplier.web.service;
 
 import com.huoli.trip.common.entity.BackChannelEntry;
+import com.huoli.trip.common.entity.HodometerPO;
+import com.huoli.trip.common.entity.ProductItemPO;
+import com.huoli.trip.common.entity.ProductPO;
 
 /**
  * 描述：<br/>
@@ -18,4 +21,18 @@ public interface CommonService {
      * @return
      */
     BackChannelEntry getSupplierById(String supplierId);
+
+    void compareProduct(ProductPO product);
+
+    void compareToursProduct(ProductPO product);
+
+    void compareProductItem(ProductItemPO productItem);
+
+    boolean compareHodometer(HodometerPO hodometerPO);
+
+    void saveBackupProduct(ProductPO product);
+
+    void saveBackupProductItem(ProductItemPO productItem);
+
+    void saveBackupHodometer(HodometerPO hodometerPO);
 }

@@ -133,8 +133,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
             } else {
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
+                commonService.compareProduct(productPO);
             }
             productDao.updateByCode(productPO);
+            commonService.saveBackupProduct(productPO);
         });
     }
 
@@ -172,8 +174,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     } else {
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
+                        commonService.compareProductItem(productItemPO);
                     }
                     productItemDao.updateByCode(productItemPO);
+                    commonService.saveBackupProductItem(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);
