@@ -63,21 +63,45 @@ public class CommonServiceImpl implements CommonService {
             List<String> productFields = Lists.newArrayList();
             ProductPO backupProduct = JSON.parseObject(backupProductPO.getData(), ProductPO.class);
             // 产品名称
-            if(!StringUtils.equals(backupProduct.getName(), product.getName())){
+            if(StringUtils.isNotBlank(product.getName()) && !StringUtils.equals(backupProduct.getName(), product.getName())){
                 productFields.add("name");
                 product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 图片
-            if(!StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
+            if(product.getImages() != null && !StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
                 productFields.add("images");
                 product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品描述
-            if(!StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
+            if(StringUtils.isNotBlank(product.getDescription()) && !StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
                 productFields.add("description");
                 product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
-            product.setFields(productFields);
+            if(StringUtils.isNotBlank(product.getIncludeDesc()) && !StringUtils.equals(backupProduct.getIncludeDesc(), product.getIncludeDesc())){
+                productFields.add("includeDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getExcludeDesc()) && !StringUtils.equals(backupProduct.getExcludeDesc(), product.getExcludeDesc())){
+                productFields.add("excludeDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getRefundDesc()) && !StringUtils.equals(backupProduct.getRefundDesc(), product.getRefundDesc())){
+                productFields.add("refundDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getBookDesc()) && !StringUtils.equals(backupProduct.getBookDesc(), product.getBookDesc())){
+                productFields.add("bookDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getRemark()) && !StringUtils.equals(backupProduct.getRemark(), product.getRemark())){
+                productFields.add("remark");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getSuitDesc()) && !StringUtils.equals(backupProduct.getSuitDesc(), product.getSuitDesc())){
+                productFields.add("suitDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            product.setChangedFields(productFields);
             // 产品说明
             if(ListUtils.isNotEmpty(product.getBookDescList())){
                 // 如果备份没有，说明新的全都相当于是变化的
@@ -86,7 +110,7 @@ public class CommonServiceImpl implements CommonService {
                         List<String> descFields = Lists.newArrayList();
                         descFields.add("title");
                         descFields.add("content");
-                        b.setFields(descFields);
+                        b.setChangedFields(descFields);
                         product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
@@ -97,13 +121,13 @@ public class CommonServiceImpl implements CommonService {
                             List<String> descFields = Lists.newArrayList();
                             descFields.add("title");
                             descFields.add("content");
-                            b.setFields(descFields);
+                            b.setChangedFields(descFields);
                             product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                         } else {
-                            if(!StringUtils.equals(descriptionPO.getContent(), b.getContent())){
+                            if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
                                 List<String> descFields = Lists.newArrayList();
                                 descFields.add("content");
-                                b.setFields(descFields);
+                                b.setChangedFields(descFields);
                                 product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         }
@@ -116,17 +140,18 @@ public class CommonServiceImpl implements CommonService {
                     product.getRoom().getRooms().forEach(r -> {
                         List<String> roomFields = Lists.newArrayList();
                         roomFields.add("title");
-                        r.setFields(roomFields);
+                        r.setChangedFields(roomFields);
                         product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
                     product.getRoom().getRooms().forEach(r -> {
                         RoomInfoPO roomInfoPO = backupProduct.getRoom().getRooms().stream().filter(br ->
                                 StringUtils.equals(br.getItemId(), r.getItemId())).findFirst().orElse(null);
-                        if(roomInfoPO == null || !StringUtils.equals(r.getItemId(), roomInfoPO.getTitle())){
+                        if(roomInfoPO == null || (StringUtils.isNotBlank(r.getTitle())
+                                && !StringUtils.equals(r.getTitle(), roomInfoPO.getTitle()))){
                             List<String> roomFields = Lists.newArrayList();
                             roomFields.add("title");
-                            r.setFields(roomFields);
+                            r.setChangedFields(roomFields);
                             product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
@@ -137,17 +162,18 @@ public class CommonServiceImpl implements CommonService {
                     product.getTicket().getTickets().forEach(r -> {
                         List<String> roomFields = Lists.newArrayList();
                         roomFields.add("title");
-                        r.setFields(roomFields);
+                        r.setChangedFields(roomFields);
                         product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
                     product.getTicket().getTickets().forEach(r -> {
                         TicketInfoPO ticketInfoPO = backupProduct.getTicket().getTickets().stream().filter(br ->
                                 StringUtils.equals(br.getItemId(), r.getItemId())).findFirst().orElse(null);
-                        if(ticketInfoPO == null || !StringUtils.equals(r.getItemId(), ticketInfoPO.getTitle())){
+                        if(ticketInfoPO == null || StringUtils.isNotBlank(r.getTitle())
+                                && !StringUtils.equals(r.getTitle(), ticketInfoPO.getTitle())){
                             List<String> roomFields = Lists.newArrayList();
                             roomFields.add("title");
-                            r.setFields(roomFields);
+                            r.setChangedFields(roomFields);
                             product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
@@ -163,42 +189,103 @@ public class CommonServiceImpl implements CommonService {
             List<String> productFields = Lists.newArrayList();
             ProductPO backupProduct = JSON.parseObject(backupProductPO.getData(), ProductPO.class);
             // 产品名称
-            if(!StringUtils.equals(backupProduct.getName(), product.getName())){
+            if(StringUtils.isNotBlank(product.getName()) && !StringUtils.equals(backupProduct.getName(), product.getName())){
                 productFields.add("name");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品图
-            if(!StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
+            if(product.getImages() != null && !StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
                 productFields.add("images");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品描述
-            if(!StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
+            if(StringUtils.isNotBlank(product.getDescription()) && !StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
                 productFields.add("description");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
             }
-            product.setFields(productFields);
+            if(StringUtils.isNotBlank(product.getIncludeDesc()) && !StringUtils.equals(backupProduct.getIncludeDesc(), product.getIncludeDesc())){
+                productFields.add("includeDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getExcludeDesc()) && !StringUtils.equals(backupProduct.getExcludeDesc(), product.getExcludeDesc())){
+                productFields.add("excludeDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getRefundDesc()) && !StringUtils.equals(backupProduct.getRefundDesc(), product.getRefundDesc())){
+                productFields.add("refundDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            if(StringUtils.isNotBlank(product.getDiffPriceDesc()) && !StringUtils.equals(backupProduct.getDiffPriceDesc(), product.getDiffPriceDesc())){
+                productFields.add("diffPriceDesc");
+                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+            }
+            product.setChangedFields(productFields);
             // 产品说明
             if(ListUtils.isNotEmpty(product.getBookDescList())){
                 // 如果备份没有，说明新的全都相当于是变化的
                 if(ListUtils.isEmpty(backupProduct.getBookDescList())){
                     product.getBookDescList().forEach(b -> {
-                        List<String> descFields = Lists.newArrayList();
-                        descFields.add("title");
-                        descFields.add("content");
-                        b.setFields(descFields);
+                        if(StringUtils.isNotBlank(b.getContent()) ){
+                            List<String> descFields = Lists.newArrayList();
+                            descFields.add("title");
+                            descFields.add("content");
+                            b.setChangedFields(descFields);
+                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                        }
                     });
                 } else {
                     product.getBookDescList().forEach(b -> {
                         DescriptionPO descriptionPO = backupProduct.getBookDescList().stream().filter(bb ->
                                 StringUtils.equals(bb.getTitle(), b.getTitle())).findFirst().orElse(null);
                         if(descriptionPO == null){
+                            if(StringUtils.isNotBlank(b.getContent()) ){
+                                List<String> descFields = Lists.newArrayList();
+                                descFields.add("title");
+                                descFields.add("content");
+                                b.setChangedFields(descFields);
+                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            }
+                        } else {
+                            if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
+                                List<String> descFields = Lists.newArrayList();
+                                descFields.add("content");
+                                b.setChangedFields(descFields);
+                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            }
+                        }
+                    });
+                }
+            }
+            if(ListUtils.isNotEmpty(product.getBookNoticeList())){
+                // 如果备份没有，说明新的全都相当于是变化的
+                if(ListUtils.isEmpty(backupProduct.getBookNoticeList())){
+                    product.getBookNoticeList().forEach(b -> {
+                        if(StringUtils.isNotBlank(b.getContent()) ){
                             List<String> descFields = Lists.newArrayList();
                             descFields.add("title");
                             descFields.add("content");
-                            b.setFields(descFields);
+                            b.setChangedFields(descFields);
+                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                        }
+                    });
+                } else {
+                    product.getBookNoticeList().forEach(b -> {
+                        DescriptionPO descriptionPO = backupProduct.getBookNoticeList().stream().filter(bb ->
+                                StringUtils.equals(bb.getTitle(), b.getTitle())).findFirst().orElse(null);
+                        if(descriptionPO == null){
+                            if(StringUtils.isNotBlank(b.getContent()) ){
+                                List<String> descFields = Lists.newArrayList();
+                                descFields.add("title");
+                                descFields.add("content");
+                                b.setChangedFields(descFields);
+                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            }
                         } else {
-                            if(!StringUtils.equals(descriptionPO.getContent(), b.getContent())){
+                            if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
                                 List<String> descFields = Lists.newArrayList();
                                 descFields.add("content");
-                                b.setFields(descFields);
+                                b.setChangedFields(descFields);
+                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         }
                     });
@@ -213,16 +300,22 @@ public class CommonServiceImpl implements CommonService {
         if(backupProductItemPO != null){
             ProductItemPO backupProductItem = JSON.parseObject(backupProductItemPO.getData(), ProductItemPO.class);
             List<String> itemFields = Lists.newArrayList();
-            if(!StringUtils.equals(backupProductItem.getBusinessHours(), productItem.getBusinessHours())){
+            if(StringUtils.isNotBlank(productItem.getBusinessHours())
+                    && !StringUtils.equals(backupProductItem.getBusinessHours(), productItem.getBusinessHours())){
                 itemFields.add("businessHours");
+                productItem.setAuditStatus(-1);
             }
-            if(!StringUtils.equals(backupProductItem.getName(), productItem.getName())){
+            if(StringUtils.isNotBlank(productItem.getName())
+                    && !StringUtils.equals(backupProductItem.getName(), productItem.getName())){
                 itemFields.add("name");
+                productItem.setAuditStatus(-1);
             }
-            if(!StringUtils.equals(JSON.toJSONString(backupProductItem.getMainImages()), JSON.toJSONString(productItem.getMainImages()))){
+            if(productItem.getMainImages() != null
+                    && !StringUtils.equals(JSON.toJSONString(backupProductItem.getMainImages()), JSON.toJSONString(productItem.getMainImages()))){
                 itemFields.add("mainImages");
+                productItem.setAuditStatus(-1);
             }
-            productItem.setFields(itemFields);
+            productItem.setChangedFields(itemFields);
         }
     }
 
@@ -243,7 +336,7 @@ public class CommonServiceImpl implements CommonService {
                             if (StringUtils.isNotBlank(r.getDescribe())) {
                                 List<String> routeFields = Lists.newArrayList();
                                 routeFields.add("describe");
-                                r.setFields(routeFields);
+                                r.setChangedFields(routeFields);
                                 changed = true;
                             }
                         }
@@ -253,11 +346,16 @@ public class CommonServiceImpl implements CommonService {
                     if(ListUtils.isNotEmpty(h.getRoutes())){
                         int j = 0;
                         for (Route route : h.getRoutes()) {
-                            Route backupRoute = hodometer.getRoutes().get(j++);
-                            if(!StringUtils.equals(route.getDescribe(), backupRoute.getDescribe())){
+                            Route backupRoute = null;
+                            if(hodometer.getRoutes().size() > j){
+                                backupRoute = hodometer.getRoutes().get(j++);
+                            }
+                            if(StringUtils.isNotBlank(route.getDescribe())
+                                && (backupRoute == null ||
+                                    !StringUtils.equals(route.getDescribe(), backupRoute.getDescribe()))){
                                 List<String> routeFields = Lists.newArrayList();
                                 routeFields.add("describe");
-                                route.setFields(routeFields);
+                                route.setChangedFields(routeFields);
                                 changed = true;
                             }
                         }
