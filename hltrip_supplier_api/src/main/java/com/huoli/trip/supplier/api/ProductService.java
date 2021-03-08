@@ -16,4 +16,11 @@ public interface ProductService {
      * @param status
      */
     void updateStatusByCode(String code, int status);
+
+    /**
+     * 更新供应商状态
+     * @param code
+     * @param supplierStatus
+     */
+    void updateSupplierStatusByCode(String code, int supplierStatus);
 }

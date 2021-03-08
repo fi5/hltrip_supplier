@@ -23,4 +23,9 @@ public class ProductServiceImpl implements ProductService {
     public void updateStatusByCode(String code, int status){
         productDao.updateStatusByCode(code, status);
     }
+
+    @Override
+    public void updateSupplierStatusByCode(String code, int supplierStatus){
+        productDao.updateSupplierStatusByCode(code, supplierStatus);
+    }
 }

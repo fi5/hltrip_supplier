@@ -98,4 +98,11 @@ public interface ProductDao {
      */
     void updateVerifyStatusByCode(String code, int verifyStatus);
 
+    /**
+     * 修改供应商状态
+     * @param code
+     * @param supplierStatus
+     */
+    void updateSupplierStatusByCode(String code, int supplierStatus);
+
 }
