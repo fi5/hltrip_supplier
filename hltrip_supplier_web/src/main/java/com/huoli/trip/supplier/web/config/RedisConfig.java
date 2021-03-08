@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisNode;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,21 +28,14 @@ import java.util.Set;
 @Configuration
 public class RedisConfig {
 
-    /**
-     * redis集群地址
-     */
     @Value("${redis.cluster}")
     private String cluster;
-    /**
-     * redis服务端地址
-     */
+
     @Value("${redis.host}")
     private String host;
-    /**
-     * 是否集群
-     */
+
     @Value("${redis.iscluster}")
-    private String iscluster;
+    private String isCluster;
 
     /**
      * 连接池配置
@@ -80,8 +74,8 @@ public class RedisConfig {
      * 初始化客户端
      * @return
      */
-    private JedisShardInfo jedisShardInfo() {
-        return new JedisShardInfo(host.split(":")[0], Integer.parseInt(host.split(":")[1]));
+    private RedisStandaloneConfiguration jedisShardInfo() {
+        return new RedisStandaloneConfiguration(host.split(":")[0], Integer.parseInt(host.split(":")[1]));
     }
 
     /**
@@ -90,26 +84,15 @@ public class RedisConfig {
      */
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
-        Integer isCluster = Integer.parseInt(iscluster);
         JedisConnectionFactory connectionFactory;
-        if (isCluster == 1) {
+        if ("1".equals(isCluster)) {
             connectionFactory = new JedisConnectionFactory(clusterConfiguration());
         } else {
             connectionFactory = new JedisConnectionFactory(jedisShardInfo());
         }
         connectionFactory.setPoolConfig(poolConfig());
-        connectionFactory.setTimeout(5000);
+        connectionFactory.setTimeout(30000);
         return connectionFactory;
-    }
-
-    /**
-     * reids服务类
-     * @param jedisConnectionFactory
-     * @return
-     */
-    @Bean(name = "stringJedisTemplate")
-    public StringRedisTemplate stringRedisTemplate(@Qualifier("jedisConnectionFactory") JedisConnectionFactory jedisConnectionFactory) {
-        return new StringRedisTemplate(jedisConnectionFactory);
     }
 
     /**
