@@ -12,6 +12,7 @@ import com.huoli.trip.supplier.web.service.CommonService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
  * 版本：1.0<br>
  * 创建日期：2021/3/2<br>
  */
+@Service
 public class CommonServiceImpl implements CommonService {
 
     @Autowired
