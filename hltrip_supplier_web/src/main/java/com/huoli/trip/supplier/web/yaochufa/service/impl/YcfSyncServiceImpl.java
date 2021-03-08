@@ -123,7 +123,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                productPO.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                productPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(productPO.getSupplierId());
                 if(backChannelEntry == null

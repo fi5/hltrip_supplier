@@ -204,7 +204,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(product.getSupplierId());
                 if(backChannelEntry == null
@@ -451,7 +451,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(product.getSupplierId());
                 if(backChannelEntry == null

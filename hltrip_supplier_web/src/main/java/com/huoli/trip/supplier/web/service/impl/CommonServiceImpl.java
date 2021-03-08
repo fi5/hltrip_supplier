@@ -67,41 +67,41 @@ public class CommonServiceImpl implements CommonService {
             // 产品名称
             if(StringUtils.isNotBlank(product.getName()) && !StringUtils.equals(backupProduct.getName(), product.getName())){
                 productFields.add("name");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 图片
             if(product.getImages() != null && !StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
                 productFields.add("images");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品描述
             if(StringUtils.isNotBlank(product.getDescription()) && !StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
                 productFields.add("description");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getIncludeDesc()) && !StringUtils.equals(backupProduct.getIncludeDesc(), product.getIncludeDesc())){
                 productFields.add("includeDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getExcludeDesc()) && !StringUtils.equals(backupProduct.getExcludeDesc(), product.getExcludeDesc())){
                 productFields.add("excludeDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getRefundDesc()) && !StringUtils.equals(backupProduct.getRefundDesc(), product.getRefundDesc())){
                 productFields.add("refundDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getBookDesc()) && !StringUtils.equals(backupProduct.getBookDesc(), product.getBookDesc())){
                 productFields.add("bookDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getRemark()) && !StringUtils.equals(backupProduct.getRemark(), product.getRemark())){
                 productFields.add("remark");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getSuitDesc()) && !StringUtils.equals(backupProduct.getSuitDesc(), product.getSuitDesc())){
                 productFields.add("suitDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             product.setChangedFields(productFields);
             // 产品说明
@@ -113,7 +113,7 @@ public class CommonServiceImpl implements CommonService {
                         descFields.add("title");
                         descFields.add("content");
                         b.setChangedFields(descFields);
-                        product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                        product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
                     product.getBookDescList().forEach(b -> {
@@ -124,13 +124,13 @@ public class CommonServiceImpl implements CommonService {
                             descFields.add("title");
                             descFields.add("content");
                             b.setChangedFields(descFields);
-                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         } else {
                             if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
                                 List<String> descFields = Lists.newArrayList();
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
-                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         }
                     });
@@ -143,7 +143,7 @@ public class CommonServiceImpl implements CommonService {
                         List<String> roomFields = Lists.newArrayList();
                         roomFields.add("title");
                         r.setChangedFields(roomFields);
-                        product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                        product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
                     product.getRoom().getRooms().forEach(r -> {
@@ -154,7 +154,7 @@ public class CommonServiceImpl implements CommonService {
                             List<String> roomFields = Lists.newArrayList();
                             roomFields.add("title");
                             r.setChangedFields(roomFields);
-                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
                 }
@@ -165,7 +165,7 @@ public class CommonServiceImpl implements CommonService {
                         List<String> roomFields = Lists.newArrayList();
                         roomFields.add("title");
                         r.setChangedFields(roomFields);
-                        product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                        product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     });
                 } else {
                     product.getTicket().getTickets().forEach(r -> {
@@ -176,7 +176,7 @@ public class CommonServiceImpl implements CommonService {
                             List<String> roomFields = Lists.newArrayList();
                             roomFields.add("title");
                             r.setChangedFields(roomFields);
-                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
                 }
@@ -193,33 +193,33 @@ public class CommonServiceImpl implements CommonService {
             // 产品名称
             if(StringUtils.isNotBlank(product.getName()) && !StringUtils.equals(backupProduct.getName(), product.getName())){
                 productFields.add("name");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品图
             if(product.getImages() != null && !StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
                 productFields.add("images");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             // 产品描述
             if(StringUtils.isNotBlank(product.getDescription()) && !StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
                 productFields.add("description");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getIncludeDesc()) && !StringUtils.equals(backupProduct.getIncludeDesc(), product.getIncludeDesc())){
                 productFields.add("includeDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getExcludeDesc()) && !StringUtils.equals(backupProduct.getExcludeDesc(), product.getExcludeDesc())){
                 productFields.add("excludeDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getRefundDesc()) && !StringUtils.equals(backupProduct.getRefundDesc(), product.getRefundDesc())){
                 productFields.add("refundDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             if(StringUtils.isNotBlank(product.getDiffPriceDesc()) && !StringUtils.equals(backupProduct.getDiffPriceDesc(), product.getDiffPriceDesc())){
                 productFields.add("diffPriceDesc");
-                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             product.setChangedFields(productFields);
             // 产品说明
@@ -232,7 +232,7 @@ public class CommonServiceImpl implements CommonService {
                             descFields.add("title");
                             descFields.add("content");
                             b.setChangedFields(descFields);
-                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
                 } else {
@@ -245,14 +245,14 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("title");
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
-                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         } else {
                             if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
                                 List<String> descFields = Lists.newArrayList();
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
-                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         }
                     });
@@ -267,7 +267,7 @@ public class CommonServiceImpl implements CommonService {
                             descFields.add("title");
                             descFields.add("content");
                             b.setChangedFields(descFields);
-                            product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                            product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
                 } else {
@@ -280,14 +280,14 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("title");
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
-                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         } else {
                             if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
                                 List<String> descFields = Lists.newArrayList();
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
-                                product.setVerifyStatus(Constants.VERIFY_STATUS_WAITING);
+                                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                             }
                         }
                     });

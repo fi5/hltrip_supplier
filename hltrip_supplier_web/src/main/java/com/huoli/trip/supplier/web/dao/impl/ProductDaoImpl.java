@@ -96,7 +96,7 @@ public class ProductDaoImpl implements ProductDao {
         Criteria criteria = Criteria.where("mainItemCode").is(itemId)
                 .and("status").is(Constants.PRODUCT_STATUS_VALID)
                 .and("supplierStatus").is(Constants.SUPPLIER_STATUS_OPEN)
-                .and("verifyStatus").is(Constants.VERIFY_STATUS_PASSING)
+                .and("auditStatus").is(Constants.VERIFY_STATUS_PASSING)
                 .and("remove").is(0)
                 .and("priceCalendar.priceInfos.stock").gt(0)
                 .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())))
@@ -125,7 +125,7 @@ public class ProductDaoImpl implements ProductDao {
                 Fields.field("name"),
                 Fields.field("status"),
                 Fields.field("supplierStatus"),
-                Fields.field("verifyStatus"),
+                Fields.field("auditStatus"),
                 Fields.field("productType"),
                 Fields.field("images"),
                 Fields.field("price"),
@@ -165,7 +165,7 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public void updateVerifyStatusByCode(String code, int verifyStatus){
         mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
-                Update.update("verifyStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+                Update.update("auditStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 
 }
