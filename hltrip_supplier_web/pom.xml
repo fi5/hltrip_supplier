@@ -60,7 +60,6 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
