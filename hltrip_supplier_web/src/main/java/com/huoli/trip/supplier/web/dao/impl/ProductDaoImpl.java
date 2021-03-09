@@ -134,7 +134,8 @@ public class ProductDaoImpl implements ProductDao {
                 Fields.field("count"),
                 Fields.field("priceCalendar"),
                 Fields.field("validTime"),
-                Fields.field("invalidTime"));
+                Fields.field("invalidTime"),
+                Fields.field("appFrom"));
     }
 
     @Override
