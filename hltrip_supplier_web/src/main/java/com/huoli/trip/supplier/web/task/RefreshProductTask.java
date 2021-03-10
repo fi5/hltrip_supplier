@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -100,7 +101,16 @@ public class RefreshProductTask {
                 productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_STOCK);
                 return;
             }
-            dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productPO.getCode()));
+            // 自动上线，这个要放在最后判断，如果放在前面的话价格状态有问题会被再次修改，状态可能会有短暂不准确
+            if(productPO.getValidTime() != null && productPO.getValidTime() != null
+                    && date.getTime() >= productPO.getValidTime().getTime()
+                    && date.getTime() <= productPO.getInvalidTime().getTime()
+                    && Constants.PRODUCT_STATUS_INVALID_SALE_DATE == productPO.getStatus() ){
+                log.error("已进入销售日期范围，并且状态是日期异常，改成上线。。。code = {}, validDate = {}",
+                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                return;
+            }
         } catch (Exception e) {
             log.error("刷新产品状态异常，productCode={}", productPO.getCode(), e);
         }
