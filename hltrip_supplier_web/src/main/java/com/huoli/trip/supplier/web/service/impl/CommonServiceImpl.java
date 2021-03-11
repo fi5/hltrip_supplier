@@ -60,6 +60,10 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void compareProduct(ProductPO product){
+        // 暂时屏蔽
+        if(true){
+            return;
+        }
         BackupProductPO backupProductPO = backupProductDao.getBackupProductByCode(product.getCode());
         if(backupProductPO != null){
             List<String> productFields = Lists.newArrayList();
@@ -186,6 +190,10 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void compareToursProduct(ProductPO product){
+        // 暂时屏蔽
+        if(true){
+            return;
+        }
         BackupProductPO backupProductPO = backupProductDao.getBackupProductByCode(product.getCode());
         if(backupProductPO != null){
             List<String> productFields = Lists.newArrayList();
@@ -298,6 +306,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void compareProductItem(ProductItemPO productItem){
+        if(true){
+            return;
+        }
         BackupProductItemPO backupProductItemPO = backupProductDao.getBackupProductItemByCode(productItem.getCode());
         if(backupProductItemPO != null){
             ProductItemPO backupProductItem = JSON.parseObject(backupProductItemPO.getData(), ProductItemPO.class);
@@ -323,6 +334,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public boolean compareHodometer(HodometerPO hodometerPO){
+        if(true){
+            return false;
+        }
         boolean changed = false;
         BackupHodometerPO backupHodometerPO = hodometerDao.getBackupHodometerPO(hodometerPO.getCode());
         HodometerPO backupHodometer = null;

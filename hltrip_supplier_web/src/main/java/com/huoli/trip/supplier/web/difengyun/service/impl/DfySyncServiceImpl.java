@@ -14,6 +14,7 @@ import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.*;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.*;
+import com.huoli.trip.supplier.web.config.FeignLogger;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
@@ -97,22 +98,32 @@ public class DfySyncServiceImpl implements DfySyncService {
         DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
         if(detailBaseResult != null && detailBaseResult.getData() != null){
             DfyScenicDetail scenicDetail = detailBaseResult.getData();
-            ProductItemPO productItem = DfyTicketConverter.convertToProductItemPO(scenicDetail);
-            ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
-            if(productItemPO == null){
-                productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            ProductItemPO newProductItem = DfyTicketConverter.convertToProductItemPO(scenicDetail);
+            ProductItemPO oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
+            List<ItemFeaturePO> featurePOs = null;
+            if(oldProductItem == null){
+                newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             } else {
+                featurePOs = oldProductItem.getFeatures();
                 // 比对信息
-                commonService.compareProductItem(productItem);
+                commonService.compareProductItem(newProductItem);
             }
-            productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            productItem.setOperator(Constants.SUPPLIER_CODE_DFY);
-            productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-            productItem.setAuditStatus(-1);
-            productItemDao.updateByCode(productItem);
-            // 保存副本
-            commonService.saveBackupProductItem(productItem);
-            productItemPO = productItemDao.selectByCode(productItem.getCode());
+            newProductItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            newProductItem.setOperator(Constants.SUPPLIER_CODE_DFY);
+            newProductItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+            // todo 暂时默认通过
+            newProductItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+//            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+            try {
+                // 保存副本
+                commonService.saveBackupProductItem(newProductItem);
+            } catch (Exception e) {
+                log.error("保存{}副本异常", newProductItem.getCode(), e);
+            }
+            // 这个不更新，还用老的
+            newProductItem.setFeatures(featurePOs);
+            productItemDao.updateByCode(newProductItem);
+            oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<DfyTicket> allTickets = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
                 allTickets.addAll(scenicDetail.getTicketList());
@@ -124,7 +135,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(allTickets)){
                 for (DfyTicket dfyTicket : allTickets) {
                     // 只同步新增产品，同步更新单独有定时任务执行
-                    syncProduct(dfyTicket.getProductId(), productItemPO, PRODUCT_SYNC_MODE_ONLY_ADD);
+                    syncProduct(dfyTicket.getProductId(), oldProductItem, PRODUCT_SYNC_MODE_ONLY_ADD);
                 }
             }
             // 产品同步有刷新。这里先不刷了。
@@ -204,7 +215,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                // todo 暂时默认通过
+//                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(product.getSupplierId());
                 if(backChannelEntry == null
@@ -416,7 +429,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 笛风云跟团游默认审核通过
-            productItem.setAuditStatus(1);
+            productItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
         } else {
             // 比对信息
             commonService.compareProductItem(productItem);
@@ -451,7 +464,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                // todo 暂时默认通过
+//                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(product.getSupplierId());
                 if(backChannelEntry == null

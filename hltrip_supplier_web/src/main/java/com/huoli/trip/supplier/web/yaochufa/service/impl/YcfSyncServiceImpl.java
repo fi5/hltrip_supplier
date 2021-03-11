@@ -96,7 +96,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     return;
                 }
             }
-            syncProductItem(ycfProduct.getProductItemIds());
             log.info("同步poi完成。");
             if(productPO.getRoom() != null && ListUtils.isNotEmpty(productPO.getRoom().getRooms())){
                 productPO.getRoom().getRooms().stream().filter(roomInfoPO -> roomInfoPO != null).forEach(roomInfoPO -> {
@@ -123,7 +122,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                productPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                // todo 暂时默认通过
+//                productPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                productPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(productPO.getSupplierId());
                 if(backChannelEntry == null
@@ -169,15 +170,25 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 try {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
+                    List<ItemFeaturePO> featurePOs = null;
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                        productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                        // todo 暂时默认通过
+                        productItemPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+//            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     } else {
+                        featurePOs = exist.getFeatures();
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                         commonService.compareProductItem(productItemPO);
                     }
+                    try {
+                        commonService.saveBackupProductItem(productItemPO);
+                    } catch (Exception e) {
+                        log.error("保存{}的副本异常", productItemPO.getCode(), e);
+                    }
+                    // 这个不更新，用原有的
+                    productItemPO.setFeatures(featurePOs);
                     productItemDao.updateByCode(productItemPO);
-                    commonService.saveBackupProductItem(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);

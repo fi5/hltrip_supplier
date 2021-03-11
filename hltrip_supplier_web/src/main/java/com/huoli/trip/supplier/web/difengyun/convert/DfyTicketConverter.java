@@ -80,8 +80,13 @@ public class DfyTicketConverter {
             // 列表图不用说明
             productItemPO.setMainImages(Lists.newArrayList(imageBasePO));
             // 详情图需要说明
-            imageBasePO.setDesc(scenicDetail.getScenicDescription());
             productItemPO.setImages(Lists.newArrayList(imageBasePO));
+        }
+        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
+            ImageBasePO imageBasePO = new ImageBasePO();
+            imageBasePO.setUrl(scenicDetail.getDefaultPic());
+            imageBasePO.setDesc(scenicDetail.getScenicDescription());
+            productItemPO.setImageDetails(Lists.newArrayList(imageBasePO));
         }
         // 放到images的说明里了
         // 这个是说明是富文本，所以放到特色说明里
