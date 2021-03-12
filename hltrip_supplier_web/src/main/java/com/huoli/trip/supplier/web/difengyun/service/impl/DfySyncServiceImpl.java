@@ -226,6 +226,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                     product.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
                 }
             } else {
+                product.setAuditStatus(productPO.getAuditStatus());
+                product.setSupplierStatus(productPO.getSupplierStatus());
                 commonService.compareProduct(product);
             }
             productDao.updateByCode(product);

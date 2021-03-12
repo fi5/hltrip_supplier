@@ -134,6 +134,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
             } else {
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
+                productPO.setAuditStatus(exist.getAuditStatus());
+                productPO.setSupplierStatus(exist.getSupplierStatus());
                 commonService.compareProduct(productPO);
             }
             productDao.updateByCode(productPO);
@@ -179,6 +181,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     } else {
                         featurePOs = exist.getFeatures();
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
+                        productItemPO.setAuditStatus(exist.getAuditStatus());
                         commonService.compareProductItem(productItemPO);
                     }
                     try {
