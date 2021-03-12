@@ -36,6 +36,15 @@ public interface YcfSyncService {
     void syncPrice(YcfPrice ycfPrice);
 
     /**
+     * 同步价格日历
+     * @param ycfPrice
+     * @param start
+     * @param end
+     */
+    void syncPrice(YcfPrice ycfPrice, String start, String end);
+
+
+    /**
      * 主动获取价格日历
      * @param request
      * @return

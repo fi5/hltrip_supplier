@@ -108,7 +108,10 @@ public class RefreshProductTask {
                     && Constants.PRODUCT_STATUS_INVALID_SALE_DATE == productPO.getStatus() ){
                 log.error("已进入销售日期范围，并且状态是日期异常，改成上线。。。code = {}, validDate = {}",
                         productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                // 供应商渠道不自动上线
+                if(!Lists.newArrayList(Constants.SUPPLIER_CODE_YCF, Constants.SUPPLIER_CODE_DFY, Constants.SUPPLIER_CODE_DFY_TOURS).contains(productPO.getSupplierId())){
+                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                }
                 return;
             }
         } catch (Exception e) {

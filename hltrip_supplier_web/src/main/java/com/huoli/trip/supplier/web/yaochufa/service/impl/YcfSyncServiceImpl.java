@@ -287,6 +287,47 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     }
 
     @Override
+    public void syncPrice(YcfPrice ycfPrice, String start, String end){
+        String ycfProductId = ycfPrice.getProductID();
+        List<YcfPriceInfo> ycfPriceInfos = ycfPrice.getSaleInfos();
+        if(StringUtils.isBlank(ycfProductId)){
+            return;
+        }
+        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+        PricePO pricePO = priceDao.getByProductCode(productCode);
+        if(pricePO == null){
+            pricePO = new PricePO();
+            pricePO.setProductCode(productCode);
+            pricePO.setPriceInfos(Lists.newArrayList());
+            pricePO.setSupplierProductId(ycfProductId);
+            pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        } else {
+            pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
+        }
+        pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
+        List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
+        List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
+        if(ListUtils.isEmpty(ycfPriceInfos)){
+            int diff = DateTimeUtil.getDateDiffDays(DateTimeUtil.parseDate(start), DateTimeUtil.parseDate(end));
+            for (int i = 0; i < diff; i++){
+                Date day = DateTimeUtil.addDay(DateTimeUtil.parseDate(start), i);
+                priceInfoPOs.removeIf(priceInfoPO -> priceInfoPO.getSaleDate().getTime() == day.getTime());
+            }
+        } else {
+            ycfPriceInfos.forEach(ycfPriceInfo -> {
+                setPrice(priceInfoPOs, newPriceInfos, ycfPriceInfo);
+            });
+        }
+        priceInfoPOs.addAll(newPriceInfos);
+        priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
+        priceDao.updateByProductCode(pricePO);
+        // 更新价格要刷新item的低价产品(异步)
+        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productCode));
+    }
+
+    @Override
     public void syncFullPrice(YcfPrice ycfPrice){
         PricePO pricePO = YcfConverter.convertToPricePO(ycfPrice);
         ProductPO productPO = productDao.getBySupplierProductId(ycfPrice.getProductID());
@@ -318,7 +359,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             if(request.getFull()){
                 syncFullPrice(ycfPrice);
             } else {
-                syncPrice(ycfPrice);
+                syncPrice(ycfPrice, request.getStartDate(), request.getEndDate());
             }
             return response.getSaleInfos();
         }
