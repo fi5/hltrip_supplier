@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 版本：1.0<br>
  * 创建日期：2021/1/8<br>
  */
-@Service
+@Service(timeout = 10000,group = "hltrip")
 public class ProductServiceImpl implements ProductService {
 
     @Autowired
