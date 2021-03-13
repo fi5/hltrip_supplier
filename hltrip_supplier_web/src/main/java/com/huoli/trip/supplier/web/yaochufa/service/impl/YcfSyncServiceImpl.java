@@ -136,6 +136,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
                 productPO.setAuditStatus(exist.getAuditStatus());
                 productPO.setSupplierStatus(exist.getSupplierStatus());
+                productPO.setRecommendFlag(exist.getRecommendFlag());
                 commonService.compareProduct(productPO);
             }
             productDao.updateByCode(productPO);
@@ -173,6 +174,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
                     List<ItemFeaturePO> featurePOs = null;
+                    ProductPO productPO = null;
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                         // todo 暂时默认通过
@@ -182,6 +184,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         featurePOs = exist.getFeatures();
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                         productItemPO.setAuditStatus(exist.getAuditStatus());
+                        productItemPO.setProduct(exist.getProduct());
                         commonService.compareProductItem(productItemPO);
                     }
                     try {

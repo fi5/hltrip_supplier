@@ -101,10 +101,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductItemPO newProductItem = DfyTicketConverter.convertToProductItemPO(scenicDetail);
             ProductItemPO oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<ItemFeaturePO> featurePOs = null;
+            ProductPO productPO = null;
             if(oldProductItem == null){
                 newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             } else {
                 featurePOs = oldProductItem.getFeatures();
+                productPO = oldProductItem.getProduct();
                 // 比对信息
                 commonService.compareProductItem(newProductItem);
             }
@@ -122,6 +124,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             // 这个不更新，还用老的
             newProductItem.setFeatures(featurePOs);
+            newProductItem.setProduct(productPO);
             productItemDao.updateByCode(newProductItem);
             oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<DfyTicket> allTickets = Lists.newArrayList();
@@ -138,8 +141,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     syncProduct(dfyTicket.getProductId(), oldProductItem, PRODUCT_SYNC_MODE_ONLY_ADD);
                 }
             }
-            // 产品同步有刷新。这里先不刷了。
-//            dynamicProductItemService.refreshItemByCode(productItemPO.getCode());
+            dynamicProductItemService.refreshItemByCode(newProductItem.getCode());
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }
@@ -228,6 +230,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             } else {
                 product.setAuditStatus(productPO.getAuditStatus());
                 product.setSupplierStatus(productPO.getSupplierStatus());
+                product.setRecommendFlag(productPO.getRecommendFlag());
                 commonService.compareProduct(product);
             }
             productDao.updateByCode(product);
@@ -428,17 +431,21 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productId);
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
+        ProductPO productPO = null;
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 笛风云跟团游默认审核通过
             productItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
         } else {
+            productItem.setAuditStatus(productItemPO.getAuditStatus());
+            productPO = productItemPO.getProduct();
             // 比对信息
             commonService.compareProductItem(productItem);
         }
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
         productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
+        productItem.setProduct(productPO);
         productItemDao.updateByCode(productItem);
         // 保存副本
         commonService.saveBackupProductItem(productItem);
@@ -477,6 +484,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     product.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
                 }
             } else {
+                product.setSupplierStatus(oldProduct.getSupplierStatus());
+                product.setAuditStatus(oldProduct.getAuditStatus());
+                product.setRecommendFlag(oldProduct.getRecommendFlag());
                 commonService.compareToursProduct(product);
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
