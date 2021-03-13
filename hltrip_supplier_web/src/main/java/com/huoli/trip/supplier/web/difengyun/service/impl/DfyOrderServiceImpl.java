@@ -186,7 +186,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                             TripRefundNotify notify = new TripRefundNotify();
                             if (refundOrder == null) {
                                 log.info("这未找到待处理的退款单" + tripOrder.getOrderId());
-                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setOrderId(tripOrder.getOrderId());
                                 notify.setChannel("dfy");
                                 notify.setStatus(0);
 
@@ -327,7 +327,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                             TripRefundNotify notify = new TripRefundNotify();
                             if (refundOrder == null) {
                                 log.info("这未找到待处理的退款单" + tripOrder.getOrderId());
-                                notify.setOrderId(refundOrder.getOrderId());
+                                notify.setOrderId(tripOrder.getOrderId());
                                 notify.setChannel("dfy");
                                 notify.setStatus(0);
 
