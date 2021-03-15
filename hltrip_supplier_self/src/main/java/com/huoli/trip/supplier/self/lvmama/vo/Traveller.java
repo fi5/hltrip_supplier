@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.self.lvmama.vo;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -9,6 +11,7 @@ import java.io.Serializable;
  * @Description:
  * @date 2021/3/1515:21
  */
+@Data
 public class Traveller implements Serializable {
     /**
      * 根据产品决 游玩人姓名 TRAV_NUM_NO:全不需要
