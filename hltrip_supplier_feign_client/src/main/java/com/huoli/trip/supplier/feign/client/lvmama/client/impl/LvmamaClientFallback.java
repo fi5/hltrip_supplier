@@ -4,15 +4,11 @@ import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Map;
 
 /**
 * @Description: 驴妈妈接口对接
