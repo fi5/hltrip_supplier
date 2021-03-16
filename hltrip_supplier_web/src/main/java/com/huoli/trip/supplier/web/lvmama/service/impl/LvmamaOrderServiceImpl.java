@@ -2,7 +2,6 @@ package com.huoli.trip.supplier.web.lvmama.service.impl;
 
 import com.huoli.trip.supplier.api.LvmamaOrderService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
-import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
