@@ -59,4 +59,21 @@ public class Traveller implements Serializable {
      */
     private String credentialsType;
 
+    public Traveller(String name, String mobile, String email, String credentials, String credentialsType) {
+        this.name = name;
+        this.mobile = mobile;
+        this.email = email;
+        this.credentials = credentials;
+        this.credentialsType = credentialsType;
+    }
+
+    public Traveller(String name, String mobile, String enName, String email, String credentials, String birthday, String credentialsType) {
+        this.name = name;
+        this.mobile = mobile;
+        this.enName = enName;
+        this.email = email;
+        this.credentials = credentials;
+        this.birthday = birthday;
+        this.credentialsType = credentialsType;
+    }
 }

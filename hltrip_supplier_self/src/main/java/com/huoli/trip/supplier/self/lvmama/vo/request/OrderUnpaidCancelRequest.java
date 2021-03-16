@@ -13,4 +13,9 @@ import lombok.Data;
 public class OrderUnpaidCancelRequest extends BaseRequest{
     private String PartnerOrderNo;
     private String orderId;
+
+    public OrderUnpaidCancelRequest(String partnerOrderNo, String orderId) {
+        PartnerOrderNo = partnerOrderNo;
+        this.orderId = orderId;
+    }
 }
