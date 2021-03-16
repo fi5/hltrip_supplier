@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.lvmama.vo.request;
 
+import com.huoli.trip.supplier.self.lvmama.vo.Booker;
 import com.huoli.trip.supplier.self.lvmama.vo.OrderInfo;
 import com.huoli.trip.supplier.self.lvmama.vo.Recipient;
 import com.huoli.trip.supplier.self.lvmama.vo.Traveller;
@@ -13,12 +14,12 @@ import java.util.List;
  * @Title:
  * @Package
  * @Description:
- * @date 2021/3/1514:55
+ * @date 2021/3/1517:21
  */
 @Data
-public class ValidateOrderRequest {
+public class CreateOrderRequest {
     private OrderInfo orderInfo;
-    private Book book;
+    private Booker book;
     private List<Traveller> traveller;
     private Recipient recipient;
 }
