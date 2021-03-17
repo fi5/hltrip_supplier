@@ -53,9 +53,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void updateAppFromByCode(String code, List<String> appFroms){
-        productDao.updateAppFromByCode(code, appFroms);
+        if(ListUtils.isNotEmpty(appFroms)) {
+            appFroms.forEach(appFrom -> productDao.updateAppFromByCode(code, appFrom));
+        }
         dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
     }
-
-
 }
