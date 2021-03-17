@@ -3,11 +3,13 @@ package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -30,7 +32,10 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
         }
         return new ILvmamaClient() {
 
-
+            @Override
+            public LmmScenicResponse getScenicList(@RequestBody LmmScenicRequest request){
+                return null;
+            }
             @Override
             public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
                 return null;

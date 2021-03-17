@@ -1,5 +1,6 @@
-package com.huoli.trip.supplier.self.lvmama.vo;
+package com.huoli.trip.supplier.self.lvmama.vo.response;
 
+import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import lombok.Data;
 
 import java.util.List;
@@ -13,12 +14,12 @@ import java.util.List;
  * 创建日期：2021/3/15<br>
  */
 @Data
-public class LmmBaseResponse {
-
-    private LmmState state;
+public class LmmScenicResponse extends LmmBaseResponse {
 
     private long totalPage;
 
-    // todo 景点列表
+    /**
+     * 景点列表
+     */
     private List<LmmScenic> scenicNameList;
 }
