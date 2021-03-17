@@ -200,6 +200,11 @@
             <artifactId>server_api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.huoli.trip.operation</groupId>
+            <artifactId>operation-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <!--dubbo-->
      <!--   <dependency>

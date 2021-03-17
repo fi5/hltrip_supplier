@@ -33,6 +33,8 @@ public class LvOrderDetail implements Serializable {
 	private String performStatus;//USED 已使用；UNUSE 未使用
 	private List<Credential> credentials;
 
+	private String gjStatus;
+
 	@Data
 	public static class Credential implements Serializable {
 		private String goodsId;//

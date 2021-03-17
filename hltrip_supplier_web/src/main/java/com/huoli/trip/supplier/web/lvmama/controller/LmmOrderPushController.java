@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.lvmama.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.supplier.api.LvmamaOrderService;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
@@ -31,5 +32,11 @@ public class LmmOrderPushController {
     LmmBaseResponse pushOrderStatus(@RequestBody LmmOrderPushRequest request) {
         log.info("驴妈供应商触发了订单推送 订单号：{}", JSONObject.toJSONString(request));
         return lvmamaOrderService.orderStatusNotice(request);
+    }
+
+    @PostMapping(path = "/pushOrderRefund")
+    LmmBaseResponse pushOrderRefund(@RequestBody LmmRefundPushRequest request) {
+        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(request));
+        return lvmamaOrderService.pushOrderRefund(request);
     }
 }
