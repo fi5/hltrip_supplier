@@ -2,10 +2,13 @@ package com.huoli.trip.supplier.web.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.ProductService;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -32,8 +35,27 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateSupplierStatusByCode(String code, int supplierStatus){
+    public void updateSupplierStatusAndAppFromByCode(String code, Integer supplierStatus, List<String> appFroms){
+        if(supplierStatus != null){
+            updateSupplierStatusByCode(code, supplierStatus);
+        }
+        if(ListUtils.isNotEmpty(appFroms)){
+            updateAppFromByCode(code, appFroms);
+        }
+        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
+    }
+
+    @Override
+    public void updateSupplierStatusByCode(String code, Integer supplierStatus){
         productDao.updateSupplierStatusByCode(code, supplierStatus);
         dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
     }
+
+    @Override
+    public void updateAppFromByCode(String code, List<String> appFroms){
+        productDao.updateAppFromByCode(code, appFroms);
+        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
+    }
+
+
 }

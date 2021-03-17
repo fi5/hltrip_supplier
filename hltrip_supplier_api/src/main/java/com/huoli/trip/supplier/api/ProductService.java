@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.api;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -22,5 +24,20 @@ public interface ProductService {
      * @param code
      * @param supplierStatus
      */
-    void updateSupplierStatusByCode(String code, int supplierStatus);
+    void updateSupplierStatusByCode(String code, Integer supplierStatus);
+
+    /**
+     * 更新供应商信息
+     * @param code
+     * @param supplierStatus
+     * @param appFroms
+     */
+    void updateSupplierStatusAndAppFromByCode(String code, Integer supplierStatus, List<String> appFroms);
+
+    /**
+     * 更新appfrom
+     * @param code
+     * @param appFroms
+     */
+    void updateAppFromByCode(String code, List<String> appFroms);
 }
