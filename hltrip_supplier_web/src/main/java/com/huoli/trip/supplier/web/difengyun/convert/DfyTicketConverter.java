@@ -82,20 +82,20 @@ public class DfyTicketConverter {
             // 详情图需要说明
             productItemPO.setImages(Lists.newArrayList(imageBasePO));
         }
-        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
-            ImageBasePO imageBasePO = new ImageBasePO();
-            imageBasePO.setUrl(scenicDetail.getDefaultPic());
-            imageBasePO.setDesc(scenicDetail.getScenicDescription());
-            productItemPO.setImageDetails(Lists.newArrayList(imageBasePO));
-        }
-        // 放到images的说明里了
-        // 这个是说明是富文本，所以放到特色说明里
+        // 放到features就可以了。不用重复存
 //        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
-//            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
-//            itemFeaturePO.setDetail(scenicDetail.getScenicDescription());
-//            itemFeaturePO.setType(YcfConstants.POI_FEATURE_DETAIL);
-//            featurePOs.add(itemFeaturePO);
+//            ImageBasePO imageBasePO = new ImageBasePO();
+//            imageBasePO.setUrl(scenicDetail.getDefaultPic());
+//            imageBasePO.setDesc(scenicDetail.getScenicDescription());
+//            productItemPO.setImageDetails(Lists.newArrayList(imageBasePO));
 //        }
+        // 现在展示图文详情了，所以还放回到这里
+        if(StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
+            ItemFeaturePO itemFeaturePO = new ItemFeaturePO();
+            itemFeaturePO.setDetail(scenicDetail.getScenicDescription());
+            itemFeaturePO.setType(YcfConstants.POI_FEATURE_DETAIL);
+            featurePOs.add(itemFeaturePO);
+        }
         // 这个不是按富文本处理的
 //        productItemPO.setDescription(scenicDetail.getScenicDescription());
         productItemPO.setAppMainTitle(productItemPO.getName());

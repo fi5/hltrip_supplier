@@ -102,11 +102,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductItemPO oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<ItemFeaturePO> featurePOs = null;
             ProductPO productPO = null;
+            List<ImageBasePO> imageDetails = null;
             if(oldProductItem == null){
                 newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             } else {
                 featurePOs = oldProductItem.getFeatures();
                 productPO = oldProductItem.getProduct();
+                imageDetails = oldProductItem.getImageDetails();
                 // 比对信息
                 commonService.compareProductItem(newProductItem);
             }
@@ -125,6 +127,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             // 这个不更新，还用老的
             newProductItem.setFeatures(featurePOs);
             newProductItem.setProduct(productPO);
+            newProductItem.setImageDetails(imageDetails);
             productItemDao.updateByCode(newProductItem);
             oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<DfyTicket> allTickets = Lists.newArrayList();

@@ -174,6 +174,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
                     List<ItemFeaturePO> featurePOs = null;
+                    List<ImageBasePO> imageDetails = null;
                     ProductPO productPO = null;
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -182,6 +183,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 //            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     } else {
                         featurePOs = exist.getFeatures();
+                        imageDetails = exist.getImageDetails();
+                        productPO = exist.getProduct();
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                         productItemPO.setAuditStatus(exist.getAuditStatus());
                         productItemPO.setProduct(exist.getProduct());
@@ -194,6 +197,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     }
                     // 这个不更新，用原有的
                     productItemPO.setFeatures(featurePOs);
+                    productItemPO.setImageDetails(imageDetails);
+                    productItemPO.setProduct(productPO);
                     productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
