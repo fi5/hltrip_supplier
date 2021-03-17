@@ -1,7 +1,10 @@
 package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.common.vo.response.BaseResponse;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.lvmama.vo.LvOrderDetail;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
@@ -45,4 +48,19 @@ public interface LvmamaOrderService {
      * @return
      */
     LmmBaseResponse rufundTicket(OrderCancelRequest request);
+
+	/**
+     * 订单状态推送
+     * @param request
+     * @return
+     */
+    LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request);
+
+	/**
+     * 退款推送
+     * @param request
+     * @return
+     */
+    LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request);
+
 }

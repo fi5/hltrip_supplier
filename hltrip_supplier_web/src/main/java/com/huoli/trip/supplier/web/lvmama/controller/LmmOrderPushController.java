@@ -1,9 +1,10 @@
 package com.huoli.trip.supplier.web.lvmama.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.huoli.trip.supplier.self.difengyun.vo.push.DfyOrderPushRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.web.difengyun.service.impl.DfyCallBackService;
+import com.huoli.trip.supplier.api.LvmamaOrderService;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/lmm/receive")
 public class LmmOrderPushController {
     @Autowired
-    DfyCallBackService dfyCallBackService;
+    LvmamaOrderService lvmamaOrderService;
 
     @PostMapping(path = "/pushOrderStatus")
-    DfyBaseResult pushOrderStatus(@RequestBody DfyOrderPushRequest request) {
-        log.info("供应商触发了订单推送 订单号：{}", JSONObject.toJSONString(request));
-        return dfyCallBackService.orderStatusNotice(request);
+    LmmBaseResponse pushOrderStatus(@RequestBody LmmOrderPushRequest request) {
+        log.info("驴妈供应商触发了订单推送 订单号：{}", JSONObject.toJSONString(request));
+        return lvmamaOrderService.orderStatusNotice(request);
+    }
+
+    @PostMapping(path = "/pushOrderRefund")
+    LmmBaseResponse pushOrderRefund(@RequestBody LmmRefundPushRequest request) {
+        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(request));
+        return lvmamaOrderService.pushOrderRefund(request);
     }
 }
