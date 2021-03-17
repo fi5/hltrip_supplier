@@ -2,7 +2,7 @@ package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
-import com.huoli.trip.supplier.self.lvmama.vo.response.BaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
 
 
             @Override
-            public BaseResponse getCheckInfos(ValidateOrderRequest request) {
+            public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
                 return null;
             }
 
@@ -52,7 +52,7 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             }
 
             @Override
-            public BaseResponse rufundTicket(OrderCancelRequest request) {
+            public LmmBaseResponse rufundTicket(OrderCancelRequest request) {
                 return null;
             }
         };

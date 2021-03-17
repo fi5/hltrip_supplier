@@ -13,6 +13,6 @@ import java.io.Serializable;
  * @date 2021/3/1515:36
  */
 @Data
-public class BaseResponse implements Serializable {
+public class LmmBaseResponse implements Serializable {
     private State state;
 }

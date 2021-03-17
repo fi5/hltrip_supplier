@@ -1,19 +1,13 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
-import com.huoli.trip.supplier.feign.client.yaochufa.Interceptor.YaoChuFaFeignInterceptor;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
-import com.huoli.trip.supplier.self.lvmama.vo.response.BaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.*;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
-import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Map;
 
 /**
  * 描述：要出发客户端连接<br>
@@ -32,7 +26,7 @@ public interface ILvmamaClient {
      * 可预订检查
      */
     @RequestMapping(method = RequestMethod.POST,path = "/validateOrder")
-    BaseResponse getCheckInfos(@RequestBody ValidateOrderRequest request);
+    LmmBaseResponse getCheckInfos(@RequestBody ValidateOrderRequest request);
     /**
      * 支付订单
      */
@@ -55,5 +49,5 @@ public interface ILvmamaClient {
      * 退票申请
      */
     @RequestMapping(method = RequestMethod.POST,path = "/orderCancel")
-    BaseResponse rufundTicket(OrderCancelRequest request);
+    LmmBaseResponse rufundTicket(OrderCancelRequest request);
 }

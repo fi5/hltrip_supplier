@@ -11,6 +11,6 @@ import lombok.Data;
  * @date 2021/3/1517:24
  */
 @Data
-public class OrderResponse extends  BaseResponse{
+public class OrderResponse extends  LmmBaseResponse{
     private CreateOrderInfo order;
 }
