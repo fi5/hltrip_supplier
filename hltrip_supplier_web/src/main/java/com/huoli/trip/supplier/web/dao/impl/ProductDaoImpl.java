@@ -51,13 +51,13 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public void updateSupplierStatusByCode(String code, int supplierStatus){
-        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("supplierId").is(code)),
                 Update.update("supplierStatus", supplierStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 
     @Override
     public void updateAppFromByCode(String code, List<String> appFroms){
-        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("supplierId").is(code)),
                 Update.update("appFrom", appFroms), Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
 

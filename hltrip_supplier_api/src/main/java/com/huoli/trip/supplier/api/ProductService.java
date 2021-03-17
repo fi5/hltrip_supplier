@@ -21,14 +21,14 @@ public interface ProductService {
 
     /**
      * 更新供应商状态
-     * @param code
+     * @param code 供应商编码
      * @param supplierStatus
      */
     void updateSupplierStatusByCode(String code, Integer supplierStatus);
 
     /**
      * 更新供应商信息
-     * @param code
+     * @param code 供应商编码
      * @param supplierStatus
      * @param appFroms
      */
@@ -36,7 +36,7 @@ public interface ProductService {
 
     /**
      * 更新appfrom
-     * @param code
+     * @param code 供应商编码
      * @param appFroms
      */
     void updateAppFromByCode(String code, List<String> appFroms);
