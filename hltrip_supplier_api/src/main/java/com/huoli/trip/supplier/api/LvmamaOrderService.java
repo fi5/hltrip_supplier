@@ -4,6 +4,7 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.LvOrderDetail;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 
 /**
@@ -28,15 +29,15 @@ public interface LvmamaOrderService {
     /**
      * 支付订单
      */
-    LmmBaseResponse payOrder(OrderPaymentRequest request);
+    OrderResponse payOrder(OrderPaymentRequest request);
     /**
      * 创建订单
      */
-    LmmBaseResponse createOrder(CreateOrderRequest request);
+    OrderResponse createOrder(CreateOrderRequest request);
     /**
      * 取消订单
      */
-    LmmBaseResponse cancelOrder(OrderUnpaidCancelRequest request);
+    OrderResponse cancelOrder(OrderUnpaidCancelRequest request);
 
     /**
      * 退票申请
