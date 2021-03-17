@@ -26,7 +26,9 @@ public class LvOrderDetail implements Serializable {
 	private String orderId;
 	private String partnerOrderNo;
 	private String status;//
+	private String approveStatus;//
 	private String paymentStatus;
+	private String waitPaymentTime;
 	private String credenctStatus;
 	private String performStatus;//USED 已使用；UNUSE 未使用
 	private List<Credential> credentials;
