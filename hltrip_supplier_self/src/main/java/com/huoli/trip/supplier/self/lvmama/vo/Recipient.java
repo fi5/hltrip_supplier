@@ -1,5 +1,9 @@
 package com.huoli.trip.supplier.self.lvmama.vo;
 
+import lombok.Data;
+
+import java.io.Serializable;
+
 /**
  * @author lunatic
  * @Title:
@@ -7,7 +11,8 @@ package com.huoli.trip.supplier.self.lvmama.vo;
  * @Description:
  * @date 2021/3/1515:26
  */
-public class Recipient{
+@Data
+public class Recipient implements Serializable {
     /**
      * 根据商品分
      * 类决定
