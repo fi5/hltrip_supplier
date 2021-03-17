@@ -105,4 +105,11 @@ public interface ProductDao {
      */
     void updateSupplierStatusByCode(String code, int supplierStatus);
 
+    /**
+     * 更新appfrom
+     * @param code
+     * @param appFroms
+     */
+    void updateAppFromByCode(String code, List<String> appFroms);
+
 }
