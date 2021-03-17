@@ -103,12 +103,16 @@ public class DfySyncServiceImpl implements DfySyncService {
             List<ItemFeaturePO> featurePOs = null;
             ProductPO productPO = null;
             List<ImageBasePO> imageDetails = null;
+            List<ImageBasePO> images = null;
+            List<ImageBasePO> mainImages = null;
             if(oldProductItem == null){
                 newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             } else {
                 featurePOs = oldProductItem.getFeatures();
                 productPO = oldProductItem.getProduct();
                 imageDetails = oldProductItem.getImageDetails();
+                images = oldProductItem.getImages();
+                mainImages = oldProductItem.getMainImages();
                 // 比对信息
                 commonService.compareProductItem(newProductItem);
             }
@@ -128,6 +132,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             newProductItem.setFeatures(featurePOs);
             newProductItem.setProduct(productPO);
             newProductItem.setImageDetails(imageDetails);
+            newProductItem.setImages(images);
+            newProductItem.setMainImages(mainImages);
+            if(ListUtils.isEmpty(newProductItem.getImages()) && ListUtils.isEmpty(newProductItem.getMainImages())){
+                log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                newProductItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+            }
             productItemDao.updateByCode(newProductItem);
             oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
             List<DfyTicket> allTickets = Lists.newArrayList();
@@ -435,11 +445,17 @@ public class DfySyncServiceImpl implements DfySyncService {
         ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productId);
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
         ProductPO productPO = null;
+        List<ImageBasePO> imageDetails = null;
+        List<ImageBasePO> images = null;
+        List<ImageBasePO> mainImages = null;
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 笛风云跟团游默认审核通过
             productItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
         } else {
+            imageDetails = productItem.getImageDetails();
+            images = productItem.getImages();
+            mainImages = productItem.getMainImages();
             productItem.setAuditStatus(productItemPO.getAuditStatus());
             productPO = productItemPO.getProduct();
             // 比对信息
@@ -449,6 +465,13 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
         productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         productItem.setProduct(productPO);
+        productItem.setImageDetails(imageDetails);
+        productItem.setImages(images);
+        productItem.setMainImages(mainImages);
+        if(ListUtils.isEmpty(productItem.getImages()) && ListUtils.isEmpty(productItem.getMainImages())){
+            log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+        }
         productItemDao.updateByCode(productItem);
         // 保存副本
         commonService.saveBackupProductItem(productItem);

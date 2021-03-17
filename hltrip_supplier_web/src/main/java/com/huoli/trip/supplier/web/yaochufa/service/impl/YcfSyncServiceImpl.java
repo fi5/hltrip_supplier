@@ -25,7 +25,6 @@ import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -139,6 +138,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 productPO.setRecommendFlag(exist.getRecommendFlag());
                 commonService.compareProduct(productPO);
             }
+            productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+            productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
             productDao.updateByCode(productPO);
             commonService.saveBackupProduct(productPO);
         });
@@ -176,6 +178,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     List<ItemFeaturePO> featurePOs = null;
                     List<ImageBasePO> imageDetails = null;
                     ProductPO productPO = null;
+                    List<ImageBasePO> images = null;
+                    List<ImageBasePO> mainImages = null;
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                         // todo 暂时默认通过
@@ -185,6 +189,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         featurePOs = exist.getFeatures();
                         imageDetails = exist.getImageDetails();
                         productPO = exist.getProduct();
+                        images = exist.getImages();
+                        mainImages = exist.getMainImages();
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
                         productItemPO.setAuditStatus(exist.getAuditStatus());
                         productItemPO.setProduct(exist.getProduct());
@@ -199,6 +205,15 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     productItemPO.setFeatures(featurePOs);
                     productItemPO.setImageDetails(imageDetails);
                     productItemPO.setProduct(productPO);
+                    productItemPO.setImages(images);
+                    productItemPO.setMainImages(mainImages);
+                    if(ListUtils.isEmpty(productItemPO.getImages()) && ListUtils.isEmpty(productItemPO.getMainImages())){
+                        log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                        productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                    }
+                    productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+                    productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
                     productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
