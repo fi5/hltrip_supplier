@@ -1,7 +1,5 @@
 package com.huoli.trip.supplier.self.lvmama.vo;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
 import java.util.List;
@@ -22,5 +20,5 @@ public class LmmBaseResponse {
     private long totalPage;
 
     // todo 景点列表
-    private List<LmmScenic>
+    private List<LmmScenic> scenicNameList;
 }
