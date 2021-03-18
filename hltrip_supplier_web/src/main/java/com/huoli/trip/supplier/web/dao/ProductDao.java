@@ -108,8 +108,8 @@ public interface ProductDao {
     /**
      * 更新appfrom
      * @param code
-     * @param appFroms
+     * @param appFrom
      */
-    void updateAppFromByCode(String code, List<String> appFroms);
+    void updateAppFromByCode(String code, String appFrom);
 
 }

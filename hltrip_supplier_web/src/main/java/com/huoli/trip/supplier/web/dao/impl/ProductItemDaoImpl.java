@@ -4,6 +4,7 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.PriceInfoPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -67,6 +69,17 @@ public class ProductItemDaoImpl implements ProductItemDao {
         query.fields().include("code").exclude("_id");
         List<ProductItemPO> productItems = mongoTemplate.find(query, ProductItemPO.class);
         return productItems;
+    }
+
+    @Override
+    public List<String> selectCodesBySupplierId(String supplierId){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId));
+        query.fields().include("code");
+        List<ProductItemPO> productItems = mongoTemplate.find(query, ProductItemPO.class);
+        if(ListUtils.isNotEmpty(productItems)){
+            return productItems.stream().map(ProductItemPO::getCode).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }
