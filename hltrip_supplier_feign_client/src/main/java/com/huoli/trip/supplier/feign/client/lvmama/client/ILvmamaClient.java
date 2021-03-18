@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.feign.client.lvmama.client;
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
         /*,configuration = YaoChuFaFeignInterceptor.class*/
         ,fallbackFactory = LvmamaClientFallback.class)
 public interface ILvmamaClient {
+
+    /**
+     * 订单详情
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
+    LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request);
 
     /**
      * 可预订检查
