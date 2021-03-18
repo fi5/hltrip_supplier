@@ -1,7 +1,5 @@
 package com.huoli.trip.supplier.self.lvmama.vo;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
 /**
@@ -18,18 +16,15 @@ public class LmmState {
     /**
      * 状态码
      */
-    @JacksonXmlProperty(localName = "code")
     private String code;
 
     /**
      * 状态描述
      */
-    @JacksonXmlProperty(localName = "message")
     private String message;
 
     /**
      * 信息描述
      */
-    @JacksonXmlProperty(localName = "solution")
     private String solution;
 }
