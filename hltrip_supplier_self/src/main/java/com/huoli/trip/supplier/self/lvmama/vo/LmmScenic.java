@@ -58,7 +58,7 @@ public class LmmScenic {
     /**
      * 景区营业时间列表
      */
-    private List<OpenTime> openTimes;
+    private List<LmmOpenTime> openTimes;
 
     /**
      * 所属镇和街道
@@ -94,27 +94,6 @@ public class LmmScenic {
      * 景区经纬度(谷歌)
      */
     private Coordinate googleData;
-
-
-    @Getter
-    @Setter
-    public class OpenTime{
-
-        /**
-         * 景区营业时间描述
-         */
-        private String openTimeInfo;
-
-        /**
-         * 景区营业开始时间
-         */
-        private String sightStart;
-
-        /**
-         * 景区营业结束时间
-         */
-        private String sightEnd;
-    }
 
     @Getter
     @Setter

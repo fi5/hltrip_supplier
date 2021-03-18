@@ -1,11 +1,9 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,13 +32,19 @@ public interface ILvmamaClient {
      * 批量获取景区
      */
     @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
-    LmmScenicResponse getScenicList(@RequestBody LmmScenicListRequest request);
+    LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request);
 
     /**
      * 按id获取景区
      */
     @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
-    LmmScenicResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request);
+    LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request);
+
+    /**
+     * 批量获取产品
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/productInfoListByPage")
+    LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request);
 
     /**
      * 可预订检查

@@ -2,7 +2,7 @@ package com.huoli.trip.supplier.web.lvmama.task;
 
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
-import com.huoli.trip.supplier.web.lvmama.service.LmmScenicService;
+import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class LmmTicketTask {
     private String schedule;
 
     @Autowired
-    private LmmScenicService lmmScenicService;
+    private LmmSyncService lmmScenicService;
 
     /**
      * 只更新本地已有景点

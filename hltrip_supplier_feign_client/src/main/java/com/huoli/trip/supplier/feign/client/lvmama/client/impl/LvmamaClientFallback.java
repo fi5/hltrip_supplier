@@ -1,11 +1,9 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
-import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.*;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,12 +32,17 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
         return new ILvmamaClient() {
 
             @Override
-            public LmmScenicResponse getScenicList(@RequestBody LmmScenicListRequest request){
+            public LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request){
                 return null;
             }
 
             @Override
-            public LmmScenicResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request){
+            public LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request){
+                return null;
+            }
+
+            @Override
+            public LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request){
                 return null;
             }
 

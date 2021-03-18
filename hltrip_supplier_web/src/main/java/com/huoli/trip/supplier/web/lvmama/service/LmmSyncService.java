@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.lvmama.service;
 
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListByIdRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.request.LmmListBaseRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  * 版本：1.0<br>
  * 创建日期：2021/3/17<br>
  */
-public interface LmmScenicService {
+public interface LmmSyncService {
 
     /**
      * 同步景点

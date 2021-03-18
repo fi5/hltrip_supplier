@@ -1,7 +1,6 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
 import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.ImageBasePO;
 import com.huoli.trip.common.entity.ItemFeaturePO;
 import com.huoli.trip.common.entity.ProductItemPO;
@@ -10,13 +9,14 @@ import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListByIdRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
-import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
-import com.huoli.trip.supplier.web.dao.ProductDao;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmProductListResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
-import com.huoli.trip.supplier.web.lvmama.service.LmmScenicService;
+import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +36,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class LmmScenicServiceImpl implements LmmScenicService {
+public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ILvmamaClient lvmamaClient;
@@ -52,13 +52,13 @@ public class LmmScenicServiceImpl implements LmmScenicService {
 
     @Override
     public boolean syncScenicList(LmmScenicListRequest request){
-        LmmScenicResponse lmmScenicResponse = lvmamaClient.getScenicList(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request);
         return updateScenic(lmmScenicResponse);
     }
 
     @Override
     public void syncScenicListById(LmmScenicListByIdRequest request){
-        LmmScenicResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
         updateScenic(lmmScenicResponse);
     }
 
@@ -66,7 +66,7 @@ public class LmmScenicServiceImpl implements LmmScenicService {
     public void syncScenicListById(String id){
         LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
         request.setScenicId(id);
-        LmmScenicResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
         updateScenic(lmmScenicResponse);
     }
 
@@ -76,7 +76,7 @@ public class LmmScenicServiceImpl implements LmmScenicService {
                 Constants.PRODUCT_ITEM_TYPE_TICKET);
     }
 
-    private boolean updateScenic(LmmScenicResponse lmmScenicResponse){
+    private boolean updateScenic(LmmScenicListResponse lmmScenicResponse){
         if(lmmScenicResponse == null){
             log.error("驴妈妈景点列表接口返回空");
             return false;
@@ -134,5 +134,47 @@ public class LmmScenicServiceImpl implements LmmScenicService {
             productItemDao.updateByCode(newItem);
         });
         return true;
+    }
+
+    public boolean syncProductList(LmmProductListRequest request){
+        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request);
+        if(lmmProductListResponse == null){
+            log.error("驴妈妈产品列表接口返回空");
+            return false;
+        }
+        if(lmmProductListResponse.getState() == null){
+            log.error("驴妈妈产品列表接口返回状态为空");
+            return false;
+        }
+        if(!StringUtils.equals(lmmProductListResponse.getState().getCode(), "1000")){
+            log.error("驴妈妈产品列表接口返回失败，code={}, message={}, solution={}",
+                    lmmProductListResponse.getState().getCode(), lmmProductListResponse.getState().getMessage(),
+                    lmmProductListResponse.getState().getSolution());
+            return false;
+        }
+        if(ListUtils.isEmpty(lmmProductListResponse.getProductList())){
+            log.error("驴妈妈产品列表接口返回的数据为空");
+            return false;
+        }
+        if(ListUtils.isEmpty(lmmProductListResponse.getProductList())){
+            log.error("驴妈妈产品列表接口返回的数据为空");
+            return false;
+        }
+        lmmProductListResponse.getProductList().forEach(p -> {
+            if(ListUtils.isEmpty(p.getGoodsList())){
+                log.error("产品{},{}的商品列表为空，跳过。。", p.getProductId(), p.getProductName());
+                return;
+            }
+            p.getGoodsList().forEach(g -> {
+                if(StringUtils.equals(g.getTicketSeason(), "true")){
+                    log.info("跳过场次票，productId={}, goodsId={}");
+                    return;
+                }
+                ProductPO productPO = LmmTicketConverter.convertToProductPO(p, g);
+                productPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                // todo 还有些通用属性需要设置
+            });
+        });
+        return false;
     }
 }

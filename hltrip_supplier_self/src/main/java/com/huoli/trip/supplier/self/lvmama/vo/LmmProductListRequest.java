@@ -1,5 +1,6 @@
-package com.huoli.trip.supplier.self.lvmama.vo.response;
+package com.huoli.trip.supplier.self.lvmama.vo;
 
+import com.huoli.trip.supplier.self.lvmama.vo.request.LmmListBaseRequest;
 import lombok.Data;
 
 /**
@@ -11,12 +12,5 @@ import lombok.Data;
  * 创建日期：2021/3/18<br>
  */
 @Data
-public class LmmProductResponse extends LmmBaseResponse{
-
-    /**
-     * 总页数
-     */
-    private long totalPage;
-
-
+public class LmmProductListRequest extends LmmListBaseRequest {
 }

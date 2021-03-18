@@ -14,9 +14,7 @@ import java.util.List;
  * 创建日期：2021/3/15<br>
  */
 @Data
-public class LmmScenicResponse extends LmmBaseResponse {
-
-    private long totalPage;
+public class LmmScenicListResponse extends LmmListBaseResponse {
 
     /**
      * 景点列表
