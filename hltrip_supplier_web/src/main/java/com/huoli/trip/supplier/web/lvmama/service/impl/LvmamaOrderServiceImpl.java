@@ -20,6 +20,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
@@ -57,7 +58,14 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Override
     public BaseResponse<LvOrderDetail> orderDetail(BaseOrderRequest request) {
         try {
-            LvOrderDetail detail=new LvOrderDetail();
+
+            LmmOrderDetailRequest lmmDetailReq=new LmmOrderDetailRequest();
+            LmmOrderDetailRequest.LmmOrderReq reqInnerOrder=new LmmOrderDetailRequest.LmmOrderReq();
+            reqInnerOrder.setPartnerOrderNos(request.getOrderId());
+            lmmDetailReq.setOrder(reqInnerOrder);
+
+            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(lmmDetailReq);
+            LvOrderDetail detail=lmmOrderDetailResponse.getOrder();
             String gjStatus="待确认";
             if(StringUtils.equals(detail.getPaymentStatus(),"PAYED")){
                 if(StringUtils.equals(detail.getCredenctStatus(),"CREDENCE_SEND"))
