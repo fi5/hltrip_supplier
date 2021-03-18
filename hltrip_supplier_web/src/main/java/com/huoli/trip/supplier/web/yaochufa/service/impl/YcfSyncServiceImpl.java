@@ -196,6 +196,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         productItemPO.setProduct(exist.getProduct());
                         commonService.compareProductItem(productItemPO);
                     }
+                    productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+                    productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
                     try {
                         commonService.saveBackupProductItem(productItemPO);
                     } catch (Exception e) {
@@ -208,12 +211,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     productItemPO.setImages(images);
                     productItemPO.setMainImages(mainImages);
                     if(ListUtils.isEmpty(productItemPO.getImages()) && ListUtils.isEmpty(productItemPO.getMainImages())){
-                        log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                        log.info("{}没有列表图、轮播图，设置待审核", productItemPO.getCode());
                         productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                     }
-                    productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
-                    productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
                     productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {

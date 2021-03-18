@@ -30,11 +30,17 @@ public interface ILvmamaClient {
     @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request);
 
-    /*
-     * 获取景区列表
+    /**
+     * 批量获取景区
      */
     @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
-    LmmScenicResponse getScenicList(@RequestBody LmmScenicRequest request);
+    LmmScenicResponse getScenicList(@RequestBody LmmScenicListRequest request);
+
+    /**
+     * 按id获取景区
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    LmmScenicResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request);
 
     /**
      * 可预订检查

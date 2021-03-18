@@ -12,10 +12,10 @@ import lombok.Data;
  * 创建日期：2021/3/17<br>
  */
 @Data
-public class LmmScenicRequest extends LmmBaseRequest {
+public class LmmScenicListByIdRequest extends LmmBaseRequest {
 
     /**
-     * 当前页数
+     * 景区id,支持多个","分隔
      */
-    private int currentPage = 1;
+    private String scenicId;
 }

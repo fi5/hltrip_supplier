@@ -82,4 +82,15 @@ public class ProductItemDaoImpl implements ProductItemDao {
         return null;
     }
 
+    @Override
+    public List<String> selectSupplierItemIdsBySupplierIdAndType(String supplierId, Integer itemType){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("itemType").is(itemType));
+        query.fields().include("supplierItemId").exclude("_id");
+        List<ProductItemPO> productItemPOs = mongoTemplate.find(query, ProductItemPO.class);
+        if(ListUtils.isNotEmpty(productItemPOs)){
+            return productItemPOs.stream().map(ProductItemPO::getSupplierItemId).collect(Collectors.toList());
+        }
+        return null;
+    }
+
 }

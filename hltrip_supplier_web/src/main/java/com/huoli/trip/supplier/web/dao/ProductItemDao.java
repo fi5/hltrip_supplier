@@ -58,4 +58,12 @@ public interface ProductItemDao {
      */
     List<String> selectCodesBySupplierId(String supplierId);
 
+    /**
+     * 获取渠道item编码
+     * @param supplierId
+     * @param itemType
+     * @return
+     */
+    List<String> selectSupplierItemIdsBySupplierIdAndType(String supplierId, Integer itemType);
+
 }

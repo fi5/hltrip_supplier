@@ -1,6 +1,5 @@
 package com.huoli.trip.supplier.web.difengyun.task;
 
-import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.ListUtils;

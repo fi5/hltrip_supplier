@@ -34,9 +34,15 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
         return new ILvmamaClient() {
 
             @Override
-            public LmmScenicResponse getScenicList(@RequestBody LmmScenicRequest request){
+            public LmmScenicResponse getScenicList(@RequestBody LmmScenicListRequest request){
                 return null;
             }
+
+            @Override
+            public LmmScenicResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request){
+                return null;
+            }
+
             @Override
             public LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request) {
                 return null;

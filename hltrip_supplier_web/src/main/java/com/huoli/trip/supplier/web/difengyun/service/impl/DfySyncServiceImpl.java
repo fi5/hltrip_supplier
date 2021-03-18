@@ -135,7 +135,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             newProductItem.setImages(images);
             newProductItem.setMainImages(mainImages);
             if(ListUtils.isEmpty(newProductItem.getImages()) && ListUtils.isEmpty(newProductItem.getMainImages())){
-                log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                log.info("{}没有列表图、轮播图，设置待审核", newProductItem.getCode());
                 newProductItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
             productItemDao.updateByCode(newProductItem);
@@ -464,17 +464,17 @@ public class DfySyncServiceImpl implements DfySyncService {
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
         productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
+        // 保存副本
+        commonService.saveBackupProductItem(productItem);
         productItem.setProduct(productPO);
         productItem.setImageDetails(imageDetails);
         productItem.setImages(images);
         productItem.setMainImages(mainImages);
         if(ListUtils.isEmpty(productItem.getImages()) && ListUtils.isEmpty(productItem.getMainImages())){
-            log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+            log.info("{}没有列表图、轮播图，设置待审核", productItem.getCode());
             productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
         }
         productItemDao.updateByCode(productItem);
-        // 保存副本
-        commonService.saveBackupProductItem(productItem);
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
         List<String> cityNames = Lists.newArrayList(productItemPO.getOriCity().split(","));
