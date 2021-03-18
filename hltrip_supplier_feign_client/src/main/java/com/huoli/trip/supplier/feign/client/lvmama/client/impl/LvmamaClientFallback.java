@@ -1,5 +1,8 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
+import com.huoli.trip.supplier.self.lvmama.vo.request.*;
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
