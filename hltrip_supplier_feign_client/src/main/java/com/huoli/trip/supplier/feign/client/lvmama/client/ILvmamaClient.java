@@ -3,7 +3,11 @@ package com.huoli.trip.supplier.feign.client.lvmama.client;
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+<<<<<<< HEAD
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmOrderDetailResponse;
+=======
+import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicResponse;
+>>>>>>> 0c3ab7e6fa87ad82e86460acb08f5d80042b5b07
 import com.huoli.trip.supplier.self.lvmama.vo.response.OrderResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +32,12 @@ public interface ILvmamaClient {
      */
     @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request);
+
+    /*
+     * 获取景区列表
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    LmmScenicResponse getScenicList(@RequestBody LmmScenicRequest request);
 
     /**
      * 可预订检查

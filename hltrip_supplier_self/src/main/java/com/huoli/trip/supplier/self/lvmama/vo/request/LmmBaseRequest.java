@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.self.lvmama.vo.request;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
@@ -9,9 +11,10 @@ import java.io.Serializable;
  * @Description:
  * @date 2021/3/1514:58
  */
-public class BaseRequest implements Serializable {
+@Data
+public class LmmBaseRequest implements Serializable {
     private String appKey;
     private String timestamp;
-    private String messageFormat;
+    private String messageFormat = "json";
     private String sign;
 }
