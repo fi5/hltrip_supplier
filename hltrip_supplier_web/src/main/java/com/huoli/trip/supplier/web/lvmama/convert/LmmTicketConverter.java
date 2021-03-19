@@ -96,6 +96,8 @@ public class LmmTicketConverter {
         productItemPO.setTown(lmmScenic.getPlaceTown());
         productItemPO.setDistrict(lmmScenic.getPlaceXian());
         productItemPO.setCity(lmmScenic.getPlaceCity());
+        productItemPO.setDesCity(lmmScenic.getPlaceCity());
+        productItemPO.setOriCity(lmmScenic.getPlaceCity());
         productItemPO.setProvince(lmmScenic.getPlaceProvince());
         productItemPO.setCountry(lmmScenic.getPlaceCountry());
         if(lmmScenic.getBaiduData() != null){
@@ -258,6 +260,9 @@ public class LmmTicketConverter {
                     break;
             }
             ticketInfoPO.setTicketType(ticketType);
+            TicketPO ticketPO = new TicketPO();
+            ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
+            productPO.setTicket(ticketPO);
         }
         // todo 入园地点、票种说明、通关时间、限购说明 现在没有
         BookRulePO booker = new BookRulePO();
@@ -331,4 +336,6 @@ public class LmmTicketConverter {
         productPO.setBookRules(bookRulePOs);
         return productPO;
     }
+
+
 }

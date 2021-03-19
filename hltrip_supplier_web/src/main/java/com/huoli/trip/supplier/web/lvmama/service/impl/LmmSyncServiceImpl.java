@@ -1,10 +1,10 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
+import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.entity.ImageBasePO;
-import com.huoli.trip.common.entity.ItemFeaturePO;
-import com.huoli.trip.common.entity.ProductItemPO;
-import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
@@ -14,6 +14,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListByIdRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmProductListResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
+import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
@@ -23,8 +24,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
 
 /**
  * 描述：<br/>
@@ -43,6 +48,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ProductItemDao productItemDao;
+
+    @Autowired
+    private ProductDao productDao;
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
@@ -136,7 +144,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return true;
     }
 
-    public boolean syncProductList(LmmProductListRequest request){
+    public boolean syncProductList(LmmProductListRequest request, int syncMode){
         LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request);
         if(lmmProductListResponse == null){
             log.error("驴妈妈产品列表接口返回空");
@@ -165,14 +173,78 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 log.error("产品{},{}的商品列表为空，跳过。。", p.getProductId(), p.getProductName());
                 return;
             }
+            String itemCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, p.getPlaceId());
             p.getGoodsList().forEach(g -> {
                 if(StringUtils.equals(g.getTicketSeason(), "true")){
                     log.info("跳过场次票，productId={}, goodsId={}");
                     return;
                 }
-                ProductPO productPO = LmmTicketConverter.convertToProductPO(p, g);
-                productPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
-                // todo 还有些通用属性需要设置
+                ProductPO newProduct = LmmTicketConverter.convertToProductPO(p, g);
+                ProductItemPO productItemPO = productItemDao.selectByCode(itemCode);
+                newProduct.setMainItemCode(productItemPO.getCode());
+                newProduct.setMainItem(productItemPO);
+                newProduct.setCity(productItemPO.getCity());
+                newProduct.setDesCity(productItemPO.getDesCity());
+                newProduct.setOriCity(productItemPO.getOriCity());
+                if(newProduct.getTicket() != null && ListUtils.isNotEmpty(newProduct.getTicket().getTickets())){
+                    for (TicketInfoPO ticket : newProduct.getTicket().getTickets()) {
+                        ticket.setItemId(productItemPO.getCode());
+                        ticket.setProductItem(productItemPO);
+                    }
+                }
+                ProductPO oldProduct = productDao.getByCode(newProduct.getCode());
+                // 是否只同步本地没有的产品
+                if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null){
+                    log.error("笛风云，本次同步不包括更新本地产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
+                    return;
+                }
+                if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && oldProduct == null){
+                    log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
+                    return;
+                }
+                newProduct.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newProduct.setOperator(Constants.SUPPLIER_CODE_LMM_TICKET);
+                newProduct.setOperatorName(Constants.SUPPLIER_NAME_LMM_TICKET);
+                newProduct.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+                log.info("准备更新价格。。。");
+                if(ListUtils.isNotEmpty(ticketDetailDfyBaseResult.getData().getPriceCalendar())){
+                    log.info("有价格信息。。。");
+                    PricePO pricePO = syncPrice(product.getCode(), ticketDetailDfyBaseResult.getData().getPriceCalendar());
+                    if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
+                        // 笛风云没有上下架时间，就把最远的销售日期作为下架时间
+                        PriceInfoPO priceInfoPO = pricePO.getPriceInfos().stream().max(Comparator.comparing(PriceInfoPO::getSaleDate)).get();
+                        product.setInvalidTime(MongoDateUtils.handleTimezoneInput(priceInfoPO.getSaleDate()));
+                    }
+                } else {
+                    product.setInvalidTime(MongoDateUtils.handleTimezoneInput(product.getValidTime()));
+                    log.error("没有价格信息。。。。");
+                }
+                if(oldProduct == null){
+                    newProduct.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    // todo 暂时默认通过
+//                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                    newProduct.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                    newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
+                    BackChannelEntry backChannelEntry = commonService.getSupplierById(newProduct.getSupplierId());
+                    if(backChannelEntry == null
+                            || backChannelEntry.getStatus() == null
+                            || backChannelEntry.getStatus() != 1){
+                        newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                    }
+                } else {
+                    newProduct.setAuditStatus(oldProduct.getAuditStatus());
+                    newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
+                    newProduct.setRecommendFlag(oldProduct.getRecommendFlag());
+                    newProduct.setAppFrom(oldProduct.getAppFrom());
+                    newProduct.setBookDescList(oldProduct.getBookDescList());
+                    newProduct.setDescriptions(oldProduct.getDescriptions());
+                    newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
+                    commonService.compareProduct(newProduct);
+                }
+                productDao.updateByCode(newProduct);
+                dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(newProduct.getCode()));
+                // 保存副本
+                commonService.saveBackupProduct(newProduct);
             });
         });
         return false;
