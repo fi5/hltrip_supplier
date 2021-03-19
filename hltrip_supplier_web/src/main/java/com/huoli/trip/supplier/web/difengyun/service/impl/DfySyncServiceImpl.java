@@ -244,6 +244,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setAuditStatus(productPO.getAuditStatus());
                 product.setSupplierStatus(productPO.getSupplierStatus());
                 product.setRecommendFlag(productPO.getRecommendFlag());
+                product.setAppFrom(productPO.getAppFrom());
+                product.setBookDescList(productPO.getBookDescList());
+                product.setDescriptions(productPO.getDescriptions());
+                product.setBookNoticeList(productPO.getBookNoticeList());
                 commonService.compareProduct(product);
             }
             productDao.updateByCode(product);
@@ -513,6 +517,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setSupplierStatus(oldProduct.getSupplierStatus());
                 product.setAuditStatus(oldProduct.getAuditStatus());
                 product.setRecommendFlag(oldProduct.getRecommendFlag());
+                product.setAppFrom(productPO.getAppFrom());
+                product.setBookDescList(productPO.getBookDescList());
+                product.setDescriptions(productPO.getDescriptions());
+                product.setBookNoticeList(productPO.getBookNoticeList());
                 commonService.compareToursProduct(product);
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
