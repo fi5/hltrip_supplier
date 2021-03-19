@@ -88,31 +88,35 @@ public class DynamicProductItemServiceImpl implements DynamicProductItemService 
             return;
         }
         ProductPO oriPro = productItemPO.getProduct();
-        String oriCode = null;
-        String oriSalePrice = null;
-        String oriSaleDate = null;
-        if(oriPro != null){
-            PriceInfoPO oriPrice = oriPro.getPriceCalendar().getPriceInfos();
-            if(oriPrice != null
-                    && StringUtils.isNotBlank(oriPro.getCode())
-                    && oriPrice.getSalePrice() != null
-                    && oriPrice.getSaleDate() != null){
-                oriCode = oriPro.getCode();
-                oriSalePrice = oriPrice.getSalePrice().toPlainString();
-                oriSaleDate = DateTimeUtil.formatDate(oriPrice.getSaleDate());
-                if(StringUtils.equals(oriPro.getCode(), productPO.getCode())
-                        && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()
-                        && oriPrice.getSaleDate().getTime() == productPO.getPriceCalendar().getPriceInfos().getSaleDate().getTime()){
-                    log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}, saleDate={}",
-                            code, oriCode, oriSalePrice, oriSaleDate);
-                    return;
-                }
-            }
-        }
-        log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}, 原saleDate={}, 新productCode={}, 新salePrice={}, 新saleDate={}",
-                code, oriCode, oriSalePrice, oriSaleDate,
-                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toPlainString(),
-                DateTimeUtil.formatDate(productPO.getPriceCalendar().getPriceInfos().getSaleDate()));
+//        String oriCode = null;
+//        String oriSalePrice = null;
+//        String oriSaleDate = null;
+        // 因为现在涉及到很多状态需要同步，不止价格，所以每次都更新
+//        if(oriPro != null){
+//            PriceInfoPO oriPrice = oriPro.getPriceCalendar().getPriceInfos();
+//            if(oriPrice != null
+//                    && StringUtils.isNotBlank(oriPro.getCode())
+//                    && oriPrice.getSalePrice() != null
+//                    && oriPrice.getSaleDate() != null){
+//                oriCode = oriPro.getCode();
+//                oriSalePrice = oriPrice.getSalePrice().toPlainString();
+//                oriSaleDate = DateTimeUtil.formatDate(oriPrice.getSaleDate());
+//
+//                if(StringUtils.equals(oriPro.getCode(), productPO.getCode())
+//                        && oriPrice.getSalePrice().doubleValue() == productPO.getPriceCalendar().getPriceInfos().getSalePrice().doubleValue()
+//                        && oriPrice.getSaleDate().getTime() == productPO.getPriceCalendar().getPriceInfos().getSaleDate().getTime()){
+//                    log.info("item={}最低价产品没有变化不用刷新，productCode={}, salePrice={}, saleDate={}",
+//                            code, oriCode, oriSalePrice, oriSaleDate);
+//                    return;
+//                }
+//            }
+//        }
+//        log.info("item={}最低价产品有变化需要刷新，原productCode={}, 原salePrice={}, 原saleDate={}, 新productCode={}, 新salePrice={}, 新saleDate={}",
+//                code, oriCode, oriSalePrice, oriSaleDate,
+//                productPO.getCode(), productPO.getPriceCalendar().getPriceInfos().getSalePrice().toPlainString(),
+//                DateTimeUtil.formatDate(productPO.getPriceCalendar().getPriceInfos().getSaleDate()));
+        log.info("item={}刷新，原product={}, 新product={}",
+                code, JSON.toJSONString(oriPro), JSON.toJSONString(productPO));
         productItemDao.updateItemProductByCode(code, productPO);
     }
 }

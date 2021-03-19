@@ -136,6 +136,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 productPO.setAuditStatus(exist.getAuditStatus());
                 productPO.setSupplierStatus(exist.getSupplierStatus());
                 productPO.setRecommendFlag(exist.getRecommendFlag());
+                productPO.setAppFrom(exist.getAppFrom());
+                productPO.setBookDescList(exist.getBookDescList());
+                productPO.setDescriptions(exist.getDescriptions());
+                productPO.setBookNoticeList(exist.getBookNoticeList());
                 commonService.compareProduct(productPO);
             }
             productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
