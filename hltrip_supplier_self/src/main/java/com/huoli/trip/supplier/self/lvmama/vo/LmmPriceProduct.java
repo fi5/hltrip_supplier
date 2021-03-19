@@ -53,7 +53,9 @@ public class LmmPriceProduct {
          */
         private String commentsCashback;
 
-
+        /**
+         * 价格
+         */
         private List<LmmPrice> prices;
     }
 }

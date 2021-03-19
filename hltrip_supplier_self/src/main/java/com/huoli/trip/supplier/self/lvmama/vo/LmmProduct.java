@@ -91,10 +91,14 @@ public class LmmProduct {
     private List<String> images;
 
     /**
-     * 商品信息
-     * 数据库中需要设置例外
+     * 商品信息，分页获取product的时候返回goods对象
      */
     private  List<LmmGoods> goodsList;
+
+    /**
+     * 产品包含商品列表，根据id获取product的时候返回的只有goodsid
+     */
+    private String goodsIds;
 
     @Setter
     @Getter

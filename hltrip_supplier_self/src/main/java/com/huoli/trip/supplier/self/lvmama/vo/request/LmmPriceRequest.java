@@ -13,4 +13,18 @@ import lombok.Data;
 @Data
 public class LmmPriceRequest extends LmmBaseRequest{
 
+    /**
+     * 商品 ID(多个以英文逗号分割)
+     */
+    private String goodsIds;
+
+    /**
+     * 产品价格:开始间 yyyy-MM-dd
+     */
+    private String beginDate;
+
+    /**
+     * 产品价格:结束时间 yyyy-MM-dd
+     */
+    private String endDate;
 }

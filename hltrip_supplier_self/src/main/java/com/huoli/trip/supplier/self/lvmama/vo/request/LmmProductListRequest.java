@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.self.lvmama.vo;
+package com.huoli.trip.supplier.self.lvmama.vo.request;
 
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmListBaseRequest;
 import lombok.Data;

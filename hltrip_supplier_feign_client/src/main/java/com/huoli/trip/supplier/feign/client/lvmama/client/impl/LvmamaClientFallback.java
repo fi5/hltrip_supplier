@@ -1,7 +1,7 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
-import com.huoli.trip.supplier.self.lvmama.vo.LmmProductListRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.request.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.*;
 import feign.hystrix.FallbackFactory;
@@ -43,6 +43,21 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
 
             @Override
             public LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request){
+                return null;
+            }
+
+            @Override
+            public LmmProductListResponse getProductListById(@RequestBody LmmProductListByIdRequest request){
+                return null;
+            }
+
+            @Override
+            public LmmGoodsListByIdResponse getGoodsListById(@RequestBody LmmGoodsListByIdRequest request){
+                return null;
+            }
+
+            @Override
+            public LmmPriceResponse getPriceList(@RequestBody LmmPriceRequest request){
                 return null;
             }
 
