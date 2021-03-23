@@ -243,7 +243,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
-                    productPO.setAppFrom(appFroms);
+                    product.setAppFrom(appFroms);
                 }
             } else {
                 product.setAuditStatus(productPO.getAuditStatus());
@@ -520,7 +520,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
-                    productPO.setAppFrom(appFroms);
+                    product.setAppFrom(appFroms);
                 }
             } else {
                 product.setSupplierStatus(oldProduct.getSupplierStatus());
