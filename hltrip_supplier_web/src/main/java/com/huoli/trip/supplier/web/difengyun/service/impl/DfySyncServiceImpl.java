@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -239,6 +240,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                         || backChannelEntry.getStatus() == null
                         || backChannelEntry.getStatus() != 1){
                     product.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                }
+                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                    productPO.setAppFrom(appFroms);
                 }
             } else {
                 product.setAuditStatus(productPO.getAuditStatus());
@@ -512,6 +517,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                         || backChannelEntry.getStatus() == null
                         || backChannelEntry.getStatus() != 1){
                     product.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                }
+                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                    productPO.setAppFrom(appFroms);
                 }
             } else {
                 product.setSupplierStatus(oldProduct.getSupplierStatus());

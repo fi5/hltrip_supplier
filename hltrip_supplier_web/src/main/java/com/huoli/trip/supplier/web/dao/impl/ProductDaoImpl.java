@@ -108,7 +108,7 @@ public class ProductDaoImpl implements ProductDao {
                 .and("remove").is(0)
                 .and("priceCalendar.priceInfos.stock").gt(0)
                 .and("priceCalendar.priceInfos.saleDate").gte(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())))
-                .and("priceCalendar.priceInfos.salePrice").ne(null);
+                .and("priceCalendar.priceInfos.salePrice").gt(0);
         MatchOperation matchOperation = Aggregation.match(criteria);
         // 指定字段
         ProjectionOperation projectionOperation = Aggregation.project(getProductListFields()).andExclude("_id");
