@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -130,6 +131,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         || backChannelEntry.getStatus() == null
                         || backChannelEntry.getStatus() != 1){
                     productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                }
+                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                    productPO.setAppFrom(appFroms);
                 }
             } else {
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
