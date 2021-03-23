@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -336,6 +337,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                             || backChannelEntry.getStatus() == null
                             || backChannelEntry.getStatus() != 1){
                         newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                    }
+                    if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                        List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                        newProduct.setAppFrom(appFroms);
                     }
                 } else {
                     newProduct.setAuditStatus(oldProduct.getAuditStatus());
