@@ -1,8 +1,13 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -15,12 +20,12 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmGoodsListByIdResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmPriceResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmProductListResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
-import com.huoli.trip.supplier.web.dao.PriceDao;
-import com.huoli.trip.supplier.web.dao.ProductDao;
-import com.huoli.trip.supplier.web.dao.ProductItemDao;
+import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
+import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
+import com.huoli.trip.supplier.web.service.ScenicSpotProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +70,21 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private PriceDao priceDao;
+
+    @Autowired
+    private ChinaCityMapper chinaCityMapper;
+
+    @Autowired
+    private ScenicSpotMappingDao scenicSpotMappingDao;
+
+    @Autowired
+    private ScenicSpotDao scenicSpotDao;
+
+    @Autowired
+    private ScenicSpotBackupDao scenicSpotBackupDao;
+
+    @Autowired
+    private ScenicSpotProductDao scenicSpotProductDao;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -152,6 +172,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             return null;
         }
         return lmmProductListResponse.getProductList();
+    }
+
+    @Override
+    public List<LmmGoods> getGoodsListById(String goodsId) {
+        LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
+        request.setGoodsIds(goodsId);
+        return getGoodsListById(request);
     }
 
     @Override
@@ -534,5 +561,142 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             });
         });
         return true;
+    }
+
+
+
+    // ==================================↓↓↓新结构↓↓↓===============================
+
+    @Override
+    public boolean syncScenicListV2(LmmScenicListRequest request){
+        List<LmmScenic> lmmScenicList = getScenicList(request);
+        syncScenic(lmmScenicList);
+        return true;
+    }
+
+    @Override
+    public void syncScenicListByIdV2(LmmScenicListByIdRequest request){
+        List<LmmScenic> lmmScenicList = getScenicListById(request);
+        syncScenic(lmmScenicList);
+    }
+
+    @Override
+    public void syncScenicListByIdV2(String id){
+        LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
+        request.setScenicId(id);
+        List<LmmScenic> lmmScenicList = getScenicListById(request);
+        syncScenic(lmmScenicList);
+    }
+
+    public void syncProduct(LmmProduct lmmProduct){
+
+        ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(lmmProduct.getProductId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+        if(scenicSpotProductMPO == null){
+            scenicSpotProductMPO = new ScenicSpotProductMPO();
+            scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+            if(scenicSpotMappingMPO == null){
+                log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
+                return;
+            }
+            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+            if(scenicSpotMPO == null){
+                log.error("景点{}不存在", scenicSpotMPO.getId());
+                return;
+            }
+            scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+            scenicSpotProductMPO.setImages(lmmProduct.getImages());
+            if(ListUtils.isNotEmpty(lmmProduct.getGoodsList())){
+                lmmProduct.getGoodsList().forEach(g -> {
+                    g.get
+                });
+            }
+            // todo 把商品拆改对应到product上
+//            scenicSpotProductMPO.set
+        }
+        scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+
+    }
+
+    private void syncScenic(List<LmmScenic> lmmScenicList){
+        if(ListUtils.isNotEmpty(lmmScenicList)){
+            lmmScenicList.forEach(s -> syncScenic(s));
+        }
+    }
+
+    private void syncScenic(LmmScenic lmmScenic){
+        // 转本地结构
+        ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
+        // 设置省市区
+        setCity(newScenic);
+        // 更新备份
+        updateBackup(newScenic, lmmScenic);
+        // 查映射关系
+        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
+        if(scenicSpotMappingMPO != null){
+            return;
+        }
+        // 没有找到映射就往本地新增一条
+        ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
+        // 同时保存映射关系
+        updateMapping(lmmScenic, addScenic.getId());
+    }
+
+    private void updateMapping(LmmScenic lmmScenic, String ScenicSpotId){
+        ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
+        scenicSpotMappingMPO.setChannelScenicSpotId(lmmScenic.getScenicId().toString());
+        scenicSpotMappingMPO.setScenicSpotId(ScenicSpotId);
+        scenicSpotMappingMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+        scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
+    }
+
+    private void updateBackup(ScenicSpotMPO newScenic, LmmScenic lmmScenic){
+        ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
+        scenicSpotBackupMPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
+        scenicSpotBackupMPO.setSupplierScenicId(lmmScenic.getScenicId().toString());
+        scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(lmmScenic));
+        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
+        if(exist == null){
+            scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        }
+        scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
+    }
+
+    private void setCity(ScenicSpotMPO scenic){
+        if(scenic == null){
+            return;
+        }
+        String provinceCode = null;
+        String cityCode = null;
+        if(StringUtils.isNotBlank(scenic.getProvince())){
+            if(scenic.getProvince().endsWith("省")){
+                scenic.setProvince(scenic.getProvince().substring(0, scenic.getProvince().length() - 1));
+            }
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getProvince(), 1, null);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                provinceCode = chinaCities.get(0).getCode();
+                scenic.setProvinceCode(provinceCode);
+            }
+        }
+        if(StringUtils.isNotBlank(scenic.getCity())){
+            if(scenic.getCity().endsWith("市")){
+                scenic.setCity(scenic.getCity().substring(0, scenic.getCity().length() - 1));
+            }
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getCity(), 2, provinceCode);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                cityCode = chinaCities.get(0).getCode();
+                scenic.setCityCode(cityCode);
+            }
+        }
+        if(StringUtils.isNotBlank(scenic.getDistrict())){
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getDistrict(), 3, cityCode);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                scenic.setDistrictCode(chinaCities.get(0).getCode());
+            }
+        }
     }
 }

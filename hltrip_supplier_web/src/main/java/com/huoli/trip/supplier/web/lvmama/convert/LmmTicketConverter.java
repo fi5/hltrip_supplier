@@ -7,6 +7,9 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
@@ -14,6 +17,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import org.apache.commons.lang3.StringUtils;
+import sun.awt.motif.X11CNS11643;
 
 import java.util.Arrays;
 import java.util.List;
@@ -337,5 +341,45 @@ public class LmmTicketConverter {
         return productPO;
     }
 
+
+    // ==================================↓↓↓新结构↓↓↓===============================
+
+
+    public static ScenicSpotMPO convertToScenicSpotMPO(LmmScenic lmmScenic){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
+        scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
+        scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
+        scenicSpotMPO.setName(lmmScenic.getScenicName());
+        scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());
+        scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData()));
+        scenicSpotMPO.setCountry(lmmScenic.getPlaceCountry());
+        scenicSpotMPO.setProvince(lmmScenic.getPlaceProvince());
+        scenicSpotMPO.setLevel(lmmScenic.getPlaceLevel());
+        scenicSpotMPO.setTheme(lmmScenic.getPlaceAct());
+        if(ListUtils.isNotEmpty(lmmScenic.getOpenTimes())){
+            List<ScenicSpotOpenTime> openTimes = lmmScenic.getOpenTimes().stream().map(o -> convertToScenicSpotOpenTime(o)).collect(Collectors.toList());
+            scenicSpotMPO.setScenicSpotOpenTimes(openTimes);
+        }
+        return scenicSpotMPO;
+    }
+
+    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate){
+        if(lmmCoordinate == null){
+            return null;
+        }
+        Coordinate coordinate = new Coordinate();
+        coordinate.setLatitude(lmmCoordinate.getLatitude());
+        coordinate.setLongitude(lmmCoordinate.getLongitude());
+        return coordinate;
+    }
+
+    public static ScenicSpotOpenTime convertToScenicSpotOpenTime(LmmOpenTime lmmOpenTime){
+        ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
+        scenicSpotOpenTime.setOpenTimeDesc(lmmOpenTime.getOpenTimeInfo());
+        scenicSpotOpenTime.setStartTime(lmmOpenTime.getSightStart());
+        scenicSpotOpenTime.setEndTime(lmmOpenTime.getSightEnd());
+        return scenicSpotOpenTime;
+    }
 
 }

@@ -92,6 +92,13 @@ public interface LmmSyncService {
     List<LmmProduct> getProductListById(LmmProductListByIdRequest request);
 
     /**
+     * 获取商品
+     * @param goodsId
+     * @return
+     */
+    List<LmmGoods> getGoodsListById(String goodsId);
+
+    /**
      * 获取商品列表，id
      * @param request
      * @return
@@ -120,4 +127,23 @@ public interface LmmSyncService {
      * @return
      */
     boolean syncGoodsListById(LmmGoodsListByIdRequest request, int syncMode);
+
+    /**
+     * 同步景点
+     * @param request
+     * @return
+     */
+    boolean syncScenicListV2(LmmScenicListRequest request);
+
+    /**
+     * 根据id同步
+     * @param request
+     */
+    void syncScenicListByIdV2(LmmScenicListByIdRequest request);
+
+    /**
+     * 根据id同步
+     * @param id
+     */
+    void syncScenicListByIdV2(String id);
 }
