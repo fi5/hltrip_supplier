@@ -146,4 +146,18 @@ public interface LmmSyncService {
      * @param id
      */
     void syncScenicListByIdV2(String id);
+
+    /**
+     * 同步商品，分页
+     * @param request
+     * @return
+     */
+    boolean syncProductListV2(LmmProductListRequest request);
+
+    /**
+     * 同步商品，id
+     * @param request
+     * @return
+     */
+    boolean syncProductListByIdV2(LmmProductListByIdRequest request);
 }

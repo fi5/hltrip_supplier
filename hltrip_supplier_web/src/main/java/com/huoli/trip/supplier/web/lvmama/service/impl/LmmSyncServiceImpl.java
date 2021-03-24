@@ -2,12 +2,11 @@ package com.huoli.trip.supplier.web.lvmama.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -85,6 +84,15 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ScenicSpotProductDao scenicSpotProductDao;
+
+    @Autowired
+    private ScenicSpotRuleDao scenicSpotRuleDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private ScenicSpotProductPriceRuleDao scenicSpotProductPriceRuleDao;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -486,6 +494,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         || backChannelEntry.getStatus() != 1){
                     newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
                 }
+                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                    newProduct.setAppFrom(appFroms);
+                }
             } else {
                 newProduct.setAuditStatus(oldProduct.getAuditStatus());
                 newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
@@ -588,35 +600,289 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         syncScenic(lmmScenicList);
     }
 
-    public void syncProduct(LmmProduct lmmProduct){
-
-        ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(lmmProduct.getProductId(), Constants.SUPPLIER_CODE_LMM_TICKET);
-        if(scenicSpotProductMPO == null){
-            scenicSpotProductMPO = new ScenicSpotProductMPO();
-            scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
-            if(scenicSpotMappingMPO == null){
-                log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
-                return;
-            }
-            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
-            if(scenicSpotMPO == null){
-                log.error("景点{}不存在", scenicSpotMPO.getId());
-                return;
-            }
-            scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
-            scenicSpotProductMPO.setImages(lmmProduct.getImages());
-            if(ListUtils.isNotEmpty(lmmProduct.getGoodsList())){
-                lmmProduct.getGoodsList().forEach(g -> {
-                    g.get
-                });
-            }
-            // todo 把商品拆改对应到product上
-//            scenicSpotProductMPO.set
+    @Override
+    public boolean syncProductListV2(LmmProductListRequest request) {
+        List<LmmProduct> lmmProductList = getProductList(request);
+        if (ListUtils.isEmpty(lmmProductList)) {
+            return false;
         }
-        scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+        lmmProductList.forEach(p -> syncProduct(p));
+        return true;
+    }
 
+    @Override
+    public boolean syncProductListByIdV2(LmmProductListByIdRequest request){
+        List<LmmProduct> lmmProductList = getProductListById(request);
+        if(ListUtils.isEmpty(lmmProductList)){
+            return false;
+        }
+        lmmProductList.forEach(p -> syncProduct(p));
+        return true;
+    }
+
+
+    private void syncProduct(LmmProduct lmmProduct){
+        if(ListUtils.isNotEmpty(lmmProduct.getGoodsList())){
+            lmmProduct.getGoodsList().forEach(g -> {
+                ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+                if(scenicSpotProductMPO == null){
+                    scenicSpotProductMPO = new ScenicSpotProductMPO();
+                    scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+                    if(scenicSpotMappingMPO == null){
+                        log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
+                        return;
+                    }
+                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    if(scenicSpotMPO == null){
+                        log.error("景点{}不存在", scenicSpotMPO.getId());
+                        return;
+                    }
+                    scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+                }
+                scenicSpotProductMPO.setSupplierProductId(g.getGoodsId());
+                // 默认销售中
+                scenicSpotProductMPO.setStatus(1);
+                // 默认未删除
+                scenicSpotProductMPO.setIsDel(0);
+                scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+                // 目前更新供应商端信息全覆盖
+                // goods没有图片，都用product的
+                scenicSpotProductMPO.setImages(lmmProduct.getImages());
+                scenicSpotProductMPO.setName(g.getGoodsName());
+                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
+                    scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                }
+                // 基础设置
+                ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
+                BackChannelEntry backChannelEntry = commonService.getSupplierById(scenicSpotProductMPO.getChannel());
+                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    baseSetting.setAppSource(backChannelEntry.getAppSource());
+                }
+                // 默认当前
+                baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                // 默认及时
+                baseSetting.setLaunchType(1);
+                baseSetting.setStockCount(0);
+                scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
+                // 交易设置
+                ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
+                transaction.setAppointInDate(1);
+                transaction.setAppointnType(1);
+                transaction.setInDay(g.getEffective());
+                // todo 限制时间（HH:mm）目前没有  g.getNotice().getEnterLimit().getLimitTime(), 取票相关的没有:取票时间，取票地点，入园方式，g.getNotice() ;是否取票
+                scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
+                // todo  票种说明要不要，放到哪儿
+                ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
+                ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+                ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
+                ruleMPO.setIsCouponRule(0);
+                if(StringUtils.isNotBlank(g.getGoodsType())){
+                    if(StringUtils.equals(g.getGoodsType(), "EXPRESSTYPE_DISPLAY")){
+                        ruleMPO.setTicketType(1);
+                    } else if(StringUtils.equals(g.getGoodsType(), "NOTICETYPE_DISPLAY")){
+                        ruleMPO.setTicketType(0);
+                    } else {
+                        log.error("不支持的门票类型goodsType={}", g.getGoodsType());
+                    }
+                }
+                if(g.getBooker() != null){
+                    List<Integer> booker = Lists.newArrayList();
+                    if(g.getBooker().isEmail()){
+                        booker.add(3);
+                    }
+                    if(g.getBooker().isMobile()){
+                        booker.add(1);
+                    }
+                    if(g.getBooker().isName()){
+                        booker.add(0);
+                    }
+                    ruleMPO.setTicketInfos(booker);
+                }
+                if(g.getTraveller() != null){
+                    List<Integer> traveller = Lists.newArrayList();
+                    List<Integer> creds = Lists.newArrayList();
+                    if(!StringUtils.equals(g.getTraveller().getName(), "TRAV_NUM_NO")){
+                        traveller.add(0);
+                    }
+                    if(!StringUtils.equals(g.getTraveller().getMobile(), "TRAV_NUM_NO")){
+                        traveller.add(1);
+                    }
+                    if(!StringUtils.equals(g.getTraveller().getCredentials(), "TRAV_NUM_NO")){
+                        traveller.add(2);
+                        if(StringUtils.isNotBlank(g.getTraveller().getCredentialsType())){
+                            creds = Arrays.asList(g.getTraveller().getCredentialsType().split("-")).stream().map(t -> {
+                                switch (t) {
+                                    case "ID_CARD":
+                                        return Certificate.ID_CARD.getCode();
+                                    case "HUZHAO":
+                                        return Certificate.PASSPORT.getCode();
+                                    case "GANGAO":
+                                        return Certificate.HKM_PASS.getCode();
+                                    case "TAIBAO":
+                                        return Certificate.TW_PASS.getCode();
+                                    case "TAIBAOZHENG":
+                                        return Certificate.TW_CARD.getCode();
+                                    case "CHUSHENGZHENGMING":
+                                    case "HUKOUBO":
+                                        return Certificate.OTHER.getCode();
+                                    case "SHIBING":
+                                        return Certificate.SOLDIERS.getCode();
+                                    case "JUNGUAN":
+                                        return Certificate.OFFICER.getCode();
+                                    case "HUIXIANG":
+                                        return Certificate.HOME_CARD.getCode();
+                                    default:
+                                        return Certificate.ID_CARD.getCode();
+                                }
+                            }).collect(Collectors.toList());
+                        }
+                    }
+                    if(!StringUtils.equals(g.getTraveller().getEmail(), "TRAV_NUM_NO")){
+                        traveller.add(3);
+                    }
+                    ruleMPO.setTravellerInfos(traveller);
+                    ruleMPO.setTravellerTypes(creds);
+                }
+                ruleMPO.setLimitBuy(1);
+                // -1 这些是为了防止0起作用，实际只为设置maxcount
+                ruleMPO.setLimitBuyType(-1);
+                ruleMPO.setRangeType(-1);
+                ruleMPO.setDistinguishUser(-1);
+                ruleMPO.setMaxCount(g.getMaximum());
+                ruleMPO.setRefundRuleDesc(g.getRefundRuleNotice());
+                List<RefundRule> refundRules;
+                if(ListUtils.isNotEmpty(g.getRules())){
+                    refundRules = g.getRules().stream().map(r -> {
+                        RefundRule refundRule = new RefundRule();
+                        if(r.getAheadTime() > 0){
+                            refundRule.setRefundRuleType(1);
+                        } else if(r.getAheadTime() < 0 && r.getAheadTime() > -1440){
+                            refundRule.setRefundRuleType(2);
+                        } else if(r.getAheadTime() <= -1440){
+                            refundRule.setRefundRuleType(4);
+                        } else {
+                            refundRule.setRefundRuleType(5);
+                        }
+                        if(r.isChange()){
+                            refundRule.setRefundCondition(2);
+                        } else {
+                            refundRule.setRefundCondition(1);
+                        }
+                        if(StringUtils.equals(r.getDeductionType(), "AMOUNT")){
+                            refundRule.setDeductionType(1);
+                        } else if(StringUtils.equals(r.getDeductionType(), "PERCENT")){
+                            refundRule.setDeductionType(0);
+                        }
+                        refundRule.setFee(r.getDeductionValue());
+                        return refundRule;
+                    }).collect(Collectors.toList());
+                    ruleMPO.setRefundRules(refundRules);
+                }
+                ruleMPO.setInAddress(g.getVisitAddress());
+                ruleMPO.setFeeInclude(g.getCostInclude());
+                // todo 费用不包含没有
+                // todo 补充说明用重要说明赋值有没有问题
+                ruleMPO.setSupplementDesc(g.getImportantNotice());
+                ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
+                ruleMPO.setValid(1);
+                ruleMPO = scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+                LmmPriceRequest request = new LmmPriceRequest();
+                request.setGoodsIds(g.getGoodsId());
+                request.setBeginDate(DateTimeUtil.formatDate(new Date()));
+                request.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), 45)));
+                List<LmmPriceProduct> priceList = getPriceList(request);
+                String scenicSpotProductId = scenicSpotProductMPO.getId();
+                String ruleId = ruleMPO.getId();
+                priceList.forEach(p -> {
+                    if(ListUtils.isEmpty(p.getGoodsList())){
+                        return;
+                    }
+                    p.getGoodsList().forEach(gl -> {
+                        ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+                        scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                        scenicSpotProductPriceMPO.setSellType(1);
+                        scenicSpotProductPriceMPO = scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                        String priceId = scenicSpotProductPriceMPO.getId();
+                        if(ListUtils.isEmpty(gl.getPrices())){
+                            return;
+                        }
+                        gl.getPrices().forEach(price -> {
+                            ScenicSpotProductPriceRuleMPO priceRuleMPO = new ScenicSpotProductPriceRuleMPO();
+                            priceRuleMPO.setScenicSpotProductPriceId(priceId);
+                            priceRuleMPO.setScenicSpotRuleId(ruleId);
+                            Integer ticketType;
+                            switch (g.getTicketType()){
+                                case "PARENTAGE":
+                                    ticketType = TicketType.TICKET_TYPE_3.getCode();
+                                    break;
+                                case "FAMILY":
+                                    ticketType = TicketType.TICKET_TYPE_4.getCode();
+                                    break;
+                                case "LOVER":
+                                    ticketType = TicketType.TICKET_TYPE_5.getCode();
+                                    break;
+                                case "COUPE":
+                                    ticketType = TicketType.TICKET_TYPE_6.getCode();
+                                    break;
+                                case "ADULT":
+                                    ticketType = TicketType.TICKET_TYPE_2.getCode();
+                                    break;
+                                case "CHILDREN":
+                                    ticketType = TicketType.TICKET_TYPE_7.getCode();
+                                    break;
+                                case "OLDMAN":
+                                    ticketType = TicketType.TICKET_TYPE_8.getCode();
+                                    break;
+                                case "STUDENT":
+                                    ticketType = TicketType.TICKET_TYPE_9.getCode();
+                                    break;
+                                case "ACTIVITY":
+                                    ticketType = TicketType.TICKET_TYPE_19.getCode();
+                                    break;
+                                case "SOLDIER":
+                                    ticketType = TicketType.TICKET_TYPE_10.getCode();
+                                    break;
+                                case "TEACHER":
+                                    ticketType = TicketType.TICKET_TYPE_11.getCode();
+                                    break;
+                                case "DISABILITY":
+                                    ticketType = TicketType.TICKET_TYPE_12.getCode();
+                                    break;
+                                case "GROUP":
+                                    ticketType = TicketType.TICKET_TYPE_13.getCode();
+                                    break;
+                                case "FREE":
+                                    ticketType = TicketType.TICKET_TYPE_1.getCode();
+                                    break;
+                                case "MAN":
+                                    ticketType = TicketType.TICKET_TYPE_31.getCode();
+                                    break;
+                                case "WOMAN":
+                                    ticketType = TicketType.TICKET_TYPE_30.getCode();
+                                    break;
+                                default:
+                                    ticketType = TicketType.TICKET_TYPE_1.getCode();
+                            }
+                            priceRuleMPO.setTicketKind(ticketType.toString());
+                            priceRuleMPO.setStartDate(price.getDate());
+                            priceRuleMPO.setEndDate(price.getDate());
+                            priceRuleMPO.setStock(price.getStock());
+                            if(price.getB2bPrice() != null){
+                                priceRuleMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
+                            }
+                            if(price.getSellPrice() != null){
+                                priceRuleMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
+                            }
+                            scenicSpotProductPriceRuleDao.addScenicSpotProductPriceRule(priceRuleMPO);
+                        });
+                    });
+                });
+            });
+        }
     }
 
     private void syncScenic(List<LmmScenic> lmmScenicList){
