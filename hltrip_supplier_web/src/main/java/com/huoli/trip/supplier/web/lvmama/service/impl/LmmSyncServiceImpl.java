@@ -601,6 +601,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
 
     private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
+        // todo 预定须知、产品简介、特色说明、公告、景点描述等目前都没有
         if(ListUtils.isNotEmpty(goodsList)){
             goodsList.forEach(g -> {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
