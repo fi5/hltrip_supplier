@@ -32,9 +32,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.huoli.trip.supplier.self.common.SupplierConstants.*;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
 
 /**
  * 描述：<br/>
@@ -163,7 +162,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public void syncProduct(String productId, ProductItemPO productItemPO){
-        syncProduct(productId, productItemPO, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        syncProduct(productId, productItemPO, PRODUCT_SYNC_MODE_UNLIMITED);
     }
 
     @Override
@@ -329,7 +328,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     }
                 }
                 // 如不不是改状态或者产品不存在就走同步
-                syncToursDetail(p.getProductId().toString(), DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+                syncToursDetail(p.getProductId().toString(), PRODUCT_SYNC_MODE_UNLIMITED);
             });
         } catch (Exception e) {
             log.error("笛风云接收通知更新产品异常，", e);

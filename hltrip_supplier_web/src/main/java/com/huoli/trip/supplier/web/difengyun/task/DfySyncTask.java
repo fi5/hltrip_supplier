@@ -3,7 +3,6 @@ package com.huoli.trip.supplier.web.difengyun.task;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
@@ -15,6 +14,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
 
 /**
  * 描述：<br/>
@@ -54,7 +55,7 @@ public class DfySyncTask {
             for (ProductPO product : products) {
                 try {
                     long sTime = System.currentTimeMillis();
-                    dfySyncService.syncProduct(product.getSupplierProductId(), null, DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    dfySyncService.syncProduct(product.getSupplierProductId(), null, PRODUCT_SYNC_MODE_ONLY_UPDATE);
                     long useTime = System.currentTimeMillis() - sTime;
                     log.info("同步第{}个产品 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
                     // 如果执行时间超过310毫秒就不用睡了
@@ -128,7 +129,7 @@ public class DfySyncTask {
             for (ProductPO product : products) {
                 try {
                     long sTime = System.currentTimeMillis();
-                    dfySyncService.syncToursDetail(product.getSupplierProductId(), DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    dfySyncService.syncToursDetail(product.getSupplierProductId(), PRODUCT_SYNC_MODE_ONLY_UPDATE);
                     long useTime = System.currentTimeMillis() - sTime;
                     log.info("同步第{}个跟团游产品 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
                     // 如果执行时间超过310毫秒就不用睡了

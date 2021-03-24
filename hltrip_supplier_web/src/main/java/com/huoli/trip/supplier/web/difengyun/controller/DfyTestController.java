@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_UNLIMITED;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -113,13 +115,13 @@ public class DfyTestController {
 
     @PostMapping(path = "/sync/tours/detail")
     DfyBaseResult syncToursDetail(@RequestBody String productId) {
-        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        dfySyncService.syncToursDetail(productId, PRODUCT_SYNC_MODE_UNLIMITED);
         return DfyBaseResult.success();
     }
 
     @PostMapping(path = "/sync/tours/multi/detail")
     DfyBaseResult syncToursMultiDetail(@RequestBody String productId) {
-        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        dfySyncService.syncToursDetail(productId, PRODUCT_SYNC_MODE_UNLIMITED);
         return DfyBaseResult.success();
     }
 

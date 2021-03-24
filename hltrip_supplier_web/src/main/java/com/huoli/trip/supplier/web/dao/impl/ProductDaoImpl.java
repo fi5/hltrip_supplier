@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -175,6 +177,17 @@ public class ProductDaoImpl implements ProductDao {
     public void updateVerifyStatusByCode(String code, int verifyStatus){
         mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
                 Update.update("auditStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+    }
+
+    @Override
+    public List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("productType").is(productType));
+        query.fields().include("supplierProductId").exclude("_id");
+        List<ProductPO> productPOs = mongoTemplate.find(query, ProductPO.class);
+        if(ListUtils.isNotEmpty(productPOs)){
+            return productPOs.stream().map(ProductPO::getSupplierProductId).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }

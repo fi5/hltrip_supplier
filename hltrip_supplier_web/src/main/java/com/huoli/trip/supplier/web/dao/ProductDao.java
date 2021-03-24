@@ -112,4 +112,12 @@ public interface ProductDao {
      */
     void updateAppFromByCode(String code, String appFrom);
 
+    /**
+     * 获取供应商产品id
+     * @param supplierId
+     * @param productType
+     * @return
+     */
+    List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType);
+
 }

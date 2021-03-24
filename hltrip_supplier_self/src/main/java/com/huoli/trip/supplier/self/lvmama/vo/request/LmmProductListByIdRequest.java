@@ -1,6 +1,5 @@
 package com.huoli.trip.supplier.self.lvmama.vo.request;
 
-import com.huoli.trip.supplier.self.lvmama.vo.request.LmmListBaseRequest;
 import lombok.Data;
 
 /**
@@ -12,7 +11,7 @@ import lombok.Data;
  * 创建日期：2021/3/18<br>
  */
 @Data
-public class LmmProductListByIdRequest extends LmmListBaseRequest {
+public class LmmProductListByIdRequest extends LmmBaseRequest {
 
     /**
      * 产品 ID(如果有多个用英文逗号分隔)

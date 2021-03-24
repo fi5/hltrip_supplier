@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
@@ -24,7 +25,6 @@ import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
-import com.huoli.trip.supplier.web.service.ScenicSpotProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
 
 /**
  * 描述：<br/>
@@ -253,14 +253,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     public void syncScenicListById(String id){
         LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
         request.setScenicId(id);
-        List<LmmScenic> lmmScenicList = getScenicListById(request);
-        updateScenic(lmmScenicList);
+        syncScenicListById(request);
     }
 
     @Override
     public List<String> getSupplierScenicIds(){
         return productItemDao.selectSupplierItemIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
                 Constants.PRODUCT_ITEM_TYPE_TICKET);
+    }
+
+    @Override
+    public List<String> getSupplierProductIds(){
+        return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
+                ProductType.SCENIC_TICKET.getCode());
     }
 
     private boolean updateScenic(List<LmmScenic> lmmScenicList){
@@ -277,7 +282,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             List<ImageBasePO> mainImages = null;
             if (oldItem == null) {
                 oldItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // 笛风云跟团游默认审核通过
                 oldItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
             } else {
                 imageDetails = oldItem.getImageDetails();
@@ -314,86 +318,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(ListUtils.isEmpty(lmmProductList)){
             return false;
         }
-        lmmProductList.forEach(p -> {
-            if(ListUtils.isEmpty(p.getGoodsList())){
-                log.error("产品{},{}的商品列表为空，跳过。。", p.getProductId(), p.getProductName());
-                return;
-            }
-            String itemCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, p.getPlaceId());
-            ProductItemPO productItemPO = productItemDao.selectByCode(itemCode);
-            if(productItemPO == null){
-                syncScenicListById(p.getPlaceId());
-                productItemPO = productItemDao.selectByCode(itemCode);
-            }
-            if(productItemPO == null){
-                log.error("item没有同步到，跳过。。");
-                return;
-            }
-            for (LmmGoods g : p.getGoodsList()) {
-                if(StringUtils.equals(g.getTicketSeason(), "true")){
-                    log.info("跳过场次票，productId={}, goodsId={}");
-                    continue;
-                }
-                ProductPO newProduct = LmmTicketConverter.convertToProductPO(p, g);
-                newProduct.setMainItemCode(productItemPO.getCode());
-                newProduct.setMainItem(productItemPO);
-                newProduct.setCity(productItemPO.getCity());
-                newProduct.setDesCity(productItemPO.getDesCity());
-                newProduct.setOriCity(productItemPO.getOriCity());
-                if(newProduct.getTicket() != null && ListUtils.isNotEmpty(newProduct.getTicket().getTickets())){
-                    for (TicketInfoPO ticket : newProduct.getTicket().getTickets()) {
-                        ticket.setItemId(productItemPO.getCode());
-                        ticket.setProductItem(productItemPO);
-                    }
-                }
-                ProductPO oldProduct = productDao.getByCode(newProduct.getCode());
-                // 是否只同步本地没有的产品
-                if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null){
-                    log.error("笛风云，本次同步不包括更新本地产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
-                    continue;
-                }
-                if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && oldProduct == null){
-                    log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
-                    continue;
-                }
-                newProduct.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                newProduct.setOperator(Constants.SUPPLIER_CODE_LMM_TICKET);
-                newProduct.setOperatorName(Constants.SUPPLIER_NAME_LMM_TICKET);
-                newProduct.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
-                newProduct.setInvalidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.addDay(new Date(), 30)));
-                if(oldProduct == null){
-                    newProduct.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    // todo 暂时默认通过
-//                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
-                    newProduct.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
-                    newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
-                    BackChannelEntry backChannelEntry = commonService.getSupplierById(newProduct.getSupplierId());
-                    if(backChannelEntry == null
-                            || backChannelEntry.getStatus() == null
-                            || backChannelEntry.getStatus() != 1){
-                        newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
-                    }
-                    if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
-                        List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
-                        newProduct.setAppFrom(appFroms);
-                    }
-                } else {
-                    newProduct.setAuditStatus(oldProduct.getAuditStatus());
-                    newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
-                    newProduct.setRecommendFlag(oldProduct.getRecommendFlag());
-                    newProduct.setAppFrom(oldProduct.getAppFrom());
-                    newProduct.setBookDescList(oldProduct.getBookDescList());
-                    newProduct.setDescriptions(oldProduct.getDescriptions());
-                    newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
-                    commonService.compareProduct(newProduct);
-                }
-                productDao.updateByCode(newProduct);
-                syncPrice(g.getGoodsId());
-                dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(newProduct.getCode()));
-                // 保存副本
-                commonService.saveBackupProduct(newProduct);
-            }
-        });
+        lmmProductList.forEach(p -> updateProduct(p, p.getGoodsList(), syncMode));
         return true;
     }
 
@@ -412,6 +337,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             updateProduct(p, goodsList, syncMode);
         });
         return true;
+    }
+
+    @Override
+    public boolean syncProductListById(String productIds, int syncMode){
+        LmmProductListByIdRequest request = new LmmProductListByIdRequest();
+        request.setProductIds(productIds);
+        return syncProductListById(request, syncMode);
     }
 
 
@@ -433,6 +365,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             updateProduct(lmmProduct, v, syncMode);
         });
         return true;
+    }
+
+    @Override
+    public boolean syncGoodsListById(String productIds, int syncMode){
+        LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
+        request.setGoodsIds(productIds);
+        return syncGoodsListById(request, syncMode);
     }
 
     private void updateProduct(LmmProduct lmmProduct, List<LmmGoods> goodsList, int syncMode){
@@ -470,11 +409,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             ProductPO oldProduct = productDao.getByCode(newProduct.getCode());
             // 是否只同步本地没有的产品
             if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null){
-                log.error("笛风云，本次同步不包括更新本地产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
+                log.error("驴妈妈，本次同步不包括更新本地产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
                 continue;
             }
             if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && oldProduct == null){
-                log.error("笛风云，本次同步不包括新增产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
+                log.error("驴妈妈，本次同步不包括新增产品，跳过，supplierProductCode={}", newProduct.getSupplierProductId());
                 continue;
             }
             newProduct.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -596,8 +535,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     public void syncScenicListByIdV2(String id){
         LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
         request.setScenicId(id);
-        List<LmmScenic> lmmScenicList = getScenicListById(request);
-        syncScenic(lmmScenicList);
+        syncScenicListByIdV2(request);
     }
 
     @Override
@@ -606,7 +544,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if (ListUtils.isEmpty(lmmProductList)) {
             return false;
         }
-        lmmProductList.forEach(p -> syncProduct(p));
+        lmmProductList.forEach(p -> updateProductV2(p, p.getGoodsList()));
         return true;
     }
 
@@ -616,14 +554,55 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(ListUtils.isEmpty(lmmProductList)){
             return false;
         }
-        lmmProductList.forEach(p -> syncProduct(p));
+        lmmProductList.forEach(p -> {
+            // todo 不知道他们是不是每次都返回product下的所有goodsid,如果不是的话本地的有些数据可能变成垃圾，需要查出来一起更新
+            String goodsIds = p.getGoodsIds();
+            LmmGoodsListByIdRequest lmmGoodsListByIdRequest = new LmmGoodsListByIdRequest();
+            lmmGoodsListByIdRequest.setGoodsIds(goodsIds);
+            List<LmmGoods> goodsList = getGoodsListById(lmmGoodsListByIdRequest);
+            updateProductV2(p, goodsList);
+        });
         return true;
     }
 
+    @Override
+    public boolean syncProductListByIdV2(String productIds){
+        LmmProductListByIdRequest request = new LmmProductListByIdRequest();
+        request.setProductIds(productIds);
+        return syncProductListByIdV2(request);
+    }
 
-    private void syncProduct(LmmProduct lmmProduct){
-        if(ListUtils.isNotEmpty(lmmProduct.getGoodsList())){
-            lmmProduct.getGoodsList().forEach(g -> {
+    @Override
+    public boolean syncGoodsListByIdV2(LmmGoodsListByIdRequest request){
+        List<LmmGoods> lmmGoodsList = getGoodsListById(request);
+        if(ListUtils.isEmpty(lmmGoodsList)){
+            return false;
+        }
+        Map<String, List<LmmGoods>> goodsMap = lmmGoodsList.stream().collect(Collectors.groupingBy(LmmGoods::getProductId));
+        goodsMap.forEach((k, v) -> {
+            LmmProductListByIdRequest lmmProductListByIdRequest = new LmmProductListByIdRequest();
+            lmmProductListByIdRequest.setProductIds(k);
+            List<LmmProduct> lmmProductList = getProductListById(lmmProductListByIdRequest);
+            if(ListUtils.isEmpty(lmmProductList)){
+                return;
+            }
+            LmmProduct lmmProduct = lmmProductList.get(0);
+            updateProductV2(lmmProduct, v);
+        });
+        return true;
+    }
+
+    @Override
+    public boolean syncGoodsListByIdV2(String productIds){
+        LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
+        request.setGoodsIds(productIds);
+        return syncGoodsListByIdV2(request);
+    }
+
+
+    private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
+        if(ListUtils.isNotEmpty(goodsList)){
+            goodsList.forEach(g -> {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                 if(scenicSpotProductMPO == null){
                     scenicSpotProductMPO = new ScenicSpotProductMPO();

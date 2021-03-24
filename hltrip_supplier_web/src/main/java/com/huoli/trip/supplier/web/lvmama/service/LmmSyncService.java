@@ -43,6 +43,12 @@ public interface LmmSyncService {
     List<String> getSupplierScenicIds();
 
     /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierProductIds();
+
+    /**
      * 同步产品、商品
      * @param request
      * @param syncMode
@@ -121,12 +127,28 @@ public interface LmmSyncService {
     boolean syncProductListById(LmmProductListByIdRequest request, int syncMode);
 
     /**
+     * 同步产品
+     * @param productIds
+     * @param syncMode
+     * @return
+     */
+    boolean syncProductListById(String productIds, int syncMode);
+
+    /**
      * 同步商品
      * @param request
      * @param syncMode
      * @return
      */
     boolean syncGoodsListById(LmmGoodsListByIdRequest request, int syncMode);
+
+    /**
+     * 同步商品
+     * @param productIds
+     * @param syncMode
+     * @return
+     */
+    boolean syncGoodsListById(String productIds, int syncMode);
 
     /**
      * 同步景点
@@ -155,9 +177,30 @@ public interface LmmSyncService {
     boolean syncProductListV2(LmmProductListRequest request);
 
     /**
-     * 同步商品，id
+     * 同步产品，id
      * @param request
      * @return
      */
     boolean syncProductListByIdV2(LmmProductListByIdRequest request);
+
+    /**
+     * 同步产品，id
+     * @param productIds
+     * @return
+     */
+    boolean syncProductListByIdV2(String productIds);
+
+    /**
+     * 同步商品，id
+     * @param request
+     * @return
+     */
+    boolean syncGoodsListByIdV2(LmmGoodsListByIdRequest request);
+
+    /**
+     * 同步商品，id
+     * @param goodsId
+     * @return
+     */
+    boolean syncGoodsListByIdV2(String goodsId);
 }
