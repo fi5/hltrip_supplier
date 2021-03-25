@@ -621,8 +621,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
                 }
                 scenicSpotProductMPO.setSupplierProductId(g.getGoodsId());
-                // 默认销售中
-                scenicSpotProductMPO.setStatus(1);
+                if(StringUtils.equals(g.getStatus(), "true")){
+                    scenicSpotProductMPO.setStatus(1);
+                } else {
+                    scenicSpotProductMPO.setStatus(3);
+                }
                 // 默认未删除
                 scenicSpotProductMPO.setIsDel(0);
                 scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
