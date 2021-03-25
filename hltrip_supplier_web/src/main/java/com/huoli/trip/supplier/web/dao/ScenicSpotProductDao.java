@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -19,4 +21,18 @@ public interface ScenicSpotProductDao {
      * @return
      */
     ScenicSpotProductMPO getBySupplierProductId(String supplierProductId, String channel);
+
+    /**
+     * 更新状态
+     * @param id
+     * @param status
+     */
+    void updateStatusById(String id, Integer status);
+
+    /**
+     * 查渠道产品
+     * @param channel
+     * @return
+     */
+    List<String> getSupplierProductIdByChannel(String channel);
 }

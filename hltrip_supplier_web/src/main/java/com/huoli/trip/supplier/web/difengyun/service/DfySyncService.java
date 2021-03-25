@@ -108,4 +108,31 @@ public interface DfySyncService {
      * @param city
      */
     void syncToursPrice(String supplierProductId, String city);
+
+    /**
+     * 同步景点，新版
+     * @param request
+     * @return
+     */
+    boolean syncScenicListV2(DfyScenicListRequest request);
+
+    /**
+     * 同步景点，新版
+     * @param scenicId
+     */
+    void syncScenicDetailV2(String scenicId);
+
+    /**
+     * 同步产品，新版
+     * @param productId
+     */
+    void syncProductV2(String productId);
+
+    /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierProductIdsV2();
 }
+
+

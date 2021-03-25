@@ -55,7 +55,6 @@ public class LmmTicketTask {
                 try {
                     long sTime = System.currentTimeMillis();
                     lmmScenicService.syncScenicListById(id);
-                    lmmScenicService.syncScenicListByIdV2(id);
                     long useTime = System.currentTimeMillis() - sTime;
                     log.info("同步第{}个景点 scenicId={}，用时{}毫秒（只更新本地已有景点）",
                             i, id, useTime);
@@ -183,6 +182,86 @@ public class LmmTicketTask {
             log.info("同步驴妈妈商品定时任务执行完成，共同步{}页，用时{}秒，(拉取本地没有的商品)", request.getCurrentPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行驴妈妈定时更新商品任务异常，(拉取本地没有的商品)", e);
+        }
+    }
+
+    /**
+     * 只更新本地已有景点
+     */
+    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+    public void syncUpdateScenicV2(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步驴妈妈景点（只更新本地已有景点）。。");
+            List<String> ids = lmmScenicService.getSupplierScenicIdsV2();
+            if(ListUtils.isEmpty(ids)){
+                log.error("同步驴妈妈景点定时任务执行完成（只更新本地已有景点），没有找到驴妈妈景点。");
+                return;
+            }
+            int i = 1;
+            for (String id : ids) {
+                try {
+                    long sTime = System.currentTimeMillis();
+                    lmmScenicService.syncScenicListByIdV2(id);
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}个景点 scenicId={}，用时{}毫秒（只更新本地已有景点）",
+                            i, id, useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
+                } catch (Exception e) {
+                    log.error("同步第{}个景点scenicId={}异常（只更新本地已有景点），", i, id, e);
+                }
+                i++;
+            }
+            log.info("同步驴妈妈景点定时任务执行完成（只更新本地已有景点），共{}个，用时{}秒（只更新本地已有景点）", i, (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行驴妈妈定时更新景点任务异常（只更新本地已有景点）", e);
+        }
+    }
+
+    /**
+     * 只更新本地已有商品
+     */
+    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
+    public void syncUpdateProductV2(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步驴妈妈商品（只更新本地已有商品）。。");
+            List<String> ids = lmmScenicService.getSupplierProductIdsV2();
+            if(ListUtils.isEmpty(ids)){
+                log.error("同步驴妈妈商品定时任务执行完成（只更新本地已有商品），没有找到驴妈妈商品。");
+                return;
+            }
+            int i = 1;
+            for (String id : ids) {
+                try {
+                    long sTime = System.currentTimeMillis();
+                    lmmScenicService.syncGoodsListByIdV2(id);
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}个商品 scenicId={}，用时{}毫秒（只更新本地已有商品）",
+                            i, id, useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
+                } catch (Exception e) {
+                    log.error("同步第{}个商品scenicId={}异常（只更新本地已有商品），", i, id, e);
+                }
+                i++;
+            }
+            log.info("同步驴妈妈商品定时任务执行完成（只更新本地已有商品），共{}个，用时{}秒（只更新本地已有商品）", i, (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行驴妈妈定时更新商品任务异常（只更新本地已有商品）", e);
         }
     }
 }

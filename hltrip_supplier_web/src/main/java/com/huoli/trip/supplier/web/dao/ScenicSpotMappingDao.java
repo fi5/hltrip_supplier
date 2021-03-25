@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -20,4 +22,11 @@ public interface ScenicSpotMappingDao {
     ScenicSpotMappingMPO getScenicSpotByChannelScenicSpotIdAndChannel(String channelScenicSpotId, String channel);
 
     ScenicSpotMappingMPO addScenicSpotMapping(ScenicSpotMappingMPO scenicSpotMappingMPO);
+
+    /**
+     * 获取渠道映射对象
+     * @param channel
+     * @return
+     */
+    List<String> getScenicSpotByChannel(String channel);
 }

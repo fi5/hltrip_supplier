@@ -9,6 +9,10 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Notice;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -18,6 +22,7 @@ import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -306,5 +311,44 @@ public class DfyTicketConverter {
         bookRulePO.setPeopleLimit(limit);
 //        bookRulePO.setPeopleNum(1);
         return bookRulePO;
+    }
+
+    public static ScenicSpotMPO convertToScenicSpotMPO(DfyScenicDetail scenicDetail){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        scenicSpotMPO.setAddress(scenicDetail.getScenicAddress());
+        scenicSpotMPO.setCity(scenicDetail.getCityName());
+        if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
+            scenicSpotMPO.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
+        }
+
+        scenicSpotMPO.setName(scenicDetail.getScenicName());
+        scenicSpotMPO.setDetailDesc(scenicDetail.getScenicDescription());
+        scenicSpotMPO.setCoordinate(convertToCoordinate(scenicDetail.getBlocation(), scenicDetail.getGlocation()));
+        scenicSpotMPO.setProvince(scenicDetail.getProvinceName());
+        if(StringUtils.isNotBlank(scenicDetail.getOpenTime())){
+            ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
+            scenicSpotOpenTime.setOpenTimeDesc(scenicDetail.getOpenTime());
+            scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
+        }
+        Notice notice = new Notice();
+        notice.setContent(scenicDetail.getBookNotice());
+        notice.setContent("预定须知");
+        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
+        scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
+        return scenicSpotMPO;
+    }
+
+    public static Coordinate convertToCoordinate(String baidu, String google){
+        Coordinate coordinate = null;
+        if(StringUtils.isNotBlank(baidu)){
+            coordinate = new Coordinate();
+            coordinate.setLongitude(Double.valueOf(baidu.split(",")[0]));
+            coordinate.setLatitude(Double.valueOf(baidu.split(",")[1]));
+        } else if(StringUtils.isNotBlank(google)){
+            coordinate = new Coordinate();
+            coordinate.setLongitude(Double.valueOf(google.split(",")[0]));
+            coordinate.setLatitude(Double.valueOf(google.split(",")[1]));
+        }
+        return coordinate;
     }
 }

@@ -4,6 +4,7 @@ import com.huoli.trip.common.entity.BackChannelEntry;
 import com.huoli.trip.common.entity.HodometerPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 
 /**
  * 描述：<br/>
@@ -35,4 +36,10 @@ public interface CommonService {
     void saveBackupProductItem(ProductItemPO productItem);
 
     void saveBackupHodometer(HodometerPO hodometerPO);
+
+    void setCity(ScenicSpotMPO scenic);
+
+    void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin);
+
+    void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic);
 }

@@ -4,16 +4,21 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
 import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.supplier.web.dao.BackupProductDao;
-import com.huoli.trip.supplier.web.dao.HodometerDao;
+import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
+import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +44,18 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private HodometerDao hodometerDao;
+
+    @Autowired
+    private ChinaCityMapper chinaCityMapper;
+
+    @Autowired
+    private ScenicSpotBackupDao scenicSpotBackupDao;
+
+    @Autowired
+    private ScenicSpotMappingDao scenicSpotMappingDao;
+
+    @Autowired
+    private ScenicSpotDao scenicSpotDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -404,5 +421,73 @@ public class CommonServiceImpl implements CommonService {
         backupHodometerPO.setCode(hodometerPO.getCode());
         backupHodometerPO.setData(JSON.toJSONString(hodometerPO));
         hodometerDao.updateBackupByCode(backupHodometerPO);
+    }
+
+    @Override
+    public void setCity(ScenicSpotMPO scenic){
+        if(scenic == null){
+            return;
+        }
+        String provinceCode = null;
+        String cityCode = null;
+        if(StringUtils.isNotBlank(scenic.getProvince())){
+            if(scenic.getProvince().endsWith("省")){
+                scenic.setProvince(scenic.getProvince().substring(0, scenic.getProvince().length() - 1));
+            }
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getProvince(), 1, null);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                provinceCode = chinaCities.get(0).getCode();
+                scenic.setProvinceCode(provinceCode);
+            }
+        }
+        if(StringUtils.isNotBlank(scenic.getCity())){
+            if(scenic.getCity().endsWith("市")){
+                scenic.setCity(scenic.getCity().substring(0, scenic.getCity().length() - 1));
+            }
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getCity(), 2, provinceCode);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                cityCode = chinaCities.get(0).getCode();
+                scenic.setCityCode(cityCode);
+            }
+        }
+        if(StringUtils.isNotBlank(scenic.getDistrict())){
+            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getDistrict(), 3, cityCode);
+            if(ListUtils.isNotEmpty(chinaCities)){
+                scenic.setDistrictCode(chinaCities.get(0).getCode());
+            }
+        }
+    }
+
+    @Override
+    public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin){
+        ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
+        scenicSpotBackupMPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
+        scenicSpotBackupMPO.setSupplierScenicId(scenicId);
+        scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
+        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicId, Constants.SUPPLIER_CODE_LMM_TICKET);
+        if(exist == null){
+            scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        }
+        scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
+    }
+
+    @Override
+    public void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic){
+        // 查映射关系
+        ScenicSpotMappingMPO exist = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(channelScenicId, channel);
+        if(exist != null){
+            return;
+        }
+        // 没有找到映射就往本地新增一条
+        ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
+        // 同时保存映射关系
+        ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
+        scenicSpotMappingMPO.setChannelScenicSpotId(channelScenicId);
+        scenicSpotMappingMPO.setScenicSpotId(addScenic.getId());
+        scenicSpotMappingMPO.setChannel(channel);
+        scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
     }
 }

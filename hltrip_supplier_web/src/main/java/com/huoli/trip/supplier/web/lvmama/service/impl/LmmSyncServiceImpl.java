@@ -725,12 +725,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setTravellerInfos(traveller);
                     ruleMPO.setTravellerTypes(creds);
                 }
-                ruleMPO.setLimitBuy(1);
-                // -1 这些是为了防止0起作用，实际只为设置maxcount
-                ruleMPO.setLimitBuyType(-1);
-                ruleMPO.setRangeType(-1);
-                ruleMPO.setDistinguishUser(-1);
-                ruleMPO.setMaxCount(g.getMaximum());
+                if(g.getMaximum() > 0){
+                    ruleMPO.setLimitBuy(1);
+                    // -1 这些是为了防止0起作用，实际只为设置maxcount
+                    ruleMPO.setLimitBuyType(-1);
+                    ruleMPO.setRangeType(-1);
+                    ruleMPO.setDistinguishUser(-1);
+                    ruleMPO.setMaxCount(g.getMaximum());
+                }
                 ruleMPO.setRefundRuleDesc(g.getRefundRuleNotice());
                 List<RefundRule> refundRules;
                 if(ListUtils.isNotEmpty(g.getRules())){
@@ -875,74 +877,21 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 转本地结构
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
         // 设置省市区
-        setCity(newScenic);
+        commonService.setCity(newScenic);
         // 更新备份
-        updateBackup(newScenic, lmmScenic);
-        // 查映射关系
-        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
-        if(scenicSpotMappingMPO != null){
-            return;
-        }
-        // 没有找到映射就往本地新增一条
-        ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
+        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), lmmScenic);
         // 同时保存映射关系
-        updateMapping(lmmScenic, addScenic.getId());
+        commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, newScenic);
     }
 
-    private void updateMapping(LmmScenic lmmScenic, String ScenicSpotId){
-        ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
-        scenicSpotMappingMPO.setChannelScenicSpotId(lmmScenic.getScenicId().toString());
-        scenicSpotMappingMPO.setScenicSpotId(ScenicSpotId);
-        scenicSpotMappingMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
-        scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
+    @Override
+    public List<String> getSupplierScenicIdsV2(){
+        return scenicSpotMappingDao.getScenicSpotByChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
     }
 
-    private void updateBackup(ScenicSpotMPO newScenic, LmmScenic lmmScenic){
-        ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
-        scenicSpotBackupMPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
-        scenicSpotBackupMPO.setSupplierScenicId(lmmScenic.getScenicId().toString());
-        scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(lmmScenic));
-        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
-        if(exist == null){
-            scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        }
-        scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
+    @Override
+    public List<String> getSupplierProductIdsV2(){
+        return scenicSpotProductDao.getSupplierProductIdByChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
     }
 
-    private void setCity(ScenicSpotMPO scenic){
-        if(scenic == null){
-            return;
-        }
-        String provinceCode = null;
-        String cityCode = null;
-        if(StringUtils.isNotBlank(scenic.getProvince())){
-            if(scenic.getProvince().endsWith("省")){
-                scenic.setProvince(scenic.getProvince().substring(0, scenic.getProvince().length() - 1));
-            }
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getProvince(), 1, null);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                provinceCode = chinaCities.get(0).getCode();
-                scenic.setProvinceCode(provinceCode);
-            }
-        }
-        if(StringUtils.isNotBlank(scenic.getCity())){
-            if(scenic.getCity().endsWith("市")){
-                scenic.setCity(scenic.getCity().substring(0, scenic.getCity().length() - 1));
-            }
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getCity(), 2, provinceCode);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                cityCode = chinaCities.get(0).getCode();
-                scenic.setCityCode(cityCode);
-            }
-        }
-        if(StringUtils.isNotBlank(scenic.getDistrict())){
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getDistrict(), 3, cityCode);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                scenic.setDistrictCode(chinaCities.get(0).getCode());
-            }
-        }
-    }
 }

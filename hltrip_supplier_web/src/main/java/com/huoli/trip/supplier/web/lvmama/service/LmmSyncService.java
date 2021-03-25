@@ -203,4 +203,17 @@ public interface LmmSyncService {
      * @return
      */
     boolean syncGoodsListByIdV2(String goodsId);
+
+    /**
+     * 获取供应商景点id
+     * @return
+     */
+    List<String> getSupplierScenicIdsV2();
+
+    /**
+     * 获取供应商商品id
+     * @return
+     */
+    List<String> getSupplierProductIdsV2();
+
 }
