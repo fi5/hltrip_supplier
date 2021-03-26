@@ -6,20 +6,17 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.self.yaochufa.constant.YcfConfigConstants;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-import com.huoli.trip.supplier.web.dao.PriceDao;
-import com.huoli.trip.supplier.web.dao.ProductDao;
-import com.huoli.trip.supplier.web.dao.ProductItemDao;
+import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +27,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
+
 
 /**
  * 描述：<br/>
@@ -60,6 +61,21 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private ScenicSpotProductDao scenicSpotProductDao;
+
+    @Autowired
+    private ScenicSpotMappingDao scenicSpotMappingDao;
+
+    @Autowired
+    private ScenicSpotDao scenicSpotDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private ScenicSpotRuleDao scenicSpotRuleDao;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -148,7 +164,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 commonService.compareProduct(productPO);
             }
             productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+            productPO.setOperator(SUPPLIER_CODE_YCF);
             productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
             productDao.updateByCode(productPO);
             commonService.saveBackupProduct(productPO);
@@ -206,7 +222,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         commonService.compareProductItem(productItemPO);
                     }
                     productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+                    productItemPO.setOperator(SUPPLIER_CODE_YCF);
                     productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
                     try {
                         commonService.saveBackupProductItem(productItemPO);
@@ -295,7 +311,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(ycfProductId) || ListUtils.isEmpty(ycfPriceInfos)){
             return;
         }
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+        String productCode = CommonUtils.genCodeBySupplier(SUPPLIER_CODE_YCF, ycfProductId);
         PricePO pricePO = priceDao.getByProductCode(productCode);
         if(pricePO == null){
             pricePO = new PricePO();
@@ -307,7 +323,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
         }
         pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperator(SUPPLIER_CODE_YCF);
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
         List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
@@ -328,7 +344,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(ycfProductId)){
             return;
         }
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+        String productCode = CommonUtils.genCodeBySupplier(SUPPLIER_CODE_YCF, ycfProductId);
         PricePO pricePO = priceDao.getByProductCode(productCode);
         if(pricePO == null){
             pricePO = new PricePO();
@@ -340,7 +356,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
         }
         pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperator(SUPPLIER_CODE_YCF);
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
         List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
@@ -455,6 +471,20 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         return true;
     }
 
+    private boolean filterScenicProduct(YcfProduct ycfProduct){
+        if(!filterProduct(ycfProduct)){
+            return false;
+        }
+        // 是单票类型并且只有门票列表有数据
+        if(ycfProduct.getProductType() != YcfConstants.PRODUCT_TYPE_TICKET
+                || !(ListUtils.isEmpty(ycfProduct.getFoodList()) &&
+                        ListUtils.isEmpty(ycfProduct.getRoomList()) &&
+                        ListUtils.isNotEmpty(ycfProduct.getTicketList()))){
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 转换类型
      * 以产品主poi类型为准，为了修正同一个poi挂在多个不同类型的产品上
@@ -480,6 +510,285 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return ProductType.RESTAURANT.getCode();
         }
         return productType;
+    }
+
+    // ============================新结构============================
+
+    @Override
+    public void syncScenicProduct(List<YcfProduct> ycfProducts){
+        if(ListUtils.isEmpty(ycfProducts)){
+            log.error("要出发推送的产品列表为空");
+            return;
+        }
+        ycfProducts.forEach(ycfProduct -> {
+            if(!filterScenicProduct(ycfProduct)){
+                return;
+            }
+            List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+            if(ListUtils.isEmpty(scenicIds)){
+                log.error("要出发景点不存在");
+                return;
+            }
+            List<String> ids = syncScenic(scenicIds);
+            if(ListUtils.isEmpty(ids)){
+                log.error("要出发景点没有同步到。");
+                return;
+            }
+            ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
+            if(scenicSpotProductMPO == null){
+                scenicSpotProductMPO = new ScenicSpotProductMPO();
+                scenicSpotProductMPO.setId(System.currentTimeMillis() + "");
+                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+                if(scenicSpotMappingMPO == null){
+                    log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                    return;
+                }
+                ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                if(scenicSpotMPO == null){
+                    log.error("景点{}不存在", scenicSpotMPO.getId());
+                    return;
+                }
+                scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+            }
+            scenicSpotProductMPO.setScenicSpotId(ids.get(0));
+            scenicSpotProductMPO.setIsDel(0);
+            scenicSpotProductMPO.setSellType(1);
+            scenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
+            scenicSpotProductMPO.setName(ycfProduct.getProductName());
+            scenicSpotProductMPO.setPayServiceType(0);
+            scenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
+            scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+            }
+            ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
+            if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
+                transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
+                scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
+            }
+            ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
+            BackChannelEntry backChannelEntry = commonService.getSupplierById(scenicSpotProductMPO.getChannel());
+            if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                baseSetting.setAppSource(backChannelEntry.getAppSource());
+            }
+            // 默认当前
+            baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            if(StringUtils.isNotBlank(ycfProduct.getStartDate())){
+                baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(ycfProduct.getStartDate())));
+            }
+            // 默认及时
+            baseSetting.setLaunchType(1);
+            baseSetting.setStockCount(0);
+            scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
+            if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
+                scenicSpotProductMPO.setStatus(1);
+            } else {
+                scenicSpotProductMPO.setStatus(3);
+            }
+            ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setChannel(SUPPLIER_CODE_YCF);
+            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+            ruleMPO.setIsCouponRule(0);
+            if(ycfProduct.getMaxNum() != null){
+                ruleMPO.setLimitBuy(1);
+                // -1 这些是为了防止0起作用，实际只为设置maxcount
+                ruleMPO.setLimitBuyType(-1);
+                ruleMPO.setRangeType(-1);
+                ruleMPO.setDistinguishUser(-1);
+                ruleMPO.setMaxCount(ycfProduct.getMaxNum());
+            }
+            ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+            RefundRule refundRule = new RefundRule();
+            if(ycfProduct.getRefundType() != null){
+                if(ycfProduct.getRefundType() == 1){
+                    refundRule.setRefundCondition(0);
+                } else if(ycfProduct.getRefundType() == 2){
+                    refundRule.setRefundCondition(1);
+                } else if(ycfProduct.getRefundType() == 3){
+                    refundRule.setRefundCondition(2);
+                }
+            }
+            if(ycfProduct.getAdvanceOrDelayType() != null){
+                if(ycfProduct.getAdvanceOrDelayType() == 0){
+                    refundRule.setRefundRuleType(1);
+                } else if(ycfProduct.getAdvanceOrDelayType() == 1){
+                    refundRule.setRefundRuleType(4);
+                }
+            }
+            ruleMPO.setRefundRules(Lists.newArrayList(refundRule));
+            if(ListUtils.isNotEmpty(ycfProduct.getBookRules())){
+                for (YcfProductBookRule bookRule : ycfProduct.getBookRules()) {
+                    List<Integer> rules = Lists.newArrayList();
+                    if(bookRule.getCName() != null && bookRule.getCName()){
+                        rules.add(0);
+                    }
+                    if(bookRule.getMobile() != null && bookRule.getMobile()){
+                        rules.add(1);
+                    }
+                    if(bookRule.getCredential() != null && bookRule.getCredential()){
+                        rules.add(3);
+                    }
+                    if(bookRule.getEmail() != null && bookRule.getEmail()){
+                        rules.add(4);
+                    }
+                    if(StringUtils.equals(bookRule.getPersonType(), "0")){
+                        ruleMPO.setTicketInfos(rules);
+                        ruleMPO.setTicketCardTypes(bookRule.getCredentialType());
+                    } else if(StringUtils.equals(bookRule.getPersonType(), "1")){
+                        ruleMPO.setTravellerInfos(rules);
+                        ruleMPO.setTravellerTypes(bookRule.getCredentialType());
+                    }
+                }
+            }
+            scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+            Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
+            days = days == null ? Integer.valueOf(30) : days;
+            String start = DateTimeUtil.formatDate(new Date());
+            String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
+            YcfGetPriceRequest request = new YcfGetPriceRequest();
+            request.setPartnerProductID(scenicSpotProductMPO.getId());
+            request.setProductID(ycfProduct.getProductID());
+            request.setStartDate(start);
+            request.setEndDate(end);
+            List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
+            syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString());
+        });
+    }
+
+    @Override
+    public List<String> syncScenic(List<String> scenicIds){
+        if(ListUtils.isEmpty(scenicIds)){
+            log.error("同步poi失败，poi id集合为空");
+            return null;
+        }
+        log.info("开始同步poi，id list = {}", JSON.toJSONString(scenicIds));
+        YcfGetPoiRequest ycfGetPoiRequest = new YcfGetPoiRequest();
+        ycfGetPoiRequest.setPoiIdList(scenicIds);
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(ycfGetPoiRequest);
+        log.info("准备请求供应商(要出发)获取poi接口，参数={}", JSON.toJSONString(ycfGetPoiRequest));
+        YcfBaseResult<YcfGetPoiResponse> baseResult = yaoChuFaClient.getPoi(ycfBaseRequest);
+        log.info("供应商(要出发)获取poi接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
+            YcfGetPoiResponse response = baseResult.getData();
+            if(response == null){
+                log.error("同步poi失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            List<YcfProductItem> ycfProductItems = response.getPoiList();
+            if(ListUtils.isEmpty(ycfProductItems)){
+                log.error("同步poi失败，供应商（要出发）没有返回poi信息");
+                return null;
+            }
+           return ycfProductItems.stream().map(item -> {
+                try {
+                    ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
+                    // 设置省市区
+                    commonService.setCity(newScenic);
+                    // 更新备份
+                    commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), item);
+                    // 同时保存映射关系
+                    commonService.updateScenicSpotMapping(item.getPoiID(), Constants.SUPPLIER_CODE_DFY, newScenic);
+                    return newScenic.getId();
+                } catch (Exception e) {
+                    log.error("poi落地失败，", e);
+                    return null;
+                }
+            }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public void syncPriceV2(YcfGetPriceRequest request){
+        if(StringUtils.isBlank(request.getEndDate())){
+            request.setEndDate(request.getStartDate());
+        }
+        int diffDays = DateTimeUtil.getDateDiffDays(DateTimeUtil.parseDate(request.getEndDate()), DateTimeUtil.parseDate(request.getStartDate()));
+        // 要出发最多请求30天，
+        int round = diffDays / 30;
+        int tail = diffDays % 30;
+        // 有余数需要循环商+1次
+        int n = round + (tail == 0 ? 0 : 1);
+        // 开始结束日期相同n会=0
+        n = n == 0 ? 1 : n;
+        for(int i = 0; i < n; i++){
+            YcfGetPriceRequest newRequest = new YcfGetPriceRequest();
+            newRequest.setTraceId(request.getTraceId());
+            newRequest.setFull(request.getFull());
+            newRequest.setPartnerProductID(request.getPartnerProductID());
+            newRequest.setProductID(request.getProductID());
+            // 从结束日期+1天开始
+            newRequest.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(request.getStartDate()), i * 30)));
+            // 前后共30天
+            newRequest.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(newRequest.getStartDate()), 29)));
+            if(i == n - 1){
+                newRequest.setEndDate(request.getEndDate());
+            }
+            try {
+                log.info("开始同步价格，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                List<YcfPriceInfo> ycfPriceInfos = getPriceV2(newRequest);
+                syncPrice(request.getPartnerProductID(), ycfPriceInfos);
+                log.info("同步价格完成，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                // 要出发限制1分钟最多请求200次
+                Thread.sleep(310);
+            } catch (Exception e) {
+                log.info("同步价异常，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate(), e);
+                continue;
+            }
+        }
+    }
+
+    private List<YcfPriceInfo> getPriceV2(YcfGetPriceRequest request){
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
+        log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
+        YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
+        log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
+            YcfGetPriceResponse response = baseResult.getData();
+            if(response == null){
+                log.error("获取价格失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            return response.getSaleInfos();
+        }
+        return null;
+    }
+
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos){
+        syncPrice(productId, ycfPriceInfos, null, null);
+    }
+
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String ruleId, String ticketKind){
+        if(StringUtils.isBlank(productId)){
+            return;
+        }
+        ScenicSpotProductPriceMPO existPrice = scenicSpotProductPriceDao.getByProductId(productId);
+        if(existPrice != null){
+            ruleId = existPrice.getScenicSpotRuleId();
+            ticketKind = existPrice.getTicketKind();
+        }
+        if(StringUtils.isBlank(ruleId)){
+            return;
+        }
+        if(ListUtils.isNotEmpty(ycfPriceInfos)){
+            log.error("价格列表没有。。");
+            return;
+        }
+        for (YcfPriceInfo yp : ycfPriceInfos) {
+            ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
+            priceMPO.setScenicSpotProductId(productId);
+            priceMPO.setScenicSpotRuleId(ruleId);
+            priceMPO.setTicketKind(ticketKind);
+            priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));
+            priceMPO.setEndDate(DateTimeUtil.formatDate(yp.getDate()));
+            priceMPO.setSellPrice(yp.getPrice());
+            priceMPO.setSettlementPrice(yp.getSettlementPrice());
+            priceMPO.setStock(yp.getStock());
+            scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
+        }
     }
 
 }

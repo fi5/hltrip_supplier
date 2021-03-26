@@ -23,7 +23,6 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
-import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -71,16 +70,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     private PriceDao priceDao;
 
     @Autowired
-    private ChinaCityMapper chinaCityMapper;
-
-    @Autowired
     private ScenicSpotMappingDao scenicSpotMappingDao;
 
     @Autowired
     private ScenicSpotDao scenicSpotDao;
-
-    @Autowired
-    private ScenicSpotBackupDao scenicSpotBackupDao;
 
     @Autowired
     private ScenicSpotProductDao scenicSpotProductDao;
@@ -90,9 +83,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
-
-    @Autowired
-    private ScenicSpotProductPriceRuleDao scenicSpotProductPriceRuleDao;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -599,7 +589,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return syncGoodsListByIdV2(request);
     }
 
-
     private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
         // todo 预定须知、产品简介、特色说明、公告、景点描述等目前都没有
         if(ListUtils.isNotEmpty(goodsList)){
@@ -628,6 +617,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
                 // 默认未删除
                 scenicSpotProductMPO.setIsDel(0);
+                scenicSpotProductMPO.setSellType(1);
                 scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
                 // 目前更新供应商端信息全覆盖
@@ -656,7 +646,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 transaction.setInDay(g.getEffective());
                 // todo 限制时间（HH:mm）目前没有  g.getNotice().getEnterLimit().getLimitTime(), 取票相关的没有:取票时间，取票地点，入园方式，g.getNotice() ;是否取票
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-                // todo  票种说明要不要，放到哪儿
+                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
                 ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
                 ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
@@ -787,18 +777,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         return;
                     }
                     p.getGoodsList().forEach(gl -> {
-                        ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                        scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
-                        scenicSpotProductPriceMPO.setSellType(1);
-                        scenicSpotProductPriceMPO = scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
-                        String priceId = scenicSpotProductPriceMPO.getId();
                         if(ListUtils.isEmpty(gl.getPrices())){
                             return;
                         }
                         gl.getPrices().forEach(price -> {
-                            ScenicSpotProductPriceRuleMPO priceRuleMPO = new ScenicSpotProductPriceRuleMPO();
-                            priceRuleMPO.setScenicSpotProductPriceId(priceId);
-                            priceRuleMPO.setScenicSpotRuleId(ruleId);
+                            ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+                            scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                            scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                             Integer ticketType;
                             switch (g.getTicketType()){
                                 case "PARENTAGE":
@@ -852,17 +837,17 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                                 default:
                                     ticketType = TicketType.TICKET_TYPE_1.getCode();
                             }
-                            priceRuleMPO.setTicketKind(ticketType.toString());
-                            priceRuleMPO.setStartDate(price.getDate());
-                            priceRuleMPO.setEndDate(price.getDate());
-                            priceRuleMPO.setStock(price.getStock());
+                            scenicSpotProductPriceMPO.setTicketKind(ticketType.toString());
+                            scenicSpotProductPriceMPO.setStartDate(price.getDate());
+                            scenicSpotProductPriceMPO.setEndDate(price.getDate());
+                            scenicSpotProductPriceMPO.setStock(price.getStock());
                             if(price.getB2bPrice() != null){
-                                priceRuleMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
+                                scenicSpotProductPriceMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
                             }
                             if(price.getSellPrice() != null){
-                                priceRuleMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
+                                scenicSpotProductPriceMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
                             }
-                            scenicSpotProductPriceRuleDao.addScenicSpotProductPriceRule(priceRuleMPO);
+                            scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
                         });
                     });
                 });

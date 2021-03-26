@@ -1,8 +1,13 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
+import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.ScenicSpotProductDao;
+import com.mongodb.client.result.UpdateResult;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -28,6 +33,16 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     private MongoTemplate mongoTemplate;
 
     @Override
+    public void saveProduct(ScenicSpotProductMPO productMPO){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(productMPO.getId()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(productMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT);
+    }
+
+    @Override
     public ScenicSpotProductMPO getBySupplierProductId(String supplierProductId, String channel){
         return mongoTemplate.findOne(new Query(Criteria.where("supplierProductId")
                 .is(supplierProductId).and("channel").is(channel)), ScenicSpotProductMPO.class);
@@ -45,8 +60,21 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     }
 
     @Override
+    public List<ScenicSpotProductMPO> getByChannel(String channel){
+        Query query = new Query(Criteria.where("channel").is(channel));
+        query.fields().include("supplierProductId").include("id");
+        return mongoTemplate.find(query, ScenicSpotProductMPO.class);
+    }
+
+    @Override
     public void updateStatusById(String id, Integer status){
         mongoTemplate.updateFirst(new Query(Criteria.where("id").is(id)),
                 Update.update("status", status), ScenicSpotProductMPO.class);
+    }
+
+    @Override
+    public ScenicSpotProductMPO getByProductId(String productId){
+        return mongoTemplate.findOne(new Query(Criteria.where("id")
+                .is(productId)), ScenicSpotProductMPO.class);
     }
 }

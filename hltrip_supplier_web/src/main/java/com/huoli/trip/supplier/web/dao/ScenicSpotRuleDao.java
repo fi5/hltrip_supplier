@@ -18,4 +18,10 @@ public interface ScenicSpotRuleDao {
      * @return
      */
     ScenicSpotRuleMPO addScenicSpotRule(ScenicSpotRuleMPO scenicSpotRuleMPO);
+
+    /**
+     * 保存
+     * @param scenicSpotRuleMPO
+     */
+    void saveScenicSpotRule(ScenicSpotRuleMPO scenicSpotRuleMPO);
 }

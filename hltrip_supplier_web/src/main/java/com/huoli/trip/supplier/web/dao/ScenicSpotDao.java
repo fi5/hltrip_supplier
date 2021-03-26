@@ -33,4 +33,10 @@ public interface ScenicSpotDao {
      * @return
      */
     ScenicSpotMPO getScenicSpotById(String id);
+
+    /**
+     * 保存
+     * @param scenicSpotMPO
+     */
+    void saveScenicSpot(ScenicSpotMPO scenicSpotMPO);
 }

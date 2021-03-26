@@ -15,6 +15,12 @@ import java.util.List;
 public interface ScenicSpotProductDao {
 
     /**
+     * 保存产品
+     * @param productMPO
+     */
+    void saveProduct(ScenicSpotProductMPO productMPO);
+
+    /**
      * 根据供应商产品id获取产品
      * @param supplierProductId
      * @param channel
@@ -35,4 +41,18 @@ public interface ScenicSpotProductDao {
      * @return
      */
     List<String> getSupplierProductIdByChannel(String channel);
+
+    /**
+     *
+     * @param channel
+     * @return
+     */
+    List<ScenicSpotProductMPO> getByChannel(String channel);
+
+    /**
+     * 根据id获取产品
+     * @param productId
+     * @return
+     */
+    ScenicSpotProductMPO getByProductId(String productId);
 }

@@ -81,9 +81,6 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Autowired
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
 
-    @Autowired
-    private ScenicSpotProductPriceRuleDao scenicSpotProductPriceRuleDao;
-
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
         try {
@@ -719,6 +716,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotProductMPO.setStatus(1);
             // 默认未删除
             scenicSpotProductMPO.setIsDel(0);
+            scenicSpotProductMPO.setSellType(1);
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY);
             // 目前更新供应商端信息全覆盖
@@ -751,7 +749,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
             // todo 取票时间，取票方式 没有
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-            // todo  票种说明要不要，放到哪儿
+            scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
@@ -879,11 +877,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             if(ListUtils.isNotEmpty(dfyTicketDetail.getPriceCalendar())){
-                ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
-                scenicSpotProductPriceMPO.setSellType(1);
-                scenicSpotProductPriceMPO = scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
-                String priceId = scenicSpotProductPriceMPO.getId();
                 Integer type = null;
                 if(StringUtils.isNotBlank(dfyTicketDetail.getMpType())){
                     switch (Integer.parseInt(dfyTicketDetail.getMpType())){
@@ -933,16 +926,16 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 Integer ticketKind = type;
                 dfyTicketDetail.getPriceCalendar().forEach(p -> {
-                    ScenicSpotProductPriceRuleMPO priceRuleMPO = new ScenicSpotProductPriceRuleMPO();
-                    priceRuleMPO.setScenicSpotProductPriceId(priceId);
-                    priceRuleMPO.setScenicSpotRuleId(ruleId);
+                    ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+                    scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                    scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                     if(ticketKind != null){
-                        priceRuleMPO.setTicketKind(ticketKind.toString());
+                        scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
                     }
-                    priceRuleMPO.setStartDate(p.getDepartDate());
-                    priceRuleMPO.setEndDate(p.getDepartDate());
-                    priceRuleMPO.setStock(99);
-                    scenicSpotProductPriceRuleDao.addScenicSpotProductPriceRule(priceRuleMPO);
+                    scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
+                    scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
+                    scenicSpotProductPriceMPO.setStock(99);
+                    scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
                 });
             }
         } else {

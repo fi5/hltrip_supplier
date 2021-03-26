@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.yaochufa.convert;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.util.CommonUtil;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
@@ -406,5 +407,74 @@ public class YcfConverter {
             element.remove();
         }
         return document.toString();
+    }
+
+    /**
+     * 转换成产品项目数据库对象
+     * @param productItem
+     * @return
+     */
+    public static ScenicSpotMPO convertToScenicSpotMPO(YcfProductItem productItem){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        scenicSpotMPO.setId(System.currentTimeMillis() + "");
+        scenicSpotMPO.setName(productItem.getPoiName());
+        if(productItem.getLevel() != null){
+            switch (productItem.getLevel()){
+                case 11:
+                    scenicSpotMPO.setLevel("A");
+                    break;
+                case 12:
+                    scenicSpotMPO.setLevel("AA");
+                    break;
+                case 13:
+                    scenicSpotMPO.setLevel("AAA");
+                    break;
+                case 14:
+                    scenicSpotMPO.setLevel("AAAA");
+                    break;
+                case 15:
+                    scenicSpotMPO.setLevel("AAAAA");
+                    break;
+            }
+        }
+        if(ListUtils.isNotEmpty(productItem.getTags())){
+            scenicSpotMPO.setTheme(productItem.getTags().stream().collect(Collectors.joining(",")));
+        }
+        scenicSpotMPO.setCountry(productItem.getCountry());
+        scenicSpotMPO.setProvince(productItem.getProvince());
+        scenicSpotMPO.setCity(productItem.getCity());
+        scenicSpotMPO.setAddress(productItem.getAddress());
+        scenicSpotMPO.setPhone(productItem.getPhone());
+        if(StringUtils.isNotBlank(productItem.getLongitude()) && StringUtils.isNotBlank(productItem.getLatitude())){
+            Coordinate coordinate = new Coordinate();
+            coordinate.setLongitude(Double.valueOf(productItem.getLongitude()));
+            coordinate.setLatitude(Double.valueOf(productItem.getLatitude()));
+            scenicSpotMPO.setCoordinate(coordinate);
+        }
+        scenicSpotMPO.setDetailDesc(productItem.getDescription());
+        List<String> images = Lists.newArrayList();
+        if(ListUtils.isNotEmpty(productItem.getImageList())){
+            images.addAll(productItem.getImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+        } else {
+            if(ListUtils.isNotEmpty(productItem.getMainImageList())){
+                images.addAll(productItem.getMainImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+            }
+        }
+        scenicSpotMPO.setImages(images);
+        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
+            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
+                Notice notice = new Notice();
+                if(c.getType() == 1){
+                    notice.setTitle("购买须知");
+                } else if(c.getType() == 2){
+                    notice.setTitle("交通指南");
+                } else if(c.getType() == 3){
+                    notice.setTitle("酒景图文");
+                }
+                notice.setContent(c.getDetail());
+                return notice;
+            }).collect(Collectors.toList()));
+        }
+        return scenicSpotMPO;
     }
 }

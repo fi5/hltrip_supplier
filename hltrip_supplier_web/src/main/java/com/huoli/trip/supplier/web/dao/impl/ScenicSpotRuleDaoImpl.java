@@ -1,9 +1,15 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
+import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
 import com.huoli.trip.supplier.web.dao.ScenicSpotRuleDao;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -23,5 +29,15 @@ public class ScenicSpotRuleDaoImpl implements ScenicSpotRuleDao {
     @Override
     public ScenicSpotRuleMPO addScenicSpotRule(ScenicSpotRuleMPO scenicSpotRuleMPO){
         return mongoTemplate.insert(scenicSpotRuleMPO);
+    }
+
+    @Override
+    public void saveScenicSpotRule(ScenicSpotRuleMPO scenicSpotRuleMPO){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(scenicSpotRuleMPO.getId()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(scenicSpotRuleMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_SCENICSPOT_RULE);
     }
 }
