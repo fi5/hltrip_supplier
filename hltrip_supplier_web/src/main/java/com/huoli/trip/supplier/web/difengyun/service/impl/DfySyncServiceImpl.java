@@ -1255,75 +1255,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }).filter(a -> a != null).collect(Collectors.toList()));
         }
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
-            groupTourProductMPO.setDepInfos(dfyToursDetail.getDesPoiNameList().stream().map(d -> {
-                AddressInfo addressInfo = new AddressInfo();
-                String province = null;
-                String provinceId = null;
-                String city = null;
-                String cityId = null;
-                String county = null;
-                String countyId = null;
-                if(StringUtils.isNotBlank(d.getDesProvinceName())){
-                    if(d.getDesProvinceName().endsWith("省")){
-                        province = d.getDesProvinceName().substring(0, d.getDesProvinceName().length() - 1);
-                    }
-                    List<ChinaCity> provinces = chinaCityMapper.getCityByNameAndTypeAndParentId(province, 1, null);
-                    if(ListUtils.isNotEmpty(provinces)){
-                        ChinaCity provinceObj = provinces.get(0);
-                        province = provinceObj.getName();
-                        provinceId = provinceObj.getCode();
-                    }
-                }
-                if(StringUtils.isNotBlank(d.getDesCityName())){
-                    List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(d.getDesCityName(), 2, provinceId);
-                    if(ListUtils.isNotEmpty(cites)){
-                        ChinaCity cityObj = cites.get(0);
-                        city = cityObj.getName();
-                        cityId = cityObj.getCode();
-                        if(StringUtils.isBlank(provinceId)){
-                            ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
-                            if(provinceObj != null){
-                                provinceId = provinceObj.getCode();
-                                province = provinceObj.getName();
-                            }
-                        }
-                    }
-                }
-                if(StringUtils.isNotBlank(d.getDesCountyName())){
-                    List<ChinaCity> counties = chinaCityMapper.getCityByNameAndTypeAndParentId(d.getDesCountyName(), 3, cityId);
-                    if(ListUtils.isNotEmpty(counties)){
-                        ChinaCity countyObj = counties.get(0);
-                        county = countyObj.getName();
-                        countyId = countyObj.getCode();
-                        if(StringUtils.isBlank(cityId)){
-                            ChinaCity cityObj = chinaCityMapper.getCityByCode(countyObj.getParentCode());
-                            if(cityObj != null){
-                                city = cityObj.getName();
-                                cityId = cityObj.getCode();
-                                if(StringUtils.isBlank(provinceId)){
-                                    ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
-                                    if(provinceObj != null){
-                                        provinceId = provinceObj.getCode();
-                                        province = provinceObj.getName();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                addressInfo.setCityCode(cityId);
-                addressInfo.setProvinceName(province);
-                addressInfo.setProvinceCode(provinceId);
-                addressInfo.setCityName(city);
-                if(StringUtils.isNotBlank(countyId)){
-                    addressInfo.setType("1");
-                    addressInfo.setDestinationCode(countyId);
-                    addressInfo.setDestinationName(county);
-                } else if(StringUtils.isNotBlank(cityId)){
-                    addressInfo.setType("0");
-                }
-                return addressInfo;
-            }).collect(Collectors.toList()));
+            groupTourProductMPO.setDepInfos(dfyToursDetail.getDesPoiNameList().stream().map(d ->
+                    commonService.setCity(d.getDesProvinceName(), d.getDesCityName(), d.getDesCountyName())).collect(Collectors.toList()));
         }
     }
 

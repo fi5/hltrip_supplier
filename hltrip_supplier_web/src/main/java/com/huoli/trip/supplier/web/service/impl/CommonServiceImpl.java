@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
@@ -428,34 +429,96 @@ public class CommonServiceImpl implements CommonService {
         if(scenic == null){
             return;
         }
-        String provinceCode = null;
-        String cityCode = null;
-        if(StringUtils.isNotBlank(scenic.getProvince())){
-            if(scenic.getProvince().endsWith("省")){
-                scenic.setProvince(scenic.getProvince().substring(0, scenic.getProvince().length() - 1));
+        AddressInfo addressInfo = setCity(scenic.getProvince(), scenic.getCity(), scenic.getDistrict());
+        if(StringUtils.isNotBlank(addressInfo.getProvinceCode())){
+            scenic.setProvinceCode(addressInfo.getProvinceCode());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getProvinceName())){
+            scenic.setProvince(addressInfo.getProvinceName());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getCityCode())){
+            scenic.setCityCode(addressInfo.getCityCode());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getCityName())){
+            scenic.setCity(addressInfo.getCityName());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getDestinationCode())){
+            scenic.setDistrictCode(addressInfo.getDestinationCode());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getDestinationName())){
+            scenic.setDistrict(addressInfo.getDestinationName());
+        }
+    }
+
+    @Override
+    public AddressInfo setCity(String provinceName, String cityName, String districtName){
+        AddressInfo addressInfo = new AddressInfo();
+        String province = null;
+        String provinceId = null;
+        String city = null;
+        String cityId = null;
+        String county = null;
+        String countyId = null;
+        if(StringUtils.isNotBlank(provinceName)){
+            if(provinceName.endsWith("省")){
+                province = provinceName.substring(0, provinceName.length() - 1);
             }
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getProvince(), 1, null);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                provinceCode = chinaCities.get(0).getCode();
-                scenic.setProvinceCode(provinceCode);
+            List<ChinaCity> provinces = chinaCityMapper.getCityByNameAndTypeAndParentId(province, 1, null);
+            if(ListUtils.isNotEmpty(provinces)){
+                ChinaCity provinceObj = provinces.get(0);
+                province = provinceObj.getName();
+                provinceId = provinceObj.getCode();
             }
         }
-        if(StringUtils.isNotBlank(scenic.getCity())){
-            if(scenic.getCity().endsWith("市")){
-                scenic.setCity(scenic.getCity().substring(0, scenic.getCity().length() - 1));
-            }
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getCity(), 2, provinceCode);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                cityCode = chinaCities.get(0).getCode();
-                scenic.setCityCode(cityCode);
+        if(StringUtils.isNotBlank(cityName)){
+            List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(cityName, 2, provinceId);
+            if(ListUtils.isNotEmpty(cites)){
+                ChinaCity cityObj = cites.get(0);
+                city = cityObj.getName();
+                cityId = cityObj.getCode();
+                if(StringUtils.isBlank(provinceId)){
+                    ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
+                    if(provinceObj != null){
+                        provinceId = provinceObj.getCode();
+                        province = provinceObj.getName();
+                    }
+                }
             }
         }
-        if(StringUtils.isNotBlank(scenic.getDistrict())){
-            List<ChinaCity> chinaCities = chinaCityMapper.getCityByNameAndTypeAndParentId(scenic.getDistrict(), 3, cityCode);
-            if(ListUtils.isNotEmpty(chinaCities)){
-                scenic.setDistrictCode(chinaCities.get(0).getCode());
+        if(StringUtils.isNotBlank(districtName)){
+            List<ChinaCity> counties = chinaCityMapper.getCityByNameAndTypeAndParentId(districtName, 3, cityId);
+            if(ListUtils.isNotEmpty(counties)){
+                ChinaCity countyObj = counties.get(0);
+                county = countyObj.getName();
+                countyId = countyObj.getCode();
+                if(StringUtils.isBlank(cityId)){
+                    ChinaCity cityObj = chinaCityMapper.getCityByCode(countyObj.getParentCode());
+                    if(cityObj != null){
+                        city = cityObj.getName();
+                        cityId = cityObj.getCode();
+                        if(StringUtils.isBlank(provinceId)){
+                            ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
+                            if(provinceObj != null){
+                                provinceId = provinceObj.getCode();
+                                province = provinceObj.getName();
+                            }
+                        }
+                    }
+                }
             }
         }
+        addressInfo.setCityCode(cityId);
+        addressInfo.setProvinceName(province);
+        addressInfo.setProvinceCode(provinceId);
+        addressInfo.setCityName(city);
+        if(StringUtils.isNotBlank(countyId)){
+            addressInfo.setType("1");
+            addressInfo.setDestinationCode(countyId);
+            addressInfo.setDestinationName(county);
+        } else if(StringUtils.isNotBlank(cityId)){
+            addressInfo.setType("0");
+        }
+        return addressInfo;
     }
 
     @Override
