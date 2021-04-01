@@ -5,6 +5,7 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.ImageBase;
@@ -530,5 +531,133 @@ public class DfyToursConverter {
                 return Constants.TRIP_TRAFFIC_13;
         }
         return null;
+    }
+
+    public static List<DescInfo> buildBookNoticeListV2(DfyJourneyInfo journeyInfo) {
+        DfyBookNotice dfyBookNotice = journeyInfo.getBookNotice();
+        List<DescInfo> descList = Lists.newArrayList();
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTrafficInfos())) {
+            DescInfo descriptionPO1 = new DescInfo();
+            descriptionPO1.setTitle("交通须知");
+            descriptionPO1.setContent(String.join("<br>", dfyBookNotice.getTrafficInfos()));
+            descList.add(descriptionPO1);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getAccInfos())) {
+            DescInfo descriptionPO2 = new DescInfo();
+            descriptionPO2.setTitle("住宿须知");
+            descriptionPO2.setContent(dfyBookNotice.getAccInfos());
+            descList.add(descriptionPO2);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getMealInfos())) {
+            DescInfo descriptionPO3 = new DescInfo();
+            descriptionPO3.setTitle("用餐须知");
+            descriptionPO3.setContent(dfyBookNotice.getMealInfos());
+            descList.add(descriptionPO3);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getShopping())) {
+            DescInfo descriptionPO4 = new DescInfo();
+            descriptionPO4.setTitle("购物须知");
+            descriptionPO4.setContent(dfyBookNotice.getShopping());
+            descList.add(descriptionPO4);
+        }
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getTour())) {
+            DescInfo descriptionPO5 = new DescInfo();
+            descriptionPO5.setTitle("游览须知");
+            descriptionPO5.setContent(String.join("<br>", dfyBookNotice.getTour()));
+            descList.add(descriptionPO5);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getDepartureNotice())) {
+            DescInfo descriptionPO6 = new DescInfo();
+            descriptionPO6.setTitle("出行通知");
+            descriptionPO6.setContent(String.join("<br>", dfyBookNotice.getDepartureNotice()));
+            descList.add(descriptionPO6);
+        }
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getSpecialTerms())) {
+            DescInfo descriptionPO7 = new DescInfo();
+            descriptionPO7.setTitle("特殊信息");
+            descriptionPO7.setContent(String.join("<br>", dfyBookNotice.getSpecialTerms()));
+            descList.add(descriptionPO7);
+        }
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getAbroadNotice())) {
+            DescInfo descriptionPO8 = new DescInfo();
+            descriptionPO8.setTitle("注意事项");
+            descriptionPO8.setContent(String.join("<br>", dfyBookNotice.getAbroadNotice()));
+            descList.add(descriptionPO8);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getWarmAttention())) {
+            DescInfo descriptionPO9 = new DescInfo();
+            descriptionPO9.setTitle("温馨提示");
+            descriptionPO9.setContent(dfyBookNotice.getWarmAttention());
+            descList.add(descriptionPO9);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getManualAttention())) {
+            DescInfo descriptionPO10 = new DescInfo();
+            descriptionPO10.setTitle("其他说明");
+            descriptionPO10.setContent(dfyBookNotice.getManualAttention());
+            descList.add(descriptionPO10);
+        }
+
+        if (StringUtils.isNotBlank(dfyBookNotice.getSuggestionFeedback())) {
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("意见反馈");
+            descriptionPO.setContent(dfyBookNotice.getSuggestionFeedback());
+            descList.add(descriptionPO);
+        }
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getActivityArrangment())) {
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("活动说明");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getActivityArrangment()));
+            descList.add(descriptionPO);
+        }
+
+        if (ListUtils.isNotEmpty(dfyBookNotice.getOrderAttentions())) {
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("附加预订须知");
+            descriptionPO.setContent(String.join("<br>", dfyBookNotice.getOrderAttentions()));
+            descList.add(descriptionPO);
+        }
+
+        if(ListUtils.isNotEmpty(journeyInfo.getImportantAddition())){
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("附加说明");
+            descriptionPO.setContent(String.join("<br>", journeyInfo.getImportantAddition()));
+            descList.add(descriptionPO);
+        }
+
+        if(StringUtils.isNotBlank(journeyInfo.getPeopleLimitDesc())){
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("特殊人群限制");
+            descriptionPO.setContent(journeyInfo.getPeopleLimitDesc());
+            descList.add(descriptionPO);
+        }
+
+        if(StringUtils.isNotBlank(journeyInfo.getLegalRemark())){
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("补充条款");
+            descriptionPO.setContent(journeyInfo.getLegalRemark());
+            descList.add(descriptionPO);
+        }
+
+        if(ListUtils.isNotEmpty(journeyInfo.getRiskContents())){
+            DescInfo descriptionPO = new DescInfo();
+            descriptionPO.setTitle("高危项目安全须知");
+            List<String> contents = journeyInfo.getRiskContents().stream().map(r ->
+                    String.format("%s<br>%s", r.getRiskTitle(), String.join("<br>", r.getRiskDetails())))
+                    .collect(Collectors.toList());
+            descriptionPO.setContent(String.join("<br>", contents));
+            descList.add(descriptionPO);
+        }
+        return descList;
     }
 }

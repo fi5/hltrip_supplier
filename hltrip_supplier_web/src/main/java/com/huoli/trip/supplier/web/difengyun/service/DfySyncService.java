@@ -133,6 +133,28 @@ public interface DfySyncService {
      * @return
      */
     List<String> getSupplierProductIdsV2();
+
+    /**
+     * 同步跟团游列表，新版
+     * @param request
+     * @return
+     */
+    boolean syncToursListV2(DfyToursListRequest request);
+
+    /**
+     * 同步跟团游，新版
+     * @param productId
+     */
+    void syncToursDetailV2(String productId);
+
+    /**
+     * 同步跟团游价格，新版
+     * @param supplierProductId
+     * @param city
+     */
+    void syncToursPriceV2(String supplierProductId, String city);
+
+
 }
 
 

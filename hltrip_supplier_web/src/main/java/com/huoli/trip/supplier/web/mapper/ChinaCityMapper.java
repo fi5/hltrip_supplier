@@ -25,4 +25,7 @@ public interface ChinaCityMapper {
     List<ChinaCity> getCityByNameAndTypeAndParentId(@Param("name") String name,
                                                     @Param("type") Integer type,
                                                     @Param("parentCode") String parentCode);
+
+    @Select("select * from china_city where code = #{code}")
+    ChinaCity getCityByCode(@Param("code") String code);
 }
