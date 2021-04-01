@@ -761,7 +761,11 @@ public class DfySyncServiceImpl implements DfySyncService {
 
             // todo 取票时间，取票方式 没有
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-            scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+            if(StringUtils.isBlank(scenicSpotProductMPO.getId())){
+                scenicSpotProductDao.addProduct(scenicSpotProductMPO);
+            } else {
+                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+            }
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));

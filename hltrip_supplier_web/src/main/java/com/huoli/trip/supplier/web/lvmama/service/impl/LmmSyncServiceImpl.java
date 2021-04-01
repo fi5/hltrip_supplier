@@ -646,7 +646,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 transaction.setInDay(g.getEffective());
                 // todo 限制时间（HH:mm）目前没有  g.getNotice().getEnterLimit().getLimitTime(), 取票相关的没有:取票时间，取票地点，入园方式，g.getNotice() ;是否取票
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+                if(StringUtils.isBlank(scenicSpotProductMPO.getId())){
+                    scenicSpotProductDao.addProduct(scenicSpotProductMPO);
+                } else {
+                    scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+                }
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
                 ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
                 ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));

@@ -537,7 +537,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
-                scenicSpotProductMPO.setId(System.currentTimeMillis() + "");
                 scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO == null){
@@ -586,6 +585,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 scenicSpotProductMPO.setStatus(1);
             } else {
                 scenicSpotProductMPO.setStatus(3);
+            }
+            if(StringUtils.isBlank(scenicSpotProductMPO.getId())){
+                scenicSpotProductDao.addProduct(scenicSpotProductMPO);
+            } else {
+                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             }
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setChannel(SUPPLIER_CODE_YCF);

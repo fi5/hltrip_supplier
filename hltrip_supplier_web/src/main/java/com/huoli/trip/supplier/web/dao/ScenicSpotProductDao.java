@@ -21,6 +21,12 @@ public interface ScenicSpotProductDao {
     void saveProduct(ScenicSpotProductMPO productMPO);
 
     /**
+     * 新增产品
+     * @param productMPO
+     */
+    void addProduct(ScenicSpotProductMPO productMPO);
+
+    /**
      * 根据供应商产品id获取产品
      * @param supplierProductId
      * @param channel

@@ -43,6 +43,11 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     }
 
     @Override
+    public void addProduct(ScenicSpotProductMPO productMPO){
+        mongoTemplate.insert(productMPO);
+    }
+
+    @Override
     public ScenicSpotProductMPO getBySupplierProductId(String supplierProductId, String channel){
         return mongoTemplate.findOne(new Query(Criteria.where("supplierProductId")
                 .is(supplierProductId).and("channel").is(channel)), ScenicSpotProductMPO.class);
