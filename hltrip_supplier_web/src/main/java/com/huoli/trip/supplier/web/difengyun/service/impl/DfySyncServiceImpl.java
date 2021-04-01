@@ -831,52 +831,56 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
             if(dfyTicketDetail.getAdmissionVoucher() != null){
                 String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
-                if(StringUtils.isNotBlank(code)){
-                    if(Integer.valueOf(code) < 300){
-                        ruleMPO.setInType(1);
-                    } else if(Integer.valueOf(code) >= 300){
-                        ruleMPO.setInType(0);
-                    }
-                    if(Arrays.asList("202","301").contains(code)){
-                        ruleMPO.setVoucherType(0);
-                    } else if(Arrays.asList("206","303").contains(code)){
-                        ruleMPO.setVoucherType(1);
-                    } else if(Arrays.asList("203").contains(code)){
-                        ruleMPO.setVoucherType(4);
-                    } else {
-                        ruleMPO.setVoucherType(5);
-                        switch (code){
-                            case "1":
-                                ruleMPO.setCardType("实体票");
-                                break;
-                            case "201":
-                                ruleMPO.setCardType("短信");
-                                break;
-                            case "204":
-                                ruleMPO.setCardType("换票证");
-                                break;
-                            case "205":
-                            case "302":
-                                ruleMPO.setCardType("邮件");
-                                break;
-                            case "207":
-                            case "304":
-                                ruleMPO.setCardType("护照");
-                                break;
-                            case "208":
-                            case "305":
-                                ruleMPO.setCardType("港澳通行证");
-                                break;
-                            case "209":
-                            case "306":
-                                ruleMPO.setCardType("军官证");
-                                break;
-                            case "210":
-                            case "307":
-                                ruleMPO.setCardType("台胞证");
-                                break;
+                try {
+                    if(StringUtils.isNotBlank(code)){
+                        if(Integer.valueOf(code) < 300){
+                            ruleMPO.setInType(1);
+                        } else if(Integer.valueOf(code) >= 300){
+                            ruleMPO.setInType(0);
+                        }
+                        if(Arrays.asList("202","301").contains(code)){
+                            ruleMPO.setVoucherType(0);
+                        } else if(Arrays.asList("206","303").contains(code)){
+                            ruleMPO.setVoucherType(1);
+                        } else if(Arrays.asList("203").contains(code)){
+                            ruleMPO.setVoucherType(4);
+                        } else {
+                            ruleMPO.setVoucherType(5);
+                            switch (code){
+                                case "1":
+                                    ruleMPO.setCardType("实体票");
+                                    break;
+                                case "201":
+                                    ruleMPO.setCardType("短信");
+                                    break;
+                                case "204":
+                                    ruleMPO.setCardType("换票证");
+                                    break;
+                                case "205":
+                                case "302":
+                                    ruleMPO.setCardType("邮件");
+                                    break;
+                                case "207":
+                                case "304":
+                                    ruleMPO.setCardType("护照");
+                                    break;
+                                case "208":
+                                case "305":
+                                    ruleMPO.setCardType("港澳通行证");
+                                    break;
+                                case "209":
+                                case "306":
+                                    ruleMPO.setCardType("军官证");
+                                    break;
+                                case "210":
+                                case "307":
+                                    ruleMPO.setCardType("台胞证");
+                                    break;
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    log.error("转化入园方式失败，不影响继续执行，value = {}", code);
                 }
             }
             // todo 预定说明没有 dfyTicketDetail.bookNotice
