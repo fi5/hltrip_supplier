@@ -108,6 +108,65 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+
+    /**
+     * 接收产品更新通知
+     *
+     * @param productId
+     * @return
+     */
+    @PostMapping(path = "/sync/product/v2")
+    DfyBaseResult syncProductV2(@RequestBody String productId) {
+        dfySyncService.syncProductV2(productId);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping(path = "/sync/scenic/v2")
+    DfyBaseResult syncScenicV2(@RequestBody DfyScenicListRequest request) {
+        dfySyncService.syncScenicListV2(request);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 更新单个景点
+     *
+     * @param ticketId
+     * @return
+     */
+    @PostMapping(path = "/sync/scenic/detail/v2")
+    DfyBaseResult syncScenicDetailV2(@RequestBody String ticketId) {
+        dfySyncService.syncScenicDetailV2(ticketId);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/new/product/v2")
+    DfyBaseResult syncNewProductV2() {
+        dfySyncTask.syncNewProductV2();
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/update/product/v2")
+    DfyBaseResult syncUpdateProductV2() {
+        dfySyncTask.syncUpdateProductV2();
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/tours/list")
     DfyBaseResult syncToursList(@RequestBody DfyToursListRequest request) {
         return DfyBaseResult.success(dfySyncService.syncToursList(request));
