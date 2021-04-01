@@ -681,9 +681,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             // 设置省市区
             commonService.setCity(newScenic);
             // 更新备份
-            commonService.updateScenicSpotMPOBackup(newScenic, scenicId, scenicDetail);
+            commonService.updateScenicSpotMPOBackup(newScenic, scenicDetail.getScenicId(), scenicDetail);
             // 同时保存映射关系
-            commonService.updateScenicSpotMapping(scenicId, Constants.SUPPLIER_CODE_DFY, newScenic);
+            commonService.updateScenicSpotMapping(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, newScenic);
             List<String> ticketIds = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
                 ticketIds.addAll(scenicDetail.getTicketList().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
@@ -713,7 +713,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
                 if(scenicSpotMappingMPO == null){
-                    log.error("驴妈妈产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
+                    log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
                     return;
                 }
                 ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
