@@ -35,7 +35,7 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     @Override
     public void saveProduct(ScenicSpotProductMPO productMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("id").is(productMPO.getId()));
+        query.addCriteria(Criteria.where("_id").is(productMPO.getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(productMPO, document);
         Update update = Update.fromDocument(document);
