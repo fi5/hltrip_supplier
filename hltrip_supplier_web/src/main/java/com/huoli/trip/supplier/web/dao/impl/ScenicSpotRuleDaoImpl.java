@@ -34,7 +34,7 @@ public class ScenicSpotRuleDaoImpl implements ScenicSpotRuleDao {
     @Override
     public void saveScenicSpotRule(ScenicSpotRuleMPO scenicSpotRuleMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("id").is(scenicSpotRuleMPO.getId()));
+        query.addCriteria(Criteria.where("_id").is(scenicSpotRuleMPO.getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(scenicSpotRuleMPO, document);
         Update update = Update.fromDocument(document);

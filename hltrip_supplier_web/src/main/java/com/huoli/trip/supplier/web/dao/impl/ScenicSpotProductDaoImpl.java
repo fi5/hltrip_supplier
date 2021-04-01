@@ -62,19 +62,19 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     @Override
     public List<ScenicSpotProductMPO> getByChannel(String channel){
         Query query = new Query(Criteria.where("channel").is(channel));
-        query.fields().include("supplierProductId").include("id");
+        query.fields().include("supplierProductId").exclude("_id");
         return mongoTemplate.find(query, ScenicSpotProductMPO.class);
     }
 
     @Override
     public void updateStatusById(String id, Integer status){
-        mongoTemplate.updateFirst(new Query(Criteria.where("id").is(id)),
+        mongoTemplate.updateFirst(new Query(Criteria.where("_id").is(id)),
                 Update.update("status", status), ScenicSpotProductMPO.class);
     }
 
     @Override
     public ScenicSpotProductMPO getByProductId(String productId){
-        return mongoTemplate.findOne(new Query(Criteria.where("id")
+        return mongoTemplate.findOne(new Query(Criteria.where("_id")
                 .is(productId)), ScenicSpotProductMPO.class);
     }
 }

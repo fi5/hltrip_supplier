@@ -38,13 +38,13 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
 
     @Override
     public ScenicSpotMPO getScenicSpotById(String id){
-        return mongoTemplate.findOne(new Query(Criteria.where("id").is(id)), ScenicSpotMPO.class);
+        return mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), ScenicSpotMPO.class);
     }
 
     @Override
     public void saveScenicSpot(ScenicSpotMPO scenicSpotMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("id").is(scenicSpotMPO.getId()));
+        query.addCriteria(Criteria.where("_id").is(scenicSpotMPO.getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(scenicSpotMPO, document);
         Update update = Update.fromDocument(document);

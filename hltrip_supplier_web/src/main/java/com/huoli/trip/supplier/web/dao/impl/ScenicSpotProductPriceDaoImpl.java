@@ -34,7 +34,7 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
     @Override
     public void saveScenicSpotProductPrice(ScenicSpotProductPriceMPO scenicSpotProductPriceMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("id").is(scenicSpotProductPriceMPO.getId()));
+        query.addCriteria(Criteria.where("_id").is(scenicSpotProductPriceMPO.getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(scenicSpotProductPriceMPO, document);
         Update update = Update.fromDocument(document);
