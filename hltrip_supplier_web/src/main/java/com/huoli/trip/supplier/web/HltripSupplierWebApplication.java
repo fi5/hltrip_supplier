@@ -20,7 +20,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication(exclude = {RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class,
         DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
-@ImportResource({"classpath:disconf-config.xml","classpath:rpc.xml"})
+@ImportResource({"classpath:disconf-config.xml"})
 @ComponentScan({"com.huoli.trip"})
 @DubboComponentScan(value = "com.huoli.trip.supplier.web")
 @EnableFeignClients(basePackages = "com.huoli.trip.supplier.feign.client")
