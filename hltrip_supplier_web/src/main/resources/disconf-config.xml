@@ -60,13 +60,25 @@
 		</property>
 	</bean>
 
-	<bean id="propertyConfigurer"
+	<!--<bean id="propertyConfigurer"
 		class="com.baidu.disconf.client.addons.properties.ReloadingPropertyPlaceholderConfigurer">
 		<property name="ignoreResourceNotFound" value="true" />
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 		<property name="propertiesArray">
 			<list>
 				<ref bean="configproperties_disconf" />
+			</list>
+		</property>
+	</bean>-->
+
+
+
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="propertiesArray">
+			<list>
+				<ref bean="platformConfigurer"/>
 			</list>
 		</property>
 	</bean>
