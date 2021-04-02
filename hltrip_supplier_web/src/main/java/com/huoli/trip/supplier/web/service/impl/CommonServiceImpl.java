@@ -18,6 +18,7 @@ import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  * 创建日期：2021/3/2<br>
  */
 @Service
+@Slf4j
 public class CommonServiceImpl implements CommonService {
 
     @Autowired
@@ -537,6 +539,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin){
+        log.info("开始保存景点副本");
         ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
         scenicSpotBackupMPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
         scenicSpotBackupMPO.setSupplierScenicId(scenicId);
@@ -548,6 +551,7 @@ public class CommonServiceImpl implements CommonService {
         }
         scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
+        log.info("景点副本保存成功id={}", scenicSpotBackupMPO.getId());
     }
 
     @Override
@@ -555,11 +559,13 @@ public class CommonServiceImpl implements CommonService {
         // 查映射关系
         ScenicSpotMappingMPO exist = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(channelScenicId, channel);
         if(exist != null){
+            log.info("{}景点{}已有映射id={}", channel, channelScenicId, exist.getId());
             return;
         }
         newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
         // 没有找到映射就往本地新增一条
         ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
+        log.info("{}景点{}没有有映射新增一条景点id={}", channel, channelScenicId, newScenic.getId());
         // 同时保存映射关系
         ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
         scenicSpotMappingMPO.setChannelScenicSpotId(channelScenicId);
@@ -578,8 +584,10 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public void refreshList(int type, String productId, int updateType, boolean add){
         if(add){
+            log.info("新增刷新列表。。type = {}, productId = {}", type, productId);
             productDataService.addProduct(type, productId);
         } else {
+            log.info("更新刷新列表。。type = {}, productId = {}, updateType = {}", type, productId, updateType);
             productDataService.updateProduct(type, productId, updateType);
         }
     }
