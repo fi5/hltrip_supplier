@@ -788,7 +788,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                         gl.getPrices().forEach(price -> {
                             ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                            scenicSpotProductPriceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                            scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                             scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
                             scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                             Integer ticketType;
