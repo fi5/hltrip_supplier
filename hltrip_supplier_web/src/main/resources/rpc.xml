@@ -7,6 +7,10 @@
        http://code.alibabatech.com/schema/dubbo
        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
+    <dubbo:application name="hltrip_supplier"/>
+    <dubbo:registry protocol="zookeeper" address="${dubbo.server.address}"/>
+    <dubbo:protocol name="dubbo"/>
+    <dubbo:consumer check="false"/>
     <dubbo:reference interface="com.huoli.flight.server.api.SmsService" id="smsService"
                    group="${dubbo.group}" timeout="10000" connections="2"/>
 
