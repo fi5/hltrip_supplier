@@ -1,6 +1,5 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
@@ -26,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -80,7 +80,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private ScenicSpotRuleDao scenicSpotRuleDao;
 
-    @Reference(group = "hltrip",timeout = 30000,check=false)
+    @Resource
     private DataService dataService;
 
     @Override
