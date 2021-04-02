@@ -63,10 +63,10 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private ScenicSpotDao scenicSpotDao;
 
-    @Reference(group = "hltirp")
+    @Reference(group = "hltrip")
     private DataService dataService;
 
-    @Reference(group = "hltirp")
+    @Reference(group = "hltrip")
     private ProductDataService productDataService;
 
     @Override
