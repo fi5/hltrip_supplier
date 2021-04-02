@@ -13,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.data.api.DataService;
+import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
@@ -64,6 +65,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Reference(group = "hltirp")
     private DataService dataService;
+
+    @Reference(group = "hltirp")
+    private ProductDataService productDataService;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -570,4 +574,15 @@ public class CommonServiceImpl implements CommonService {
     public String getId(String bizTag){
         return String.valueOf(dataService.getId(bizTag));
     }
+
+    @Override
+    public void refreshList(int type, String productId, int updateType, boolean add){
+        if(add){
+            productDataService.addProduct(type, productId);
+        } else {
+            productDataService.updateProduct(type, productId, updateType);
+        }
+    }
+
+
 }
