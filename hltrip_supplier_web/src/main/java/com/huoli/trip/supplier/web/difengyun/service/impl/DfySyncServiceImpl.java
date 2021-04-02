@@ -93,9 +93,6 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Autowired
     private GroupTourProductSetMealDao groupTourProductSetMealDao;
 
-    @Resource
-    private DataService dataService;
-
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
         try {
@@ -713,7 +710,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
-                scenicSpotProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
                 if(scenicSpotMappingMPO == null){
@@ -767,7 +764,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-            ruleMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
             ruleMPO.setIsCouponRule(0);
@@ -948,7 +945,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 Integer ticketKind = type;
                 dfyTicketDetail.getPriceCalendar().forEach(p -> {
                     ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                    scenicSpotProductPriceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                    scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                     scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
                     scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                     if(ticketKind != null){
@@ -1040,7 +1037,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS, departCity.getName());
             if(groupTourProductMPO == null ){
                 groupTourProductMPO = new GroupTourProductMPO();
-                groupTourProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT)));
+                groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
                 groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             }
             groupTourProductMPO.setSupplierProductId(productId);
@@ -1077,7 +1074,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 setMealMPO = setMealMPOs.get(0);
             } else {
                 setMealMPO = new GroupTourProductSetMealMPO();
-                setMealMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT)));
+                setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             }
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
             setMealMPO.setName(groupTourProductMPO.getProductName());

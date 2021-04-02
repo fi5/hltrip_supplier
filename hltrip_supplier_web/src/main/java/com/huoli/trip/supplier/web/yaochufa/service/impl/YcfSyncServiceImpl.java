@@ -80,9 +80,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private ScenicSpotRuleDao scenicSpotRuleDao;
 
-    @Resource
-    private DataService dataService;
-
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
         if(ListUtils.isEmpty(ycfProducts)){
@@ -543,7 +540,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
-                scenicSpotProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO == null){
@@ -599,7 +596,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             }
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-            ruleMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             ruleMPO.setChannel(SUPPLIER_CODE_YCF);
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setIsCouponRule(0);
@@ -791,7 +788,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         for (YcfPriceInfo yp : ycfPriceInfos) {
             ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
-            priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            priceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             priceMPO.setScenicSpotProductId(productId);
             priceMPO.setScenicSpotRuleId(ruleId);
             priceMPO.setTicketKind(ticketKind);
