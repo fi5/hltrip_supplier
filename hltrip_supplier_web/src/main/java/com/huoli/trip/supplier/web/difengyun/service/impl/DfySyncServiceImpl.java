@@ -85,9 +85,6 @@ public class DfySyncServiceImpl implements DfySyncService {
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
 
     @Autowired
-    private ChinaCityMapper chinaCityMapper;
-
-    @Autowired
     private GroupTourProductDao groupTourProductDao;
 
     @Autowired
@@ -1028,7 +1025,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                 return;
             }
         }
-
+        for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
+            // todo 笛风云有全国，这种城市怎么赋值，而且一个产品多个价格这种是否要拆成多个GroupTourProductMPO，还是拆成多个GroupTourProductSetMealMPO，需要城市查对应关系，套餐现在没有城市，不管怎么拆 除了价格其它信息都是一样的
+        }
         GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
         if(groupTourProductMPO == null ){
             groupTourProductMPO = new GroupTourProductMPO();
@@ -1068,7 +1067,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO = setMealMPOs.get(0);
         } else {
             setMealMPO = new GroupTourProductSetMealMPO();
-            setMealMPO.setId(System.currentTimeMillis() + "");
         }
         setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
         setMealMPO.setName(groupTourProductMPO.getProductName());
@@ -1225,106 +1223,56 @@ public class DfySyncServiceImpl implements DfySyncService {
                 return groupTourTripInfo;
             }).collect(Collectors.toList()));
         }
-        // todo 价格
-//        setMealMPO.setGroupTourPrices();
+        // todo 城市需要确认上面产品怎么拆
+        setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), ""));
+        groupTourProductSetMealDao.saveSetMeals(setMealMPO);
     }
 
     private void setCity(GroupTourProductMPO groupTourProductMPO, DfyToursDetailResponse dfyToursDetail){
         if(ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())){
-            groupTourProductMPO.setDepInfos(dfyToursDetail.getDepartCitys().stream().map(d -> {
-                AddressInfo addressInfo = new AddressInfo();
-                String name = d.getName();
-                if(name.endsWith("市")){
-                    name = name.substring(0, name.length() - 1);
-                }
-                List<ChinaCity> chinaCites = chinaCityMapper.getCityByNameAndTypeAndParentId(name, 2, null);
-                if(ListUtils.isEmpty(chinaCites)){
-                    return null;
-                }
-                ChinaCity chinaCity = chinaCites.get(0);
-                ChinaCity province = chinaCityMapper.getCityByCode(chinaCity.getParentCode());
-                if(province == null){
-                    return null;
-                }
-                addressInfo.setCityCode(chinaCity.getCode());
-                addressInfo.setCityName(chinaCity.getName());
-                addressInfo.setProvinceCode(province.getCode());
-                addressInfo.setProvinceName(province.getName());
-                addressInfo.setType("0");
-                return addressInfo;
-            }).filter(a -> a != null).collect(Collectors.toList()));
+            groupTourProductMPO.setDepInfos(dfyToursDetail.getDepartCitys().stream().map(d ->
+                    commonService.setCity(null, d.getName(), null)).filter(a -> a != null).collect(Collectors.toList()));
         }
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
-            groupTourProductMPO.setDepInfos(dfyToursDetail.getDesPoiNameList().stream().map(d ->
+            groupTourProductMPO.setArrInfos(dfyToursDetail.getDesPoiNameList().stream().map(d ->
                     commonService.setCity(d.getDesProvinceName(), d.getDesCityName(), d.getDesCountyName())).collect(Collectors.toList()));
         }
     }
 
     @Override
-    public void syncToursPriceV2(String supplierProductId, String city){
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_DFY_TOURS, supplierProductId, city);
-        ProductPO product = productDao.getByCode(productCode);
-        if(product == null){
-            log.error("同步笛风云跟团游价格失败，产品{}不存在", productCode);
-            return;
-        }
+    public List<GroupTourPrice> syncToursPriceV2(String supplierProductId, String city){
         DfyToursCalendarRequest calendarRequest = new DfyToursCalendarRequest();
         calendarRequest.setProductId(Integer.valueOf(supplierProductId));
         calendarRequest.setDepartCityCode(Integer.valueOf(city));
         DfyBaseResult<List<DfyToursCalendarResponse>> priceBaseResult = getToursCalendar(calendarRequest);
         if (priceBaseResult == null || ListUtils.isEmpty(priceBaseResult.getData())){
-            log.error("同步笛风云跟团游价格失败，产品码={}，接口没有返回数据", productCode);
-            return;
+            log.error("同步笛风云跟团游价格失败，产品码={}，接口没有返回数据", supplierProductId);
+            return null;
         }
-        PricePO pricePO = new PricePO();
-        pricePO.setProductCode(product.getCode());
-        pricePO.setSupplierProductId(product.getSupplierProductId());
-        pricePO.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
-        pricePO.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-        List<PriceInfoPO> priceInfoPOs = priceBaseResult.getData().stream().map(data -> {
-            PriceInfoPO priceInfoPO = new PriceInfoPO();
-            priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(data.getDepartDate())));
-            priceInfoPO.setSettlePrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
-            priceInfoPO.setSalePrice(priceInfoPO.getSettlePrice());
+        return priceBaseResult.getData().stream().map(data -> {
+            GroupTourPrice groupTourPrice = new GroupTourPrice();
+            groupTourPrice.setDate(data.getDepartDate());
+            groupTourPrice.setAdtPrice(BigDecimal.valueOf(data.getDistributeAdultPrice() == null ? 0 : data.getDistributeAdultPrice()));
+            groupTourPrice.setAdtSellPrice(groupTourPrice.getAdtPrice());
             if(data.getStockSign() != null){
                 switch (data.getStockSign()){
                     case DfyConstants.STOCK_TYPE_NOM:
-                        priceInfoPO.setStock(data.getStockNum());
+                        groupTourPrice.setAdtStock(data.getStockNum());
                         break;
                     case DfyConstants.STOCK_TYPE_UNLIMITED:
-                        priceInfoPO.setStock(999);
+                        groupTourPrice.setAdtStock(999);
                         break;
                     case DfyConstants.STOCK_TYPE_OFFLINE:
-                        priceInfoPO.setStock(0);
+                        groupTourPrice.setAdtStock(0);
                         break;
                 }
             }
             if(data.getExcludeChildFlag() != null && data.getExcludeChildFlag() == 0){
-                priceInfoPO.setChdSettlePrice(BigDecimal.valueOf(data.getDistributeChildPrice() == null ? 0 : data.getDistributeChildPrice()));
-                priceInfoPO.setChdSalePrice(priceInfoPO.getChdSettlePrice());
+                groupTourPrice.setChdPrice(BigDecimal.valueOf(data.getDistributeChildPrice() == null ? 0 : data.getDistributeChildPrice()));
+                groupTourPrice.setChdSellPrice(groupTourPrice.getChdPrice());
             }
-            priceInfoPO.setRoomDiffPrice(data.getRoomChargeprice() == null ? null : BigDecimal.valueOf(data.getRoomChargeprice()));
-            priceInfoPO.setDeadline(data.getDeadlineTime());
-            return priceInfoPO;
+            groupTourPrice.setDiffPrice(data.getRoomChargeprice() == null ? null : BigDecimal.valueOf(data.getRoomChargeprice()));
+            return groupTourPrice;
         }).collect(Collectors.toList());
-        pricePO.setPriceInfos(priceInfoPOs);
-        priceDao.updateByProductCode(pricePO);
-        List<PriceInfoPO> priceList = priceInfoPOs.stream().sorted(Comparator.comparing(p -> p.getSaleDate().getTime())).filter(p ->
-                p.getSaleDate().getTime() >= DateTimeUtil.trancateToDate(new Date()).getTime() &&
-                        p.getSalePrice() != null && p.getSalePrice().compareTo(BigDecimal.valueOf(0)) == 1 &&
-                        p.getStock() != null && p.getStock() > 0).collect(Collectors.toList());
-        if(priceList.size() > 0){
-            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
-            PriceInfoPO endPrice = priceList.get(priceList.size() - 1);
-            if(StringUtils.isNotBlank(endPrice.getDeadline())){
-                Date deadline = DateTimeUtil.parseDate(endPrice.getDeadline());
-                if(deadline.getTime() >= DateTimeUtil.trancateToDate(new Date()).getTime()){
-                    product.setInvalidTime(MongoDateUtils.handleTimezoneInput(deadline));
-                }
-            } else {
-                product.setInvalidTime(MongoDateUtils.handleTimezoneInput(endPrice.getSaleDate()));
-            }
-            productDao.updateByCode(product);
-        }
     }
 }

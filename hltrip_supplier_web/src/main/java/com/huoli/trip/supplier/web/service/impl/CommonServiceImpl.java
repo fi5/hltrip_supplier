@@ -471,6 +471,9 @@ public class CommonServiceImpl implements CommonService {
             }
         }
         if(StringUtils.isNotBlank(cityName)){
+            if(cityName.endsWith("市")){
+                cityName = cityName.substring(0, cityName.length() - 1);
+            }
             List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(cityName, 2, provinceId);
             if(ListUtils.isNotEmpty(cites)){
                 ChinaCity cityObj = cites.get(0);

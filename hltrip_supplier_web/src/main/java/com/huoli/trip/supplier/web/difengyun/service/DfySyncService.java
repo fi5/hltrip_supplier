@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyProductInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
@@ -152,7 +153,7 @@ public interface DfySyncService {
      * @param supplierProductId
      * @param city
      */
-    void syncToursPriceV2(String supplierProductId, String city);
+    List<GroupTourPrice> syncToursPriceV2(String supplierProductId, String city);
 
 
 }

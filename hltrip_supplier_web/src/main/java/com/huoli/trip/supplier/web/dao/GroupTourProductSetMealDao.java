@@ -20,4 +20,16 @@ public interface GroupTourProductSetMealDao {
      * @return
      */
     List<GroupTourProductSetMealMPO> getSetMeals(String groupTourProductId);
+
+    /**
+     * 新增套餐
+     * @param setMealMPO
+     */
+    void addSetMeals(GroupTourProductSetMealMPO setMealMPO);
+
+    /**
+     * 保存套餐
+     * @param setMealMPO
+     */
+    void saveSetMeals(GroupTourProductSetMealMPO setMealMPO);
 }
