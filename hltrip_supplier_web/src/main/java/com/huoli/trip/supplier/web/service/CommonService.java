@@ -47,4 +47,6 @@ public interface CommonService {
     void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic);
 
     String getId(String bizTag);
+
+    void refreshList(int type, String productId, int updateType, boolean add);
 }

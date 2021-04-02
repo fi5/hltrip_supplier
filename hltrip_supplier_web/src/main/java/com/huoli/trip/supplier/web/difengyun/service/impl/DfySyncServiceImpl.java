@@ -708,6 +708,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
 
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
+            boolean fresh = false;
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
@@ -723,6 +724,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     return;
                 }
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+                fresh = true;
             }
             scenicSpotProductMPO.setSupplierProductId(dfyTicketDetail.getProductId());
             // 默认销售中
@@ -957,6 +959,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
                 });
             }
+            commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(productId, Constants.SUPPLIER_CODE_DFY);
