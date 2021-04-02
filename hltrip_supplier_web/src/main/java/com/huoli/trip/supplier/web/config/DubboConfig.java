@@ -3,7 +3,6 @@ package com.huoli.trip.supplier.web.config;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,11 +11,8 @@ import javax.annotation.Resource;
 @Configuration
 public class DubboConfig {
 
-    private final DubboProperties dubboProperties;
-
-    public DubboConfig(DubboProperties dubboProperties) {
-        this.dubboProperties = dubboProperties;
-    }
+    @Resource
+    private DubboProperties dubboProperties;
 
     /**
      * 应用名配置，等同于 <dubbo:application name="xxx"  />
