@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.Serializable;
 
 @Data
-//@Configuration
+@Configuration
 public class DubboProperties implements Serializable {
     @Value("${dubbo.server.name}")
     private String name;
