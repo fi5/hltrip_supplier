@@ -9,4 +9,7 @@
 
     <dubbo:reference interface="com.huoli.flight.server.api.SmsService" id="smsService"
                    group="${dubbo.group}" timeout="10000" connections="2"/>
+
+    <dubbo:reference interface="com.huoli.trip.data.api.DataService" id="dataService"
+                     group="${dubbo.group}" timeout="10000" connections="2"/>
 </beans>
