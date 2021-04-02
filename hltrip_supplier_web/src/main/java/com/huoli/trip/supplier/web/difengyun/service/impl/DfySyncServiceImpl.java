@@ -987,7 +987,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             return false;
         }
         List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
-        productInfos.forEach(p -> syncToursDetail(p.getProductId(), PRODUCT_SYNC_MODE_ONLY_ADD));
+        productInfos.forEach(p -> syncToursDetailV2(p.getProductId()));
         return true;
     }
 
@@ -1036,12 +1036,14 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.info("过滤全国出发的产品。");
                 return;
             }
+            boolean add = false;
             // todo 笛风云有全国，这种城市怎么赋值，而且一个产品多个价格这种是否要拆成多个GroupTourProductMPO，还是拆成多个GroupTourProductSetMealMPO，需要城市查对应关系，套餐现在没有城市，不管怎么拆 除了价格其它信息都是一样的
             GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS, departCity.getName());
             if(groupTourProductMPO == null ){
                 groupTourProductMPO = new GroupTourProductMPO();
                 groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
                 groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                add = true;
             }
             groupTourProductMPO.setSupplierProductId(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
@@ -1236,8 +1238,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getName()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
+            commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
         }
-
     }
 
     private void setCity(GroupTourProductMPO groupTourProductMPO, DfyToursDetailResponse dfyToursDetail){
