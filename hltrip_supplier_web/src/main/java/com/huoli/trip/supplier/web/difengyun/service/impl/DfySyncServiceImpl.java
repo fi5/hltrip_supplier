@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -92,7 +93,7 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Autowired
     private GroupTourProductSetMealDao groupTourProductSetMealDao;
 
-    @Reference(group = "hltrip",timeout = 30000,check=false)
+    @Resource
     private DataService dataService;
 
     @Override
