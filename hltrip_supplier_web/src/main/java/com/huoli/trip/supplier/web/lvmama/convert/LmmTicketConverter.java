@@ -376,9 +376,8 @@ public class LmmTicketConverter {
 
     public static ScenicSpotOpenTime convertToScenicSpotOpenTime(LmmOpenTime lmmOpenTime){
         ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
-        scenicSpotOpenTime.setOpenTimeDesc(lmmOpenTime.getOpenTimeInfo());
-        scenicSpotOpenTime.setStartTime(lmmOpenTime.getSightStart());
-        scenicSpotOpenTime.setEndTime(lmmOpenTime.getSightEnd());
+        scenicSpotOpenTime.setTimeDesc(lmmOpenTime.getOpenTimeInfo());
+        scenicSpotOpenTime.setDateDesc(String.format("%s-%s", lmmOpenTime.getSightStart(), lmmOpenTime.getSightEnd()));
         return scenicSpotOpenTime;
     }
 

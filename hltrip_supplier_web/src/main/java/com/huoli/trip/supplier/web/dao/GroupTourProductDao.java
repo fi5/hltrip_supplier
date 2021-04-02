@@ -13,12 +13,33 @@ import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 public interface GroupTourProductDao {
 
     /**
+     * 保存产品
+     * @param groupTourProductMPO
+     */
+    void saveProduct(GroupTourProductMPO groupTourProductMPO);
+
+    /**
+     * 新增产品
+     * @param groupTourProductMPO
+     */
+    void addProduct(GroupTourProductMPO groupTourProductMPO);
+
+    /**
      * 根据供应商产品id获取产品
      * @param supplierProductId
      * @param channel
      * @return
      */
     GroupTourProductMPO getTourProduct(String supplierProductId, String channel);
+
+    /**
+     * 根据供应商id和城市获取产品
+     * @param supplierProductId
+     * @param channel
+     * @param cityName
+     * @return
+     */
+    GroupTourProductMPO getTourProduct(String supplierProductId, String channel, String cityName);
 
     /**
      * 根据供应商产品id修改状态

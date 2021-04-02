@@ -1,13 +1,16 @@
 package com.huoli.trip.supplier.web.yaochufa.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
+import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
@@ -76,6 +79,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private ScenicSpotRuleDao scenicSpotRuleDao;
+
+    @Reference(group = "hltrip",timeout = 30000,check=false)
+    private DataService dataService;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -537,6 +543,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
+                scenicSpotProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
                 scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO == null){
@@ -592,6 +599,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             }
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             ruleMPO.setChannel(SUPPLIER_CODE_YCF);
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setIsCouponRule(0);
@@ -783,6 +791,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         for (YcfPriceInfo yp : ycfPriceInfos) {
             ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
+            priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             priceMPO.setScenicSpotProductId(productId);
             priceMPO.setScenicSpotRuleId(ruleId);
             priceMPO.setTicketKind(ticketKind);

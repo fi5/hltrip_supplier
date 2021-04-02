@@ -461,20 +461,21 @@ public class YcfConverter {
             }
         }
         scenicSpotMPO.setImages(images);
-        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
-            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
-                Notice notice = new Notice();
-                if(c.getType() == 1){
-                    notice.setTitle("购买须知");
-                } else if(c.getType() == 2){
-                    notice.setTitle("交通指南");
-                } else if(c.getType() == 3){
-                    notice.setTitle("酒景图文");
-                }
-                notice.setContent(c.getDetail());
-                return notice;
-            }).collect(Collectors.toList()));
-        }
+        // todo 说明要不要
+//        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
+//            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
+//                Notice notice = new Notice();
+//                if(c.getType() == 1){
+//                    notice.setTitle("购买须知");
+//                } else if(c.getType() == 2){
+//                    notice.setTitle("交通指南");
+//                } else if(c.getType() == 3){
+//                    notice.setTitle("酒景图文");
+//                }
+//                notice.setContent(c.getDetail());
+//                return notice;
+//            }).collect(Collectors.toList()));
+//        }
         return scenicSpotMPO;
     }
 }

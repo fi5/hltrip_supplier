@@ -327,13 +327,13 @@ public class DfyTicketConverter {
         scenicSpotMPO.setProvince(scenicDetail.getProvinceName());
         if(StringUtils.isNotBlank(scenicDetail.getOpenTime())){
             ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
-            scenicSpotOpenTime.setOpenTimeDesc(scenicDetail.getOpenTime());
+            scenicSpotOpenTime.setTimeDesc(scenicDetail.getOpenTime());
             scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
         }
         Notice notice = new Notice();
         notice.setContent(scenicDetail.getBookNotice());
         notice.setContent("预定须知");
-        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
+//        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
         scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
         return scenicSpotMPO;
     }

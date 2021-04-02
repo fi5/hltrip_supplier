@@ -1,7 +1,9 @@
 package com.huoli.trip.supplier.web.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
@@ -10,6 +12,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
@@ -57,6 +60,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ScenicSpotDao scenicSpotDao;
+
+    @Reference(group = "hltrip",timeout = 30000,check=false)
+    private DataService dataService;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -532,6 +538,7 @@ public class CommonServiceImpl implements CommonService {
         scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
         ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicId, Constants.SUPPLIER_CODE_LMM_TICKET);
         if(exist == null){
+            scenicSpotBackupMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         }
         scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -545,6 +552,7 @@ public class CommonServiceImpl implements CommonService {
         if(exist != null){
             return;
         }
+        newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
         // 没有找到映射就往本地新增一条
         ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
         // 同时保存映射关系

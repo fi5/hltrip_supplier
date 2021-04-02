@@ -46,6 +46,7 @@ public class YcfProductReceiveController {
         try {
             log.info("开始接收产品。。{}", JSON.toJSONString(products));
             ycfSyncService.syncProduct(products);
+            ycfSyncService.syncScenicProduct(products);
         } catch (Exception e) {
             log.error("接收产品推送失败，", e);
             return YcfBaseResult.fail(new YcfPushProductResponse(YcfConstants.PRODUCT_HANDLE_STATUS_FAIL, YcfConstants.PRODUCT_STATUS_VALID, YcfConstants.HANDLE_TYPE_ASYNC));
