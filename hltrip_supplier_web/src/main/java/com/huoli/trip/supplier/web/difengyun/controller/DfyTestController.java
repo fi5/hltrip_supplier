@@ -190,6 +190,23 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/tours/list/v2")
+    DfyBaseResult syncToursListV2(@RequestBody DfyToursListRequest request) {
+        return DfyBaseResult.success(dfySyncService.syncToursListV2(request));
+    }
+
+    @PostMapping(path = "/sync/tours/detail/v2")
+    DfyBaseResult syncToursDetailV2(@RequestBody String productId) {
+        dfySyncService.syncToursDetailV2(productId);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/price/v2")
+    DfyBaseResult syncToursPriceV2(@RequestBody DfyToursCalendarRequest request) {
+        dfySyncService.syncToursPriceV2(String.valueOf(request.getProductId()), String.valueOf(request.getDepartCityCode()));
+        return DfyBaseResult.success();
+    }
+
     /**
      * 订单详情
      *
