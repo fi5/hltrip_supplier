@@ -45,4 +45,6 @@ public interface CommonService {
     void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin);
 
     void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic);
+
+    String getId(String bizTag);
 }

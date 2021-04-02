@@ -565,4 +565,9 @@ public class CommonServiceImpl implements CommonService {
         scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
     }
+
+    @Override
+    public String getId(String bizTag){
+        return String.valueOf(dataService.getId(bizTag));
+    }
 }

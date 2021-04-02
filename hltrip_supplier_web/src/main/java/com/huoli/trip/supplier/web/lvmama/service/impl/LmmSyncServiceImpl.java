@@ -84,9 +84,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     @Autowired
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
 
-    @Resource
-    private DataService dataService;
-
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
         LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request);
@@ -599,7 +596,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                 if(scenicSpotProductMPO == null){
                     scenicSpotProductMPO = new ScenicSpotProductMPO();
-                    scenicSpotProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                    scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                     scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                     ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                     if(scenicSpotMappingMPO == null){
@@ -656,7 +653,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 }
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-                scenicSpotProductMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
                 ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
                 ruleMPO.setIsCouponRule(0);
