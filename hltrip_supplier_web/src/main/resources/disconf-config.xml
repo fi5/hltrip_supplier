@@ -78,7 +78,7 @@
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 		<property name="propertiesArray">
 			<list>
-				<ref bean="platformConfigurer"/>
+				<ref bean="configproperties_disconf"/>
 			</list>
 		</property>
 	</bean>
