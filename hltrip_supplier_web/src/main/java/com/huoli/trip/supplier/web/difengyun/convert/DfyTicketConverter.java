@@ -341,13 +341,21 @@ public class DfyTicketConverter {
     public static Coordinate convertToCoordinate(String baidu, String google){
         Coordinate coordinate = null;
         if(StringUtils.isNotBlank(baidu)){
-            coordinate = new Coordinate();
-            coordinate.setLongitude(Double.valueOf(baidu.split(",")[0]));
-            coordinate.setLatitude(Double.valueOf(baidu.split(",")[1]));
+            try {
+                coordinate = new Coordinate();
+                coordinate.setLongitude(Double.valueOf(baidu.split(",")[0]));
+                coordinate.setLatitude(Double.valueOf(baidu.split(",")[1]));
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
         } else if(StringUtils.isNotBlank(google)){
-            coordinate = new Coordinate();
-            coordinate.setLongitude(Double.valueOf(google.split(",")[0]));
-            coordinate.setLatitude(Double.valueOf(google.split(",")[1]));
+            try {
+                coordinate = new Coordinate();
+                coordinate.setLongitude(Double.valueOf(google.split(",")[0]));
+                coordinate.setLatitude(Double.valueOf(google.split(",")[1]));
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
         }
         return coordinate;
     }
