@@ -699,7 +699,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     // 更新备份
                     commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), item);
                     // 同时保存映射关系
-                    commonService.updateScenicSpotMapping(item.getPoiID(), Constants.SUPPLIER_CODE_DFY, newScenic);
+                    commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, newScenic);
                     return newScenic.getId();
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);
