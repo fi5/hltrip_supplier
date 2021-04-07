@@ -101,46 +101,23 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyScenicDetail scenicDetail = detailBaseResult.getData();
             ProductItemPO newProductItem = DfyTicketConverter.convertToProductItemPO(scenicDetail);
             ProductItemPO oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
-            List<ItemFeaturePO> featurePOs = null;
-            ProductPO productPO = null;
-            List<ImageBasePO> imageDetails = null;
-            List<ImageBasePO> images = null;
-            List<ImageBasePO> mainImages = null;
-            if(oldProductItem == null){
-                newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            } else {
-                featurePOs = oldProductItem.getFeatures();
-                productPO = oldProductItem.getProduct();
-                imageDetails = oldProductItem.getImageDetails();
-                images = oldProductItem.getImages();
-                mainImages = oldProductItem.getMainImages();
-                // 比对信息
-                commonService.compareProductItem(newProductItem);
-            }
-            newProductItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            newProductItem.setOperator(Constants.SUPPLIER_CODE_DFY);
-            newProductItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
-            // todo 暂时默认通过
-            newProductItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
-//            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
-            try {
-                // 保存副本
-                commonService.saveBackupProductItem(newProductItem);
-            } catch (Exception e) {
-                log.error("保存{}副本异常", newProductItem.getCode(), e);
-            }
-            // 这个不更新，还用老的
-            newProductItem.setFeatures(featurePOs);
-            newProductItem.setProduct(productPO);
-            newProductItem.setImageDetails(imageDetails);
-            newProductItem.setImages(images);
-            newProductItem.setMainImages(mainImages);
-            if(ListUtils.isEmpty(newProductItem.getImages()) && ListUtils.isEmpty(newProductItem.getMainImages())){
-                log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
-                newProductItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
-            }
             // 已存在的景点不更新
             if(oldProductItem == null){
+                newProductItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newProductItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newProductItem.setOperator(Constants.SUPPLIER_CODE_DFY);
+                newProductItem.setOperatorName(Constants.SUPPLIER_NAME_DFY);
+                newProductItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                try {
+                    // 保存副本
+                    commonService.saveBackupProductItem(newProductItem);
+                } catch (Exception e) {
+                    log.error("保存{}副本异常", newProductItem.getCode(), e);
+                }
+                if(ListUtils.isEmpty(newProductItem.getImages()) && ListUtils.isEmpty(newProductItem.getMainImages())){
+                    log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                    newProductItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                }
                 productItemDao.updateByCode(newProductItem);
                 // 拿到最新的景点
                 oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
