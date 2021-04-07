@@ -416,7 +416,6 @@ public class YcfConverter {
      */
     public static ScenicSpotMPO convertToScenicSpotMPO(YcfProductItem productItem){
         ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
-        scenicSpotMPO.setId(System.currentTimeMillis() + "");
         scenicSpotMPO.setName(productItem.getPoiName());
         if(productItem.getLevel() != null){
             switch (productItem.getLevel()){
