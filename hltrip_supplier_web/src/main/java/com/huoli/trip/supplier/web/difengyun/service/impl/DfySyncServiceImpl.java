@@ -724,6 +724,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                     return;
                 }
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+                if(ListUtils.isNotEmpty(scenicSpotMPO.getImages())){
+                    scenicSpotProductMPO.setImages(scenicSpotMPO.getImages());
+                    scenicSpotProductMPO.setMainImage(scenicSpotMPO.getImages().get(0));
+                }
                 fresh = true;
             }
             scenicSpotProductMPO.setSupplierProductId(dfyTicketDetail.getProductId());
@@ -955,6 +959,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     }
                     scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
                     scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
+                    if(StringUtils.isNotBlank(p.getSalePrice())){
+                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                    }
                     scenicSpotProductPriceMPO.setStock(99);
                     scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
                 });
