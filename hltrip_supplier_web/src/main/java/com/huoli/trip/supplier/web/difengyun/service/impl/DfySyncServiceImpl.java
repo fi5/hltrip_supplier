@@ -765,83 +765,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(dfyTicketDetail.getAdvanceHour() != null){
                 transaction.setBookBeforeTime(dfyTicketDetail.getAdvanceHour().toString());
             }
-
             // todo 取票时间，取票方式 没有
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
-            if(ListUtils.isNotEmpty(dfyTicketDetail.getPriceCalendar())){
-                Integer type = null;
-                if(StringUtils.isNotBlank(dfyTicketDetail.getMpType())){
-                    switch (Integer.parseInt(dfyTicketDetail.getMpType())){
-                        case DfyConstants.TICKET_TYPE_0:
-                            type = TicketType.TICKET_TYPE_19.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_1:
-                            type = TicketType.TICKET_TYPE_2.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_2:
-                            type = TicketType.TICKET_TYPE_4.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_3:
-                            type = TicketType.TICKET_TYPE_9.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_4:
-                            type = TicketType.TICKET_TYPE_7.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_5:
-                            type = TicketType.TICKET_TYPE_8.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_6:
-                            type = TicketType.TICKET_TYPE_14.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_7:
-                            type = TicketType.TICKET_TYPE_17.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_8:
-                            type = TicketType.TICKET_TYPE_16.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_9:
-                            type = TicketType.TICKET_TYPE_20.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_10:
-                            type = TicketType.TICKET_TYPE_21.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_11:
-                            type = TicketType.TICKET_TYPE_23.getCode();
-                            break;
-                        case DfyConstants.TICKET_TYPE_12:
-                            type = TicketType.TICKET_TYPE_22.getCode();
-                            break;
-                        default:
-                            type = TicketType.TICKET_TYPE_1.getCode();
-                            break;
-                    }
-                }
-                Integer ticketKind = type;
-                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
-                dfyTicketDetail.getPriceCalendar().forEach(p -> {
-                    ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDepartDate())).findFirst().orElse(null);
-                    if(scenicSpotProductPriceMPO == null){
-                        scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                        scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                        scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
-                        scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
-                        scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
-                        scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
-                        if(ticketKind != null){
-                            scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
-                        }
-                    }
-                    if(StringUtils.isNotBlank(p.getSalePrice())){
-                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
-                    }
-                    scenicSpotProductPriceMPO.setStock(99);
-                    scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
-                });
-            }
+            savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
@@ -855,6 +785,79 @@ public class DfySyncServiceImpl implements DfySyncService {
                 scenicSpotProductDao.updateStatusById(scenicSpotProductMPO.getId(), 3);
                 log.info("笛风云产品详情返回空，产品已下线，productCode = {}", scenicSpotProductMPO.getId());
             }
+        }
+    }
+
+    private void savePrice(DfyTicketDetail dfyTicketDetail, String scenicSpotProductId, String ruleId){
+        if(ListUtils.isNotEmpty(dfyTicketDetail.getPriceCalendar())){
+            Integer type = null;
+            if(StringUtils.isNotBlank(dfyTicketDetail.getMpType())){
+                switch (Integer.parseInt(dfyTicketDetail.getMpType())){
+                    case DfyConstants.TICKET_TYPE_0:
+                        type = TicketType.TICKET_TYPE_19.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_1:
+                        type = TicketType.TICKET_TYPE_2.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_2:
+                        type = TicketType.TICKET_TYPE_4.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_3:
+                        type = TicketType.TICKET_TYPE_9.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_4:
+                        type = TicketType.TICKET_TYPE_7.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_5:
+                        type = TicketType.TICKET_TYPE_8.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_6:
+                        type = TicketType.TICKET_TYPE_14.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_7:
+                        type = TicketType.TICKET_TYPE_17.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_8:
+                        type = TicketType.TICKET_TYPE_16.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_9:
+                        type = TicketType.TICKET_TYPE_20.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_10:
+                        type = TicketType.TICKET_TYPE_21.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_11:
+                        type = TicketType.TICKET_TYPE_23.getCode();
+                        break;
+                    case DfyConstants.TICKET_TYPE_12:
+                        type = TicketType.TICKET_TYPE_22.getCode();
+                        break;
+                    default:
+                        type = TicketType.TICKET_TYPE_1.getCode();
+                        break;
+                }
+            }
+            Integer ticketKind = type;
+            List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
+            dfyTicketDetail.getPriceCalendar().forEach(p -> {
+                ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDepartDate())).findFirst().orElse(null);
+                if(scenicSpotProductPriceMPO == null){
+                    scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+                    scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                    scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
+                    scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
+                    scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
+                    if(ticketKind != null){
+                        scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
+                    }
+                }
+                if(StringUtils.isNotBlank(p.getSalePrice())){
+                    scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                }
+                scenicSpotProductPriceMPO.setStock(99);
+                scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+            });
         }
     }
 
