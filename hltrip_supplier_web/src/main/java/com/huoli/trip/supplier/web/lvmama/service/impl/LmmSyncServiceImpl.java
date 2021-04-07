@@ -268,7 +268,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 log.info("{}没有列表图、轮播图，设置待审核", newItem.getCode());
                 newItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
-            productItemDao.updateByCode(newItem);
+            // 已存在的景点不更新
+            if(oldItem == null){
+                productItemDao.updateByCode(newItem);
+            }
         });
         return true;
     }
