@@ -769,135 +769,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             // todo 取票时间，取票方式 没有
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-            ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
-            ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
-            ruleMPO.setIsCouponRule(0);
-            if(dfyTicketDetail.getDrawType() != null){
-                if(dfyTicketDetail.getDrawType() == 1){
-                    ruleMPO.setTicketType(1);
-                } else if(dfyTicketDetail.getDrawType() == 8){
-                    ruleMPO.setTicketType(0);
-                } else {
-                    log.error("不支持的门票类型drawType={}", dfyTicketDetail.getDrawType());
-                }
-            }
-            if(dfyTicketDetail.getCustInfoLimit() != null){
-
-                List<Integer> booker = Lists.newArrayList();
-                booker.add(0);
-                booker.add(1);
-                if(dfyTicketDetail.getCustInfoLimit() > 3){
-                    booker.add(2);
-                }
-                ruleMPO.setTicketInfos(booker);
-                List<Integer> traveller = Lists.newArrayList();
-                if(Arrays.asList(3, 7).contains(dfyTicketDetail.getCustInfoLimit())){
-                    traveller.add(0);
-                    traveller.add(1);
-                } else if(Arrays.asList(2, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
-                    traveller.add(0);
-                    traveller.add(1);
-                    traveller.add(2);
-                }
-                if(ListUtils.isNotEmpty(traveller)){
-                    ruleMPO.setTravellerInfos(traveller);
-                    if(StringUtils.isNotBlank(dfyTicketDetail.getCertificateType())){
-                        List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
-                            switch (Integer.parseInt(c)){
-                                case DfyConstants.CRED_TYPE_ID:
-                                    return Certificate.ID_CARD.getCode();
-                                case DfyConstants.CRED_TYPE_PP:
-                                    return Certificate.PASSPORT.getCode();
-                                case DfyConstants.CRED_TYPE_OF:
-                                    return Certificate.OFFICER.getCode();
-                                case DfyConstants.CRED_TYPE_HK:
-                                    return Certificate.HKM_PASS.getCode();
-                                case DfyConstants.CRED_TYPE_TW:
-                                    return Certificate.TW_CARD.getCode();
-                                default:
-                                    // 其它类型直接舍弃（笛风云建议这样操作）
-                                    return Integer.MIN_VALUE;
-                            }
-                        }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
-                        ruleMPO.setTravellerTypes(creds);
-                    } else {
-                        // 如果空的只支持身份证
-                        ruleMPO.setTravellerTypes(Lists.newArrayList(Certificate.ID_CARD.getCode()));
-                    }
-                }
-            }
-            if(dfyTicketDetail.getLimitNumHigh() != null){
-                ruleMPO.setLimitBuy(1);
-                // -1 这些是为了防止0起作用，实际只为设置maxcount
-                ruleMPO.setLimitBuyType(-1);
-                ruleMPO.setRangeType(-1);
-                ruleMPO.setDistinguishUser(-1);
-                ruleMPO.setMaxCount(dfyTicketDetail.getLimitNumHigh());
-            }
-            ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
-            if(dfyTicketDetail.getAdmissionVoucher() != null){
-                String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
-                try {
-                    if(StringUtils.isNotBlank(code)){
-                        if(Integer.valueOf(code) < 300){
-                            ruleMPO.setInType(1);
-                        } else if(Integer.valueOf(code) >= 300){
-                            ruleMPO.setInType(0);
-                        }
-                        if(Arrays.asList("202","301").contains(code)){
-                            ruleMPO.setVoucherType(0);
-                        } else if(Arrays.asList("206","303").contains(code)){
-                            ruleMPO.setVoucherType(1);
-                        } else if(Arrays.asList("203").contains(code)){
-                            ruleMPO.setVoucherType(4);
-                        } else {
-                            ruleMPO.setVoucherType(5);
-                            switch (code){
-                                case "1":
-                                    ruleMPO.setCardType("实体票");
-                                    break;
-                                case "201":
-                                    ruleMPO.setCardType("短信");
-                                    break;
-                                case "204":
-                                    ruleMPO.setCardType("换票证");
-                                    break;
-                                case "205":
-                                case "302":
-                                    ruleMPO.setCardType("邮件");
-                                    break;
-                                case "207":
-                                case "304":
-                                    ruleMPO.setCardType("护照");
-                                    break;
-                                case "208":
-                                case "305":
-                                    ruleMPO.setCardType("港澳通行证");
-                                    break;
-                                case "209":
-                                case "306":
-                                    ruleMPO.setCardType("军官证");
-                                    break;
-                                case "210":
-                                case "307":
-                                    ruleMPO.setCardType("台胞证");
-                                    break;
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("转化入园方式失败，不影响继续执行，value = {}", code);
-                }
-            }
-            // todo 预定说明没有 dfyTicketDetail.bookNotice
-            ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
-            ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
-            ruleMPO.setValid(1);
-            ruleMPO = scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+            ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             if(ListUtils.isNotEmpty(dfyTicketDetail.getPriceCalendar())){
@@ -949,21 +821,25 @@ public class DfySyncServiceImpl implements DfySyncService {
                     }
                 }
                 Integer ticketKind = type;
+                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
                 dfyTicketDetail.getPriceCalendar().forEach(p -> {
-                    ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                    scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                    scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
-                    scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
-                    if(ticketKind != null){
-                        scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
+                    ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDepartDate())).findFirst().orElse(null);
+                    if(scenicSpotProductPriceMPO == null){
+                        scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+                        scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                        scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                        scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
+                        scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
+                        scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
+                        if(ticketKind != null){
+                            scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
+                        }
                     }
-                    scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
-                    scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
                     if(StringUtils.isNotBlank(p.getSalePrice())){
                         scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
                     }
                     scenicSpotProductPriceMPO.setStock(99);
-                    scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                    scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
                 });
             }
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
@@ -980,6 +856,141 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.info("笛风云产品详情返回空，产品已下线，productCode = {}", scenicSpotProductMPO.getId());
             }
         }
+    }
+
+    private ScenicSpotRuleMPO saveRule(ScenicSpotProductMPO scenicSpotProductMPO, DfyTicketDetail dfyTicketDetail){
+        ScenicSpotRuleMPO ruleMPO = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
+        if(ruleMPO == null){
+            ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+            ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
+            ruleMPO.setIsCouponRule(0);
+            ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
+            ruleMPO.setValid(1);
+            ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        }
+        if(dfyTicketDetail.getDrawType() != null){
+            if(dfyTicketDetail.getDrawType() == 1){
+                ruleMPO.setTicketType(1);
+            } else if(dfyTicketDetail.getDrawType() == 8){
+                ruleMPO.setTicketType(0);
+            } else {
+                log.error("不支持的门票类型drawType={}", dfyTicketDetail.getDrawType());
+            }
+        }
+        if(dfyTicketDetail.getCustInfoLimit() != null){
+            List<Integer> booker = Lists.newArrayList();
+            booker.add(0);
+            booker.add(1);
+            if(dfyTicketDetail.getCustInfoLimit() > 3){
+                booker.add(2);
+            }
+            ruleMPO.setTicketInfos(booker);
+            List<Integer> traveller = Lists.newArrayList();
+            if(Arrays.asList(3, 7).contains(dfyTicketDetail.getCustInfoLimit())){
+                traveller.add(0);
+                traveller.add(1);
+            } else if(Arrays.asList(2, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
+                traveller.add(0);
+                traveller.add(1);
+                traveller.add(2);
+            }
+            if(ListUtils.isNotEmpty(traveller)){
+                ruleMPO.setTravellerInfos(traveller);
+                if(StringUtils.isNotBlank(dfyTicketDetail.getCertificateType())){
+                    List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
+                        switch (Integer.parseInt(c)){
+                            case DfyConstants.CRED_TYPE_ID:
+                                return Certificate.ID_CARD.getCode();
+                            case DfyConstants.CRED_TYPE_PP:
+                                return Certificate.PASSPORT.getCode();
+                            case DfyConstants.CRED_TYPE_OF:
+                                return Certificate.OFFICER.getCode();
+                            case DfyConstants.CRED_TYPE_HK:
+                                return Certificate.HKM_PASS.getCode();
+                            case DfyConstants.CRED_TYPE_TW:
+                                return Certificate.TW_CARD.getCode();
+                            default:
+                                // 其它类型直接舍弃（笛风云建议这样操作）
+                                return Integer.MIN_VALUE;
+                        }
+                    }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
+                    ruleMPO.setTravellerTypes(creds);
+                } else {
+                    // 如果空的只支持身份证
+                    ruleMPO.setTravellerTypes(Lists.newArrayList(Certificate.ID_CARD.getCode()));
+                }
+            }
+        }
+        if(dfyTicketDetail.getLimitNumHigh() != null){
+            ruleMPO.setLimitBuy(1);
+            // -1 这些是为了防止0起作用，实际只为设置maxcount
+            ruleMPO.setLimitBuyType(-1);
+            ruleMPO.setRangeType(-1);
+            ruleMPO.setDistinguishUser(-1);
+            ruleMPO.setMaxCount(dfyTicketDetail.getLimitNumHigh());
+        }
+        ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
+        if(dfyTicketDetail.getAdmissionVoucher() != null){
+            String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
+            try {
+                if(StringUtils.isNotBlank(code)){
+                    if(Integer.valueOf(code) < 300){
+                        ruleMPO.setInType(1);
+                    } else if(Integer.valueOf(code) >= 300){
+                        ruleMPO.setInType(0);
+                    }
+                    if(Arrays.asList("202","301").contains(code)){
+                        ruleMPO.setVoucherType(0);
+                    } else if(Arrays.asList("206","303").contains(code)){
+                        ruleMPO.setVoucherType(1);
+                    } else if(Arrays.asList("203").contains(code)){
+                        ruleMPO.setVoucherType(4);
+                    } else {
+                        ruleMPO.setVoucherType(5);
+                        switch (code){
+                            case "1":
+                                ruleMPO.setCardType("实体票");
+                                break;
+                            case "201":
+                                ruleMPO.setCardType("短信");
+                                break;
+                            case "204":
+                                ruleMPO.setCardType("换票证");
+                                break;
+                            case "205":
+                            case "302":
+                                ruleMPO.setCardType("邮件");
+                                break;
+                            case "207":
+                            case "304":
+                                ruleMPO.setCardType("护照");
+                                break;
+                            case "208":
+                            case "305":
+                                ruleMPO.setCardType("港澳通行证");
+                                break;
+                            case "209":
+                            case "306":
+                                ruleMPO.setCardType("军官证");
+                                break;
+                            case "210":
+                            case "307":
+                                ruleMPO.setCardType("台胞证");
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转化入园方式失败，不影响继续执行，value = {}", code);
+            }
+        }
+        // todo 预定说明没有 dfyTicketDetail.bookNotice
+        ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
+        ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     @Override

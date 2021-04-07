@@ -40,4 +40,9 @@ public class ScenicSpotRuleDaoImpl implements ScenicSpotRuleDao {
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_SCENICSPOT_RULE);
     }
+
+    @Override
+    public ScenicSpotRuleMPO getScenicSpotRule(String scenicSpotId){
+        return mongoTemplate.findOne(new Query(Criteria.where("scenicSpotId").is(scenicSpotId)), ScenicSpotRuleMPO.class);
+    }
 }

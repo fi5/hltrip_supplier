@@ -774,10 +774,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(productId)){
             return;
         }
-        ScenicSpotProductPriceMPO existPrice = scenicSpotProductPriceDao.getByProductId(productId);
-        if(existPrice != null){
-            ruleId = existPrice.getScenicSpotRuleId();
-            ticketKind = existPrice.getTicketKind();
+        List<ScenicSpotProductPriceMPO> existPrice = scenicSpotProductPriceDao.getByProductId(productId);
+        if(ListUtils.isNotEmpty(existPrice)){
+            ruleId = existPrice.get(0).getScenicSpotRuleId();
+            ticketKind = existPrice.get(0).getTicketKind();
         }
         if(StringUtils.isBlank(ruleId)){
             return;
