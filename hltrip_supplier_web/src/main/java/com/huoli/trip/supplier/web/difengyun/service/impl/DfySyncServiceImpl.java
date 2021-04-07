@@ -840,6 +840,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             Integer ticketKind = type;
             List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
             dfyTicketDetail.getPriceCalendar().forEach(p -> {
+                if(DateTimeUtil.parseDate(p.getDepartDate()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
+                    // 历史库存不更新
+                    return;
+                }
                 ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDepartDate())).findFirst().orElse(null);
                 if(scenicSpotProductPriceMPO == null){
                     scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
