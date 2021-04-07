@@ -553,19 +553,18 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     return;
                 }
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+                scenicSpotProductMPO.setIsDel(0);
+                scenicSpotProductMPO.setSellType(1);
+                scenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
+                scenicSpotProductMPO.setPayServiceType(0);
+                scenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
+                if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                    scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                    scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                }
             }
-            scenicSpotProductMPO.setScenicSpotId(ids.get(0));
-            scenicSpotProductMPO.setIsDel(0);
-            scenicSpotProductMPO.setSellType(1);
-            scenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
             scenicSpotProductMPO.setName(ycfProduct.getProductName());
-            scenicSpotProductMPO.setPayServiceType(0);
-            scenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
-                scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
-                scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
-            }
             ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
             if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
                 transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
