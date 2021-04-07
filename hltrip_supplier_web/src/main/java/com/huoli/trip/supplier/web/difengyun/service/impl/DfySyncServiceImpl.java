@@ -139,8 +139,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
                 newProductItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
-            productItemDao.updateByCode(newProductItem);
-            oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
+            // 已存在的景点不更新
+            if(oldProductItem == null){
+                productItemDao.updateByCode(newProductItem);
+                // 拿到最新的景点
+                oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
+            }
             List<DfyTicket> allTickets = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
                 allTickets.addAll(scenicDetail.getTicketList());

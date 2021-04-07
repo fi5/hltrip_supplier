@@ -223,7 +223,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                     productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
                     productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
-                    productItemDao.updateByCode(productItemPO);
+                    // 已存在的景点不更新
+                    if(exist == null){
+                        productItemDao.updateByCode(productItemPO);
+                    }
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);
