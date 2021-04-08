@@ -532,11 +532,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 log.error("要出发景点不存在");
                 return;
             }
-            List<String> ids = syncScenic(scenicIds);
-            if(ListUtils.isEmpty(ids)){
-                log.error("要出发景点没有同步到。");
-                return;
-            }
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             if(scenicSpotProductMPO == null){
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
