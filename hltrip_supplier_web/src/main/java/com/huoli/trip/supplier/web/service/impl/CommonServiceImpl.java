@@ -220,32 +220,39 @@ public class CommonServiceImpl implements CommonService {
             if(StringUtils.isNotBlank(product.getName()) && !StringUtils.equals(backupProduct.getName(), product.getName())){
                 productFields.add("name");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品名称变更。原值={}，新值={}", product.getCode(), backupProduct.getName(), product.getName());
             }
             // 产品图
             if(product.getImages() != null && !StringUtils.equals(JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()))){
                 productFields.add("images");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品图片变更。原值={}，新值={}", product.getCode(), JSON.toJSONString(backupProduct.getImages()), JSON.toJSONString(product.getImages()));
             }
             // 产品描述
             if(StringUtils.isNotBlank(product.getDescription()) && !StringUtils.equals(backupProduct.getDescription(), product.getDescription())){
                 productFields.add("description");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品描述变更。原值={}，新值={}", product.getCode(), backupProduct.getDescription(), product.getDescription());
             }
             if(StringUtils.isNotBlank(product.getIncludeDesc()) && !StringUtils.equals(backupProduct.getIncludeDesc(), product.getIncludeDesc())){
                 productFields.add("includeDesc");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品费用包含变更。原值={}，新值={}", product.getCode(), backupProduct.getIncludeDesc(), product.getIncludeDesc());
             }
             if(StringUtils.isNotBlank(product.getExcludeDesc()) && !StringUtils.equals(backupProduct.getExcludeDesc(), product.getExcludeDesc())){
                 productFields.add("excludeDesc");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品费用不包含变更。原值={}，新值={}", product.getCode(), backupProduct.getExcludeDesc(), product.getExcludeDesc());
             }
             if(StringUtils.isNotBlank(product.getRefundDesc()) && !StringUtils.equals(backupProduct.getRefundDesc(), product.getRefundDesc())){
                 productFields.add("refundDesc");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品退改说明变更。原值={}，新值={}", product.getCode(), backupProduct.getRefundDesc(), product.getRefundDesc());
             }
             if(StringUtils.isNotBlank(product.getDiffPriceDesc()) && !StringUtils.equals(backupProduct.getDiffPriceDesc(), product.getDiffPriceDesc())){
                 productFields.add("diffPriceDesc");
                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                log.info("{}产品差价说明变更。原值={}，新值={}", product.getCode(), backupProduct.getDiffPriceDesc(), product.getDiffPriceDesc());
             }
             product.setChangedFields(productFields);
             // 产品说明
@@ -261,6 +268,7 @@ public class CommonServiceImpl implements CommonService {
                             product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
+                    log.info("{}产品动态预订说明bookdesc变更（全新增）。新值={}", JSON.toJSONString(product.getBookDescList()));
                 } else {
                     product.getBookDescList().forEach(b -> {
                         DescriptionPO descriptionPO = backupProduct.getBookDescList().stream().filter(bb ->
@@ -272,6 +280,7 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
                                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                                log.info("{}产品动态预订说明bookdesc变更（部分新增）。新值={}", product.getCode(), JSON.toJSONString(b));
                             }
                         } else {
                             if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
@@ -279,6 +288,7 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
                                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                                log.info("{}产品动态预订说明bookdesc变更（更新）。原值={}，新值={}", product.getCode(), JSON.toJSONString(descriptionPO), JSON.toJSONString(b));
                             }
                         }
                     });
@@ -296,6 +306,7 @@ public class CommonServiceImpl implements CommonService {
                             product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                         }
                     });
+                    log.info("{}产品动态预订须知booknotice变更（全新增）。新值={}", JSON.toJSONString(product.getBookNoticeList()));
                 } else {
                     product.getBookNoticeList().forEach(b -> {
                         DescriptionPO descriptionPO = backupProduct.getBookNoticeList().stream().filter(bb ->
@@ -307,6 +318,7 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
                                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                                log.info("{}产品动态预订须知booknotice变更（部分新增）。新值={}", product.getCode(), JSON.toJSONString(b));
                             }
                         } else {
                             if(StringUtils.isNotBlank(b.getContent()) && !StringUtils.equals(descriptionPO.getContent(), b.getContent())){
@@ -314,6 +326,7 @@ public class CommonServiceImpl implements CommonService {
                                 descFields.add("content");
                                 b.setChangedFields(descFields);
                                 product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                                log.info("{}产品动态预订须知booknotice变更（更新）。原值={}，新值={}", product.getCode(), JSON.toJSONString(descriptionPO), JSON.toJSONString(b));
                             }
                         }
                     });
