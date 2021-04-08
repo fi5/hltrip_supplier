@@ -137,9 +137,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     productPO.setAppFrom(appFroms);
                 }
             } else {
-                if(exist.getCreateTime() == null){
-                    productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                }
                 commonService.compareProduct(productPO);
             }
             productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
@@ -154,7 +151,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 productPO.setBookDescList(exist.getBookDescList());
                 productPO.setDescriptions(exist.getDescriptions());
                 productPO.setBookNoticeList(exist.getBookNoticeList());
-                productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(exist.getCreateTime()));
+                if(exist.getCreateTime() == null){
+                    productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                } else {
+                    productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(exist.getCreateTime()));
+                }
             }
             productDao.updateByCode(productPO);
 
