@@ -1261,7 +1261,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     return groupTourTripInfo;
                 }).collect(Collectors.toList()));
             }
-            setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getName()));
+            setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
         }
