@@ -227,6 +227,14 @@ public class DfySyncServiceImpl implements DfySyncService {
                     product.setAppFrom(appFroms);
                 }
             } else {
+                if(productPO.getCreateTime() == null){
+                    product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                }
+                commonService.compareProduct(product);
+            }
+            // 保存副本
+            commonService.saveBackupProduct(product);
+            if(productPO != null){
                 product.setAuditStatus(productPO.getAuditStatus());
                 product.setSupplierStatus(productPO.getSupplierStatus());
                 product.setRecommendFlag(productPO.getRecommendFlag());
@@ -234,12 +242,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setBookDescList(productPO.getBookDescList());
                 product.setDescriptions(productPO.getDescriptions());
                 product.setBookNoticeList(productPO.getBookNoticeList());
-                commonService.compareProduct(product);
+                product.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
             }
             productDao.updateByCode(product);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
-            // 保存副本
-            commonService.saveBackupProduct(product);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
 
@@ -442,6 +448,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
             productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         } else {
+            if(productItemPO.getCreateTime() == null){
+                productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            }
             // 比对信息
             commonService.compareProductItem(productItem);
         }
@@ -451,9 +460,10 @@ public class DfySyncServiceImpl implements DfySyncService {
         if (productItemPO != null) {
             productItem.setAuditStatus(productItemPO.getAuditStatus());
             productItem.setProduct(productItemPO.getProduct());
-            productItem.setImageDetails(productItem.getImageDetails());
-            productItem.setImages(productItem.getImages());
-            productItem.setMainImages(productItem.getMainImages());
+            productItem.setImageDetails(productItemPO.getImageDetails());
+            productItem.setImages(productItemPO.getImages());
+            productItem.setMainImages(productItemPO.getMainImages());
+            productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
         }
         if(ListUtils.isEmpty(productItem.getImages()) && ListUtils.isEmpty(productItem.getMainImages())){
             log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
@@ -501,7 +511,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
                 product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             } else {
-                if(product.getCreateTime() == null){
+                if(oldProduct.getCreateTime() == null){
                     product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 }
                 commonService.compareToursProduct(product);
@@ -518,6 +528,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setBookDescList(oldProduct.getBookDescList());
                 product.setDescriptions(oldProduct.getDescriptions());
                 product.setBookNoticeList(oldProduct.getBookNoticeList());
+                product.setCreateTime(MongoDateUtils.handleTimezoneInput(oldProduct.getCreateTime()));
             }
             productDao.updateByCode(product);
             syncToursPrice(productId, city);
@@ -533,7 +544,6 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.saveBackupHodometer(hodometerPO);
             }
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
-
         }
     }
 
