@@ -776,7 +776,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(ruleId)){
             return;
         }
-        if(ListUtils.isNotEmpty(ycfPriceInfos)){
+        if(ListUtils.isEmpty(ycfPriceInfos)){
             log.error("价格列表没有。。");
             return;
         }
