@@ -501,6 +501,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
                 product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             } else {
+                if(product.getCreateTime() == null){
+                    product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                }
                 commonService.compareToursProduct(product);
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
