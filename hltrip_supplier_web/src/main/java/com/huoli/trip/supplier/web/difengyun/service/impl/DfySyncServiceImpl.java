@@ -434,37 +434,32 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         ProductItemPO productItem = DfyToursConverter.convertToProductItemPO(dfyToursDetail, productId);
         ProductItemPO productItemPO = productItemDao.selectByCode(productItem.getCode());
-        ProductPO productPO = null;
-        List<ImageBasePO> imageDetails = null;
-        List<ImageBasePO> images = null;
-        List<ImageBasePO> mainImages = null;
+
         if (productItemPO == null) {
             productItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 笛风云跟团游默认审核通过
             productItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+            productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+            productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
         } else {
-            imageDetails = productItem.getImageDetails();
-            images = productItem.getImages();
-            mainImages = productItem.getMainImages();
-            productItem.setAuditStatus(productItemPO.getAuditStatus());
-            productPO = productItemPO.getProduct();
             // 比对信息
             commonService.compareProductItem(productItem);
         }
         productItem.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        productItem.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
-        productItem.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-        productItem.setProduct(productPO);
-        productItem.setImageDetails(imageDetails);
-        productItem.setImages(images);
-        productItem.setMainImages(mainImages);
+        // 保存副本
+        commonService.saveBackupProductItem(productItem);
+        if (productItemPO != null) {
+            productItem.setAuditStatus(productItemPO.getAuditStatus());
+            productItem.setProduct(productItemPO.getProduct());
+            productItem.setImageDetails(productItem.getImageDetails());
+            productItem.setImages(productItem.getImages());
+            productItem.setMainImages(productItem.getMainImages());
+        }
         if(ListUtils.isEmpty(productItem.getImages()) && ListUtils.isEmpty(productItem.getMainImages())){
             log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
             productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
         }
         productItemDao.updateByCode(productItem);
-        // 保存副本
-        commonService.saveBackupProductItem(productItem);
         productItemPO = productItemDao.selectByCode(productItem.getCode());
         List<String> citys = Lists.newArrayList(productItemPO.getOriCityCode().split(","));
         List<String> cityNames = Lists.newArrayList(productItemPO.getOriCity().split(","));
@@ -503,20 +498,24 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
+                product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+                product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             } else {
-                product.setSupplierStatus(oldProduct.getSupplierStatus());
-                product.setAuditStatus(oldProduct.getAuditStatus());
-                product.setRecommendFlag(oldProduct.getRecommendFlag());
-                product.setAppFrom(productPO.getAppFrom());
-                product.setBookDescList(productPO.getBookDescList());
-                product.setDescriptions(productPO.getDescriptions());
-                product.setBookNoticeList(productPO.getBookNoticeList());
                 commonService.compareToursProduct(product);
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
-            product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+            // 保存副本
+            commonService.saveBackupProduct(product);
+            if(oldProduct != null){
+                product.setSupplierStatus(oldProduct.getSupplierStatus());
+                product.setAuditStatus(oldProduct.getAuditStatus());
+                product.setRecommendFlag(oldProduct.getRecommendFlag());
+                product.setAppFrom(oldProduct.getAppFrom());
+                product.setBookDescList(oldProduct.getBookDescList());
+                product.setDescriptions(oldProduct.getDescriptions());
+                product.setBookNoticeList(oldProduct.getBookNoticeList());
+            }
             productDao.updateByCode(product);
             syncToursPrice(productId, city);
             if(dfyToursDetail.getJourneyInfo().getJourneyDescJson() != null
@@ -531,8 +530,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.saveBackupHodometer(hodometerPO);
             }
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
-            // 保存副本
-            commonService.saveBackupProduct(product);
+
         }
     }
 
