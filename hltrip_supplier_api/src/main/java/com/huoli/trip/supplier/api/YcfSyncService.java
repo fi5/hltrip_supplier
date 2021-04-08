@@ -70,9 +70,15 @@ public interface YcfSyncService {
     List<String> syncScenic(List<String> scenicIds);
 
     /**
-     * 同步价格
+     * 同步价格，新版
      * @param request
      * @return
      */
     void syncPriceV2(YcfGetPriceRequest request);
+
+    /**
+     * 被动同步价格，新版
+     * @param ycfPrice
+     */
+    void syncPriceV2(YcfPrice ycfPrice);
 }

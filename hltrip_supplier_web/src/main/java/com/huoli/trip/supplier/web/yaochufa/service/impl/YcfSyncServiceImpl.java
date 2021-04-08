@@ -744,6 +744,22 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
+    @Override
+    public void syncPriceV2(YcfPrice ycfPrice){
+        String ycfProductId = ycfPrice.getProductID();
+        List<YcfPriceInfo> ycfPriceInfos = ycfPrice.getSaleInfos();
+        if(StringUtils.isBlank(ycfProductId) || ListUtils.isEmpty(ycfPriceInfos)){
+            log.error("价格同步失败，{}产品id或者价格日历为空", SUPPLIER_CODE_YCF);
+            return;
+        }
+        ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProductId, SUPPLIER_CODE_YCF);
+        if(scenicSpotProductMPO == null){
+            log.error("价格同步失败，{}的产品{}不存在", SUPPLIER_CODE_YCF, ycfProductId);
+            return;
+        }
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos);
+    }
+
     private List<YcfPriceInfo> getPriceV2(YcfGetPriceRequest request){
         YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
         log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
@@ -765,7 +781,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     }
 
     private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String ruleId, String ticketKind){
-        if(StringUtils.isBlank(productId)){
+        if(StringUtils.isBlank(productId) || ListUtils.isEmpty(ycfPriceInfos)){
+            log.error("同步价格失败，产品id或者价格日历为空");
             return;
         }
         List<ScenicSpotProductPriceMPO> existPrice = scenicSpotProductPriceDao.getByProductId(productId);
@@ -774,10 +791,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ticketKind = existPrice.get(0).getTicketKind();
         }
         if(StringUtils.isBlank(ruleId)){
-            return;
-        }
-        if(ListUtils.isEmpty(ycfPriceInfos)){
-            log.error("价格列表没有。。");
+            log.error("同步价格失败，产品{}规则没有获取到规则id", productId);
             return;
         }
         for (YcfPriceInfo yp : ycfPriceInfos) {
