@@ -1100,7 +1100,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
             List<GroupTourProductSetMealMPO> setMealMPOs = groupTourProductSetMealDao.getSetMeals(groupTourProductMPO.getId());
             GroupTourProductSetMealMPO setMealMPO;
-            if(ListUtils.isEmpty(setMealMPOs)){
+            if(ListUtils.isNotEmpty(setMealMPOs)){
                 setMealMPO = setMealMPOs.get(0);
             } else {
                 setMealMPO = new GroupTourProductSetMealMPO();
