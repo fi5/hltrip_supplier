@@ -33,8 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.*;
 
 /**
  * 描述：<br/>
@@ -390,7 +389,18 @@ public class DfySyncServiceImpl implements DfySyncService {
             return false;
         }
         List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
-        productInfos.forEach(p -> syncToursDetail(p.getProductId(), PRODUCT_SYNC_MODE_ONLY_ADD));
+        productInfos.forEach(p -> syncToursDetail(p.getProductId(), PRODUCT_SYNC_MODE_UNLIMITED));
+        return true;
+    }
+
+    @Override
+    public boolean syncToursList(DfyToursListRequest request, int syncMode){
+        DfyBaseResult<DfyToursListResponse> baseResult = getToursList(request);
+        if(baseResult == null){
+            return false;
+        }
+        List<DfyProductInfo> productInfos = baseResult.getData().getProductList();
+        productInfos.forEach(p -> syncToursDetail(p.getProductId(), syncMode));
         return true;
     }
 

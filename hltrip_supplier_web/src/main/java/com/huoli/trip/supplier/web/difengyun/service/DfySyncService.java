@@ -89,11 +89,19 @@ public interface DfySyncService {
     DfyBaseResult<List<DfyToursCalendarResponse>> getToursCalendar(DfyToursCalendarRequest request);
 
     /**
-     * 同步跟团游列表
+     * 同步跟团游列表，默认同步所有
      * @param request
      * @return
      */
     boolean syncToursList(DfyToursListRequest request);
+
+    /**
+     * 同步跟团游列表
+     * @param request
+     * @param syncMode
+     * @return
+     */
+    boolean syncToursList(DfyToursListRequest request, int syncMode);
 
     /**
      * 同步跟团游产品
