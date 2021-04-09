@@ -831,8 +831,8 @@ public class CommonServiceImpl implements CommonService {
                         groupTourPrice.setChdSellPrice(priceInfoPO.getChdSalePrice());
                         groupTourPrice.setAdtPrice(priceInfoPO.getSettlePrice());
                         groupTourPrice.setAdtSellPrice(priceInfoPO.getSalePrice());
-                        groupTourPrice.setAdtStock(priceInfoPO.getStock());
-                        groupTourPrice.setChdStock(priceInfoPO.getStock());
+                        groupTourPrice.setAdtStock(priceInfoPO.getStock() == null ? 0 : priceInfoPO.getStock().intValue());
+                        groupTourPrice.setChdStock(priceInfoPO.getStock() == null ? 0 : priceInfoPO.getStock().intValue());
                         groupTourPrice.setDate(DateTimeUtil.formatDate(priceInfoPO.getSaleDate()));
                         return groupTourPrice;
                     }).collect(Collectors.toList()));
