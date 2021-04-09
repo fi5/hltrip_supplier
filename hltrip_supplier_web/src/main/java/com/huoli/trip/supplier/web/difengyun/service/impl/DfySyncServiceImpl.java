@@ -1044,6 +1044,14 @@ public class DfySyncServiceImpl implements DfySyncService {
         if (ListUtils.isEmpty(dfyToursDetail.getDepartCitys())) {
             log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productId);
             return;
+        } else {
+            for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
+                if (StringUtils.equals(departCity.getName(), "全国")) {
+                    // 过滤全国这种产品，将来放到当地参团单独处理
+                    log.info("过滤全国出发的产品。跳过。");
+                    return;
+                }
+            }
         }
         if (dfyToursDetail.getJourneyInfo() == null) {
             log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productId);
@@ -1095,13 +1103,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         groupTourProductDao.saveProduct(groupTourProductMPO);
 
         for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
-            if(StringUtils.equals(departCity.getName(), "全国")){
-                // 过滤全国这种产品，将来放到当地参团单独处理
-                log.info("过滤全国出发的产品。");
-                return;
-            }
             DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
-            AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), null);
+            AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), departCity.getName());
             if(addressInfo != null && StringUtils.isNotBlank(addressInfo.getCityCode())
                     && StringUtils.isNotBlank(addressInfo.getCityName())){
             } else {
