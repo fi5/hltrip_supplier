@@ -622,8 +622,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void transTours(){
-        List<ProductPO> productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_YCF);
+        List<ProductPO> productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
         for (ProductPO productPO : productPOs) {
+            log.info("开始处理  {}", JSON.toJSONString(productPO));
             boolean add = false;
             GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productPO.getSupplierProductId(), Constants.SUPPLIER_CODE_SHENGHE_TICKET);
             if(groupTourProductMPO == null ){
@@ -662,7 +663,7 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             if(StringUtils.isNotBlank(productPO.getOriCity())){
                 groupTourProductMPO.setDepInfos(Arrays.asList(productPO.getOriCity().split(",")).stream().map(c ->
-                    setCity(null, c, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
+                        setCity(null, c, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
             }
             if(StringUtils.isNotBlank(productPO.getDesCity())){
                 groupTourProductMPO.setArrInfos(Arrays.asList(productPO.getDesCity().split(",")).stream().map(c ->
@@ -707,7 +708,10 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setGroupTourProductBaseSetting(baseSetting);
             // 笛风云没有退改
             groupTourProductDao.saveProduct(groupTourProductMPO);
-
+            if(ListUtils.isEmpty(groupTourProductMPO.getDepInfos())){
+                log.info("{}出发城市为空", productPO.getCode());
+                continue;
+            }
             for (AddressInfo addressInfo : groupTourProductMPO.getDepInfos()) {
                 GroupTourProductSetMealMPO setMealMPO = groupTourProductSetMealDao.getSetMeal(groupTourProductMPO.getId(), addressInfo.getCityCode());
                 if(setMealMPO == null){
