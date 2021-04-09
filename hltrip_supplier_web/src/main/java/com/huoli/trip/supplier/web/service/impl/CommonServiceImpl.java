@@ -736,7 +736,10 @@ public class CommonServiceImpl implements CommonService {
                 setMealMPO.setDepName(addressInfo.getCityName());
 
                 HodometerPO hodometerPO = hodometerDao.getHodometerPO(productPO.getCode());
-
+                if(hodometerPO == null){
+                    log.error("{}行程信息为空", productPO.getCode());
+                    continue;
+                }
                 if(ListUtils.isNotEmpty(hodometerPO.getHodometers())){
                     List<GroupTourTripInfo> groupTourTripInfos = Lists.newArrayList();
                     int day = 1;
