@@ -662,11 +662,11 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             if(StringUtils.isNotBlank(productPO.getOriCity())){
                 groupTourProductMPO.setDepInfos(Arrays.asList(productPO.getOriCity().split(",")).stream().map(c ->
-                    setCity(null, null, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
+                    setCity(null, c, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
             }
             if(StringUtils.isNotBlank(productPO.getDesCity())){
                 groupTourProductMPO.setArrInfos(Arrays.asList(productPO.getDesCity().split(",")).stream().map(c ->
-                        setCity(null, null, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
+                        setCity(null, c, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
             }
             GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
             productPayInfo.setSellType(1);
