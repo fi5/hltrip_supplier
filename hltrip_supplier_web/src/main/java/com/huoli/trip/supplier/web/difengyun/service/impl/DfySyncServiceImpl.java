@@ -1067,7 +1067,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
         }
         boolean add = false;
-        // todo 笛风云有全国，这种城市怎么赋值，而且一个产品多个价格这种是否要拆成多个GroupTourProductMPO，还是拆成多个GroupTourProductSetMealMPO，需要城市查对应关系，套餐现在没有城市，不管怎么拆 除了价格其它信息都是一样的
         GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
         if(groupTourProductMPO == null ){
             groupTourProductMPO = new GroupTourProductMPO();
@@ -1104,7 +1103,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
         for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
             DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
-            AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), departCity.getName());
+            AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), null);
             if(addressInfo != null && StringUtils.isNotBlank(addressInfo.getCityCode())
                     && StringUtils.isNotBlank(addressInfo.getCityName())){
             } else {
