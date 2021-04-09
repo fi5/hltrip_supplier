@@ -49,4 +49,6 @@ public interface CommonService {
     String getId(String bizTag);
 
     void refreshList(int type, String productId, int updateType, boolean add);
+
+    void transTours();
 }

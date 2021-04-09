@@ -190,4 +190,10 @@ public class ProductDaoImpl implements ProductDao {
         return null;
     }
 
+    @Override
+    public List<ProductPO> getBySupplierId(String supplierId){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId));
+        return mongoTemplate.find(query, ProductPO.class);
+    }
+
 }

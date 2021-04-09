@@ -5,16 +5,29 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
+import com.huoli.trip.common.entity.mpo.DescInfo;
+import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.vo.ImageBase;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyDepartCity;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursCalendarRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursCalendarResponse;
 import com.huoli.trip.supplier.web.dao.*;
+import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
@@ -25,9 +38,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -71,6 +87,18 @@ public class CommonServiceImpl implements CommonService {
     @Reference(group = "hltrip")
     private ProductDataService productDataService;
 
+    @Autowired
+    private ProductDao productDao;
+
+    @Autowired
+    private GroupTourProductDao groupTourProductDao;
+
+    @Autowired
+    private GroupTourProductSetMealDao groupTourProductSetMealDao;
+
+    @Autowired
+    private PriceDao priceDao;
+
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
         String key = String.join("_", "SUPPLIER_", supplierId);
@@ -92,9 +120,9 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public void compareProduct(ProductPO product){
         // 暂时屏蔽
-        if(true){
-            return;
-        }
+//        if(true){
+//            return;
+//        }
         BackupProductPO backupProductPO = backupProductDao.getBackupProductByCode(product.getCode());
         if(backupProductPO != null){
             List<String> productFields = Lists.newArrayList();
@@ -592,5 +620,219 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    @Override
+    public void transTours(){
+        List<ProductPO> productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_YCF);
+        for (ProductPO productPO : productPOs) {
+            boolean add = false;
+            GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productPO.getSupplierProductId(), Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+            if(groupTourProductMPO == null ){
+                groupTourProductMPO = new GroupTourProductMPO();
+                groupTourProductMPO.setId(getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+                groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                add = true;
+            }
+            groupTourProductMPO.setSupplierProductId(productPO.getSupplierProductId());
+            groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+            groupTourProductMPO.setProductName(productPO.getName());
+            if(ListUtils.isNotEmpty(productPO.getMainItem().getTopic())){
+                StringBuffer sb = new StringBuffer();
+                for (BaseCode baseCode : productPO.getMainItem().getTopic()) {
+                    if(StringUtils.equals(baseCode.getCode(), "1000")){
+                        sb.append("17").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1001")){
+                        sb.append("18").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1002")){
+                        sb.append("19").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1003")){
+                        sb.append("20").append(",");
+                    } else {
+                        sb.append("16");
+                    }
+                }
+                String theme = sb.toString();
+                if(theme.endsWith(",")){
+                    theme = theme.substring(0, theme.length() - 1);
+                }
+                groupTourProductMPO.setTheme(theme);
+            }
+            groupTourProductMPO.setGoTraffic(productPO.getGoTraffic() == null ? null : productPO.getGoTraffic().toString());
+            groupTourProductMPO.setBackTraffice(productPO.getReturnTraffic() == null ? null : productPO.getReturnTraffic().toString());
+            groupTourProductMPO.setIsDel(0);
+            groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            if(StringUtils.isNotBlank(productPO.getOriCity())){
+                groupTourProductMPO.setDepInfos(Arrays.asList(productPO.getOriCity().split(",")).stream().map(c ->
+                    setCity(null, null, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
+            }
+            if(StringUtils.isNotBlank(productPO.getDesCity())){
+                groupTourProductMPO.setArrInfos(Arrays.asList(productPO.getDesCity().split(",")).stream().map(c ->
+                        setCity(null, null, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
+            }
+            GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
+            productPayInfo.setSellType(1);
+            productPayInfo.setConfirmType(1);
+            groupTourProductMPO.setGroupTourProductPayInfo(productPayInfo);
+            groupTourProductMPO.setStatus(1);
+            GroupTourProductBaseSetting baseSetting = new GroupTourProductBaseSetting();
+            if(productPO.getValidTime() == null){
+                if(productPO.getInvalidTime() != null){
+                    // 已过期
+                    if(DateTimeUtil.trancateToDate(new Date()).getTime() > productPO.getInvalidTime().getTime()){
+                        groupTourProductMPO.setStatus(3);
+                        baseSetting.setLaunchType(3);
+                    }
+                } else {
+                    baseSetting.setLaunchType(1);
+                }
+            } else {
+                // 没到上架时间
+                if(productPO.getValidTime().getTime() > DateTimeUtil.trancateToDate(new Date()).getTime()){
+                    groupTourProductMPO.setStatus(2);
+                    baseSetting.setLaunchType(2);
+                } else {
+                    if(productPO.getInvalidTime() != null){
+                        // 已过期
+                        if(DateTimeUtil.trancateToDate(new Date()).getTime() > productPO.getInvalidTime().getTime()){
+                            groupTourProductMPO.setStatus(3);
+                            baseSetting.setLaunchType(3);
+                        }
+                    } else {
+                        baseSetting.setLaunchType(1);
+                    }
+                }
+            }
+            baseSetting.setLaunchDateTime(productPO.getValidTime());
+            baseSetting.setStockCount(0);
+            baseSetting.setAppSource(ListUtils.isEmpty(productPO.getAppFrom()) ? null : String.join(",", productPO.getAppFrom()));
+            groupTourProductMPO.setGroupTourProductBaseSetting(baseSetting);
+            // 笛风云没有退改
+            groupTourProductDao.saveProduct(groupTourProductMPO);
 
+            for (AddressInfo addressInfo : groupTourProductMPO.getDepInfos()) {
+                GroupTourProductSetMealMPO setMealMPO = groupTourProductSetMealDao.getSetMeal(groupTourProductMPO.getId(), addressInfo.getCityCode());
+                if(setMealMPO == null){
+                    setMealMPO = new GroupTourProductSetMealMPO();
+                    setMealMPO.setId(getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+                }
+                setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
+                setMealMPO.setName(groupTourProductMPO.getProductName());
+                setMealMPO.setTripDay(productPO.getTripDays());
+                setMealMPO.setConstInclude(productPO.getIncludeDesc());
+                setMealMPO.setCostExclude(productPO.getExcludeDesc());
+                setMealMPO.setBookNotice(productPO.getBookDesc());
+                if(ListUtils.isNotEmpty(productPO.getBookNoticeList())){
+                    setMealMPO.setBookNotices(productPO.getBookNoticeList().stream().map(b -> {
+                        DescInfo descInfo = new DescInfo();
+                        descInfo.setContent(b.getContent());
+                        descInfo.setTitle(b.getTitle());
+                        return descInfo;
+                    }).collect(Collectors.toList()));
+                }
+                setMealMPO.setDepCode(addressInfo.getCityCode());
+                setMealMPO.setDepName(addressInfo.getCityName());
+
+                HodometerPO hodometerPO = hodometerDao.getHodometerPO(productPO.getCode());
+
+                if(ListUtils.isNotEmpty(hodometerPO.getHodometers())){
+                    List<GroupTourTripInfo> groupTourTripInfos = Lists.newArrayList();
+                    int day = 1;
+                    for(Hodometer hodometer : hodometerPO.getHodometers()) {
+                        GroupTourTripInfo groupTourTripInfo = new GroupTourTripInfo();
+                        groupTourTripInfo.setDay(day++);
+                        List<GroupTourProductTripItem> items = Lists.newArrayList();
+                        if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
+                            GroupTourProductTripItem item1 = new GroupTourProductTripItem();
+                            item1.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode()));
+                            hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
+                                GroupTourHotel groupTourHotel = new GroupTourHotel();
+                                // todo 酒店名称没有，是需要关联本地酒店表吗
+                                groupTourHotel.setDesc(r.getDescribe());
+                                groupTourHotel.setRoomName(r.getName());
+                                if (ListUtils.isNotEmpty(r.getImages())) {
+                                    groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
+                                }
+                                return groupTourHotel;
+                            }).collect(Collectors.toList());
+                            items.add(item1);
+                            for (Route route : hodometer.getRoutes()) {
+                                int type = route.getMduleType();
+                                GroupTourProductTripItem item = new GroupTourProductTripItem();
+                                if (type == DfyConstants.MODULE_TYPE_SCENIC) {
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode()));
+                                    item.setPoiName(route.getTitle());
+                                } else if (type == DfyConstants.MODULE_TYPE_TRAFFIC) {
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode()));
+                                    String means = "";
+                                    if (route.getTransportationType() > 0) {
+                                        switch (route.getTransportationType()) {
+                                            case 1:
+                                                means = "飞机";
+                                                break;
+                                            case 2:
+                                                means = "火车";
+                                                break;
+                                            case 3:
+                                                means = "轮渡";
+                                                break;
+                                            case 4:
+                                                means = "汽车";
+                                                break;
+                                            case 5:
+                                            default:
+                                                means = "自主";
+                                                break;
+                                        }
+                                    }
+                                    if (StringUtils.isBlank(means)) {
+                                        item.setPoiName(String.format("从%s到%s", route.getDeparture(), route.getArrival()));
+                                    } else {
+                                        item.setPoiName(String.format("从%s乘%s到%s", route.getDeparture(), means, route.getArrival()));
+                                    }
+                                } else if (type == DfyConstants.MODULE_TYPE_FOOD) {
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
+                                    item.setPoiName(route.getName());
+                                } else if (type == DfyConstants.MODULE_TYPE_SHOPPING) {
+                                    item.setPoiName(route.getName());
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode()));
+                                } else if (type == DfyConstants.MODULE_TYPE_ACTIVITY) {
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode()));
+                                    item.setPoiName(route.getName());
+                                } else if (type == DfyConstants.MODULE_TYPE_REMINDER) {
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode()));
+                                    item.setPoiName(route.getName());
+                                }
+                                item.setTime(route.getDepTime());
+                                item.setPlayTime(route.getDuration());
+                                item.setPoiDesc(route.getDescribe());
+                                if (ListUtils.isNotEmpty(route.getImages())) {
+                                    item.setImages(route.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
+                                }
+                                items.add(item);
+                            }
+                        }
+                        groupTourTripInfo.setGroupTourProductTripItems(items);
+                        groupTourTripInfos.add(groupTourTripInfo);
+                    }
+                    setMealMPO.setGroupTourTripInfos(groupTourTripInfos);
+                }
+                PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
+                if(pricePO != null && ListUtils.isNotEmpty(pricePO.getPriceInfos())){
+                    setMealMPO.setGroupTourPrices(pricePO.getPriceInfos().stream().map(priceInfoPO -> {
+                        GroupTourPrice groupTourPrice = new GroupTourPrice();
+                        groupTourPrice.setDiffPrice(priceInfoPO.getRoomDiffPrice());
+                        groupTourPrice.setChdPrice(priceInfoPO.getChdSettlePrice());
+                        groupTourPrice.setChdSellPrice(priceInfoPO.getChdSalePrice());
+                        groupTourPrice.setAdtPrice(priceInfoPO.getSettlePrice());
+                        groupTourPrice.setAdtSellPrice(priceInfoPO.getSalePrice());
+                        groupTourPrice.setAdtStock(priceInfoPO.getStock());
+                        groupTourPrice.setChdStock(priceInfoPO.getStock());
+                        groupTourPrice.setDate(DateTimeUtil.formatDate(priceInfoPO.getSaleDate()));
+                        return groupTourPrice;
+                    }).collect(Collectors.toList()));
+                }
+                groupTourProductSetMealDao.saveSetMeals(setMealMPO);
+                refreshList(1, groupTourProductMPO.getId(), 1, add);
+            }
+        }
+    }
 }

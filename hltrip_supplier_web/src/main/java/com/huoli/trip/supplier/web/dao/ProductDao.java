@@ -120,4 +120,11 @@ public interface ProductDao {
      */
     List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType);
 
+    /**
+     * 根据供应商获取产品
+     * @param supplierId
+     * @return
+     */
+    List<ProductPO> getBySupplierId(String supplierId);
+
 }
