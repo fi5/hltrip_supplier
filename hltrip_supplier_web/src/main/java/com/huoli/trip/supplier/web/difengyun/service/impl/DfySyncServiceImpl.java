@@ -1027,9 +1027,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             log.error("笛风云跟团游详情返回data为空，productId={}", productId);
             if(StringUtils.equals(baseResult.getErrorCode(), "231000")){
                 // 笛风云的产品下线就不会返回，所以没拿到就认为已下线，当data为空并且code=231000才认为下线，其它情况可能是接口异常，防止误下线
-                groupTourProductDao.updateStatus(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
-                // todo 需要刷新列表
-                log.info("笛风云跟团游产品详情返回空，产品已下线，productId = {}", productId);
+                GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
+                if(groupTourProductMPO != null){
+                    groupTourProductDao.updateStatus(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
+                    commonService.refreshList(1, groupTourProductMPO.getId(), 1, false);
+                    log.info("笛风云跟团游产品详情返回空，产品已下线，productId = {}", productId);
+                }
             }
             return;
         }
@@ -1055,54 +1058,58 @@ public class DfySyncServiceImpl implements DfySyncService {
                 return;
             }
         }
+        boolean add = false;
+        // todo 笛风云有全国，这种城市怎么赋值，而且一个产品多个价格这种是否要拆成多个GroupTourProductMPO，还是拆成多个GroupTourProductSetMealMPO，需要城市查对应关系，套餐现在没有城市，不管怎么拆 除了价格其它信息都是一样的
+        GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
+        if(groupTourProductMPO == null ){
+            groupTourProductMPO = new GroupTourProductMPO();
+            groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+            groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            add = true;
+        }
+        groupTourProductMPO.setSupplierProductId(productId);
+        groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+        groupTourProductMPO.setProductName(dfyToursDetail.getProductName());
+
+        Integer goTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficGo());
+        Integer backTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficBack());
+        groupTourProductMPO.setGoTraffic(goTfc == null ? null : goTfc.toString());
+        groupTourProductMPO.setBackTraffice(backTfc == null ? null : backTfc.toString());
+        groupTourProductMPO.setIsDel(0);
+        groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        setCity(groupTourProductMPO, dfyToursDetail);
+        GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
+        productPayInfo.setSellType(1);
+        productPayInfo.setConfirmType(1);
+        groupTourProductMPO.setGroupTourProductPayInfo(productPayInfo);
+
+        GroupTourProductBaseSetting baseSetting = new GroupTourProductBaseSetting();
+        baseSetting.setLaunchType(1);
+        baseSetting.setLaunchDateTime(new Date());
+        BackChannelEntry backChannelEntry = commonService.getSupplierById(groupTourProductMPO.getChannel());
+        if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+            baseSetting.setAppSource(backChannelEntry.getAppSource());
+        }
+        groupTourProductMPO.setGroupTourProductBaseSetting(baseSetting);
+        // 笛风云没有退改
+        groupTourProductDao.saveProduct(groupTourProductMPO);
+
         for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
             if(StringUtils.equals(departCity.getName(), "全国")){
                 // 过滤全国这种产品，将来放到当地参团单独处理
                 log.info("过滤全国出发的产品。");
                 return;
             }
-            boolean add = false;
-            // todo 笛风云有全国，这种城市怎么赋值，而且一个产品多个价格这种是否要拆成多个GroupTourProductMPO，还是拆成多个GroupTourProductSetMealMPO，需要城市查对应关系，套餐现在没有城市，不管怎么拆 除了价格其它信息都是一样的
-            GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS, departCity.getName());
-            if(groupTourProductMPO == null ){
-                groupTourProductMPO = new GroupTourProductMPO();
-                groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
-                groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                add = true;
-            }
-            groupTourProductMPO.setSupplierProductId(productId);
-            groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
-            groupTourProductMPO.setProductName(dfyToursDetail.getProductName());
-
-            Integer goTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficGo());
-            Integer backTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficBack());
-            groupTourProductMPO.setGoTraffic(goTfc == null ? null : goTfc.toString());
-            groupTourProductMPO.setBackTraffice(backTfc == null ? null : backTfc.toString());
-            groupTourProductMPO.setIsDel(0);
-            groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            setCity(groupTourProductMPO, dfyToursDetail);
-            GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
-            productPayInfo.setSellType(1);
-            productPayInfo.setConfirmType(1);
-            groupTourProductMPO.setGroupTourProductPayInfo(productPayInfo);
-
-            GroupTourProductBaseSetting baseSetting = new GroupTourProductBaseSetting();
-            baseSetting.setLaunchType(1);
-            baseSetting.setLaunchDateTime(new Date());
-            BackChannelEntry backChannelEntry = commonService.getSupplierById(groupTourProductMPO.getChannel());
-            if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
-                baseSetting.setAppSource(backChannelEntry.getAppSource());
-            }
-            groupTourProductMPO.setGroupTourProductBaseSetting(baseSetting);
-            // 笛风云没有退改
-            groupTourProductDao.saveProduct(groupTourProductMPO);
-
             DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
-            List<GroupTourProductSetMealMPO> setMealMPOs = groupTourProductSetMealDao.getSetMeals(groupTourProductMPO.getId());
-            GroupTourProductSetMealMPO setMealMPO;
-            if(ListUtils.isNotEmpty(setMealMPOs)){
-                setMealMPO = setMealMPOs.get(0);
+            AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), null);
+            if(addressInfo != null && StringUtils.isNotBlank(addressInfo.getCityCode())
+                    && StringUtils.isNotBlank(addressInfo.getCityName())){
             } else {
+                log.error("产品={}没有查到城市={}，跳过。", groupTourProductMPO.getProductName(), departCity.getName());
+                continue;
+            }
+            GroupTourProductSetMealMPO setMealMPO = groupTourProductSetMealDao.getSetMeal(groupTourProductMPO.getId(), addressInfo.getCityCode());
+            if(setMealMPO == null){
                 setMealMPO = new GroupTourProductSetMealMPO();
                 setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             }
@@ -1112,7 +1119,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setConstInclude(journeyInfo.getCostInclude());
             setMealMPO.setCostExclude(journeyInfo.getCostExclude());
             setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
-
+            setMealMPO.setDepCode(addressInfo.getCityCode());
+            setMealMPO.setDepName(addressInfo.getCityName());
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null
                     && ListUtils.isNotEmpty(journeyInfo.getJourneyDescJson().getData().getData())){
                 setMealMPO.setGroupTourTripInfos(journeyInfo.getJourneyDescJson().getData().getData().stream().map(j -> {

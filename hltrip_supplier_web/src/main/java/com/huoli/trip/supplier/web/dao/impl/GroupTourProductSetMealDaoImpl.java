@@ -44,7 +44,8 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
     }
 
     @Override
-    public List<GroupTourProductSetMealMPO> getSetMeals(String groupTourProductId){
-        return mongoTemplate.find(new Query(Criteria.where("groupTourProductId").is(groupTourProductId)), GroupTourProductSetMealMPO.class);
+    public GroupTourProductSetMealMPO getSetMeal(String groupTourProductId, String depCode){
+        return mongoTemplate.findOne(new Query(Criteria.where("groupTourProductId").is(groupTourProductId)
+                .and("depCode").is(depCode)), GroupTourProductSetMealMPO.class);
     }
 }

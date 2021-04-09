@@ -33,15 +33,6 @@ public interface GroupTourProductDao {
     GroupTourProductMPO getTourProduct(String supplierProductId, String channel);
 
     /**
-     * 根据供应商id和城市获取产品
-     * @param supplierProductId
-     * @param channel
-     * @param cityName
-     * @return
-     */
-    GroupTourProductMPO getTourProduct(String supplierProductId, String channel, String cityName);
-
-    /**
      * 根据供应商产品id修改状态
      * @param supplierProductId
      * @param channel

@@ -48,12 +48,6 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
     }
 
     @Override
-    public GroupTourProductMPO getTourProduct(String supplierProductId, String channel, String cityName){
-        return mongoTemplate.findOne(new Query(Criteria.where("supplierProductId")
-                .is(supplierProductId).and("channel").is(channel).and("depInfos.$cityName").is(cityName)), GroupTourProductMPO.class);
-    }
-
-    @Override
     public void updateStatus(String supplierProductId, String channel){
         mongoTemplate.updateFirst(new Query(Criteria.where("supplierProductId")
                 .is(supplierProductId).and("channel").is(channel)), Update.update("status", 3), GroupTourProductMPO.class);

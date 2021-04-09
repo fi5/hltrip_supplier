@@ -19,7 +19,7 @@ public interface GroupTourProductSetMealDao {
      * @param groupTourProductId
      * @return
      */
-    List<GroupTourProductSetMealMPO> getSetMeals(String groupTourProductId);
+    GroupTourProductSetMealMPO getSetMeal(String groupTourProductId, String depCode);
 
     /**
      * 新增套餐
