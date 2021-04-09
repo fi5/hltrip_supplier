@@ -634,7 +634,7 @@ public class CommonServiceImpl implements CommonService {
                 add = true;
             }
             groupTourProductMPO.setSupplierProductId(productPO.getSupplierProductId());
-            groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+            groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
             groupTourProductMPO.setProductName(productPO.getName());
             if(productPO.getMainItem() == null){
                 log.info("{}mainitem为空", productPO.getCode());
