@@ -570,19 +570,19 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, String channel, Object origin){
+    public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String channelScenicId, String channel, Object origin){
         log.info("开始保存景点副本");
-        ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
-        scenicSpotBackupMPO.setSupplierId(channel);
-        scenicSpotBackupMPO.setSupplierScenicId(scenicId);
-        scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
-        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicId, channel);
-        if(exist == null){
+        ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(channelScenicId, channel);
+        if(scenicSpotBackupMPO == null){
+            scenicSpotBackupMPO = new ScenicSpotBackupMPO();
             scenicSpotBackupMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            scenicSpotBackupMPO.setSupplierId(channel);
+            scenicSpotBackupMPO.setSupplierScenicId(channelScenicId);
             scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        } else {
-            scenicSpotBackupMPO.setId(exist.getId());
+            log.info("创建新的景点备份，scenicId={}, name={}, channel={}，channelScenicId={}", newScenic.getId(), newScenic.getName(), channel, channelScenicId);
         }
+        scenicSpotBackupMPO.setScenicSpotMPO(newScenic);
+        scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
         scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
         log.info("景点副本保存成功id={}", scenicSpotBackupMPO.getId());
@@ -599,7 +599,7 @@ public class CommonServiceImpl implements CommonService {
         newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
         // 没有找到映射就往本地新增一条
         ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
-        log.info("{}景点{}没有有映射新增一条景点id={}", channel, channelScenicId, newScenic.getId());
+        log.info("{}景点{}没有映射，新增一条景点id={}", channel, channelScenicId, newScenic.getId());
         // 同时保存映射关系
         ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
         scenicSpotMappingMPO.setChannelScenicSpotId(channelScenicId);
@@ -941,9 +941,9 @@ public class CommonServiceImpl implements CommonService {
             scenicSpotMPO.setTages(productItemPO.getTags());
             scenicSpotMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 同时保存映射关系
-            updateScenicSpotMapping(productItemPO.getCode(), SUPPLIER_CODE_SHENGHE_TICKET, scenicSpotMPO);
+            updateScenicSpotMapping(productItemPO.getCode(), productItemPO.getSupplierId(), scenicSpotMPO);
             // 更新备份
-            updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getCode(), SUPPLIER_CODE_SHENGHE_TICKET, productItemPO);
+            updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getCode(), productItemPO.getSupplierId(), productItemPO);
         }
     }
 }
