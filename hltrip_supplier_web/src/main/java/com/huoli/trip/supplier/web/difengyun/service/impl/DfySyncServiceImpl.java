@@ -209,6 +209,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setInvalidTime(MongoDateUtils.handleTimezoneInput(product.getValidTime()));
                 log.error("没有价格信息。。。。");
             }
+            ProductPO backup;
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过
@@ -225,10 +226,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
-            }
-            // 保存副本
-            commonService.saveBackupProduct(product);
-            if(productPO != null){
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
+            } else {
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
                 product.setAuditStatus(productPO.getAuditStatus());
                 product.setSupplierStatus(productPO.getSupplierStatus());
                 product.setRecommendFlag(productPO.getRecommendFlag());
@@ -244,6 +244,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.compareProduct(product, productPO);
             }
             productDao.updateByCode(product);
+            // 保存副本
+            commonService.saveBackupProduct(backup);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
