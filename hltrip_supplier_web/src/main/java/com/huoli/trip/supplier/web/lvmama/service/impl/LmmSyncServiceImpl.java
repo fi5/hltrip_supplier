@@ -432,10 +432,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
                 newProduct.setRecommendFlag(oldProduct.getRecommendFlag());
                 newProduct.setAppFrom(oldProduct.getAppFrom());
-                newProduct.setBookDescList(oldProduct.getBookDescList());
+//                newProduct.setBookDescList(oldProduct.getBookDescList());
                 newProduct.setDescriptions(oldProduct.getDescriptions());
-                newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
-                commonService.compareProduct(newProduct);
+//                newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
+                commonService.compareProduct(newProduct, oldProduct);
             }
             productDao.updateByCode(newProduct);
             syncPrice(g.getGoodsId());
