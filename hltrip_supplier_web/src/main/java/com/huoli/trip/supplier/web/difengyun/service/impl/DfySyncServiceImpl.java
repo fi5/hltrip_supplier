@@ -495,6 +495,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setDesCity(productItemPO.getDesCity());
             product.setOriCity(cityNames.get(i++));
             product.setOriCityCode(city);
+            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+            product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+            product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             ProductPO oldProduct = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
             if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null) {
@@ -505,6 +509,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.error("笛风云跟团游，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
+            ProductPO backup;
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过
@@ -521,14 +526,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
-                product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
-                product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-            }
-            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
-            // 保存副本
-            commonService.saveBackupProduct(product);
-            if(oldProduct != null){
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
+            } else {
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
                 product.setSupplierStatus(oldProduct.getSupplierStatus());
                 product.setAuditStatus(oldProduct.getAuditStatus());
                 product.setRecommendFlag(oldProduct.getRecommendFlag());
@@ -545,6 +545,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.compareToursProduct(product, oldProduct);
             }
             productDao.updateByCode(product);
+            // 保存副本
+            commonService.saveBackupProduct(backup);
             syncToursPrice(productId, city);
             if(dfyToursDetail.getJourneyInfo().getJourneyDescJson() != null
                     && dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() != null
