@@ -42,7 +42,7 @@ public interface CommonService {
 
     AddressInfo setCity(String provinceName, String cityName, String districtName);
 
-    void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin);
+    void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, String channel, Object origin);
 
     void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic);
 
@@ -51,4 +51,6 @@ public interface CommonService {
     void refreshList(int type, String productId, int updateType, boolean add);
 
     void transTours();
+
+    void transScenic();
 }

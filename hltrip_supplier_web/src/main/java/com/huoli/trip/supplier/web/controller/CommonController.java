@@ -83,4 +83,16 @@ public class CommonController {
         }
         return BaseResponse.withSuccess();
     }
+
+    @PostMapping("/trans/scenic")
+    public BaseResponse transScenic(){
+        try {
+            log.info("开始转移录入后台数据。");
+            commonService.transScenic();
+        } catch (Exception e) {
+            log.error("转移录入后台数据异常", e);
+            return BaseResponse.withFail(-1, "刷新item失败");
+        }
+        return BaseResponse.withSuccess();
+    }
 }

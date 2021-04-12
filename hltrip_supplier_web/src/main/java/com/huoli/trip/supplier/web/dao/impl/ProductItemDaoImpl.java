@@ -93,4 +93,9 @@ public class ProductItemDaoImpl implements ProductItemDao {
         return null;
     }
 
+    @Override
+    public List<ProductItemPO> selectAll(){
+        return mongoTemplate.find(new Query(), ProductItemPO.class);
+    }
+
 }

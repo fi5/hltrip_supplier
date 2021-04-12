@@ -10,9 +10,7 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotBackupMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMappingMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
@@ -44,6 +42,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_SHENGHE_TICKET;
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
 
 /**
  * 描述：<br/>
@@ -98,6 +99,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private PriceDao priceDao;
+
+    @Autowired
+    private ProductItemDao productItemDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -566,16 +570,18 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, Object origin){
+    public void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String scenicId, String channel, Object origin){
         log.info("开始保存景点副本");
         ScenicSpotBackupMPO scenicSpotBackupMPO = JSON.parseObject(JSON.toJSONString(newScenic), ScenicSpotBackupMPO.class);
-        scenicSpotBackupMPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
+        scenicSpotBackupMPO.setSupplierId(channel);
         scenicSpotBackupMPO.setSupplierScenicId(scenicId);
         scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
-        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicId, Constants.SUPPLIER_CODE_LMM_TICKET);
+        ScenicSpotBackupMPO exist = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicId, channel);
         if(exist == null){
             scenicSpotBackupMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        } else {
+            scenicSpotBackupMPO.setId(exist.getId());
         }
         scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
@@ -844,6 +850,100 @@ public class CommonServiceImpl implements CommonService {
                 groupTourProductSetMealDao.saveSetMeals(setMealMPO);
                 refreshList(1, groupTourProductMPO.getId(), 1, add);
             }
+        }
+    }
+
+    @Override
+    public void transScenic(){
+        List<ProductItemPO> productItemPOs = productItemDao.selectAll();
+        for (ProductItemPO productItemPO : productItemPOs) {
+            ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+            AddressInfo addressInfo = setCity(null, productItemPO.getCity(), null);
+            if(addressInfo != null){
+                scenicSpotMPO.setCity(addressInfo.getCityName());
+                scenicSpotMPO.setCityCode(addressInfo.getCityCode());
+                scenicSpotMPO.setProvince(addressInfo.getProvinceName());
+                scenicSpotMPO.setProvinceCode(addressInfo.getProvinceCode());
+            }
+            scenicSpotMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            if(ListUtils.isEmpty(productItemPO.getImages())){
+                scenicSpotMPO.setImages(productItemPO.getImages().stream().map(ImageBasePO::getUrl).collect(Collectors.toList()));
+            }
+            if(ListUtils.isEmpty(scenicSpotMPO.getImages()) && ListUtils.isNotEmpty(productItemPO.getMainImages())){
+                scenicSpotMPO.setImages(productItemPO.getMainImages().stream().map(ImageBasePO::getUrl).collect(Collectors.toList()));
+            }
+            scenicSpotMPO.setDetailDesc(productItemPO.getDescription());
+            if(productItemPO.getItemCoordinate() != null && productItemPO.getItemCoordinate().length == 2){
+                Coordinate coordinate = new Coordinate();
+                coordinate.setLongitude(productItemPO.getItemCoordinate()[0]);
+                coordinate.setLatitude(productItemPO.getItemCoordinate()[1]);
+                scenicSpotMPO.setCoordinate(coordinate);
+            }
+            scenicSpotMPO.setPhone(productItemPO.getPhone());
+            if(ListUtils.isNotEmpty(productItemPO.getTopic())){
+                StringBuffer sb = new StringBuffer();
+                for (BaseCode baseCode : productItemPO.getTopic()) {
+                    if(StringUtils.equals(baseCode.getCode(), "1000")){
+                        sb.append("17").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1001")){
+                        sb.append("18").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1002")){
+                        sb.append("19").append(",");
+                    } else if(StringUtils.equals(baseCode.getCode(), "1003")){
+                        sb.append("20").append(",");
+                    } else {
+                        sb.append("16");
+                    }
+                }
+                String theme = sb.toString();
+                if(theme.endsWith(",")){
+                    theme = theme.substring(0, theme.length() - 1);
+                }
+                scenicSpotMPO.setTheme(theme);
+            }
+            if(productItemPO.getLevel() != null){
+                switch (productItemPO.getLevel()){
+                    case 11:
+                        scenicSpotMPO.setLevel("1");
+                        break;
+                    case 12:
+                        scenicSpotMPO.setLevel("2");
+                        break;
+                    case 13:
+                        scenicSpotMPO.setLevel("3");
+                        break;
+                    case 14:
+                        scenicSpotMPO.setLevel("4");
+                        break;
+                    case 15:
+                        scenicSpotMPO.setLevel("5");
+                        break;
+                }
+            }
+            scenicSpotMPO.setAddress(productItemPO.getAddress());
+            scenicSpotMPO.setName(productItemPO.getName());
+            if(ListUtils.isNotEmpty(productItemPO.getFeatures())){
+                ItemFeaturePO itemFeaturePO = productItemPO.getFeatures().stream().filter(f -> f.getType() == 2).findFirst().orElse(null);
+                if(itemFeaturePO != null){
+                    scenicSpotMPO.setTraffic(itemFeaturePO.getDetail());
+                }
+            }
+            if(StringUtils.isNotBlank(productItemPO.getBusinessHours())){
+                ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
+                scenicSpotOpenTime.setTimeDesc(productItemPO.getBusinessHours());
+                scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
+            }
+            scenicSpotMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotMPO.setProposalPlayTime(productItemPO.getSuggestPlaytime());
+            scenicSpotMPO.setOperatingStatus(1);
+            scenicSpotMPO.setSpotOfficialWeb(productItemPO.getWebsite());
+            scenicSpotMPO.setStatus(1);
+            scenicSpotMPO.setTages(productItemPO.getTags());
+            scenicSpotMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            // 同时保存映射关系
+            updateScenicSpotMapping(productItemPO.getCode(), SUPPLIER_CODE_SHENGHE_TICKET, scenicSpotMPO);
+            // 更新备份
+            updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getCode(), SUPPLIER_CODE_SHENGHE_TICKET, productItemPO);
         }
     }
 }

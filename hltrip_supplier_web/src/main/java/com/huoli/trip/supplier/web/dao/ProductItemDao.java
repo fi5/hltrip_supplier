@@ -66,4 +66,10 @@ public interface ProductItemDao {
      */
     List<String> selectSupplierItemIdsBySupplierIdAndType(String supplierId, Integer itemType);
 
+    /**
+     *
+     * @return
+     */
+    List<ProductItemPO> selectAll();
+
 }

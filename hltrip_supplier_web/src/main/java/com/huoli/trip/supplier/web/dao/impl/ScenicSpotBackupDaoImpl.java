@@ -28,8 +28,7 @@ public class ScenicSpotBackupDaoImpl implements ScenicSpotBackupDao {
     @Override
     public void saveScenicSpotBackup(ScenicSpotBackupMPO scenicSpotBackupMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("supplierScenicId").is(scenicSpotBackupMPO.getSupplierScenicId())
-        .and("supplierId").is(scenicSpotBackupMPO.getSupplierId()));
+        query.addCriteria(Criteria.where("_id").is(scenicSpotBackupMPO.getSupplierScenicId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(scenicSpotBackupMPO, document);
         Update update = Update.fromDocument(document);

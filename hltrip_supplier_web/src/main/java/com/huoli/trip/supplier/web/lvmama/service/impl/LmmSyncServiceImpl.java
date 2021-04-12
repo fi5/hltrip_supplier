@@ -873,10 +873,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
         // 设置省市区
         commonService.setCity(newScenic);
-        // 更新备份
-        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), lmmScenic);
         // 同时保存映射关系
         commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, newScenic);
+        // 更新备份
+        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, lmmScenic);
     }
 
     @Override

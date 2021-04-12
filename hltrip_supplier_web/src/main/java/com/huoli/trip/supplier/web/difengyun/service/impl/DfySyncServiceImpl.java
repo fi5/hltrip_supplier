@@ -680,10 +680,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             ScenicSpotMPO newScenic = DfyTicketConverter.convertToScenicSpotMPO(scenicDetail);
             // 设置省市区
             commonService.setCity(newScenic);
-            // 更新备份
-            commonService.updateScenicSpotMPOBackup(newScenic, scenicDetail.getScenicId(), scenicDetail);
             // 同时保存映射关系
             commonService.updateScenicSpotMapping(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, newScenic);
+            // 更新备份
+            commonService.updateScenicSpotMPOBackup(newScenic, scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, scenicDetail);
             List<String> ticketIds = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){
                 ticketIds.addAll(scenicDetail.getTicketList().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
