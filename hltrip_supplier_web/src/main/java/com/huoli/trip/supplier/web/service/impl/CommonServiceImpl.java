@@ -591,23 +591,34 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic){
         // 查映射关系
+        log.info("查询景点是否映射，channel={}, channelScenicId={}", channel, channelScenicId);
         ScenicSpotMappingMPO exist = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(channelScenicId, channel);
         if(exist != null){
-            log.info("{}景点{}已有映射id={}", channel, channelScenicId, exist.getId());
+            log.info("{}景点{}已有映射id={}，跳过", channel, channelScenicId, exist.getId());
             return;
         }
-        newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
-        // 没有找到映射就往本地新增一条
-        ScenicSpotMPO addScenic = scenicSpotDao.addScenicSpot(newScenic);
-        log.info("{}景点{}没有映射，新增一条景点id={}", channel, channelScenicId, newScenic.getId());
+        log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName(), newScenic.getAddress());
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
+        String scenicId;
+        if(existScenic == null){
+            newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            // 没有找到映射就往本地新增一条
+            scenicSpotDao.addScenicSpot(newScenic);
+            scenicId = newScenic.getId();
+            log.info("不存在同名同址景点，添加新的景点记录，景点id={}", scenicId);
+        } else {
+            scenicId = existScenic.getId();
+            log.info("已存在同名同址景点，不用新增景点，直接关联，景点id={}", scenicId);
+        }
         // 同时保存映射关系
         ScenicSpotMappingMPO scenicSpotMappingMPO = new ScenicSpotMappingMPO();
         scenicSpotMappingMPO.setChannelScenicSpotId(channelScenicId);
-        scenicSpotMappingMPO.setScenicSpotId(addScenic.getId());
+        scenicSpotMappingMPO.setScenicSpotId(scenicId);
         scenicSpotMappingMPO.setChannel(channel);
         scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
+        log.info("{}景点{}已关联景点id={}", channel, channelScenicId, newScenic.getId());
     }
 
     @Override
