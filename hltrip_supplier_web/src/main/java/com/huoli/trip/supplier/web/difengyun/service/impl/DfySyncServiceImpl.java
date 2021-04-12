@@ -225,8 +225,6 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
-            } else {
-                commonService.compareProduct(product);
             }
             // 保存副本
             commonService.saveBackupProduct(product);
@@ -235,14 +233,15 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setSupplierStatus(productPO.getSupplierStatus());
                 product.setRecommendFlag(productPO.getRecommendFlag());
                 product.setAppFrom(productPO.getAppFrom());
-                product.setBookDescList(productPO.getBookDescList());
                 product.setDescriptions(productPO.getDescriptions());
-                product.setBookNoticeList(productPO.getBookNoticeList());
+                // 下面对比信息会处理这个信息
+//                product.setBookDescList(productPO.getBookDescList());
                 if(productPO.getCreateTime() == null){
                     product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 } else {
                     product.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
                 }
+                commonService.compareProduct(product, productPO);
             }
             productDao.updateByCode(product);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
@@ -522,8 +521,6 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
                 product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-            } else {
-                commonService.compareToursProduct(product);
             }
             product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
@@ -534,14 +531,16 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setAuditStatus(oldProduct.getAuditStatus());
                 product.setRecommendFlag(oldProduct.getRecommendFlag());
                 product.setAppFrom(oldProduct.getAppFrom());
-                product.setBookDescList(oldProduct.getBookDescList());
                 product.setDescriptions(oldProduct.getDescriptions());
-                product.setBookNoticeList(oldProduct.getBookNoticeList());
+                // 下面对比信息会处理这两个
+//                product.setBookDescList(oldProduct.getBookDescList());
+//                product.setBookNoticeList(oldProduct.getBookNoticeList());
                 if(oldProduct.getCreateTime() == null){
                     product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 } else {
                     product.setCreateTime(MongoDateUtils.handleTimezoneInput(oldProduct.getCreateTime()));
                 }
+                commonService.compareToursProduct(product, oldProduct);
             }
             productDao.updateByCode(product);
             syncToursPrice(productId, city);

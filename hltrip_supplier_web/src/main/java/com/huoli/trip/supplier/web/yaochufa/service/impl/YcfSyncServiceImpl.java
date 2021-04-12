@@ -136,8 +136,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     productPO.setAppFrom(appFroms);
                 }
-            } else {
-                commonService.compareProduct(productPO);
             }
             productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
             productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
@@ -148,14 +146,15 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 productPO.setSupplierStatus(exist.getSupplierStatus());
                 productPO.setRecommendFlag(exist.getRecommendFlag());
                 productPO.setAppFrom(exist.getAppFrom());
-                productPO.setBookDescList(exist.getBookDescList());
+                // 下面对比信息会处理这个
+//                productPO.setBookDescList(exist.getBookDescList());
                 productPO.setDescriptions(exist.getDescriptions());
-                productPO.setBookNoticeList(exist.getBookNoticeList());
                 if(exist.getCreateTime() == null){
                     productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 } else {
                     productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(exist.getCreateTime()));
                 }
+                commonService.compareProduct(productPO, exist);
             }
             productDao.updateByCode(productPO);
 
