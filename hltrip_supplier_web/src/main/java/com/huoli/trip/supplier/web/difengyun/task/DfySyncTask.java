@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED;
 
 /**
  * 描述：<br/>
@@ -165,7 +166,7 @@ public class DfySyncTask {
                 request.setStart(start * 100);
                 request.setLimit(100);
                 long sTime = System.currentTimeMillis();
-                boolean success = dfySyncService.syncToursList(request);
+                boolean success = dfySyncService.syncToursList(request, PRODUCT_SYNC_MODE_ONLY_ADD);
                 long useTime = System.currentTimeMillis() - sTime;
 
                 log.info("同步第{}页跟团游，用时{}毫秒", (start + 1), useTime);

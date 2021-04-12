@@ -155,22 +155,28 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     productPO.setAppFrom(appFroms);
                 }
-            } else {
-                productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productPO.getCreateTime()));
+            }
+            productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+            productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
+            productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            commonService.saveBackupProduct(productPO);
+            if(exist != null){
                 productPO.setAuditStatus(exist.getAuditStatus());
                 productPO.setSupplierStatus(exist.getSupplierStatus());
                 productPO.setRecommendFlag(exist.getRecommendFlag());
                 productPO.setAppFrom(exist.getAppFrom());
-                productPO.setBookDescList(exist.getBookDescList());
+                // 下面对比信息会处理这个
+//                productPO.setBookDescList(exist.getBookDescList());
                 productPO.setDescriptions(exist.getDescriptions());
-                productPO.setBookNoticeList(exist.getBookNoticeList());
-                commonService.compareProduct(productPO);
+                if(exist.getCreateTime() == null){
+                    productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                } else {
+                    productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(exist.getCreateTime()));
+                }
+                commonService.compareProduct(productPO, exist);
             }
-            productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            productPO.setOperator(SUPPLIER_CODE_YCF);
-            productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
             productDao.updateByCode(productPO);
-            commonService.saveBackupProduct(productPO);
+
         });
     }
 
@@ -203,46 +209,24 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 try {
                     ProductItemPO productItemPO = YcfConverter.convertToProductItemPO(item);
                     ProductItemPO exist = productItemDao.selectByCode(productItemPO.getCode());
-                    List<ItemFeaturePO> featurePOs = null;
-                    List<ImageBasePO> imageDetails = null;
-                    ProductPO productPO = null;
-                    List<ImageBasePO> images = null;
-                    List<ImageBasePO> mainImages = null;
+                    // 已存在的景点不更新
                     if(exist == null){
                         productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                        // todo 暂时默认通过
                         productItemPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
-//            productItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
-                    } else {
-                        featurePOs = exist.getFeatures();
-                        imageDetails = exist.getImageDetails();
-                        productPO = exist.getProduct();
-                        images = exist.getImages();
-                        mainImages = exist.getMainImages();
-                        productItemPO.setCreateTime(MongoDateUtils.handleTimezoneInput(productItemPO.getCreateTime()));
-                        productItemPO.setAuditStatus(exist.getAuditStatus());
-                        productItemPO.setProduct(exist.getProduct());
-                        commonService.compareProductItem(productItemPO);
+                        try {
+                            commonService.saveBackupProductItem(productItemPO);
+                        } catch (Exception e) {
+                            log.error("保存{}的副本异常", productItemPO.getCode(), e);
+                        }
+                        if(ListUtils.isEmpty(productItemPO.getImages()) && ListUtils.isEmpty(productItemPO.getMainImages())){
+                            log.info("{}没有列表图、轮播图，设置待审核", Constants.VERIFY_STATUS_WAITING);
+                            productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
+                        }
+                        productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                        productItemPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+                        productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
+                        productItemDao.updateByCode(productItemPO);
                     }
-                    productItemPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    productItemPO.setOperator(SUPPLIER_CODE_YCF);
-                    productItemPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
-                    try {
-                        commonService.saveBackupProductItem(productItemPO);
-                    } catch (Exception e) {
-                        log.error("保存{}的副本异常", productItemPO.getCode(), e);
-                    }
-                    // 这个不更新，用原有的
-                    productItemPO.setFeatures(featurePOs);
-                    productItemPO.setImageDetails(imageDetails);
-                    productItemPO.setProduct(productPO);
-                    productItemPO.setImages(images);
-                    productItemPO.setMainImages(mainImages);
-                    if(ListUtils.isEmpty(productItemPO.getImages()) && ListUtils.isEmpty(productItemPO.getMainImages())){
-                        log.info("{}没有列表图、轮播图，设置待审核", productItemPO.getCode());
-                        productItemPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
-                    }
-                    productItemDao.updateByCode(productItemPO);
                     productItemPOs.add(productItemPO);
                 } catch (Exception e) {
                     log.error("poi落地失败，", e);

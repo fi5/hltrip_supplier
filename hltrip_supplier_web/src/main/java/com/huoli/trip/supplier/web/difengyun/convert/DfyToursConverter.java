@@ -106,7 +106,15 @@ public class DfyToursConverter {
         if (dfyToursDetail.getTrafficBack() != null) {
             productPO.setReturnTraffic(convertToTraffic(dfyToursDetail.getTrafficBack()));
         }
-        productPO.setSite(dfyToursDetail.getTeamType() == null ? null : String.valueOf(dfyToursDetail.getTeamType()));
+        if(dfyToursDetail.getTeamType() != null){
+            if(dfyToursDetail.getTeamType() == 0){
+                productPO.setSite("1");
+            } else if(dfyToursDetail.getTeamType() == 1){
+                productPO.setSite("2");
+            } else if(dfyToursDetail.getTeamType() == 2){
+                productPO.setSite("3");
+            }
+        }
         DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
         if (ListUtils.isNotEmpty(journeyInfo.getTourRecommend())) {
             productPO.setRecommendDesc(journeyInfo.getTourRecommend().stream().map(r -> {

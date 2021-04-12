@@ -24,9 +24,9 @@ public interface CommonService {
      */
     BackChannelEntry getSupplierById(String supplierId);
 
-    void compareProduct(ProductPO product);
+    void compareProduct(ProductPO product, ProductPO existProduct);
 
-    void compareToursProduct(ProductPO product);
+    void compareToursProduct(ProductPO product, ProductPO existProduct);
 
     void compareProductItem(ProductItemPO productItem);
 
