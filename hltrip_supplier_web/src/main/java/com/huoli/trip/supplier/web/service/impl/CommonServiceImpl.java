@@ -866,7 +866,7 @@ public class CommonServiceImpl implements CommonService {
                 scenicSpotMPO.setProvinceCode(addressInfo.getProvinceCode());
             }
             scenicSpotMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-            if(ListUtils.isEmpty(productItemPO.getImages())){
+            if(ListUtils.isNotEmpty(productItemPO.getImages())){
                 scenicSpotMPO.setImages(productItemPO.getImages().stream().map(ImageBasePO::getUrl).collect(Collectors.toList()));
             }
             if(ListUtils.isEmpty(scenicSpotMPO.getImages()) && ListUtils.isNotEmpty(productItemPO.getMainImages())){
