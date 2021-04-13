@@ -445,10 +445,13 @@ public class YcfConverter {
         scenicSpotMPO.setAddress(productItem.getAddress());
         scenicSpotMPO.setPhone(productItem.getPhone());
         if(StringUtils.isNotBlank(productItem.getLongitude()) && StringUtils.isNotBlank(productItem.getLatitude())){
-            Coordinate coordinate = new Coordinate();
-            coordinate.setLongitude(Double.valueOf(productItem.getLongitude()));
-            coordinate.setLatitude(Double.valueOf(productItem.getLatitude()));
-            scenicSpotMPO.setCoordinate(coordinate);
+            double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.parseDouble(productItem.getLatitude()), Double.parseDouble(productItem.getLongitude()));
+            if(coordinateArr != null && coordinateArr.length == 2){
+                Coordinate coordinate = new Coordinate();
+                coordinate.setLongitude(coordinateArr[1]);
+                coordinate.setLatitude(coordinateArr[0]);
+                scenicSpotMPO.setCoordinate(coordinate);
+            }
         }
         scenicSpotMPO.setDetailDesc(productItem.getDescription());
         List<String> images = Lists.newArrayList();

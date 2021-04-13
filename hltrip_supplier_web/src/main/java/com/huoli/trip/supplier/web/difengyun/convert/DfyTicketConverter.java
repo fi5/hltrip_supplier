@@ -13,10 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Notice;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
@@ -74,8 +71,18 @@ public class DfyTicketConverter {
         productItemPO.setOriCity(scenicDetail.getCityName());
         productItemPO.setProvince(scenicDetail.getProvinceName());
         if(StringUtils.isNotBlank(scenicDetail.getBlocation())){
-            productItemPO.setItemCoordinate(Arrays.asList(scenicDetail.getBlocation().split(",")).stream().map(l ->
-                    Double.valueOf(l)).collect(Collectors.toList()).toArray(new Double[]{}));
+            try {
+                String[] baiduArr = scenicDetail.getBlocation().split(",");
+                if(baiduArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(baiduArr[0]), Double.valueOf(baiduArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                        productItemPO.setItemCoordinate(coordinate);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
         }
         productItemPO.setBusinessHours(scenicDetail.getOpenTime());
         productItemPO.setAddress(scenicDetail.getScenicAddress());
@@ -342,17 +349,29 @@ public class DfyTicketConverter {
         Coordinate coordinate = null;
         if(StringUtils.isNotBlank(baidu)){
             try {
-                coordinate = new Coordinate();
-                coordinate.setLongitude(Double.valueOf(baidu.split(",")[0]));
-                coordinate.setLatitude(Double.valueOf(baidu.split(",")[1]));
+                String[] baiduArr = baidu.split(",");
+                if(baiduArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(baiduArr[0]), Double.valueOf(baiduArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        coordinate = new Coordinate();
+                        coordinate.setLongitude(coordinateArr[1]);
+                        coordinate.setLatitude(coordinateArr[0]);
+                    }
+                }
             } catch (Exception e) {
                 log.error("转换坐标失败，不影响继续执行，", e);
             }
         } else if(StringUtils.isNotBlank(google)){
             try {
-                coordinate = new Coordinate();
-                coordinate.setLongitude(Double.valueOf(google.split(",")[0]));
-                coordinate.setLatitude(Double.valueOf(google.split(",")[1]));
+                String[] googleArr = google.split(",");
+                if(googleArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(googleArr[0]), Double.valueOf(googleArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        coordinate = new Coordinate();
+                        coordinate.setLongitude(coordinateArr[1]);
+                        coordinate.setLatitude(coordinateArr[0]);
+                    }
+                }
             } catch (Exception e) {
                 log.error("转换坐标失败，不影响继续执行，", e);
             }

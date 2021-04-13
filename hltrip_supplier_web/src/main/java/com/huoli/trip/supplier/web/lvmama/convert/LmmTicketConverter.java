@@ -11,6 +11,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
@@ -365,13 +366,17 @@ public class LmmTicketConverter {
     }
 
     public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate){
-        if(lmmCoordinate == null){
+        if(lmmCoordinate == null || lmmCoordinate.getLatitude() == null || lmmCoordinate.getLongitude() == null){
             return null;
         }
-        Coordinate coordinate = new Coordinate();
-        coordinate.setLatitude(lmmCoordinate.getLatitude());
-        coordinate.setLongitude(lmmCoordinate.getLongitude());
-        return coordinate;
+        double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
+        if(coordinateArr != null && coordinateArr.length == 2){
+            Coordinate coordinate = new Coordinate();
+            coordinate.setLatitude(coordinateArr[0]);
+            coordinate.setLongitude(coordinateArr[1]);
+            return coordinate;
+        }
+        return null;
     }
 
     public static ScenicSpotOpenTime convertToScenicSpotOpenTime(LmmOpenTime lmmOpenTime){
