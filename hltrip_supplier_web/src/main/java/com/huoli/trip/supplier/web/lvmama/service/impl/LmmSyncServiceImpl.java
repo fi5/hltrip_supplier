@@ -737,20 +737,39 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 if(ListUtils.isNotEmpty(g.getRules())){
                     refundRules = g.getRules().stream().map(r -> {
                         RefundRule refundRule = new RefundRule();
+                        int day = 0;
+                        int hour = 0;
+                        int min = 0;
                         if(r.getAheadTime() > 0){
                             refundRule.setRefundRuleType(1);
+                            // 至少前一天
+                            day = r.getAheadTime() / 1440 + 1;
+                            // 供应商给的分钟是到的游玩当天0点的差，逆向时间，所以要反推实际时间
+                            min = 1440 - (r.getAheadTime() % 1440);
+                            if(min > 60){
+                                hour = min / 60;
+                                min = min % 60;
+                            }
                         } else if(r.getAheadTime() < 0 && r.getAheadTime() > -1440){
                             refundRule.setRefundRuleType(2);
+                            // 当天和游玩后分钟就是正向时间，可以直接计算
+                            hour = r.getAheadTime() / -60;
+                            min = Math.abs(r.getAheadTime()) % 60;
                         } else if(r.getAheadTime() <= -1440){
                             refundRule.setRefundRuleType(4);
+                            // 小于-1440的肯定是从后一天开始，所以不用+1
+                            day = r.getAheadTime() / -1440;
+                            min = Math.abs(r.getAheadTime()) % 1440;
+                            if(min > 60){
+                                hour = min / 60;
+                                min = min % 60;
+                            }
                         } else {
                             refundRule.setRefundRuleType(5);
                         }
-                        if(r.isChange()){
-                            refundRule.setRefundCondition(2);
-                        } else {
-                            refundRule.setRefundCondition(1);
-                        }
+                        refundRule.setDay(day);
+                        refundRule.setHour(hour);
+                        refundRule.setMinute(min);
                         if(StringUtils.equals(r.getDeductionType(), "AMOUNT")){
                             refundRule.setDeductionType(1);
                         } else if(StringUtils.equals(r.getDeductionType(), "PERCENT")){
@@ -760,6 +779,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         return refundRule;
                     }).collect(Collectors.toList());
                     ruleMPO.setRefundRules(refundRules);
+                    Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
+                    ruleMPO.setRefundCondition(2);
+                    // 全部不可退就认为是不可退，其它都认为是条件退，没有全退
+                    if(ruleMap.size() == 1 && !ruleMap.keySet().iterator().next()){
+                        ruleMPO.setRefundCondition(1);
+                    }
                 }
                 ruleMPO.setInAddress(g.getVisitAddress());
                 ruleMPO.setFeeInclude(g.getCostInclude());

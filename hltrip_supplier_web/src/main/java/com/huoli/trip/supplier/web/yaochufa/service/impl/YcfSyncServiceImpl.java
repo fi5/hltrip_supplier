@@ -588,22 +588,42 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
             ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
-            RefundRule refundRule = new RefundRule();
             if(ycfProduct.getRefundType() != null){
                 if(ycfProduct.getRefundType() == 1){
-                    refundRule.setRefundCondition(0);
+                    ruleMPO.setRefundCondition(0);
                 } else if(ycfProduct.getRefundType() == 2){
-                    refundRule.setRefundCondition(1);
+                    ruleMPO.setRefundCondition(1);
                 } else if(ycfProduct.getRefundType() == 3){
-                    refundRule.setRefundCondition(2);
+                    ruleMPO.setRefundCondition(2);
                 }
             }
+            RefundRule refundRule = new RefundRule();
             if(ycfProduct.getAdvanceOrDelayType() != null){
                 if(ycfProduct.getAdvanceOrDelayType() == 0){
                     refundRule.setRefundRuleType(1);
                 } else if(ycfProduct.getAdvanceOrDelayType() == 1){
                     refundRule.setRefundRuleType(4);
                 }
+            }
+            if(ycfProduct.getRefundPreMinute() != null){
+                int allMin = ycfProduct.getRefundPreMinute();
+                int day = 0;
+                int hour = 0;
+                int min = 0;
+                // 有天
+                if(allMin >= 1440){
+                    day = allMin / 1440;
+                    allMin = allMin % 1440;
+                }
+                if(allMin >= 60){
+                    hour = allMin / 60;
+                    min = allMin % 60;
+                } else {
+                    min = allMin;
+                }
+                refundRule.setDay(day);
+                refundRule.setHour(hour);
+                refundRule.setMinute(min);
             }
             ruleMPO.setRefundRules(Lists.newArrayList(refundRule));
             if(ListUtils.isNotEmpty(ycfProduct.getBookRules())){
