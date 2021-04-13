@@ -1,6 +1,5 @@
 package com.huoli.trip.supplier.web.difengyun.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
@@ -10,7 +9,6 @@ import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
-import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
@@ -21,14 +19,12 @@ import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
-import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -38,7 +34,6 @@ import java.util.stream.Collectors;
 
 import static com.huoli.trip.supplier.self.common.SupplierConstants.*;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
-import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.*;
 
 /**
  * 描述：<br/>
