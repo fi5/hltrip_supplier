@@ -415,7 +415,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         if(baseResult.getData() == null){
             log.error("笛风云跟团游详情返回data为空，productId={}", productId);
-            if(StringUtils.equals(baseResult.getErrorCode(), "231000")){
+            // 返回成功码和数据权限不足认为下线
+            if(Arrays.asList("231000", "350204").contains(baseResult.getErrorCode())){
                 // 笛风云的产品下线就不会返回，所以没拿到就认为已下线，当data为空并且code=231000才认为下线，其它情况可能是接口异常，防止误下线
                 List<ProductPO> productPOs = productDao.getBySupplierProductIdAndSupplierId(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
                 if (ListUtils.isNotEmpty(productPOs)) {
