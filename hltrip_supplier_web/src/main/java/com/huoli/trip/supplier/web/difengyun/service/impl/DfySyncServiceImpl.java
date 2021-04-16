@@ -257,7 +257,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(productPO != null
                     && ticketDetailDfyBaseResult != null
                     && ticketDetailDfyBaseResult.getData() == null
-                    && StringUtils.equals(ticketDetailDfyBaseResult.getErrorCode(), "231000")){
+                    && Arrays.asList("231000", "350204").contains(ticketDetailDfyBaseResult.getErrorCode())){
                 productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID);
                 dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productPO.getCode()));
                 log.info("笛风云产品详情返回空，产品已下线，productCode = {}", productPO.getCode());
