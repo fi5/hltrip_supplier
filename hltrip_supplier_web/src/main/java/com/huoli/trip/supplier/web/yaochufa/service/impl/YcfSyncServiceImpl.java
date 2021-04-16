@@ -81,6 +81,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private ScenicSpotRuleDao scenicSpotRuleDao;
 
+    @Autowired
+    private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
+
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
         if(ListUtils.isEmpty(ycfProducts)){
@@ -521,6 +524,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             ScenicSpotMPO scenicSpotMPO = null;
             boolean fresh = false;
+            List<String> changedFields = Lists.newArrayList();
+            ScenicSpotProductBackupMPO backupMPO = null;
             if(scenicSpotProductMPO == null){
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO == null){
@@ -546,6 +551,37 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
                 }
                 fresh = true;
+            } else {
+                backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+                if(backupMPO != null){
+                    ScenicSpotProductMPO backup = backupMPO.getScenicSpotProduct();
+                    if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(ycfProduct.getProductImageList()))
+                            || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList()))){
+                        changedFields.add("images");
+                        changedFields.add("mainImage");
+                        if(ListUtils.isEmpty(ycfProduct.getProductImageList())){
+                            scenicSpotProductMPO.setImages(null);
+                            scenicSpotProductMPO.setMainImage(null);
+                        } else {
+                            scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                            scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                        }
+                    } else if(ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                        if(backup.getImages().size() != ycfProduct.getProductImageList().size()
+                                || backup.getImages().stream().anyMatch(i ->
+                                !ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(i))){
+                            changedFields.add("images");
+                            // 原来的图没有了，换一张
+                            if(!ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(scenicSpotProductMPO.getMainImage())){
+                                changedFields.add("mainImage");
+                                scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                            }
+                        }
+                    }
+                    if(StringUtils.equals(backup.getPcDescription(), ycfProduct.getProductDescription())){
+                        scenicSpotProductMPO.setPcDescription(ycfProduct.getProductDescription());
+                    }
+                }
             }
             scenicSpotProductMPO.setName(ycfProduct.getProductName());
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -591,8 +627,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 ruleMPO.setDistinguishUser(-1);
                 ruleMPO.setMaxCount(ycfProduct.getMaxNum());
             }
-            ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
-            ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
             if(ycfProduct.getRefundType() != null){
                 if(ycfProduct.getRefundType() == 1){
                     ruleMPO.setRefundCondition(0);
@@ -654,6 +688,21 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         ruleMPO.setTravellerTypes(bookRule.getCredentialType());
                     }
                 }
+            }
+            if(backupMPO != null){
+                List<String> ruleChanged = Lists.newArrayList();
+                YcfProduct backup = JSON.parseObject(backupMPO.getOriginContent(), YcfProduct.class);
+                if(!StringUtils.equals(backup.getRefundNote(), ycfProduct.getRefundNote())){
+                    ruleChanged.add("refundRuleDesc");
+                    ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+                }
+                if(!StringUtils.equals(backup.getFeeInclude(), ycfProduct.getFeeInclude())){
+                    ruleChanged.add("feeInclude");
+                    ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+                }
+            } else {
+                ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+                ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
             }
             scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
             Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);

@@ -5,6 +5,7 @@ import com.huoli.trip.common.entity.HodometerPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
@@ -56,7 +57,7 @@ public interface CommonService {
     void transScenic();
 
     /**
-     * 添加订阅通知
+     * 添加门票订阅通知
      * @param scenicSpotMPO
      * @param scenicSpotProductMPO
      * @param fresh
@@ -64,5 +65,12 @@ public interface CommonService {
     void addScenicProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh);
 
     void addHotelProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh);
+
+    /**
+     * 添加跟团游订阅通知
+     * @param groupTourProductMPO
+     * @param fresh
+     */
+    void addToursProductSubscribe(GroupTourProductMPO groupTourProductMPO, boolean fresh);
 
 }

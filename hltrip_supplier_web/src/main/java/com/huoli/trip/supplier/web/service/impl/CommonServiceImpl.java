@@ -1096,7 +1096,7 @@ public class CommonServiceImpl implements CommonService {
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
                     noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(scenicSpotProductMPO.getId());
                     noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
                     noticeMPO.setNoticeStatus(0);
@@ -1113,9 +1113,9 @@ public class CommonServiceImpl implements CommonService {
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
                 List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductMPO.getId());
                 priceMPOs.stream().filter(p ->
-                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
-                        p.getSellPrice().doubleValue(), Double::compare));
-                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
+                        p.getSettlementPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                        p.getSettlementPrice().doubleValue(), Double::compare));
+                noticeMPO.setPrice(priceMPOs.get(0).getSettlementPrice());
                 int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
                 noticeMPO.setStock(stock);
                 productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
@@ -1128,7 +1128,7 @@ public class CommonServiceImpl implements CommonService {
         if(scenicSpotMPO == null){
             scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotProductMPO.getScenicSpotId());
         }
-        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("d_ss_ticket");
+        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("hotel_scenicSpot");
         if(ListUtils.isNotEmpty(subscribes)){
             for (SubscribeProductMPO subscribe : subscribes) {
                 if(!StringUtils.equals(subscribe.getCityCode(), scenicSpotMPO.getCityCode())){
@@ -1149,12 +1149,12 @@ public class CommonServiceImpl implements CommonService {
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
                     noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(scenicSpotProductMPO.getId());
                     noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
                     noticeMPO.setNoticeStatus(0);
                     noticeMPO.setCategory(scenicSpotProductMPO.getCategory());
-                    noticeMPO.setType(0);
+                    noticeMPO.setType(2);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
                 noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -1178,7 +1178,7 @@ public class CommonServiceImpl implements CommonService {
 
     @Override
     public void addToursProductSubscribe(GroupTourProductMPO groupTourProductMPO, boolean fresh){
-        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("d_ss_ticket");
+        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("group_tour");
         if(ListUtils.isNotEmpty(subscribes)){
             for (SubscribeProductMPO subscribe : subscribes) {
                 // 出发城市必填，没有就不比
@@ -1205,28 +1205,33 @@ public class CommonServiceImpl implements CommonService {
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
                     noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(groupTourProductMPO.getId());
                     noticeMPO.setChannel(groupTourProductMPO.getChannel());
                     noticeMPO.setNoticeStatus(0);
                     noticeMPO.setCategory(groupTourProductMPO.getCategory());
-                    noticeMPO.setType(0);
+                    noticeMPO.setType(1);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
                 noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 if(ListUtils.isNotEmpty(groupTourProductMPO.getImages())){
                     noticeMPO.setProductImageUrl(groupTourProductMPO.getImages().get(0));
                 }
-                noticeMPO.setProductName(groupTourProductMPO.getName());
+                noticeMPO.setProductName(groupTourProductMPO.getProductName());
                 noticeMPO.setProductStatus(groupTourProductMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
-                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(groupTourProductMPO.getId());
-                priceMPOs.stream().filter(p ->
-                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
-                        p.getSellPrice().doubleValue(), Double::compare));
-                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
-                int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
-                noticeMPO.setStock(stock);
+                List<GroupTourProductSetMealMPO> setMealMPOs = groupTourProductSetMealDao.getSetMealByProductId(groupTourProductMPO.getId());
+                if(ListUtils.isNotEmpty(setMealMPOs)){
+                    List<GroupTourPrice> prices = setMealMPOs.stream().flatMap(m -> m.getGroupTourPrices().stream()).collect(Collectors.toList());
+                    prices.stream().filter(p ->
+                            p.getAdtPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                            p.getAdtPrice().doubleValue(), Double::compare));
+                    noticeMPO.setPrice(prices.get(0).getAdtPrice());
+                    int stock = prices.stream().mapToInt(p -> p.getAdtStock()).sum();
+                    noticeMPO.setStock(stock);
+                } else {
+                    log.error("产品{}没有套餐信息", groupTourProductMPO.getId());
+                }
                 productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
             }
         }

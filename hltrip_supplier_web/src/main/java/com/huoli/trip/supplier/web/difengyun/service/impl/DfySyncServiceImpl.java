@@ -6,8 +6,6 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
-import com.huoli.trip.common.entity.mpo.ProductUpdateNoticeMPO;
-import com.huoli.trip.common.entity.mpo.SubscribeProductMPO;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
@@ -22,7 +20,6 @@ import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import com.huoli.trip.supplier.web.service.CommonService;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +27,8 @@ import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
 import static com.huoli.trip.supplier.self.common.SupplierConstants.*;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
 
@@ -90,6 +85,14 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Autowired
     private GroupTourProductSetMealDao groupTourProductSetMealDao;
+
+    @Autowired
+    private ScenicSpotBackupDao scenicSpotBackupDao;
+
+    @Autowired
+    private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
+
+    private boolean imageChanged = false;
 
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
@@ -690,6 +693,19 @@ public class DfySyncServiceImpl implements DfySyncService {
             commonService.setCity(newScenic);
             // 同时保存映射关系
             commonService.updateScenicSpotMapping(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, Constants.SUPPLIER_NAME_DFY, newScenic);
+            ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotBySupplierScenicIdAndSupplierId(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
+            if(scenicSpotBackupMPO != null){
+                ScenicSpotMPO backup = scenicSpotBackupMPO.getScenicSpotMPO();
+                if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(newScenic.getImages()))
+                        || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(newScenic.getImages()))){
+                    imageChanged = true;
+                } else if(ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isNotEmpty(newScenic.getImages())){
+                    if(backup.getImages().size() != newScenic.getImages().size()
+                            || backup.getImages().stream().filter(i -> !newScenic.getImages().contains(i)).findAny().isPresent()){
+                        imageChanged = true;
+                    }
+                }
+            }
             // 更新备份
             commonService.updateScenicSpotMPOBackup(newScenic, scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, scenicDetail);
             List<String> ticketIds = Lists.newArrayList();
@@ -718,6 +734,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
             boolean fresh = false;
             ScenicSpotMPO scenicSpotMPO = null;
+            List<String> changedFields = Lists.newArrayList();
             if(scenicSpotProductMPO == null){
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
                 if(scenicSpotMappingMPO == null){
@@ -745,6 +762,30 @@ public class DfySyncServiceImpl implements DfySyncService {
                 // 默认销售中
                 scenicSpotProductMPO.setStatus(1);
                 fresh = true;
+            } else {
+                if(imageChanged){
+                    // 笛风云的产品图片取自景点
+                    changedFields.add("images");
+                    scenicSpotProductMPO.setImages(scenicSpotMPO.getImages());
+                    if(StringUtils.isNotBlank(scenicSpotProductMPO.getMainImage())){
+                        // 原来有值，现在是空的
+                        if(ListUtils.isEmpty(scenicSpotMPO.getImages())){
+                            changedFields.add("mainImage");
+                        } else {
+                            // 原来的图没有了，换一张
+                            if(!scenicSpotMPO.getImages().contains(scenicSpotProductMPO.getMainImage())){
+                                changedFields.add("mainImage");
+                                scenicSpotProductMPO.setMainImage(scenicSpotMPO.getImages().get(0));
+                            }
+                        }
+                    } else {
+                        // 原来是空的，现在有值
+                        if(ListUtils.isNotEmpty(scenicSpotMPO.getImages())){
+                            changedFields.add("mainImage");
+                            scenicSpotProductMPO.setMainImage(scenicSpotMPO.getImages().get(0));
+                        }
+                    }
+                }
             }
             // 默认未删除
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -777,11 +818,19 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             // todo 取票时间，取票方式 没有
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
+            scenicSpotProductMPO.setChangedFields(changedFields);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
+
+            ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+            scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
+            scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(dfyTicketDetail));
+            scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
             // 添加订阅通知
             commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
@@ -879,6 +928,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     private ScenicSpotRuleMPO saveRule(ScenicSpotProductMPO scenicSpotProductMPO, DfyTicketDetail dfyTicketDetail){
         ScenicSpotRuleMPO ruleMPO = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
         if(ruleMPO == null){
             ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
@@ -950,7 +1000,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setDistinguishUser(-1);
             ruleMPO.setMaxCount(dfyTicketDetail.getLimitNumHigh());
         }
-        ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
         if(dfyTicketDetail.getAdmissionVoucher() != null){
             String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
             try {
@@ -1006,8 +1055,19 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
         }
         // todo 预定说明没有 dfyTicketDetail.bookNotice
-        ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
         ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        if(scenicSpotProductBackupMPO != null){
+            List<String> changedFields = Lists.newArrayList();
+            DfyTicketDetail backup = JSON.parseObject(scenicSpotProductBackupMPO.getOriginContent(), DfyTicketDetail.class);
+            if(!StringUtils.equals(backup.getMpLossInfo(), dfyTicketDetail.getMpLossInfo())){
+                changedFields.add("refundRuleDesc");
+                ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
+            }
+            if(!StringUtils.equals(backup.getInfo(), dfyTicketDetail.getInfo())){
+                changedFields.add("supplementDesc");
+                ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
+            }
+        }
         scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         return ruleMPO;
     }
