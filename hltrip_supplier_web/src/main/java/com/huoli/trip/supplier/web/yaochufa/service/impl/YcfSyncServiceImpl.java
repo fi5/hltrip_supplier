@@ -139,7 +139,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.info("主项目={}", JSON.toJSONString(productItemPO));
             productPO.setMainItem(productItemPO);
             productPO.setCity(productItemPO.getCity());
+            productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
+            productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
+            productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             ProductPO exist = productDao.getBySupplierProductId(productPO.getSupplierProductId());
+            ProductPO backup;
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过
@@ -156,12 +160,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     productPO.setAppFrom(appFroms);
                 }
-            }
-            productPO.setOperator(Constants.SUPPLIER_CODE_YCF);
-            productPO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
-            productPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            commonService.saveBackupProduct(productPO);
-            if(exist != null){
+                backup = JSON.parseObject(JSON.toJSONString(productPO), ProductPO.class);
+            } else {
+                backup = JSON.parseObject(JSON.toJSONString(productPO), ProductPO.class);
                 productPO.setAuditStatus(exist.getAuditStatus());
                 productPO.setSupplierStatus(exist.getSupplierStatus());
                 productPO.setRecommendFlag(exist.getRecommendFlag());
@@ -177,7 +178,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 commonService.compareProduct(productPO, exist);
             }
             productDao.updateByCode(productPO);
-
+            commonService.saveBackupProduct(backup);
         });
     }
 

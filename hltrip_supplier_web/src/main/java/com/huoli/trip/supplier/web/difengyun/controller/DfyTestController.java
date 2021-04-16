@@ -207,6 +207,19 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/tours/update")
+    DfyBaseResult syncToursUpdate() {
+        dfySyncTask.syncUpdateToursProduct();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/new")
+    DfyBaseResult syncToursNew() {
+        dfySyncTask.syncNewToursProduct();
+        return DfyBaseResult.success();
+    }
+
+
     /**
      * 订单详情
      *

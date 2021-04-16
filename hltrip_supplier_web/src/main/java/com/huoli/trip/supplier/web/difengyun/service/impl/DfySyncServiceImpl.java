@@ -229,6 +229,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 product.setInvalidTime(MongoDateUtils.handleTimezoneInput(product.getValidTime()));
                 log.error("没有价格信息。。。。");
             }
+            ProductPO backup;
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过
@@ -245,10 +246,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
-            }
-            // 保存副本
-            commonService.saveBackupProduct(product);
-            if(productPO != null){
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
+            } else {
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
                 product.setAuditStatus(productPO.getAuditStatus());
                 product.setSupplierStatus(productPO.getSupplierStatus());
                 product.setRecommendFlag(productPO.getRecommendFlag());
@@ -264,6 +264,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.compareProduct(product, productPO);
             }
             productDao.updateByCode(product);
+            // 保存副本
+            commonService.saveBackupProduct(backup);
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
@@ -433,8 +435,9 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         if(baseResult.getData() == null){
             log.error("笛风云跟团游详情返回data为空，productId={}", productId);
-            if(StringUtils.equals(baseResult.getErrorCode(), "231000")){
-                // 笛风云的产品下线就不会返回，所以没拿到就认为已下线，当data为空并且code=231000才认为下线，其它情况可能是接口异常，防止误下线
+            // 返回成功码和数据权限不足认为下线
+            if(Arrays.asList("231000", "350204").contains(baseResult.getErrorCode())){
+                // 笛风云的产品下线就不会返回，所以没拿到就认为已下线，当data为空并且code=231000、350204才认为下线，其它情况可能是接口异常，防止误下线
                 List<ProductPO> productPOs = productDao.getBySupplierProductIdAndSupplierId(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
                 if (ListUtils.isNotEmpty(productPOs)) {
                     for (ProductPO productPO : productPOs) {
@@ -513,6 +516,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             product.setDesCity(productItemPO.getDesCity());
             product.setOriCity(cityNames.get(i++));
             product.setOriCityCode(city);
+            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
+            product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
+            product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
             ProductPO oldProduct = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
             if (PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && oldProduct != null) {
@@ -523,6 +530,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.error("笛风云跟团游，本次同步不包括新增产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
+            ProductPO backup;
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过
@@ -539,14 +547,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     product.setAppFrom(appFroms);
                 }
-                product.setOperator(Constants.SUPPLIER_CODE_DFY_TOURS);
-                product.setOperatorName(Constants.SUPPLIER_NAME_DFY_TOURS);
-            }
-            product.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            product.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
-            // 保存副本
-            commonService.saveBackupProduct(product);
-            if(oldProduct != null){
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
+            } else {
+                backup = JSON.parseObject(JSON.toJSONString(product), ProductPO.class);
                 product.setSupplierStatus(oldProduct.getSupplierStatus());
                 product.setAuditStatus(oldProduct.getAuditStatus());
                 product.setRecommendFlag(oldProduct.getRecommendFlag());
@@ -563,6 +566,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 commonService.compareToursProduct(product, oldProduct);
             }
             productDao.updateByCode(product);
+            // 保存副本
+            commonService.saveBackupProduct(backup);
             syncToursPrice(productId, city);
             if(dfyToursDetail.getJourneyInfo().getJourneyDescJson() != null
                     && dfyToursDetail.getJourneyInfo().getJourneyDescJson().getData() != null
