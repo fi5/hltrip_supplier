@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_NAME_YCF;
 
 
 /**
@@ -517,20 +518,22 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 return;
             }
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
+            ScenicSpotMPO scenicSpotMPO = null;
+            boolean fresh = false;
             if(scenicSpotProductMPO == null){
-                scenicSpotProductMPO = new ScenicSpotProductMPO();
-                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO == null){
                     log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
                     return;
                 }
-                ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                 if(scenicSpotMPO == null){
                     log.error("景点{}不存在", scenicSpotMPO.getId());
                     return;
                 }
+                scenicSpotProductMPO = new ScenicSpotProductMPO();
+                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
                 scenicSpotProductMPO.setIsDel(0);
                 scenicSpotProductMPO.setSellType(1);
@@ -541,6 +544,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
                     scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
                 }
+                fresh = true;
             }
             scenicSpotProductMPO.setName(ycfProduct.getProductName());
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
@@ -662,6 +666,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             request.setEndDate(end);
             List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
             syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString());
+            commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
+            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
         });
     }
 
@@ -695,7 +701,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     // 设置省市区
                     commonService.setCity(newScenic);
                     // 同时保存映射关系
-                    commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, newScenic);
+                    commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
                     // 更新备份
                     commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
                     return newScenic.getId();

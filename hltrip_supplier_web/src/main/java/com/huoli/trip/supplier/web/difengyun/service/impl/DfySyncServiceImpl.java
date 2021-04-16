@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
+import com.huoli.trip.common.entity.mpo.ProductUpdateNoticeMPO;
+import com.huoli.trip.common.entity.mpo.SubscribeProductMPO;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
@@ -20,18 +22,18 @@ import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
 import com.huoli.trip.supplier.web.service.CommonService;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
 import static com.huoli.trip.supplier.self.common.SupplierConstants.*;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConfigConstants.*;
 
@@ -682,7 +684,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             // 设置省市区
             commonService.setCity(newScenic);
             // 同时保存映射关系
-            commonService.updateScenicSpotMapping(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, newScenic);
+            commonService.updateScenicSpotMapping(scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, Constants.SUPPLIER_NAME_DFY, newScenic);
             // 更新备份
             commonService.updateScenicSpotMPOBackup(newScenic, scenicDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY, scenicDetail);
             List<String> ticketIds = Lists.newArrayList();
@@ -710,35 +712,37 @@ public class DfySyncServiceImpl implements DfySyncService {
 
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
             boolean fresh = false;
+            ScenicSpotMPO scenicSpotMPO = null;
             if(scenicSpotProductMPO == null){
-                scenicSpotProductMPO = new ScenicSpotProductMPO();
-                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
                 if(scenicSpotMappingMPO == null){
                     log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
                     return;
                 }
-                ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                 if(scenicSpotMPO == null){
                     log.error("景点{}不存在", scenicSpotMPO.getId());
                     return;
                 }
+                scenicSpotProductMPO = new ScenicSpotProductMPO();
+                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
                 if(ListUtils.isNotEmpty(scenicSpotMPO.getImages())){
                     scenicSpotProductMPO.setImages(scenicSpotMPO.getImages());
                     scenicSpotProductMPO.setMainImage(scenicSpotMPO.getImages().get(0));
                 }
+                scenicSpotProductMPO.setIsDel(0);
+                scenicSpotProductMPO.setSellType(1);
+                scenicSpotProductMPO.setSupplierProductId(dfyTicketDetail.getProductId());
+                scenicSpotProductMPO.setPayServiceType(0);
+                scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY);
+                // 默认销售中
+                scenicSpotProductMPO.setStatus(1);
                 fresh = true;
             }
-            scenicSpotProductMPO.setSupplierProductId(dfyTicketDetail.getProductId());
-            // 默认销售中
-            scenicSpotProductMPO.setStatus(1);
             // 默认未删除
-            scenicSpotProductMPO.setIsDel(0);
-            scenicSpotProductMPO.setSellType(1);
             scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY);
             // 目前更新供应商端信息全覆盖
             scenicSpotProductMPO.setName(dfyTicketDetail.getProductName());
             // 基础设置
@@ -774,6 +778,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             String ruleId = ruleMPO.getId();
             savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
+            // 添加订阅通知
+            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(productId, Constants.SUPPLIER_CODE_DFY);

@@ -7,8 +7,7 @@ import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.entity.mpo.AddressInfo;
-import com.huoli.trip.common.entity.mpo.DescInfo;
+import com.huoli.trip.common.entity.mpo.*;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.DateTimeUtil;
@@ -18,14 +17,7 @@ import com.huoli.trip.common.vo.ImageBase;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyDepartCity;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyDetail;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyJourneyInfo;
-import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursCalendarRequest;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.difengyun.vo.response.DfyToursCalendarResponse;
 import com.huoli.trip.supplier.web.dao.*;
-import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
@@ -35,17 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
 
-import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_SHENGHE_TICKET;
-import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
 
 /**
  * 描述：<br/>
@@ -103,6 +91,18 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ProductItemDao productItemDao;
+
+    @Autowired
+    private PoiReviewDao poiReviewDao;
+
+    @Autowired
+    private SubscribeProductDao subscribeProductDao;
+
+    @Autowired
+    private ProductUpdateNoticeDao productUpdateNoticeDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -686,7 +686,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic){
+    public void updateScenicSpotMapping(String channelScenicId, String channel, String channelName, ScenicSpotMPO newScenic){
         // 查映射关系
         log.info("查询景点是否映射，channel={}, channelScenicId={}", channel, channelScenicId);
         ScenicSpotMappingMPO exist = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(channelScenicId, channel);
@@ -702,7 +702,20 @@ public class CommonServiceImpl implements CommonService {
             // 没有找到映射就往本地新增一条
             scenicSpotDao.addScenicSpot(newScenic);
             scenicId = newScenic.getId();
-            log.info("不存在同名同址景点，添加新的景点记录，景点id={}", scenicId);
+            // 景点申请单
+            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
+            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            poiReviewMPO.setChannel(channel);
+            poiReviewMPO.setChannelName(channelName);
+            poiReviewMPO.setPoiName(newScenic.getName());
+            poiReviewMPO.setStatus(0);
+            poiReviewMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setCityName(newScenic.getCity());
+            poiReviewMPO.setPoiId(newScenic.getId());
+            poiReviewMPO.setPoiType(0);
+            poiReviewMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewDao.addPoiReview(poiReviewMPO);
+            log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
         } else {
             scenicId = existScenic.getId();
             log.info("已存在同名同址景点，不用新增景点，直接关联，景点id={}", scenicId);
@@ -1049,9 +1062,173 @@ public class CommonServiceImpl implements CommonService {
             scenicSpotMPO.setTages(productItemPO.getTags());
             scenicSpotMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             // 同时保存映射关系
-            updateScenicSpotMapping(productItemPO.getCode(), productItemPO.getSupplierId(), scenicSpotMPO);
+            updateScenicSpotMapping(productItemPO.getCode(), productItemPO.getSupplierId(), "晟和", scenicSpotMPO);
             // 更新备份
             updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getCode(), productItemPO.getSupplierId(), productItemPO);
+        }
+    }
+
+    @Override
+    public void addScenicProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh){
+        if(scenicSpotMPO == null){
+            scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotProductMPO.getScenicSpotId());
+        }
+        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("d_ss_ticket");
+        if(ListUtils.isNotEmpty(subscribes)){
+            for (SubscribeProductMPO subscribe : subscribes) {
+                // 城市必填，没有不比
+                if(StringUtils.isBlank(subscribe.getCityCode()) || !StringUtils.equals(subscribe.getCityCode(), scenicSpotMPO.getCityCode())){
+                    continue;
+                }
+                // 景点id必填，没有不比
+                if(StringUtils.isBlank(subscribe.getPoiId()) || !StringUtils.equals(subscribe.getPoiId(), scenicSpotMPO.getId())){
+                    continue;
+                }
+                // 渠道空代表所有，不空的时候比
+                if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(scenicSpotProductMPO.getChannel())){
+                    continue;
+                }
+                // 产品id非必填，有就比，没有就过
+                if(StringUtils.isNotBlank(subscribe.getProductId()) && StringUtils.equals(subscribe.getProductId(), scenicSpotProductMPO.getId())){
+                    continue;
+                }
+                ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), scenicSpotProductMPO.getId());
+                if(noticeMPO == null){
+                    noticeMPO = new ProductUpdateNoticeMPO();
+                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setProductId(scenicSpotProductMPO.getId());
+                    noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
+                    noticeMPO.setNoticeStatus(0);
+                    noticeMPO.setCategory(scenicSpotProductMPO.getCategory());
+                    noticeMPO.setType(0);
+                    noticeMPO.setUserId(subscribe.getUserId());
+                }
+                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
+                    noticeMPO.setProductImageUrl(scenicSpotProductMPO.getImages().get(0));
+                }
+                noticeMPO.setProductName(scenicSpotProductMPO.getName());
+                noticeMPO.setProductStatus(scenicSpotProductMPO.getStatus());
+                noticeMPO.setUpdateType(fresh ? "0" : "1");
+                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductMPO.getId());
+                priceMPOs.stream().filter(p ->
+                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                        p.getSellPrice().doubleValue(), Double::compare));
+                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
+                int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
+                noticeMPO.setStock(stock);
+                productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
+            }
+        }
+    }
+
+    @Override
+    public void addHotelProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh){
+        if(scenicSpotMPO == null){
+            scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotProductMPO.getScenicSpotId());
+        }
+        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("d_ss_ticket");
+        if(ListUtils.isNotEmpty(subscribes)){
+            for (SubscribeProductMPO subscribe : subscribes) {
+                if(!StringUtils.equals(subscribe.getCityCode(), scenicSpotMPO.getCityCode())){
+                    continue;
+                }
+                if(!StringUtils.equals(subscribe.getPoiId(), scenicSpotMPO.getId())){
+                    continue;
+                }
+                // 渠道空代表所有，不用比
+                if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(scenicSpotProductMPO.getChannel())){
+                    continue;
+                }
+                // 产品id非必填，有就比，没有就过
+                if(StringUtils.isNotBlank(subscribe.getProductId()) && StringUtils.equals(subscribe.getProductId(), scenicSpotProductMPO.getId())){
+                    continue;
+                }
+                ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), scenicSpotProductMPO.getId());
+                if(noticeMPO == null){
+                    noticeMPO = new ProductUpdateNoticeMPO();
+                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setProductId(scenicSpotProductMPO.getId());
+                    noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
+                    noticeMPO.setNoticeStatus(0);
+                    noticeMPO.setCategory(scenicSpotProductMPO.getCategory());
+                    noticeMPO.setType(0);
+                    noticeMPO.setUserId(subscribe.getUserId());
+                }
+                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
+                    noticeMPO.setProductImageUrl(scenicSpotProductMPO.getImages().get(0));
+                }
+                noticeMPO.setProductName(scenicSpotProductMPO.getName());
+                noticeMPO.setProductStatus(scenicSpotProductMPO.getStatus());
+                noticeMPO.setUpdateType(fresh ? "0" : "1");
+                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductMPO.getId());
+                priceMPOs.stream().filter(p ->
+                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                        p.getSellPrice().doubleValue(), Double::compare));
+                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
+                int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
+                noticeMPO.setStock(stock);
+                productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
+            }
+        }
+    }
+
+    @Override
+    public void addToursProductSubscribe(GroupTourProductMPO groupTourProductMPO, boolean fresh){
+        List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("d_ss_ticket");
+        if(ListUtils.isNotEmpty(subscribes)){
+            for (SubscribeProductMPO subscribe : subscribes) {
+                // 出发城市必填，没有就不比
+                if(StringUtils.isBlank(subscribe.getCityCode()) || ListUtils.isEmpty(groupTourProductMPO.getDepInfos())
+                        || !groupTourProductMPO.getDepInfos().stream().map(c ->
+                        c.getCityCode()).collect(Collectors.toList()).contains(subscribe.getCityCode())){
+                    continue;
+                }
+                // 目的地城市必填，没有就不比
+                if(StringUtils.isBlank(subscribe.getArrCityCode()) || ListUtils.isEmpty(groupTourProductMPO.getArrInfos())
+                        || !groupTourProductMPO.getArrInfos().stream().map(c ->
+                        c.getCityCode()).collect(Collectors.toList()).contains(subscribe.getArrCityCode())){
+                    continue;
+                }
+                // 渠道空代表所有，不用比
+                if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(groupTourProductMPO.getChannel())){
+                    continue;
+                }
+                // 产品id非必填，有就比，没有就过
+                if(StringUtils.isNotBlank(subscribe.getProductId()) && StringUtils.equals(subscribe.getProductId(), groupTourProductMPO.getId())){
+                    continue;
+                }
+                ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(1, subscribe.getUserId(), groupTourProductMPO.getId());
+                if(noticeMPO == null){
+                    noticeMPO = new ProductUpdateNoticeMPO();
+                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    noticeMPO.setProductId(groupTourProductMPO.getId());
+                    noticeMPO.setChannel(groupTourProductMPO.getChannel());
+                    noticeMPO.setNoticeStatus(0);
+                    noticeMPO.setCategory(groupTourProductMPO.getCategory());
+                    noticeMPO.setType(0);
+                    noticeMPO.setUserId(subscribe.getUserId());
+                }
+                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                if(ListUtils.isNotEmpty(groupTourProductMPO.getImages())){
+                    noticeMPO.setProductImageUrl(groupTourProductMPO.getImages().get(0));
+                }
+                noticeMPO.setProductName(groupTourProductMPO.getName());
+                noticeMPO.setProductStatus(groupTourProductMPO.getStatus());
+                noticeMPO.setUpdateType(fresh ? "0" : "1");
+                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(groupTourProductMPO.getId());
+                priceMPOs.stream().filter(p ->
+                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                        p.getSellPrice().doubleValue(), Double::compare));
+                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
+                int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
+                noticeMPO.setStock(stock);
+                productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
+            }
         }
     }
 }

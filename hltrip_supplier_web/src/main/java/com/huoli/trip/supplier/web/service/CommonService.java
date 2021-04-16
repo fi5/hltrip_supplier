@@ -6,6 +6,7 @@ import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
 /**
  * 描述：<br/>
@@ -44,7 +45,7 @@ public interface CommonService {
 
     void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String channelScenicId, String channel, Object origin);
 
-    void updateScenicSpotMapping(String channelScenicId, String channel, ScenicSpotMPO newScenic);
+    void updateScenicSpotMapping(String channelScenicId, String channel, String channelName, ScenicSpotMPO newScenic);
 
     String getId(String bizTag);
 
@@ -53,4 +54,15 @@ public interface CommonService {
     void transTours();
 
     void transScenic();
+
+    /**
+     * 添加订阅通知
+     * @param scenicSpotMPO
+     * @param scenicSpotProductMPO
+     * @param fresh
+     */
+    void addScenicProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh);
+
+    void addHotelProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh);
+
 }

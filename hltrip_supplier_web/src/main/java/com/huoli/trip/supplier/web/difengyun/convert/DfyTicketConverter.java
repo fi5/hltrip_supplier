@@ -322,6 +322,8 @@ public class DfyTicketConverter {
 
     public static ScenicSpotMPO convertToScenicSpotMPO(DfyScenicDetail scenicDetail){
         ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        // 默认待审核
+        scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(scenicDetail.getScenicAddress());
         scenicSpotMPO.setCity(scenicDetail.getCityName());
         if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){

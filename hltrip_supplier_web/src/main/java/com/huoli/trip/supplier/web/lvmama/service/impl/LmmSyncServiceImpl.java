@@ -594,33 +594,36 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(ListUtils.isNotEmpty(goodsList)){
             goodsList.forEach(g -> {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+                ScenicSpotMPO scenicSpotMPO = null;
+                boolean fresh = false;
                 if(scenicSpotProductMPO == null){
-                    scenicSpotProductMPO = new ScenicSpotProductMPO();
-                    scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                    scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                     ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                     if(scenicSpotMappingMPO == null){
                         log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
                         return;
                     }
-                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                     if(scenicSpotMPO == null){
                         log.error("景点{}不存在", scenicSpotMPO.getId());
                         return;
                     }
+                    scenicSpotProductMPO = new ScenicSpotProductMPO();
+                    scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                     scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+                    scenicSpotProductMPO.setIsDel(0);
+                    scenicSpotProductMPO.setSellType(1);
+                    scenicSpotProductMPO.setSupplierProductId(g.getGoodsId());
+                    scenicSpotProductMPO.setPayServiceType(0);
+                    scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+                    fresh = true;
                 }
-                scenicSpotProductMPO.setSupplierProductId(g.getGoodsId());
                 if(StringUtils.equals(g.getStatus(), "true")){
                     scenicSpotProductMPO.setStatus(1);
                 } else {
                     scenicSpotProductMPO.setStatus(3);
                 }
-                // 默认未删除
-                scenicSpotProductMPO.setIsDel(0);
-                scenicSpotProductMPO.setSellType(1);
                 scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
                 // 目前更新供应商端信息全覆盖
                 // goods没有图片，都用product的
                 scenicSpotProductMPO.setImages(lmmProduct.getImages());
@@ -883,6 +886,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         });
                     });
                 });
+                commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
+                commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
             });
         }
     }
@@ -899,7 +904,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 设置省市区
         commonService.setCity(newScenic);
         // 同时保存映射关系
-        commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, newScenic);
+        commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, Constants.SUPPLIER_NAME_LMM_TICKET, newScenic);
         // 更新备份
         commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, lmmScenic);
     }
