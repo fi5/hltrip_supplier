@@ -159,6 +159,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             productDao.updateByCode(productPO);
             commonService.saveBackupProduct(backup);
+            commonService.checkProduct(productPO, DateTimeUtil.trancateToDate(new Date()));
         });
     }
 

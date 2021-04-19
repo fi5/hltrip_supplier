@@ -4,9 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.BackupProductDao;
 import com.huoli.trip.supplier.web.dao.HodometerDao;
+import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -42,6 +47,12 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private HodometerDao hodometerDao;
+
+    @Autowired
+    private PriceDao priceDao;
+
+    @Autowired
+    private ProductDao productDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -503,5 +514,79 @@ public class CommonServiceImpl implements CommonService {
         backupHodometerPO.setCode(hodometerPO.getCode());
         backupHodometerPO.setData(JSON.toJSONString(hodometerPO));
         hodometerDao.updateBackupByCode(backupHodometerPO);
+    }
+
+    @Override
+    public void checkProduct(ProductPO productPO, Date date){
+        try {
+            if(productPO.getValidTime() != null && date.getTime() < productPO.getValidTime().getTime()){
+                log.error("还没到销售日期。。。code = {}, validDate = {}",
+                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                return;
+            }
+            if(productPO.getInvalidTime() != null && date.getTime() > productPO.getInvalidTime().getTime()){
+                log.error("已经过了销售日期。。。code = {}, invalidDate = {}",
+                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getInvalidTime()));
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                return;
+            }
+            PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
+            if(pricePO == null || ListUtils.isEmpty(pricePO.getPriceInfos())){
+                log.error("没有价格信息，code = {}", productPO.getCode());
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
+                return;
+            }
+            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                    && checkPrice(p.getSalePrice()) && checkStock(p.getStock()))){
+                log.error("没有有效的价格和库存信息，code = {}", productPO.getCode());
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
+                return;
+            }
+            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                    && checkPrice(p.getSalePrice()))){
+                log.error("没有有效的价格信息，code = {}", productPO.getCode());
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE);
+                return;
+            }
+            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                    && checkStock(p.getStock()))){
+                log.error("没有有效的库存信息，code = {}", productPO.getCode());
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_STOCK);
+                return;
+            }
+            // 自动上线，这个要放在最后判断，如果放在前面的话价格状态有问题会被再次修改，状态可能会有短暂不准确
+            if(productPO.getValidTime() != null && productPO.getValidTime() != null
+                    && date.getTime() >= productPO.getValidTime().getTime()
+                    && date.getTime() <= productPO.getInvalidTime().getTime()
+                    && Constants.PRODUCT_STATUS_INVALID_SALE_DATE == productPO.getStatus() ){
+                log.error("已进入销售日期范围，并且状态是日期异常，改成上线。。。code = {}, validDate = {}",
+                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
+                // 供应商渠道不自动上线
+                if(!Lists.newArrayList(Constants.SUPPLIER_CODE_YCF, Constants.SUPPLIER_CODE_DFY, Constants.SUPPLIER_CODE_DFY_TOURS).contains(productPO.getSupplierId())){
+                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                }
+                return;
+            }
+        } catch (Exception e) {
+            log.error("刷新产品状态异常，productCode={}", productPO.getCode(), e);
+        }
+    }
+
+    private boolean checkPrice(BigDecimal price){
+        return price != null && price.compareTo(BigDecimal.valueOf(0)) == 1;
+    }
+
+    private boolean checkStock(Integer stock){
+        return stock != null && stock > 0;
+    }
+
+    private boolean checkDate(Date cDate, Date nDate){
+        if(cDate == null){
+            return false;
+        }
+        long cTime = DateTimeUtil.trancateToDate(cDate).getTime();
+        long nTime = DateTimeUtil.trancateToDate(nDate).getTime();
+        return cTime >= nTime;
     }
 }

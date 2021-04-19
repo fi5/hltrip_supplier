@@ -246,6 +246,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             productDao.updateByCode(product);
             // 保存副本
             commonService.saveBackupProduct(backup);
+            commonService.checkProduct(productPO, DateTimeUtil.trancateToDate(new Date()));
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
@@ -560,6 +561,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 // 保存行程副本
                 commonService.saveBackupHodometer(hodometerPO);
             }
+            commonService.checkProduct(product, DateTimeUtil.trancateToDate(new Date()));
             dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(product.getCode()));
         }
     }
