@@ -68,9 +68,6 @@ public class DfySyncServiceImpl implements DfySyncService {
     @Autowired
     private CommonService commonService;
 
-    @Autowired
-    private BackupProductDao backupProductDao;
-
     @Override
     public boolean syncScenicList(DfyScenicListRequest request){
         try {
