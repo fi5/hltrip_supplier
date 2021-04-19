@@ -649,6 +649,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                                     || backup.getImages().stream().anyMatch(i ->
                                     !lmmProduct.getImages().contains(i))){
                                 changedFields.add("images");
+                                scenicSpotProductMPO.setImages(lmmProduct.getImages());
                                 // 原来的图没有了，换一张
                                 if(!lmmProduct.getImages().contains(scenicSpotProductMPO.getMainImage())){
                                     changedFields.add("mainImage");

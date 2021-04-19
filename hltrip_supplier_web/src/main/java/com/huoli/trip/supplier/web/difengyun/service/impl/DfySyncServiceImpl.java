@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
+import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
@@ -91,6 +92,9 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Autowired
     private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
+
+    @Autowired
+    private GroupProductBackupDao groupProductBackupDao;
 
     private boolean imageChanged = false;
 
@@ -1148,12 +1152,42 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO = new GroupTourProductMPO();
             groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            groupTourProductMPO.setSupplierProductId(productId);
+            groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
             add = true;
+        } else {
+            GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
+            if (backupMPO != null) {
+                List<String> changedFields = Lists.newArrayList();
+                GroupTourProductMPO backupProduct = backupMPO.getGroupTourProductMPO();
+                if ((ListUtils.isNotEmpty(backupProduct.getImages()) && ListUtils.isEmpty(dfyToursDetail.getProductPicList()))
+                        || (ListUtils.isEmpty(backupProduct.getImages()) && ListUtils.isNotEmpty(dfyToursDetail.getProductPicList()))) {
+                    changedFields.add("images");
+                    changedFields.add("mainImage");
+                    if (ListUtils.isEmpty(dfyToursDetail.getProductPicList())) {
+                        groupTourProductMPO.setImages(null);
+                        groupTourProductMPO.setMainImage(null);
+                    } else {
+                        groupTourProductMPO.setImages(dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()));
+                        groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
+                    }
+                } else if (ListUtils.isNotEmpty(backupProduct.getImages()) && ListUtils.isNotEmpty(dfyToursDetail.getProductPicList())) {
+                    if (backupProduct.getImages().size() != dfyToursDetail.getProductPicList().size()
+                            || backupProduct.getImages().stream().anyMatch(i ->
+                            !dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()).contains(i))) {
+                        changedFields.add("images");
+                        groupTourProductMPO.setImages(dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()));
+                        // 原来的图没有了，换一张
+                        if (!dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()).contains(backupProduct.getMainImage())) {
+                            changedFields.add("mainImage");
+                            groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
+                        }
+                    }
+                }
+                groupTourProductMPO.setChangedFields(changedFields);
+            }
         }
-        groupTourProductMPO.setSupplierProductId(productId);
-        groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
         groupTourProductMPO.setProductName(dfyToursDetail.getProductName());
-
         Integer goTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficGo());
         Integer backTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficBack());
         groupTourProductMPO.setGoTraffic(goTfc == null ? null : goTfc.toString());
@@ -1187,16 +1221,45 @@ public class DfySyncServiceImpl implements DfySyncService {
                 continue;
             }
             GroupTourProductSetMealMPO setMealMPO = groupTourProductSetMealDao.getSetMeal(groupTourProductMPO.getId(), addressInfo.getCityCode());
+            boolean addSm = false;
             if(setMealMPO == null){
                 setMealMPO = new GroupTourProductSetMealMPO();
                 setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+                setMealMPO.setConstInclude(journeyInfo.getCostInclude());
+                setMealMPO.setCostExclude(journeyInfo.getCostExclude());
+                setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
+            } else {
+                GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
+                if(backupMPO != null){
+                    List<String> changedFields = Lists.newArrayList();
+                    GroupTourProductSetMealMPO backup = backupMPO.getGroupTourProductSetMealMPO();
+                    if(!StringUtils.equals(backup.getConstInclude(), journeyInfo.getCostInclude())){
+                        changedFields.add("constInclude");
+                        setMealMPO.setConstInclude(journeyInfo.getCostInclude());
+                    }
+                    if(!StringUtils.equals(backup.getCostExclude(), journeyInfo.getCostExclude())){
+                        changedFields.add("costExclude");
+                        setMealMPO.setCostExclude(journeyInfo.getCostExclude());
+                    }
+                    List<DescInfo> newDesc = DfyToursConverter.buildBookNoticeListV2(journeyInfo);
+                    if(ListUtils.isNotEmpty(backup.getBookNotices())){
+                        if(ListUtils.isNotEmpty(newDesc)){
+                            // 删除新数据中已经删掉的元素
+                            backup.getBookNotices().removeIf(n ->
+                                    !newDesc.stream().map(DescInfo::getTitle).anyMatch(t -> StringUtils.equals(n.getTitle(), t)));
+
+                        }
+                    } else {
+                        if(ListUtils.isNotEmpty(newDesc)){
+                            newDesc.forEach(d -> d.setChangedFields(Lists.newArrayList("content")));
+                        }
+                    }
+
+                }
             }
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
             setMealMPO.setName(groupTourProductMPO.getProductName());
             setMealMPO.setTripDay(dfyToursDetail.getDuration());
-            setMealMPO.setConstInclude(journeyInfo.getCostInclude());
-            setMealMPO.setCostExclude(journeyInfo.getCostExclude());
-            setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
             setMealMPO.setDepCode(addressInfo.getCityCode());
             setMealMPO.setDepName(addressInfo.getCityName());
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null

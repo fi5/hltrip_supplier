@@ -571,6 +571,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                                 || backup.getImages().stream().anyMatch(i ->
                                 !ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(i))){
                             changedFields.add("images");
+                            scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
                             // 原来的图没有了，换一张
                             if(!ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(scenicSpotProductMPO.getMainImage())){
                                 changedFields.add("mainImage");
