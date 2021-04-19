@@ -1247,14 +1247,25 @@ public class DfySyncServiceImpl implements DfySyncService {
                             // 删除新数据中已经删掉的元素
                             backup.getBookNotices().removeIf(n ->
                                     !newDesc.stream().map(DescInfo::getTitle).anyMatch(t -> StringUtils.equals(n.getTitle(), t)));
-
+                            newDesc.forEach(nd -> {
+                                DescInfo descInfo = backup.getBookNotices().stream().filter(bn -> StringUtils.equals(bn.getTitle(), nd.getTitle())).findFirst().orElse(null);
+                                // 新增的节点
+                                if(descInfo == null){
+                                    nd.setChangedFields(Lists.newArrayList("title", "content"));
+                                } else {
+                                    // 有变化的节点
+                                    if(!StringUtils.equals(nd.getContent(), descInfo.getContent())){
+                                        nd.setChangedFields(Lists.newArrayList("content"));
+                                    }
+                                }
+                            });
                         }
                     } else {
+                        // 所有节点都是新增的
                         if(ListUtils.isNotEmpty(newDesc)){
-                            newDesc.forEach(d -> d.setChangedFields(Lists.newArrayList("content")));
+                            newDesc.forEach(d -> d.setChangedFields(Lists.newArrayList("title", "content")));
                         }
                     }
-
                 }
             }
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
