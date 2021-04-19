@@ -1184,6 +1184,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                         }
                     }
                 }
+                // todo 跟团游没有产品描述（比对需求）
                 groupTourProductMPO.setChangedFields(changedFields);
             }
         }
@@ -1266,6 +1267,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                             newDesc.forEach(d -> d.setChangedFields(Lists.newArrayList("title", "content")));
                         }
                     }
+                    setMealMPO.setBookNotices(newDesc);
                 }
             }
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
@@ -1273,6 +1275,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setTripDay(dfyToursDetail.getDuration());
             setMealMPO.setDepCode(addressInfo.getCityCode());
             setMealMPO.setDepName(addressInfo.getCityName());
+            // todo 行程比哪个字段，内容繁多
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null
                     && ListUtils.isNotEmpty(journeyInfo.getJourneyDescJson().getData().getData())){
                 setMealMPO.setGroupTourTripInfos(journeyInfo.getJourneyDescJson().getData().getData().stream().map(j -> {
