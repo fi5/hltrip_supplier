@@ -524,7 +524,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
             ScenicSpotMPO scenicSpotMPO = null;
             boolean fresh = false;
-            List<String> changedFields = Lists.newArrayList();
             ScenicSpotProductBackupMPO backupMPO = null;
             if(scenicSpotProductMPO == null){
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
@@ -554,6 +553,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             } else {
                 backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
                 if(backupMPO != null){
+                    List<String> changedFields = Lists.newArrayList();
                     ScenicSpotProductMPO backup = backupMPO.getScenicSpotProduct();
                     if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(ycfProduct.getProductImageList()))
                             || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList()))){
@@ -578,9 +578,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                             }
                         }
                     }
-                    if(StringUtils.equals(backup.getPcDescription(), ycfProduct.getProductDescription())){
+                    if(!StringUtils.equals(backup.getPcDescription(), ycfProduct.getProductDescription())){
                         scenicSpotProductMPO.setPcDescription(ycfProduct.getProductDescription());
+                        changedFields.add("pcDescription");
                     }
+                    scenicSpotProductMPO.setChangedFields(changedFields);
                 }
             }
             scenicSpotProductMPO.setName(ycfProduct.getProductName());
@@ -609,11 +611,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             } else {
                 scenicSpotProductMPO.setStatus(3);
             }
-            if(StringUtils.isBlank(scenicSpotProductMPO.getId())){
-                scenicSpotProductDao.addProduct(scenicSpotProductMPO);
-            } else {
-                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-            }
+            scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             ruleMPO.setChannel(SUPPLIER_CODE_YCF);
@@ -700,6 +698,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     ruleChanged.add("feeInclude");
                     ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
                 }
+                ruleMPO.setChangedFields(ruleChanged);
             } else {
                 ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
                 ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
@@ -716,8 +715,18 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             request.setEndDate(end);
             List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
             syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString());
+
+            ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+            scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
+            scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+            scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
-            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+
+            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields())){
+                commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+            }
         });
     }
 

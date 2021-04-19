@@ -820,7 +820,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-            ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail);
+            ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail, fresh);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
@@ -832,8 +832,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
-            // 添加订阅通知
-            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+            // 有重要信息更新需要通知
+            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields())){
+                // 添加订阅通知
+                commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+            }
         } else {
             log.error("笛风云产品详情返回空，request = {}", JSON.toJSONString(ticketDetailBaseRequest));
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(productId, Constants.SUPPLIER_CODE_DFY);
@@ -926,7 +929,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
     }
 
-    private ScenicSpotRuleMPO saveRule(ScenicSpotProductMPO scenicSpotProductMPO, DfyTicketDetail dfyTicketDetail){
+    private ScenicSpotRuleMPO saveRule(ScenicSpotProductMPO scenicSpotProductMPO, DfyTicketDetail dfyTicketDetail, boolean fresh){
         ScenicSpotRuleMPO ruleMPO = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
         if(ruleMPO == null){
@@ -1067,6 +1070,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 changedFields.add("supplementDesc");
                 ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
             }
+            ruleMPO.setChangedFields(changedFields);
         }
         scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         return ruleMPO;

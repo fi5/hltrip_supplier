@@ -19,6 +19,8 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmGoodsListByIdResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmPriceResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmProductListResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfImageBase;
+import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
@@ -83,6 +85,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -596,6 +601,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                 ScenicSpotMPO scenicSpotMPO = null;
                 boolean fresh = false;
+                ScenicSpotProductBackupMPO backupMPO = null;
                 if(scenicSpotProductMPO == null){
                     ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                     if(scenicSpotMappingMPO == null){
@@ -616,7 +622,47 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     scenicSpotProductMPO.setSupplierProductId(g.getGoodsId());
                     scenicSpotProductMPO.setPayServiceType(0);
                     scenicSpotProductMPO.setChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+                    // goods没有图片，都用product的
+                    scenicSpotProductMPO.setImages(lmmProduct.getImages());
+                    if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
+                        scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                    }
                     fresh = true;
+                } else {
+                    backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+                    if(backupMPO != null){
+                        List<String> changedFields = Lists.newArrayList();
+                        ScenicSpotProductMPO backup = backupMPO.getScenicSpotProduct();
+                        if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(lmmProduct.getImages()))
+                                || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(lmmProduct.getImages()))){
+                            changedFields.add("images");
+                            changedFields.add("mainImage");
+                            if(ListUtils.isEmpty(lmmProduct.getImages())){
+                                scenicSpotProductMPO.setImages(null);
+                                scenicSpotProductMPO.setMainImage(null);
+                            } else {
+                                scenicSpotProductMPO.setImages(lmmProduct.getImages());
+                                scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                            }
+                        } else if(ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isNotEmpty(lmmProduct.getImages())){
+                            if(backup.getImages().size() != lmmProduct.getImages().size()
+                                    || backup.getImages().stream().anyMatch(i ->
+                                    !lmmProduct.getImages().contains(i))){
+                                changedFields.add("images");
+                                // 原来的图没有了，换一张
+                                if(!lmmProduct.getImages().contains(scenicSpotProductMPO.getMainImage())){
+                                    changedFields.add("mainImage");
+                                    scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                                }
+                            }
+                        }
+                        // todo 本地电脑描述从哪儿取，商品还是产品，取哪个字段
+                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
+                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
+                            changedFields.add("pcDescription");
+                        }
+                        scenicSpotProductMPO.setChangedFields(changedFields);
+                    }
                 }
                 if(StringUtils.equals(g.getStatus(), "true")){
                     scenicSpotProductMPO.setStatus(1);
@@ -625,12 +671,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
                 scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // 目前更新供应商端信息全覆盖
-                // goods没有图片，都用product的
-                scenicSpotProductMPO.setImages(lmmProduct.getImages());
                 scenicSpotProductMPO.setName(g.getGoodsName());
-                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
-                    scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
-                }
                 // 基础设置
                 ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
                 BackChannelEntry backChannelEntry = commonService.getSupplierById(scenicSpotProductMPO.getChannel());
@@ -650,11 +691,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 transaction.setInDay(g.getEffective());
                 // todo 限制时间（HH:mm）目前没有  g.getNotice().getEnterLimit().getLimitTime(), 取票相关的没有:取票时间，取票地点，入园方式，g.getNotice() ;是否取票
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-                if(StringUtils.isBlank(scenicSpotProductMPO.getId())){
-                    scenicSpotProductDao.addProduct(scenicSpotProductMPO);
-                } else {
-                    scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-                }
+                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
@@ -790,15 +827,31 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                 }
                 ruleMPO.setInAddress(g.getVisitAddress());
-                ruleMPO.setFeeInclude(g.getCostInclude());
-                // todo 费用不包含没有
-                // todo 补充说明用重要说明赋值有没有问题
-                ruleMPO.setSupplementDesc(g.getImportantNotice());
                 ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
                 ruleMPO.setValid(1);
-                ruleMPO = scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+                if(backupMPO != null){
+                    List<String> ruleChanged = Lists.newArrayList();
+                    LmmProduct backup = JSON.parseObject(backupMPO.getOriginContent(), LmmProduct.class);
+                    LmmGoods lmmGoods = backup.getGoodsList().get(0);
+                    if(!StringUtils.equals(lmmGoods.getCostInclude(), g.getCostInclude())){
+                        ruleChanged.add("feeInclude");
+                        ruleMPO.setFeeInclude(g.getCostInclude());
+                    }
+                    if(!StringUtils.equals(lmmGoods.getImportantNotice(), g.getImportantNotice())){
+                        ruleChanged.add("supplementDesc");
+                        ruleMPO.setSupplementDesc(g.getImportantNotice());
+                    }
+                    ruleMPO.setChangedFields(ruleChanged);
+                } else {
+                    ruleMPO.setFeeInclude(g.getCostInclude());
+                    // todo 费用不包含没有
+                    // todo 补充说明用重要说明赋值有没有问题
+                    ruleMPO.setSupplementDesc(g.getImportantNotice());
+                }
+                // todo 规则无法确定唯一，每次都会创建新的
+                scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
                 LmmPriceRequest request = new LmmPriceRequest();
                 request.setGoodsIds(g.getGoodsId());
                 request.setBeginDate(DateTimeUtil.formatDate(new Date()));
@@ -886,8 +939,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         });
                     });
                 });
+
+                ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+                scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
+                // 备份当前这个商品
+                lmmProduct.setGoodsList(Lists.newArrayList(g));
+                scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(lmmProduct));
+                scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+
                 commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
-                commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields())){
+                    commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+                }
             });
         }
     }
