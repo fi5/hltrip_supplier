@@ -820,7 +820,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(dfyTicketDetail.getAdvanceHour() != null){
                 transaction.setBookBeforeTime(dfyTicketDetail.getAdvanceHour().toString());
             }
-            // todo 取票时间，取票方式 没有
+            // todo 取票地址对应rulempo换票地址
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
@@ -837,7 +837,7 @@ public class DfySyncServiceImpl implements DfySyncService {
 
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
             // 有重要信息更新需要通知
-            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields())){
+            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
                 // 添加订阅通知
                 commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
             }
@@ -1011,6 +1011,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
             try {
                 if(StringUtils.isNotBlank(code)){
+                    // todo 如果有多个只要包含大于300就认为直接入园
                     if(Integer.valueOf(code) < 300){
                         ruleMPO.setInType(1);
                     } else if(Integer.valueOf(code) >= 300){
@@ -1061,7 +1062,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.error("转化入园方式失败，不影响继续执行，value = {}", code);
             }
         }
-        // todo 预定说明没有 dfyTicketDetail.bookNotice
+        // todo 预定说明没有 dfyTicketDetail.bookNotice 加动态说明字段
         ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         if(scenicSpotProductBackupMPO != null){
             List<String> changedFields = Lists.newArrayList();
@@ -1184,7 +1185,6 @@ public class DfySyncServiceImpl implements DfySyncService {
                         }
                     }
                 }
-                // todo 跟团游没有产品描述（比对需求）
                 groupTourProductMPO.setChangedFields(changedFields);
             }
         }
@@ -1212,6 +1212,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         // 笛风云没有退改
         groupTourProductDao.saveProduct(groupTourProductMPO);
 
+        boolean setMealChanged = false;
         for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
             DfyJourneyInfo journeyInfo = dfyToursDetail.getJourneyInfo();
             AddressInfo addressInfo = commonService.setCity(null, departCity.getName(), null);
@@ -1229,6 +1230,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 setMealMPO.setConstInclude(journeyInfo.getCostInclude());
                 setMealMPO.setCostExclude(journeyInfo.getCostExclude());
                 setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
+                addSm = true;
+                setMealChanged = true;
             } else {
                 GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
                 if(backupMPO != null){
@@ -1237,10 +1240,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                     if(!StringUtils.equals(backup.getConstInclude(), journeyInfo.getCostInclude())){
                         changedFields.add("constInclude");
                         setMealMPO.setConstInclude(journeyInfo.getCostInclude());
+                        setMealChanged = true;
                     }
                     if(!StringUtils.equals(backup.getCostExclude(), journeyInfo.getCostExclude())){
                         changedFields.add("costExclude");
                         setMealMPO.setCostExclude(journeyInfo.getCostExclude());
+                        setMealChanged = true;
                     }
                     List<DescInfo> newDesc = DfyToursConverter.buildBookNoticeListV2(journeyInfo);
                     if(ListUtils.isNotEmpty(backup.getBookNotices())){
@@ -1268,6 +1273,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                         }
                     }
                     setMealMPO.setBookNotices(newDesc);
+                    if(ListUtils.isNotEmpty(changedFields)){
+                        setMealMPO.setChangedFields(changedFields);
+                    }
                 }
             }
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
@@ -1427,6 +1435,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
+
+            if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
+                // 添加订阅通知
+                commonService.addToursProductSubscribe(groupTourProductMPO, add);
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.*;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -1124,52 +1125,92 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void addHotelProductSubscribe(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO scenicSpotProductMPO, boolean fresh){
-        if(scenicSpotMPO == null){
-            scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotProductMPO.getScenicSpotId());
-        }
+    public void addHotelProductSubscribe(HotelScenicSpotProductMPO productMPO, HotelScenicSpotProductSetMealMPO setMealMPO, boolean fresh){
         List<SubscribeProductMPO> subscribes = subscribeProductDao.getByCategory("hotel_scenicSpot");
         if(ListUtils.isNotEmpty(subscribes)){
             for (SubscribeProductMPO subscribe : subscribes) {
-                if(!StringUtils.equals(subscribe.getCityCode(), scenicSpotMPO.getCityCode())){
+                List<String> elements = Lists.newArrayList();
+                List<HotelScenicSpotProductHotelElement> hotels = setMealMPO.getHotelElements();
+                List<HotelScenicSpotProductScenicSpotElement> scenicSpots = setMealMPO.getScenicSpotElements();
+
+                if(ListUtils.isNotEmpty(hotels)){
+                    elements.add("1");
+                    if(!hotels.stream().anyMatch(h -> StringUtils.equals(h.getHotelId(), subscribe.getHotelId()))){
+                        continue;
+                    }
+                    if(ListUtils.isNotEmpty(scenicSpots)){
+                        if(!scenicSpots.stream().anyMatch(s -> StringUtils.equals(s.getScenicSpotId(), subscribe.getPoiId()))){
+                            continue;
+                        }
+                    }
+                }
+                if(ListUtils.isNotEmpty(scenicSpots)){
+                    elements.add("2");
+                    if(!scenicSpots.stream().anyMatch(s -> StringUtils.equals(s.getScenicSpotId(), subscribe.getPoiId()))){
+                        continue;
+                    }
+                    if(ListUtils.isNotEmpty(hotels)){
+                        if(!hotels.stream().anyMatch(h -> StringUtils.equals(h.getHotelId(), subscribe.getHotelId()))){
+                            continue;
+                        }
+                    }
+                }
+                if(ListUtils.isNotEmpty(setMealMPO.getOtherElements())){
+                    elements.add("7");
+                }
+                if(ListUtils.isNotEmpty(setMealMPO.getRestaurantElements())){
+                    elements.add("4");
+                }
+                if(ListUtils.isNotEmpty(setMealMPO.getSpecialActivityElements())){
+                    elements.add("5");
+                }
+                if(ListUtils.isNotEmpty(setMealMPO.getSpaElements())){
+                    elements.add("6");
+                }
+                if(ListUtils.isNotEmpty(setMealMPO.getTrafficConnectionElements())){
+                    elements.add("3");
+                }
+                if(ListUtils.isEmpty(subscribe.getElements()) && ListUtils.isNotEmpty(elements)){
                     continue;
                 }
-                if(!StringUtils.equals(subscribe.getPoiId(), scenicSpotMPO.getId())){
-                    continue;
-                }
+                // todo 元素完全匹配还是完全包含匹配还是包含匹配
+//                if(){
+//
+//                }
                 // 渠道空代表所有，不用比
-                if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(scenicSpotProductMPO.getChannel())){
+                if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(productMPO.getChannel())){
                     continue;
                 }
                 // 产品id非必填，有就比，没有就过
-                if(StringUtils.isNotBlank(subscribe.getProductId()) && StringUtils.equals(subscribe.getProductId(), scenicSpotProductMPO.getId())){
+                if(StringUtils.isNotBlank(subscribe.getProductId()) && StringUtils.equals(subscribe.getProductId(), productMPO.getId())){
                     continue;
                 }
-                ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), scenicSpotProductMPO.getId());
+                ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), productMPO.getId());
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
                     noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
-                    noticeMPO.setProductId(scenicSpotProductMPO.getId());
-                    noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
+                    noticeMPO.setProductId(productMPO.getId());
+                    noticeMPO.setChannel(productMPO.getChannel());
                     noticeMPO.setNoticeStatus(0);
-                    noticeMPO.setCategory(scenicSpotProductMPO.getCategory());
+                    noticeMPO.setCategory(productMPO.getCategory());
                     noticeMPO.setType(2);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
                 noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
-                    noticeMPO.setProductImageUrl(scenicSpotProductMPO.getImages().get(0));
+                if(ListUtils.isNotEmpty(productMPO.getImages())){
+                    noticeMPO.setProductImageUrl(productMPO.getImages().get(0));
                 }
-                noticeMPO.setProductName(scenicSpotProductMPO.getName());
-                noticeMPO.setProductStatus(scenicSpotProductMPO.getStatus());
+                // todo 酒景没有名称，这里存什么
+//                noticeMPO.setProductName(hotelScenicSpotProductMPO.getName());
+                noticeMPO.setProductStatus(productMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
-                List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductMPO.getId());
+                List<HotelScenicSpotPriceStock> priceMPOs = setMealMPO.getPriceStocks();
                 priceMPOs.stream().filter(p ->
-                        p.getSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
-                        p.getSellPrice().doubleValue(), Double::compare));
-                noticeMPO.setPrice(priceMPOs.get(0).getSellPrice());
-                int stock = priceMPOs.stream().mapToInt(p -> p.getStock()).sum();
+                        p.getAdtSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
+                        p.getAdtSellPrice().doubleValue(), Double::compare));
+                noticeMPO.setPrice(priceMPOs.get(0).getAdtSellPrice());
+                int stock = priceMPOs.stream().mapToInt(p -> p.getAdtStock()).sum();
                 noticeMPO.setStock(stock);
                 productUpdateNoticeDao.saveProductUpdateNotice(noticeMPO);
             }

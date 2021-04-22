@@ -47,7 +47,7 @@ public class GroupProductBackupDaoImpl implements GroupProductBackupDao {
     @Override
     public GroupTourProductSetMealBackupMPO getGroupProductBackupByProductId(String productId){
         Query query = new Query();
-        query.addCriteria(Criteria.where("groupTourProductSetMealMPO._id").is(productId));
+        query.addCriteria(Criteria.where("groupTourProductMPO._id").is(productId));
         return mongoTemplate.findOne(query, GroupTourProductSetMealBackupMPO.class);
     }
 }

@@ -595,7 +595,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
-        // todo 预定须知、产品简介、特色说明、公告、景点描述等目前都没有
+        // todo 过滤到付产品
+        // todo 入园须知，费用不包含，产品简介
+        // todo importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
         if(ListUtils.isNotEmpty(goodsList)){
             goodsList.forEach(g -> {
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
@@ -690,7 +692,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 transaction.setAppointInDate(1);
                 transaction.setAppointnType(1);
                 transaction.setInDay(g.getEffective());
-                // todo 限制时间（HH:mm）目前没有  g.getNotice().getEnterLimit().getLimitTime(), 取票相关的没有:取票时间，取票地点，入园方式，g.getNotice() ;是否取票
+                // todo 动态说明   入园须知：取票时间、取票地点、有效期、限制时间 拼到一起，换行分隔，限制时间用;分隔
+                // todo 是否取票转成入园凭证
+                // todo 通关时间取第一个，本地在产品交易设置里
+                // todo limitType 限购类型在本地要加字典值，身份证、身份证+手机号
+                // todo limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
@@ -950,7 +956,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
                 commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
-                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields())){
+                if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
                     commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
                 }
             });
