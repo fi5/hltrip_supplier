@@ -188,7 +188,6 @@ public class LmmTicketConverter {
             }).collect(Collectors.toList());
             productPO.setDescriptions(descs);
         }
-        // todo serviceGuarantee 要不要存，在哪儿展示，产品上价格标签字段 List<String>
         if(ListUtils.isNotEmpty(lmmProduct.getImages())){
             List<ImageBasePO> images = lmmProduct.getImages().stream().map(i -> {
                 ImageBasePO imageBasePO = new ImageBasePO();

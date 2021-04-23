@@ -820,7 +820,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(dfyTicketDetail.getAdvanceHour() != null){
                 transaction.setBookBeforeTime(dfyTicketDetail.getAdvanceHour().toString());
             }
-            // todo 取票地址对应rulempo换票地址
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
@@ -946,6 +945,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setValid(1);
             ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         }
+        ruleMPO.setChangeTicketAddress(dfyTicketDetail.getDrawAddress());
         if(dfyTicketDetail.getDrawType() != null){
             if(dfyTicketDetail.getDrawType() == 1){
                 ruleMPO.setTicketType(1);
@@ -1300,6 +1300,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 for (DfyJourneyDetail.ModuleScenic scenic : journeyModule.getScenicList()) {
                                     GroupTourProductTripItem item = new GroupTourProductTripItem();
                                     item.setTime(journeyModule.getMoment());
+                                    // todo 计算一下转换成hh:mm
                                     item.setPlayTime(scenic.getTimes() == null ? null : scenic.getTimes().toString());
                                     item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode()));
                                     item.setPoiName(scenic.getTitle());

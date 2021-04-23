@@ -37,7 +37,7 @@ public class DfyJourneyDetail {
         /**
          * 行程附注
          */
-        private String content;
+        private String content;  // todo 不要
 
         private List<Journey> data;
     }
@@ -52,7 +52,7 @@ public class DfyJourneyDetail {
         /**
          * 交通信息 资源类不存在每天的行程交通信息 为空
          */
-        private JourneyTraffic traffic;
+        private JourneyTraffic traffic; // todo 本地没有每天行程交通
 
         private List<JourneyModule> moduleList;
     }
@@ -69,7 +69,7 @@ public class DfyJourneyDetail {
          */
         private String from;
 
-        private List<JourneyDestination> toList;
+        private List<JourneyDestination> toList;  // todo 多个目的地
     }
 
     @Getter
@@ -103,19 +103,19 @@ public class DfyJourneyDetail {
         /**
          * 上午、下午、晚上、全天
          */
-        private String period;
+        private String period;  // todo 加上
         /**
          * 时间点 13:00，新数据里的“上午下午”以及“00：00”时间点统一的放到moment字段内
          */
-        private String moment;
+        private String moment;  // todo 这个目前对应到 time 但是可能有汉字，没关系不格式化
         /**
          * 备注
          */
-        private String remark;
+        private String remark;  // todo 不要
         /**
          * 描述
          */
-        private String description;
+        private String description;  // todo 优先取元素内的content,或者根据类型从不同地方取
         /**
          * 图片
          */
@@ -124,7 +124,7 @@ public class DfyJourneyDetail {
          * 模块类型为景点时
          * 景点---是否为并关系 0-或，1-并
          */
-        private Integer relative;
+        private Integer relative; // todo 本地没有,不要
         /**
          * 景点
          */
@@ -162,7 +162,7 @@ public class DfyJourneyDetail {
         /**
          * 景点 poi id（必填）
          */
-        private Integer id;
+        private Integer id;  // todo 是否关联本地景点库，目前没有，不需要关联
         /**
          * 标题（必填）
          */
@@ -170,11 +170,11 @@ public class DfyJourneyDetail {
         /**
          * 游玩时间
          */
-        private Integer times;
+        private Integer times;  // todo 对应到playTime，转成hh:mm
         /**
          * 正文（必填）
          */
-        private String content;
+        private String content; // todo 本地没有，也对应了poiDesc
         /**
          * 图片
          */
@@ -187,11 +187,11 @@ public class DfyJourneyDetail {
         /**
          * 酒店POI id，自行输入时，id为0（必填）
          */
-        private Integer id;
+        private Integer id; // todo 是否对应本地酒店，目前没有
         /**
          * 酒店id，自行输入时，id为0（必填）
          */
-        private Integer hotelId;
+        private Integer hotelId; // todo 没有
         /**
          * 酒店名（必填）
          */
@@ -199,11 +199,11 @@ public class DfyJourneyDetail {
         /**
          * 来自哪个系统
          */
-        private Integer origin;
+        private Integer origin; // todo 本地没有，不要
         /**
          * 是否属于国内酒店
          */
-        private Integer source;
+        private Integer source; // todo 本地没有，不要
         /**
          * 酒店星级，1，2，3，4，5
          */
@@ -211,11 +211,11 @@ public class DfyJourneyDetail {
         /**
          * 房间
          */
-        private List<ModuleHotelRoom> room;
+        private List<ModuleHotelRoom> room; // todo 本地只有一个房型，目前把集合拼成一个，把酒店描述和房型描述合并起来，名字按现在拼的就行
         /**
          * 说明
          */
-        private String description;
+        private String description;  // todo 本地只有一个说明，目前优先用房型的说明
     }
 
     @Getter
@@ -241,7 +241,7 @@ public class DfyJourneyDetail {
         /**
          * 出发地
          */
-        private String from;
+        private String from;  // todo 按现有的拼到poiname
         /**
          * 出发地id
          */
@@ -283,7 +283,7 @@ public class DfyJourneyDetail {
         /**
          * 用餐时间
          */
-        private Integer hour;
+        private Integer hour; // todo 本地没有，只用了上面的times
         /**
          * 用餐时间
          */
@@ -291,7 +291,7 @@ public class DfyJourneyDetail {
         /**
          * 餐食
          */
-        private List<HasFood> hasList;
+        private List<HasFood> hasList;  // todo 早餐：含/不含 这种放到poiname
     }
 
     @Getter
@@ -312,7 +312,7 @@ public class DfyJourneyDetail {
         /**
          * 营业产品（必填）
          */
-        private String product;
+        private String product;  // todo 拼到说明后面
         /**
          * 说明（必填）
          */
@@ -338,7 +338,7 @@ public class DfyJourneyDetail {
         /**
          * 提醒内容
          */
-        private String content;
+        private String content;  // todo 没有名称
         /**
          * 温馨提示，当日概览
          */

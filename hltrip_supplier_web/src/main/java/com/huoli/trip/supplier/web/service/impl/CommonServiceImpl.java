@@ -1173,10 +1173,11 @@ public class CommonServiceImpl implements CommonService {
                 if(ListUtils.isEmpty(subscribe.getElements()) && ListUtils.isNotEmpty(elements)){
                     continue;
                 }
-                // todo 元素完全匹配还是完全包含匹配还是包含匹配
-//                if(){
-//
-//                }
+                // 只要有一个包含就通过
+                if(ListUtils.isNotEmpty(subscribe.getElements()) && ListUtils.isNotEmpty(elements)
+                        && !subscribe.getElements().stream().anyMatch(e -> elements.contains(e))){
+                    continue;
+                }
                 // 渠道空代表所有，不用比
                 if(ListUtils.isNotEmpty(subscribe.getChannelCodes()) && !subscribe.getChannelCodes().contains(productMPO.getChannel())){
                     continue;

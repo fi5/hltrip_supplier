@@ -150,8 +150,6 @@ public class DfyToursConverter {
             productPO.setRemark(sb.toString());
         }
 
-        // todo 没有整体退改说明
-//        productPO.setRefundDesc(ticketDetail.getMpLossInfo());
         // 预定规则根据下单证件规则
         List<BookRulePO> bookRules = Lists.newArrayList();
         BookRulePO contact = new BookRulePO();

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
@@ -595,11 +596,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
-        // todo 过滤到付产品
-        // todo 入园须知，费用不包含，产品简介
-        // todo importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
+
         if(ListUtils.isNotEmpty(goodsList)){
             goodsList.forEach(g -> {
+                // 过滤到付产品
+                if(StringUtils.equals(g.getPaymentType(), "offline")){
+                    log.error("到付产品productId={}, goodsId={}，跳过。。", g.getProductId(), g.getGoodsId());
+                    return;
+                }
                 ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(g.getGoodsId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                 ScenicSpotMPO scenicSpotMPO = null;
                 boolean fresh = false;
@@ -629,6 +633,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
                         scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
                     }
+                    // 动态说明   入园须知：取票时间、取票地点、有效期、限制时间 拼到一起，换行分隔，限制时间用;分隔
+                    List<DescInfo> descInfos = buildDescInfos(lmmProduct, g);
+                    scenicSpotProductMPO.setDescInfos(descInfos);
                     fresh = true;
                 } else {
                     backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
@@ -659,13 +666,49 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                                 }
                             }
                         }
-                        // todo 本地电脑描述从哪儿取，商品还是产品，取哪个字段
-                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
-                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
-                            changedFields.add("pcDescription");
-                        }
+                        // 这个放到动态里了
+//                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
+//                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
+//                            changedFields.add("pcDescription");
+//                        }
+                        List<DescInfo> newDescInfos = buildDescInfos(lmmProduct, g);
                         scenicSpotProductMPO.setChangedFields(changedFields);
+                        if(ListUtils.isEmpty(backup.getDescInfos())){
+                            if(ListUtils.isNotEmpty(newDescInfos)){
+                                newDescInfos.forEach(d -> {
+                                    List<String> descChg = Lists.newArrayList();
+                                    descChg.add("title");
+                                    descChg.add("content");
+                                    d.setChangedFields(descChg);
+                                });
+                            }
+                        } else {
+                            if(ListUtils.isEmpty(newDescInfos)){
+                                scenicSpotProductMPO.setDescInfos(null);
+                            } else {
+                                // 删除减少的
+                                backup.getDescInfos().removeIf(d -> !newDescInfos.stream().map(nd -> nd.getTitle()).anyMatch(nd -> StringUtils.equals(nd, d.getTitle())));
+                                // 更新有变化的
+                                backup.getDescInfos().stream().forEach(d ->
+                                    newDescInfos.stream().filter(nd -> StringUtils.equals(nd.getTitle(), d.getTitle()) &&
+                                            StringUtils.equals(nd.getContent(), d.getContent())).findFirst().ifPresent(nd ->
+                                                d.setChangedFields(Lists.newArrayList("content"))));
+                                // 添加新增的(差集)
+                                List<DescInfo> newDesc = newDescInfos.stream().filter(d ->
+                                        backup.getDescInfos().stream().filter(nd ->
+                                                !StringUtils.equals(nd.getTitle(), d.getTitle())).findAny().isPresent()).collect(Collectors.toList());
+                                newDesc.forEach(nd ->
+                                        nd.setChangedFields(Lists.newArrayList("title", "content")));
+                                backup.getDescInfos().addAll(newDesc);
+                                scenicSpotProductMPO.setDescInfos(backup.getDescInfos());
+                            }
+                        }
                     }
+                }
+                if(lmmProduct.getServiceGuarantee() == null){
+                    scenicSpotProductMPO.setTags(null);
+                } else {
+                    scenicSpotProductMPO.setTags(Lists.newArrayList(lmmProduct.getServiceGuarantee()));
                 }
                 if(StringUtils.equals(g.getStatus(), "true")){
                     scenicSpotProductMPO.setStatus(1);
@@ -692,18 +735,27 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 transaction.setAppointInDate(1);
                 transaction.setAppointnType(1);
                 transaction.setInDay(g.getEffective());
-                // todo 动态说明   入园须知：取票时间、取票地点、有效期、限制时间 拼到一起，换行分隔，限制时间用;分隔
-                // todo 是否取票转成入园凭证
-                // todo 通关时间取第一个，本地在产品交易设置里
+                // 通关时间取第一个
+                if(g.getPassTimeLimit() != null && ListUtils.isNotEmpty(g.getPassTimeLimit().getPassLimit())){
+                    int time = g.getPassTimeLimit().getPassLimit().get(0).getPassLimitTime();
+                    transaction.setTicketOutMinute(time);
+                }
+
                 // todo limitType 限购类型在本地要加字典值，身份证、身份证+手机号
                 // todo limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
+
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
                 ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
                 ruleMPO.setIsCouponRule(0);
+                if(StringUtils.equals("Y", g.getNeedTicket())){
+                    ruleMPO.setInType(1);
+                } else if(StringUtils.equals("N", g.getNeedTicket())){
+                    ruleMPO.setInType(0);
+                }
                 if(StringUtils.isNotBlank(g.getGoodsType())){
                     if(StringUtils.equals(g.getGoodsType(), "EXPRESSTYPE_DISPLAY")){
                         ruleMPO.setTicketType(1);
@@ -779,7 +831,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setDistinguishUser(-1);
                     ruleMPO.setMaxCount(g.getMaximum());
                 }
-                ruleMPO.setRefundRuleDesc(g.getRefundRuleNotice());
+                // importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
+                buildRefundDesc(ruleMPO, g);
                 List<RefundRule> refundRules;
                 if(ListUtils.isNotEmpty(g.getRules())){
                     refundRules = g.getRules().stream().map(r -> {
@@ -841,21 +894,21 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 if(backupMPO != null){
                     List<String> ruleChanged = Lists.newArrayList();
                     LmmProduct backup = JSON.parseObject(backupMPO.getOriginContent(), LmmProduct.class);
-                    LmmGoods lmmGoods = backup.getGoodsList().get(0);
-                    if(!StringUtils.equals(lmmGoods.getCostInclude(), g.getCostInclude())){
-                        ruleChanged.add("feeInclude");
-                        ruleMPO.setFeeInclude(g.getCostInclude());
+                    LmmGoods lmmGoods = backup.getGoodsList().stream().filter(bg -> StringUtils.equals(bg.getGoodsId(), g.getGoodsId())).findFirst().orElse(null);
+                    if(lmmGoods != null){
+                        if(!StringUtils.equals(lmmGoods.getCostInclude(), g.getCostInclude())){
+                            ruleChanged.add("feeInclude");
+                            ruleMPO.setFeeInclude(g.getCostInclude());
+                        }
+                        if(!StringUtils.equals(lmmGoods.getImportentPoint(), g.getImportentPoint())){
+                            ruleChanged.add("refundRuleDesc");
+                            buildRefundDesc(ruleMPO, g);
+                        }
+                        ruleMPO.setChangedFields(ruleChanged);
                     }
-                    if(!StringUtils.equals(lmmGoods.getImportantNotice(), g.getImportantNotice())){
-                        ruleChanged.add("supplementDesc");
-                        ruleMPO.setSupplementDesc(g.getImportantNotice());
-                    }
-                    ruleMPO.setChangedFields(ruleChanged);
                 } else {
                     ruleMPO.setFeeInclude(g.getCostInclude());
-                    // todo 费用不包含没有
-                    // todo 补充说明用重要说明赋值有没有问题
-                    ruleMPO.setSupplementDesc(g.getImportantNotice());
+                    buildRefundDesc(ruleMPO, g);
                 }
                 // todo 规则无法确定唯一，每次都会创建新的
                 scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
@@ -961,6 +1014,65 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
             });
         }
+    }
+
+    private void buildRefundDesc(ScenicSpotRuleMPO ruleMPO, LmmGoods g){
+        if(StringUtils.isNotBlank(g.getImportentPoint())){
+            ruleMPO.setRefundRuleDesc(g.getImportentPoint());
+        } else {
+            if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
+                ruleMPO.setRefundRuleDesc(g.getRefundRuleNotice());
+            }
+            if(StringUtils.isNotBlank(g.getImportantNotice())){
+                if(StringUtils.isNotBlank(ruleMPO.getRefundRuleDesc())){
+                    ruleMPO.setRefundRuleDesc(String.format("%s<br>%s", ruleMPO.getRefundRuleDesc(), g.getImportantNotice()));
+                } else {
+                    ruleMPO.setRefundRuleDesc(g.getImportantNotice());
+                }
+            }
+        }
+    }
+
+    private List<DescInfo> buildDescInfos(LmmProduct lmmProduct, LmmGoods g){
+        List<DescInfo> descInfos = Lists.newArrayList();
+        if(StringUtils.isNotBlank(g.getCostNoinclude())){
+            DescInfo exclude = new DescInfo();
+            exclude.setTitle("费用不包含");
+            exclude.setContent(g.getCostNoinclude());
+            descInfos.add(exclude);
+        }
+        if(StringUtils.isNotBlank(lmmProduct.getIntrodution())){
+            DescInfo productDesc = new DescInfo();
+            productDesc.setTitle("费用不包含");
+            productDesc.setContent(g.getCostNoinclude());
+            descInfos.add(productDesc);
+        }
+        if(g.getNotice() != null){
+            LmmGoods.Notice notice = g.getNotice();
+            StringBuffer sb = new StringBuffer();
+            if(StringUtils.isNotBlank(notice.getGetTicketTime())){
+                sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
+                sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
+                sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getWays())){
+                sb.append("入园方式:").append(notice.getWays()).append("<br>");
+            }
+            if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
+                sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(sb.toString())){
+                DescInfo noticeDesc = new DescInfo();
+                noticeDesc.setTitle("入园须知");
+                noticeDesc.setContent(sb.toString());
+                descInfos.add(noticeDesc);
+            }
+        }
+        return descInfos;
     }
 
     private void syncScenic(List<LmmScenic> lmmScenicList){
