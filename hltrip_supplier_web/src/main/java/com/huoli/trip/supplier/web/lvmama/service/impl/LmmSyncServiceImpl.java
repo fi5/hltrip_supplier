@@ -741,16 +741,17 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     transaction.setTicketOutMinute(time);
                 }
 
-                // todo limitType 限购类型在本地要加字典值，身份证、身份证+手机号
-                // todo limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-
-                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-                ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-                scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
-                ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
-                ruleMPO.setIsCouponRule(0);
+                ScenicSpotRuleMPO ruleMPO;
+                if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
+                    ruleMPO = new ScenicSpotRuleMPO();
+                    scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+                    ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
+                    ruleMPO.setIsCouponRule(0);
+                } else {
+                    ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
+                }
                 if(StringUtils.equals("Y", g.getNeedTicket())){
                     ruleMPO.setInType(1);
                 } else if(StringUtils.equals("N", g.getNeedTicket())){
@@ -831,6 +832,46 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setDistinguishUser(-1);
                     ruleMPO.setMaxCount(g.getMaximum());
                 }
+                // limitType 限购类型在本地要加字典值，身份证、身份证+手机号
+                // limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
+                if(g.getLimitation() != null){
+                    LmmGoods.Limitation limitation = g.getLimitation();
+                    ruleMPO.setLimitBuy(1);
+                    // -1 这些是为了防止0起作用，实际只为设置maxcount
+                    ruleMPO.setLimitBuyType(-1);
+                    ruleMPO.setRangeType(0);
+                    ruleMPO.setDistinguishUser(-1);
+                    ruleMPO.setLimitWay(-1);
+                    if(StringUtils.isNotBlank(limitation.getTimeType())){
+                        if(StringUtils.equals(limitation.getTimeType(), "orderTime")){
+                            ruleMPO.setLimitBuyType(0);
+                        } else if(StringUtils.equals(limitation.getTimeType(), "playTime")){
+                            ruleMPO.setLimitBuyType(1);
+                        }
+                    }
+                    ruleMPO.setLimitDay(limitation.getAmountCycle());
+                    if(StringUtils.isNotBlank(limitation.getLimitWay())){
+                        if(StringUtils.equals(limitation.getLimitWay(), "ORDERNUM")){
+                            ruleMPO.setLimitWay(1);
+                        } else if(StringUtils.equals(limitation.getLimitWay(), "GOODSNUM")){
+                            ruleMPO.setLimitWay(2);
+                        }
+                    }
+                    if(StringUtils.isNotBlank(limitation.getLimitType())){
+                        if(StringUtils.equals(limitation.getLimitType(), "phoneNum")){
+                            ruleMPO.setDistinguishUser(1);
+                        } else if(StringUtils.equals(limitation.getLimitType(), "IDcard")){
+                            ruleMPO.setDistinguishUser(2);
+                        } else if(StringUtils.equals(limitation.getLimitType(), "phoneAndIDCard")){
+                            ruleMPO.setDistinguishUser(3);
+                        }
+                    }
+                    ruleMPO.setMaxCount(limitation.getLimitAmount());
+                    ruleMPO.setOrderStartTime(limitation.getOrderStartTime());
+                    ruleMPO.setOrderEndTime(limitation.getOrderEntTime());
+                    ruleMPO.setPlayStartTime(limitation.getPlayStartTime());
+                    ruleMPO.setPlayEndTime(limitation.getPlayEntTime());
+                }
                 // importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
                 buildRefundDesc(ruleMPO, g);
                 List<RefundRule> refundRules;
@@ -910,8 +951,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setFeeInclude(g.getCostInclude());
                     buildRefundDesc(ruleMPO, g);
                 }
-                // todo 规则无法确定唯一，每次都会创建新的
                 scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+                scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+                scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 LmmPriceRequest request = new LmmPriceRequest();
                 request.setGoodsIds(g.getGoodsId());
                 request.setBeginDate(DateTimeUtil.formatDate(new Date()));
@@ -1043,8 +1085,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         if(StringUtils.isNotBlank(lmmProduct.getIntrodution())){
             DescInfo productDesc = new DescInfo();
-            productDesc.setTitle("费用不包含");
-            productDesc.setContent(g.getCostNoinclude());
+            productDesc.setTitle("产品简介");
+            productDesc.setContent(lmmProduct.getIntrodution());
             descInfos.add(productDesc);
         }
         if(g.getNotice() != null){

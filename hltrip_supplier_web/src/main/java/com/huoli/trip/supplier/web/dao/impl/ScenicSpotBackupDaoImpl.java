@@ -42,4 +42,11 @@ public class ScenicSpotBackupDaoImpl implements ScenicSpotBackupDao {
                 .and("supplierId").is(supplierId));
         return mongoTemplate.findOne(query, ScenicSpotBackupMPO.class);
     }
+
+    @Override
+    public ScenicSpotBackupMPO getScenicSpotByScenicSpotId(String scenicSpotId){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("scenicSpotMPO._id").is(scenicSpotId));
+        return mongoTemplate.findOne(query, ScenicSpotBackupMPO.class);
+    }
 }

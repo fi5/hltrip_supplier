@@ -884,7 +884,6 @@ public class CommonServiceImpl implements CommonService {
                             item1.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode()));
                             hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
-                                // todo 酒店名称没有，是需要关联本地酒店表吗
                                 groupTourHotel.setDesc(r.getDescribe());
                                 groupTourHotel.setRoomName(r.getName());
                                 if (ListUtils.isNotEmpty(r.getImages())) {

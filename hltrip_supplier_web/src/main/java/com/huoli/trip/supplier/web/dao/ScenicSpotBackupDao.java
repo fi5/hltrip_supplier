@@ -20,4 +20,6 @@ public interface ScenicSpotBackupDao {
 
     ScenicSpotBackupMPO getScenicSpotBySupplierScenicIdAndSupplierId(String supplierScenicId, String supplierId);
 
+    ScenicSpotBackupMPO getScenicSpotByScenicSpotId(String scenicSpotId);
+
 }

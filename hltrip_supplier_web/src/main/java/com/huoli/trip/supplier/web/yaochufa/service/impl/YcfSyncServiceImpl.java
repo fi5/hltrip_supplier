@@ -100,6 +100,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     @Autowired
     private HotelScenicProductBackupDao hotelScenicProductBackupDao;
 
+    @Autowired
+    private ScenicSpotBackupDao scenicSpotBackupDao;
+
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
         if(ListUtils.isEmpty(ycfProducts)){
@@ -552,7 +555,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
     }
 
     private void syncScenicProduct(YcfProduct ycfProduct){
-        // todo 规则加动态说明 费用不包含
         List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(scenicIds)){
             log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
@@ -650,12 +652,34 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         } else {
             scenicSpotProductMPO.setStatus(3);
         }
-        scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-        ScenicSpotRuleMPO ruleMPO = new ScenicSpotRuleMPO();
-        ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-        ruleMPO.setChannel(SUPPLIER_CODE_YCF);
-        ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
-        ruleMPO.setIsCouponRule(0);
+        ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotByScenicSpotId(scenicSpotMPO.getId());
+        DescInfo bookNotice = new DescInfo();
+        if(scenicSpotBackupMPO != null){
+            YcfProductItem ycfProductItem = JSON.parseObject(scenicSpotBackupMPO.getOriginContent(), YcfProductItem.class);
+            if(ListUtils.isNotEmpty(ycfProductItem.getCharacterrList())){
+                ycfProductItem.getCharacterrList().stream().filter(c -> c.getType() == 1).findFirst().ifPresent(c -> {
+                    bookNotice.setTitle("购买须知");
+                    bookNotice.setContent(c.getDetail());
+                });
+            }
+        }
+        if(StringUtils.isNotBlank(bookNotice.getContent())){
+            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getDescInfos())){
+                scenicSpotProductMPO.getDescInfos().add(bookNotice);
+            } else {
+                scenicSpotProductMPO.setDescInfos(Lists.newArrayList(bookNotice));
+            }
+        }
+        ScenicSpotRuleMPO ruleMPO;
+        if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
+            ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setChannel(SUPPLIER_CODE_YCF);
+            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+            ruleMPO.setIsCouponRule(0);
+        } else {
+            ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
+        }
         if(ycfProduct.getMaxNum() != null){
             ruleMPO.setLimitBuy(1);
             // -1 这些是为了防止0起作用，实际只为设置maxcount
@@ -737,12 +761,32 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 ruleChanged.add("feeInclude");
                 ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
             }
+            if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
+                DescInfo descInfo = new DescInfo();
+                descInfo.setTitle("费用不包含");
+                descInfo.setContent(ycfProduct.getFeeExclude());
+                if(StringUtils.isNotBlank(backup.getFeeExclude())){
+                    if(!StringUtils.equals(backup.getFeeExclude(), ycfProduct.getFeeExclude())){
+                        descInfo.setChangedFields(Lists.newArrayList("content"));
+                    }
+                }
+                ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
+            }
             ruleMPO.setChangedFields(ruleChanged);
         } else {
             ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
             ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
+                // 规则加动态说明 费用不包含
+                DescInfo feeExclude = new DescInfo();
+                feeExclude.setTitle("费用不包含");
+                feeExclude.setContent(ycfProduct.getFeeExclude());
+                ruleMPO.setDescInfos(Lists.newArrayList(feeExclude));
+            }
         }
         scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+        scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+        scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
         Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
         days = days == null ? Integer.valueOf(30) : days;
         String start = DateTimeUtil.formatDate(new Date());
@@ -832,8 +876,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 baseSetting.setAppSource(backChannelEntry.getAppSource());
             }
             hotelScenicSpotProductMPO.setBaseSetting(baseSetting);
-            hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
-
             fresh = true;
         } else {
             List<HotelScenicSpotProductSetMealMPO> setMealMPOs = hotelScenicProductSetMealDao.getByProductId(hotelScenicSpotProductMPO.getId());
@@ -907,6 +949,23 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+        ScenicSpotMappingMPO scenicSpotMapping = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMapping != null){
+            ScenicSpotMPO scenicSpot = scenicSpotDao.getScenicSpotById(scenicSpotMapping.getScenicSpotId());
+            if(scenicSpot != null){
+                ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotByScenicSpotId(scenicSpot.getId());
+                DescInfo bookNotice = new DescInfo();
+                if(scenicSpotBackupMPO != null){
+                    YcfProductItem ycfProductItem = JSON.parseObject(scenicSpotBackupMPO.getOriginContent(), YcfProductItem.class);
+                    if(ListUtils.isNotEmpty(ycfProductItem.getCharacterrList())){
+                        ycfProductItem.getCharacterrList().stream().filter(c -> c.getType() == 1).findFirst().ifPresent(c -> {
+                            bookNotice.setTitle("购买须知");
+                            bookNotice.setContent(c.getDetail());
+                        });
                     }
                 }
             }

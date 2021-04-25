@@ -45,4 +45,9 @@ public class ScenicSpotRuleDaoImpl implements ScenicSpotRuleDao {
     public ScenicSpotRuleMPO getScenicSpotRule(String scenicSpotId){
         return mongoTemplate.findOne(new Query(Criteria.where("scenicSpotId").is(scenicSpotId)), ScenicSpotRuleMPO.class);
     }
+
+    @Override
+    public ScenicSpotRuleMPO getScenicSpotRuleById(String id){
+        return mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), ScenicSpotRuleMPO.class);
+    }
 }

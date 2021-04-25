@@ -822,8 +822,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);
-            scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail, fresh);
+            scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+            scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
@@ -933,9 +934,8 @@ public class DfySyncServiceImpl implements DfySyncService {
     }
 
     private ScenicSpotRuleMPO saveRule(ScenicSpotProductMPO scenicSpotProductMPO, DfyTicketDetail dfyTicketDetail, boolean fresh){
-        ScenicSpotRuleMPO ruleMPO = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
-        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
-        if(ruleMPO == null){
+        ScenicSpotRuleMPO ruleMPO;
+        if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
             ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
@@ -944,7 +944,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
             ruleMPO.setValid(1);
             ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        } else {
+            ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
         }
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
         ruleMPO.setChangeTicketAddress(dfyTicketDetail.getDrawAddress());
         if(dfyTicketDetail.getDrawType() != null){
             if(dfyTicketDetail.getDrawType() == 1){
@@ -1011,7 +1014,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             String code = dfyTicketDetail.getAdmissionVoucher().getAdmissionVoucherCode();
             try {
                 if(StringUtils.isNotBlank(code)){
-                    // todo 如果有多个只要包含大于300就认为直接入园
+                    code = code.split(",")[0];
                     if(Integer.valueOf(code) < 300){
                         ruleMPO.setInType(1);
                     } else if(Integer.valueOf(code) >= 300){
@@ -1062,7 +1065,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 log.error("转化入园方式失败，不影响继续执行，value = {}", code);
             }
         }
-        // todo 预定说明没有 dfyTicketDetail.bookNotice 加动态说明字段
+
         ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         if(scenicSpotProductBackupMPO != null){
             List<String> changedFields = Lists.newArrayList();
@@ -1075,7 +1078,30 @@ public class DfySyncServiceImpl implements DfySyncService {
                 changedFields.add("supplementDesc");
                 ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
             }
+            //  预定说明没有 dfyTicketDetail.bookNotice 加动态说明字段
+            if(StringUtils.isNotBlank(dfyTicketDetail.getBookNotice())){
+                DescInfo descInfo = new DescInfo();
+                descInfo.setTitle("预订须知");
+                descInfo.setContent(dfyTicketDetail.getBookNotice());
+                if(StringUtils.isNotBlank(backup.getBookNotice())){
+                    if(!StringUtils.equals(dfyTicketDetail.getBookNotice(), backup.getBookNotice())){
+                        descInfo.setChangedFields(Lists.newArrayList("content"));
+                    }
+                } else {
+                    descInfo.setChangedFields(Lists.newArrayList("content"));
+                }
+                ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
+            } else {
+                if(ListUtils.isNotEmpty(ruleMPO.getDescInfos())){
+                    ruleMPO.getDescInfos().removeIf(d -> StringUtils.equals(d.getTitle(), "预订须知"));
+                }
+            }
             ruleMPO.setChangedFields(changedFields);
+        } else {
+            DescInfo descInfo = new DescInfo();
+            descInfo.setTitle("预订须知");
+            descInfo.setContent(dfyTicketDetail.getBookNotice());
+            ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
         }
         scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         return ruleMPO;
@@ -1224,6 +1250,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             GroupTourProductSetMealMPO setMealMPO = groupTourProductSetMealDao.getSetMeal(groupTourProductMPO.getId(), addressInfo.getCityCode());
             boolean addSm = false;
+            GroupTourProductSetMealBackupMPO backupMPO = null;
             if(setMealMPO == null){
                 setMealMPO = new GroupTourProductSetMealMPO();
                 setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
@@ -1233,7 +1260,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 addSm = true;
                 setMealChanged = true;
             } else {
-                GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
+                backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
                 if(backupMPO != null){
                     List<String> changedFields = Lists.newArrayList();
                     GroupTourProductSetMealMPO backup = backupMPO.getGroupTourProductSetMealMPO();
@@ -1273,6 +1300,13 @@ public class DfySyncServiceImpl implements DfySyncService {
                         }
                     }
                     setMealMPO.setBookNotices(newDesc);
+                    DfyToursDetailResponse dfyBackup = JSON.parseObject(backupMPO.getOriginContent(), DfyToursDetailResponse.class);
+                    if(dfyBackup != null){
+                        String journeyDesc = JSON.toJSONString(dfyBackup.getJourneyInfo().getJourneyDescJson());
+                        if(!StringUtils.equals(journeyDesc, JSON.toJSONString(journeyInfo.getJourneyDescJson()))){
+                            changedFields.add("groupTourTripInfos");
+                        }
+                    }
                     if(ListUtils.isNotEmpty(changedFields)){
                         setMealMPO.setChangedFields(changedFields);
                     }
@@ -1283,13 +1317,20 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setTripDay(dfyToursDetail.getDuration());
             setMealMPO.setDepCode(addressInfo.getCityCode());
             setMealMPO.setDepName(addressInfo.getCityName());
-            // todo 行程比哪个字段，内容繁多
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null
                     && ListUtils.isNotEmpty(journeyInfo.getJourneyDescJson().getData().getData())){
                 setMealMPO.setGroupTourTripInfos(journeyInfo.getJourneyDescJson().getData().getData().stream().map(j -> {
                     GroupTourTripInfo groupTourTripInfo = new GroupTourTripInfo();
                     if(journeyInfo.getJourneyDescJson().getType() == 1) {
                         groupTourTripInfo.setDay(j.getDay());
+                    }
+                    if(j.getTraffic() != null){
+                        StringBuffer sb = new StringBuffer();
+                        sb.append(j.getTraffic().getFrom());
+                        if(ListUtils.isNotEmpty(j.getTraffic().getToList())){
+                            j.getTraffic().getToList().forEach(t -> sb.append(t.getTo()));
+                        }
+                        groupTourTripInfo.setTitle(sb.toString());
                     }
                     List<GroupTourProductTripItem> items = Lists.newArrayList();
                     if(ListUtils.isNotEmpty(j.getModuleList())){
@@ -1300,8 +1341,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 for (DfyJourneyDetail.ModuleScenic scenic : journeyModule.getScenicList()) {
                                     GroupTourProductTripItem item = new GroupTourProductTripItem();
                                     item.setTime(journeyModule.getMoment());
-                                    // todo 计算一下转换成hh:mm
-                                    item.setPlayTime(scenic.getTimes() == null ? null : scenic.getTimes().toString());
+                                    // 计算一下转换成hh:mm
+                                    if(scenic.getTimes() != null){
+                                        int hh = scenic.getTimes() / 60;
+                                        int mm = scenic.getTimes() % 60;
+                                        item.setPlayTime(String.format("%s:%s", hh >= 10 ? hh : String.format("0%s", hh), mm >= 10 ? mm : String.format("0%s", mm)));
+                                    }
                                     item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode()));
                                     item.setPoiName(scenic.getTitle());
                                     item.setPoiDesc(scenic.getContent());
@@ -1386,6 +1431,21 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
                                     item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                 }
+                                if(ListUtils.isNotEmpty(journeyModule.getFood().getHasList())){
+                                    StringBuffer sb = new StringBuffer();
+                                    journeyModule.getFood().getHasList().forEach(h -> {
+                                        if(StringUtils.equals("breakfast", h.getType())){
+                                            sb.append("早餐：");
+                                        } else if(StringUtils.equals("lunch", h.getType())){
+                                            sb.append("午餐：");
+                                        } else if(StringUtils.equals("dinner", h.getType())){
+                                            sb.append("晚餐：");
+                                        }
+                                        sb.append(h.getHas() == 1 ? "含" : "敬请自理");
+                                    });
+                                    item.setPoiName(sb.toString());
+                                }
+                                item.setCostInclude(-1);
                                 items.add(item);
                             }
                             if (type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())) {
@@ -1395,6 +1455,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     item.setPoiName(moduleShop.getTitle());
                                     if (StringUtils.isNotBlank(moduleShop.getInstruction())) {
                                         item.setPoiDesc(moduleShop.getInstruction().replace("<pre>", "").replace("</pre>", ""));
+                                    }
+                                    if(StringUtils.isNotBlank(moduleShop.getProduct())){
+                                        item.setPoiDesc(String.format("%s<br>%s", item.getPoiDesc(), moduleShop.getProduct()));
                                     }
                                     item.setPlayTime(moduleShop.getTimes() == null ? null : moduleShop.getTimes().toString());
                                     item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode()));
@@ -1436,7 +1499,12 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
-
+            GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
+            groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
+            groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
+            groupTourProductSetMealBackupMPO.setId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT);
+            groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
+            groupProductBackupDao.saveGroupProductBackup(groupTourProductSetMealBackupMPO);
             if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
                 // 添加订阅通知
                 commonService.addToursProductSubscribe(groupTourProductMPO, add);

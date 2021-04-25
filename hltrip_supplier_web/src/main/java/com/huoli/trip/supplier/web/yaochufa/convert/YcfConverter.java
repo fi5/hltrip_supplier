@@ -463,7 +463,7 @@ public class YcfConverter {
             }
         }
         scenicSpotMPO.setImages(images);
-        // todo 把购买须知加到产品动态说明，需要加字段
+        // 把购买须知加到产品动态说明，需要加字段
 //        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
 //            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
 //                Notice notice = new Notice();

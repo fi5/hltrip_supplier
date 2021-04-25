@@ -31,4 +31,11 @@ public interface ScenicSpotRuleDao {
      * @return
      */
     ScenicSpotRuleMPO getScenicSpotRule(String scenicSpotId);
+
+    /**
+     * 根据id查询
+     * @param id
+     * @return
+     */
+    ScenicSpotRuleMPO getScenicSpotRuleById(String id);
 }
