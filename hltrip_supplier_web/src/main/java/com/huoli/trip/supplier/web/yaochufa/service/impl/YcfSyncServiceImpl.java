@@ -862,7 +862,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             hotelScenicSpotProductMPO.setPayInfo(payInfo);
             HotelScenisSpotProductBaseSetting baseSetting = new HotelScenisSpotProductBaseSetting();
             baseSetting.setStockCount(0);
-            baseSetting.setLaunchDateTime(StringUtils.isNotBlank(ycfProduct.getStartDate()) ? DateTimeUtil.parseFullDate(ycfProduct.getStartDate()) : new Date());
+            baseSetting.setLaunchDateTime(StringUtils.isNotBlank(ycfProduct.getStartDate()) ? DateTimeUtil.parseDate(ycfProduct.getStartDate()) : new Date());
             if(baseSetting.getLaunchDateTime().getTime() > new Date().getTime()){
                 baseSetting.setLaunchType(2);
                 hotelScenicSpotProductMPO.setStatus(4);
