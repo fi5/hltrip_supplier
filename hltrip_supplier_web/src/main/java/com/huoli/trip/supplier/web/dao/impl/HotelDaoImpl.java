@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.supplier.web.dao.HotelDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,5 +26,15 @@ public class HotelDaoImpl implements HotelDao {
     @Override
     public HotelMPO getById(String id){
         return mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), HotelMPO.class);
+    }
+
+    @Override
+    public HotelMPO getHotelByNameAndAddress(String name, String address){
+        return mongoTemplate.findOne(new Query(Criteria.where("name").is(name).and("address").is(address)), HotelMPO.class);
+    }
+
+    @Override
+    public HotelMPO addHotel(HotelMPO hotelMPO){
+        return mongoTemplate.insert(hotelMPO);
     }
 }

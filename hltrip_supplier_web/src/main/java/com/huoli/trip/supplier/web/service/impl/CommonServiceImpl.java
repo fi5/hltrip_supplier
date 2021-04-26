@@ -9,6 +9,7 @@ import com.huoli.trip.common.constant.TripModuleTypeEnum;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.*;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
+import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.DateTimeUtil;
@@ -104,6 +105,12 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private HotelMappingDao hotelMappingDao;
+
+    @Autowired
+    private HotelDao hotelDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -594,6 +601,26 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
+    public void setCity(HotelMPO hotel){
+        if(hotel == null){
+            return;
+        }
+        AddressInfo addressInfo = setCity(hotel.getProvinceName(), hotel.getCity(), null);
+        if(StringUtils.isNotBlank(addressInfo.getProvinceCode())){
+            hotel.setProvinceCode(addressInfo.getProvinceCode());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getProvinceName())){
+            hotel.setProvinceName(addressInfo.getProvinceName());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getCityCode())){
+            hotel.setCityCode(addressInfo.getCityCode());
+        }
+        if(StringUtils.isNotBlank(addressInfo.getCityName())){
+            hotel.setCity(addressInfo.getCityName());
+        }
+    }
+
+    @Override
     public AddressInfo setCity(String provinceName, String cityName, String districtName){
         AddressInfo addressInfo = new AddressInfo();
         String province = null;
@@ -729,7 +756,53 @@ public class CommonServiceImpl implements CommonService {
         scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
         scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
-        log.info("{}景点{}已关联景点id={}", channel, channelScenicId, newScenic.getId());
+        log.info("{}景点{}已关联本地景点id={}", channel, channelScenicId, newScenic.getId());
+    }
+
+    @Override
+    public void updateHotelMapping(String channelHotelId, String channel, String channelName, HotelMPO hotelMPO){
+        // 查映射关系
+        log.info("查询酒店是否映射，channel={}, channelHotelId={}", channel, channelHotelId);
+        HotelMappingMPO exist = hotelMappingDao.getHotelByChannelHotelIdAndChannel(channelHotelId, channel);
+        if(exist != null){
+            log.info("{}酒店{}已有映射id={}，跳过", channel, channelHotelId, exist.getId());
+            return;
+        }
+        log.info("查询是否存在同名同址酒店，name={}，address={}", hotelMPO.getName(), hotelMPO.getAddress());
+        HotelMPO existHotel = hotelDao.getHotelByNameAndAddress(hotelMPO.getName(), hotelMPO.getAddress());
+        String hotelId;
+        if(existHotel == null){
+            hotelMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_HOTEL)));
+            // 没有找到映射就往本地新增一条
+            hotelDao.addHotel(hotelMPO);
+            hotelId = hotelMPO.getId();
+            // 景点申请单
+            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
+            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            poiReviewMPO.setChannel(channel);
+            poiReviewMPO.setChannelName(channelName);
+            poiReviewMPO.setPoiName(hotelMPO.getName());
+            poiReviewMPO.setStatus(0);
+            poiReviewMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setCityName(hotelMPO.getCity());
+            poiReviewMPO.setPoiId(hotelMPO.getId());
+            poiReviewMPO.setPoiType(1);
+            poiReviewMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewDao.addPoiReview(poiReviewMPO);
+            log.info("不存在同名同址酒店，添加新的酒店记录和申请单，酒店id={}，申请单id={}", hotelId, poiReviewMPO.getId());
+        } else {
+            hotelId = existHotel.getId();
+            log.info("已存在同名同址酒店，不用新增酒店，直接关联，酒店id={}", hotelId);
+        }
+        // 同时保存映射关系
+        HotelMappingMPO hotelMappingMPO = new HotelMappingMPO();
+        hotelMappingMPO.setChannelHotelId(channelHotelId);
+        hotelMappingMPO.setHotelId(hotelId);
+        hotelMappingMPO.setChannel(channel);
+        hotelMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        hotelMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        hotelMappingDao.addHotelMapping(hotelMappingMPO);
+        log.info("{}酒店{}已关联本地酒店id={}", channel, channelHotelId, hotelMPO.getId());
     }
 
     @Override

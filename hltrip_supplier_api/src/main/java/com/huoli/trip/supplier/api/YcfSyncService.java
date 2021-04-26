@@ -70,6 +70,13 @@ public interface YcfSyncService {
     List<String> syncScenic(List<String> scenicIds);
 
     /**
+     * 同步酒店，新版
+     * @param hotelIds
+     * @return
+     */
+    List<String> syncHotel(List<String> hotelIds);
+
+    /**
      * 同步价格，新版
      * @param request
      * @return

@@ -824,11 +824,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         List<String> hotelIds = ycfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(hotelIds)){
-            log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+            log.error("要出发产品{}酒店不存在，跳过", ycfProduct.getProductID());
             return;
         }
-        poiIds.addAll(hotelIds);
         syncScenic(poiIds);
+        syncHotel(hotelIds);
         HotelScenicSpotProductMPO hotelScenicSpotProductMPO = hotelScenicProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
         HotelScenicSpotProductSetMealMPO setMealMPO = null;
         HotelScenicSpotProductBackupMPO backupMPO = null;
@@ -978,56 +978,79 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         setMealMPO.setName(ycfProduct.getProductName());
         List<HotelScenicSpotProductHotelElement> hotelElements = ycfProduct.getRoomList().stream().map(r -> {
             HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
+            String hotelName = null;
+            String hotelId = null;
+            String hotelCityCode = null;
+            String hotelCityName = null;
+            // 要出发酒景元素有相同poi情况，没有的元素是没办法关联，没有是正常的
             if(hotelMappingMPO == null){
                 log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
-                return null;
-            }
-            HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
-            if(hotelMPO == null){
-                log.error("景点{}不存在", hotelMappingMPO.getHotelId());
-                return null;
+//                return null;
+            } else {
+                HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                if(hotelMPO == null){
+                    log.error("景点{}不存在", hotelMappingMPO.getHotelId());
+//                return null;
+                } else {
+                    hotelName = hotelMPO.getName();
+                    hotelId = hotelMPO.getId();
+                    hotelCityCode = hotelMPO.getCityCode();
+                    hotelCityName = hotelMPO.getCity();
+                }
             }
 
             HotelScenicSpotProductHotelElement hotelElement = new HotelScenicSpotProductHotelElement();
-            hotelElement.setHotelName(hotelMPO.getName());
-            hotelElement.setHotelId(hotelMPO.getId());
-            hotelElement.setCityCode(hotelMPO.getCityCode());
-            hotelElement.setCityName(hotelMPO.getCity());
+            hotelElement.setHotelName(hotelName);
+            hotelElement.setHotelId(hotelId);
+            hotelElement.setCityCode(hotelCityCode);
+            hotelElement.setCityName(hotelCityName);
             hotelElement.setRelationHotelLib(1);
             hotelElement.setRoomName(r.getRoomName());
             return hotelElement;
         }).collect(Collectors.toList());
-        if(hotelElements.stream().anyMatch(h -> h == null)){
-            log.error("产品{}酒店有空元素，跳过", ycfProduct.getProductID());
-            return;
-        }
+//        if(hotelElements.stream().anyMatch(h -> h == null)){
+//            log.error("产品{}酒店有空元素，跳过", ycfProduct.getProductID());
+//            return;
+//        }
         setMealMPO.setHotelElements(hotelElements);
         if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
             List<HotelScenicSpotProductScenicSpotElement> scenicSpotElements = ycfProduct.getTicketList().stream().map(t -> {
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
+                String scenicName = t.getTicketName();
+                String scenicId = null;
+                String scenicCityCode = null;
+                String scenicCityName = null;
+                // 跟酒店情况一样
                 if(scenicSpotMappingMPO == null){
                     log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
-                    return null;
+//                    return null;
+                } else {
+                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    if(scenicSpotMPO == null){
+                        log.error("景点{}不存在", scenicSpotMappingMPO.getScenicSpotId());
+//                    return null;
+                    } else {
+                        scenicName = scenicSpotMPO.getId();
+                        scenicId = scenicSpotMPO.getCityCode();
+                        scenicCityCode = scenicSpotMPO.getName();
+                        scenicCityName = scenicSpotMPO.getCity();
+                    }
                 }
-                ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
-                if(scenicSpotMPO == null){
-                    log.error("景点{}不存在", scenicSpotMappingMPO.getScenicSpotId());
-                    return null;
-                }
+
                 HotelScenicSpotProductScenicSpotElement scenicSpotElement = new HotelScenicSpotProductScenicSpotElement();
-                scenicSpotElement.setScenicSpotId(scenicSpotMPO.getId());
-                scenicSpotElement.setCityCode(scenicSpotMPO.getCityCode());
-                scenicSpotElement.setScenicSpotName(scenicSpotMPO.getName());
-                scenicSpotElement.setCityName(scenicSpotMPO.getCity());
+                scenicSpotElement.setScenicSpotId(scenicId);
+                scenicSpotElement.setCityCode(scenicCityCode);
+                scenicSpotElement.setScenicSpotName(scenicName);
+                scenicSpotElement.setCityName(scenicCityName);
                 scenicSpotElement.setRelationLib(1);
                 scenicSpotElement.setCount(t.getTicketBaseNum());
                 scenicSpotElement.setTicketKind(t.getTicketName());
                 return scenicSpotElement;
             }).collect(Collectors.toList());
-            if(scenicSpotElements.stream().anyMatch(s -> s == null)){
-                log.error("产品{}门票有空元素，跳过", ycfProduct.getProductID());
-                return;
-            }
+//            if(scenicSpotElements.stream().anyMatch(s -> s == null)){
+//                log.error("产品{}门票有空元素，跳过", ycfProduct.getProductID());
+//                return;
+//            }
             setMealMPO.setScenicSpotElements(scenicSpotElements);
         }
         if(ListUtils.isNotEmpty(ycfProduct.getFoodList())){
@@ -1093,45 +1116,56 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Override
     public List<String> syncScenic(List<String> scenicIds){
-        if(ListUtils.isEmpty(scenicIds)){
-            log.error("同步poi失败，poi id集合为空");
+        List<YcfProductItem> ycfProductItems = getPoi(scenicIds);
+        if(ListUtils.isEmpty(ycfProductItems)){
             return null;
         }
-        log.info("开始同步poi，id list = {}", JSON.toJSONString(scenicIds));
-        YcfGetPoiRequest ycfGetPoiRequest = new YcfGetPoiRequest();
-        ycfGetPoiRequest.setPoiIdList(scenicIds);
-        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(ycfGetPoiRequest);
-        log.info("准备请求供应商(要出发)获取poi接口，参数={}", JSON.toJSONString(ycfGetPoiRequest));
-        YcfBaseResult<YcfGetPoiResponse> baseResult = yaoChuFaClient.getPoi(ycfBaseRequest);
-        log.info("供应商(要出发)获取poi接口返回，结果={}", JSON.toJSONString(baseResult));
-        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
-            YcfGetPoiResponse response = baseResult.getData();
-            if(response == null){
-                log.error("同步poi失败，供应商（要出发）没有返回data");
-                return null;
-            }
-            List<YcfProductItem> ycfProductItems = response.getPoiList();
-            if(ListUtils.isEmpty(ycfProductItems)){
-                log.error("同步poi失败，供应商（要出发）没有返回poi信息");
-                return null;
-            }
-           return ycfProductItems.stream().map(item -> {
-                try {
-                    ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
-                    // 设置省市区
-                    commonService.setCity(newScenic);
-                    // 同时保存映射关系
-                    commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
-                    // 更新备份
-                    commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
-                    return newScenic.getId();
-                } catch (Exception e) {
-                    log.error("poi落地失败，", e);
+       return ycfProductItems.stream().map(item -> {
+            try {
+                if(item.getPoiType() != 2){
+                    log.error("poi {},{} 不是景点类型，跳过。。", item.getPoiID(), item.getPoiName());
                     return null;
                 }
-            }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
+                ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
+                // 设置省市区
+                commonService.setCity(newScenic);
+                // 同时保存映射关系
+                commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
+                // 更新备份
+                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+                return newScenic.getId();
+            } catch (Exception e) {
+                log.error("poi落地失败，", e);
+                return null;
+            }
+        }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> syncHotel(List<String> hotelIds){
+        List<YcfProductItem> ycfProductItems = getPoi(hotelIds);
+        if(ListUtils.isEmpty(ycfProductItems)){
+            return null;
         }
-        return null;
+        return ycfProductItems.stream().map(item -> {
+            try {
+                if(item.getPoiType() != 1){
+                    log.error("poi {},{} 不是酒店类型，跳过。。", item.getPoiID(), item.getPoiName());
+                    return null;
+                }
+                HotelMPO newHotel = YcfConverter.convertToHotelMPO(item);
+                // 设置省市区
+                commonService.setCity(newHotel);
+                // 同时保存映射关系
+                commonService.updateHotelMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newHotel);
+                // 更新备份
+//                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+                return newHotel.getId();
+            } catch (Exception e) {
+                log.error("poi落地失败，", e);
+                return null;
+            }
+        }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
     }
 
     @Override
@@ -1202,6 +1236,34 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 return null;
             }
             return response.getSaleInfos();
+        }
+        return null;
+    }
+
+    private List<YcfProductItem> getPoi(List<String> scenicIds){
+        if(ListUtils.isEmpty(scenicIds)){
+            log.error("同步poi失败，poi id集合为空");
+            return null;
+        }
+        log.info("开始同步poi，id list = {}", JSON.toJSONString(scenicIds));
+        YcfGetPoiRequest ycfGetPoiRequest = new YcfGetPoiRequest();
+        ycfGetPoiRequest.setPoiIdList(scenicIds);
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(ycfGetPoiRequest);
+        log.info("准备请求供应商(要出发)获取poi接口，参数={}", JSON.toJSONString(ycfGetPoiRequest));
+        YcfBaseResult<YcfGetPoiResponse> baseResult = yaoChuFaClient.getPoi(ycfBaseRequest);
+        log.info("供应商(要出发)获取poi接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS) {
+            YcfGetPoiResponse response = baseResult.getData();
+            if (response == null) {
+                log.error("同步poi失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            List<YcfProductItem> ycfProductItems = response.getPoiList();
+            if (ListUtils.isEmpty(ycfProductItems)) {
+                log.error("同步poi失败，供应商（要出发）没有返回poi信息");
+                return null;
+            }
+            return ycfProductItems;
         }
         return null;
     }

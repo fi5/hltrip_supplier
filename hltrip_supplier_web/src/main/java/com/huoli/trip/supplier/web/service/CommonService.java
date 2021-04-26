@@ -6,6 +6,7 @@ import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
+import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
@@ -44,11 +45,15 @@ public interface CommonService {
 
     void setCity(ScenicSpotMPO scenic);
 
+    void setCity(HotelMPO hotel);
+
     AddressInfo setCity(String provinceName, String cityName, String districtName);
 
     void updateScenicSpotMPOBackup(ScenicSpotMPO newScenic, String channelScenicId, String channel, Object origin);
 
     void updateScenicSpotMapping(String channelScenicId, String channel, String channelName, ScenicSpotMPO newScenic);
+
+    void updateHotelMapping(String channelHotelId, String channel, String channelName, HotelMPO hotelMPO);
 
     String getId(String bizTag);
 

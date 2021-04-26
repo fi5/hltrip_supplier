@@ -13,4 +13,8 @@ import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 public interface HotelDao {
 
     HotelMPO getById(String id);
+
+    HotelMPO getHotelByNameAndAddress(String name, String address);
+
+    HotelMPO addHotel(HotelMPO hotelMPO);
 }

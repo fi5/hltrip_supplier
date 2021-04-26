@@ -3,6 +3,8 @@ package com.huoli.trip.supplier.web.yaochufa.convert;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
+import com.huoli.trip.common.entity.mpo.hotel.HotelPic;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.util.CommonUtil;
@@ -479,5 +481,58 @@ public class YcfConverter {
 //            }).collect(Collectors.toList()));
 //        }
         return scenicSpotMPO;
+    }
+
+    public static HotelMPO convertToHotelMPO(YcfProductItem productItem){
+        HotelMPO hotelMPO = new HotelMPO();
+        hotelMPO.setName(productItem.getPoiName());
+        if(productItem.getLevel() != null){
+            switch (productItem.getLevel()){
+                case 0:
+                    hotelMPO.setStar("0");
+                    break;
+                case 1:
+                    hotelMPO.setStar("1");
+                    break;
+                case 2:
+                    hotelMPO.setStar("2");
+                    break;
+                case 3:
+                    hotelMPO.setStar("3");
+                    break;
+                case 4:
+                    hotelMPO.setStar("4");
+                    break;
+                case 5:
+                    hotelMPO.setStar("5");
+                    break;
+            }
+        }
+        hotelMPO.setCountyName(productItem.getCountry());
+        hotelMPO.setProvinceName(productItem.getProvince());
+        hotelMPO.setCity(productItem.getCity());
+        hotelMPO.setAddress(productItem.getAddress());
+        hotelMPO.setTel(productItem.getPhone());
+        hotelMPO.setDesc(productItem.getDescription());
+        List<HotelPic> images = Lists.newArrayList();
+        if(ListUtils.isNotEmpty(productItem.getImageList())){
+            images.addAll(productItem.getImageList().stream().map(i -> {
+                HotelPic hotelPic = new HotelPic();
+                hotelPic.setName(i.getImageName());
+                hotelPic.setUrl(i.getImageUrl());
+                return hotelPic;
+            }).collect(Collectors.toList()));
+        } else {
+            if(ListUtils.isNotEmpty(productItem.getMainImageList())){
+                images.addAll(productItem.getMainImageList().stream().map(i -> {
+                    HotelPic hotelPic = new HotelPic();
+                    hotelPic.setName(i.getImageName());
+                    hotelPic.setUrl(i.getImageUrl());
+                    return hotelPic;
+                }).collect(Collectors.toList()));
+            }
+        }
+        hotelMPO.setHotelPics(images);
+        return hotelMPO;
     }
 }
