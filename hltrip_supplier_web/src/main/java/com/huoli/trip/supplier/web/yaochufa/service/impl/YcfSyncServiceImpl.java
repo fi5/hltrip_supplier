@@ -822,7 +822,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             poiIds.addAll(scenicIds);
         }
-        List<String> hotelIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+        List<String> hotelIds = ycfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(hotelIds)){
             log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
             return;
