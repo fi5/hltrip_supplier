@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
 
 /**
  * 描述：<br/>
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
  * 版本：1.0<br>
  * 创建日期：2021/4/21<br>
  */
+@Repository
 public class HotelDaoImpl implements HotelDao {
 
     @Autowired
