@@ -772,6 +772,8 @@ public class CommonServiceImpl implements CommonService {
         HotelMPO existHotel = hotelDao.getHotelByNameAndAddress(hotelMPO.getName(), hotelMPO.getAddress());
         String hotelId;
         if(existHotel == null){
+            hotelMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            hotelMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             hotelMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_HOTEL)));
             // 没有找到映射就往本地新增一条
             hotelDao.addHotel(hotelMPO);
@@ -1173,7 +1175,7 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setProductId(scenicSpotProductMPO.getId());
                     noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
                     noticeMPO.setNoticeStatus(0);
-                    noticeMPO.setCategory(scenicSpotProductMPO.getCategory());
+                    noticeMPO.setCategory(scenicSpotProductMPO.getScenicSpotProductBaseSetting().getCategoryCode());
                     noticeMPO.setType(0);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
