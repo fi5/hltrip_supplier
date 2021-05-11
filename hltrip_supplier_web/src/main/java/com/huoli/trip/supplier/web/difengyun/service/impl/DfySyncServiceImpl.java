@@ -212,7 +212,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO productPO = productDao.getByCode(product.getCode());
             // 是否只同步本地没有的产品
             if(PRODUCT_SYNC_MODE_ONLY_ADD == syncMode && productPO != null){
-                log.error("笛风云，本次同步不包括更新更新，跳过，supplierProductCode={}", product.getSupplierProductId());
+                log.error("笛风云，本次同步不包括更新产品，跳过，supplierProductCode={}", product.getSupplierProductId());
                 return;
             }
             if(PRODUCT_SYNC_MODE_ONLY_UPDATE == syncMode && productPO == null){
@@ -838,6 +838,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
             // 有重要信息更新需要通知
             if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
+                log.info("准备发订阅通知");
                 // 添加订阅通知
                 commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
             }
