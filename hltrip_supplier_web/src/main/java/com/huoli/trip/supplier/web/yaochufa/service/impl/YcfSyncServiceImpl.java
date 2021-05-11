@@ -646,6 +646,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         // 默认及时
         baseSetting.setLaunchType(1);
         baseSetting.setStockCount(0);
+        baseSetting.setCategoryCode("d_ss_ticket");
         scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
         if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
             scenicSpotProductMPO.setStatus(1);

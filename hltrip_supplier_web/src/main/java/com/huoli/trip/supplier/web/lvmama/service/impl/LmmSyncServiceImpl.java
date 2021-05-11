@@ -729,6 +729,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 // 默认及时
                 baseSetting.setLaunchType(1);
                 baseSetting.setStockCount(0);
+                baseSetting.setCategoryCode("d_ss_ticket");
                 scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
                 // 交易设置
                 ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
