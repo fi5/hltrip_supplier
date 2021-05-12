@@ -928,6 +928,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 if(StringUtils.isNotBlank(p.getSalePrice())){
                     scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                    scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
                 }
                 scenicSpotProductPriceMPO.setStock(99);
                 scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
