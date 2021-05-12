@@ -112,9 +112,6 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private HotelDao hotelDao;
 
-    @Autowired
-    private BackChannelMapper backChannelMapper;
-
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
         String key = String.join("_", "SUPPLIER_", supplierId);
