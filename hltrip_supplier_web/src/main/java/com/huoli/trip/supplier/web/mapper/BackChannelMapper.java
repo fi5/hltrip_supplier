@@ -18,6 +18,6 @@ import java.util.List;
 @Repository
 @Mapper
 public interface BackChannelMapper {
-    @Select("select channel,payNoticePhone,refundNoticePhone,status,appSource from trip_back_channel where  channel= #{channelCode}")
+    @Select("select channel,payNoticePhone,refundNoticePhone,status,appSource,channelName from trip_back_channel where  channel= #{channelCode}")
     BackChannelEntry getChannelInfoByChannelCode(String channelCode);
 }
