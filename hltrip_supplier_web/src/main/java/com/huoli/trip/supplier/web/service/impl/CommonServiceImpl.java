@@ -112,6 +112,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private HotelDao hotelDao;
 
+    @Autowired
+    private BackChannelMapper backChannelMapper;
+
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
         String key = String.join("_", "SUPPLIER_", supplierId);
@@ -1269,6 +1272,8 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(productMPO.getId());
                     noticeMPO.setChannel(productMPO.getChannel());
+                    BackChannelEntry backChannelEntry = backChannelMapper.getChannelInfoByChannelCode(productMPO.getChannel());
+                    noticeMPO.setChannelName(backChannelEntry.getChannelName());
                     noticeMPO.setNoticeStatus(0);
                     noticeMPO.setCategory(productMPO.getCategory());
                     noticeMPO.setType(2);
@@ -1326,6 +1331,8 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(groupTourProductMPO.getId());
                     noticeMPO.setChannel(groupTourProductMPO.getChannel());
+                    BackChannelEntry backChannelEntry = backChannelMapper.getChannelInfoByChannelCode(groupTourProductMPO.getChannel());
+                    noticeMPO.setChannelName(backChannelEntry.getChannelName());
                     noticeMPO.setNoticeStatus(0);
                     noticeMPO.setCategory(groupTourProductMPO.getCategory());
                     noticeMPO.setType(1);
