@@ -977,6 +977,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                             ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
                             scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                             scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                            scenicSpotProductPriceMPO.setMerchantCode(g.getGoodsId());
                             scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                             Integer ticketType;
                             switch (g.getTicketType()){

@@ -798,7 +798,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         request.setStartDate(start);
         request.setEndDate(end);
         List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
-        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString());
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString(), ycfProduct.getProductID());
 
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
         scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
@@ -840,6 +840,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             hotelScenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             hotelScenicSpotProductMPO.setIsDel(0);
             hotelScenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
+            hotelScenicSpotProductMPO.setMerchantCode(ycfProduct.getProductID());
             hotelScenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
             if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
                 hotelScenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
@@ -1198,7 +1199,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             try {
                 log.info("开始同步价格，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
                 List<YcfPriceInfo> ycfPriceInfos = getPriceV2(newRequest);
-                syncPrice(request.getPartnerProductID(), ycfPriceInfos);
+                syncPrice(request.getPartnerProductID(), ycfPriceInfos, request.getProductID());
                 log.info("同步价格完成，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
                 // 要出发限制1分钟最多请求200次
                 Thread.sleep(310);
@@ -1222,7 +1223,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.error("价格同步失败，{}的产品{}不存在", SUPPLIER_CODE_YCF, ycfProductId);
             return;
         }
-        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos);
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, scenicSpotProductMPO.getSupplierProductId());
     }
 
     private List<YcfPriceInfo> getPriceV2(YcfGetPriceRequest request){
@@ -1269,11 +1270,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         return null;
     }
 
-    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos){
-        syncPrice(productId, ycfPriceInfos, null, null);
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String supplierProductId){
+        syncPrice(productId, ycfPriceInfos, null, null, supplierProductId);
     }
 
-    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String ruleId, String ticketKind){
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String ruleId, String ticketKind, String supplierProductId){
         if(StringUtils.isBlank(productId) || ListUtils.isEmpty(ycfPriceInfos)){
             log.error("同步价格失败，产品id或者价格日历为空");
             return;
@@ -1291,6 +1292,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
             priceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             priceMPO.setScenicSpotProductId(productId);
+            priceMPO.setMerchantCode(supplierProductId);
             priceMPO.setScenicSpotRuleId(ruleId);
             priceMPO.setTicketKind(ticketKind);
             priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));

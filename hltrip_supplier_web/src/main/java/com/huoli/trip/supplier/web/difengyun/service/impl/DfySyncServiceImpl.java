@@ -919,6 +919,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
                     scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                     scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+                    scenicSpotProductPriceMPO.setMerchantCode(dfyTicketDetail.getProductId());
                     scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                     scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
                     scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
@@ -1183,6 +1184,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
             groupTourProductMPO.setSupplierProductId(productId);
+            groupTourProductMPO.setMerchantCode(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
             add = true;
         } else {
