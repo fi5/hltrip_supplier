@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
+import com.huoli.trip.supplier.feign.client.lvmama.interceptor.LvMaMaFeignInterceptor;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.*;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 版本：1.0<br>
  * 创建日期：2020/6/18<br>
  */
-@FeignClient(name = "lvmam", url = "${lvmama.host.server}"
-        /*,configuration = YaoChuFaFeignInterceptor.class*/
+@FeignClient(name = "lvmama", url = "${lvmama.host.server}"
+        ,configuration = LvMaMaFeignInterceptor.class
         ,fallbackFactory = LvmamaClientFallback.class)
 public interface ILvmamaClient {
 
@@ -31,37 +32,37 @@ public interface ILvmamaClient {
     /**
      * 批量获取景区
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/scenicInfoListByPage")
     LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request);
 
     /**
      * 按id获取景区
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/scenicInfoList")
     LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request);
 
     /**
      * 批量获取产品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/productInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/productInfoListByPage")
     LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request);
 
     /**
      * 根据id获取产品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/productInfoList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/productInfoList")
     LmmProductListResponse getProductListById(@RequestBody LmmProductListByIdRequest request);
 
     /**
      * 根据id获取商品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/goodInfoList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/goodInfoList")
     LmmGoodsListByIdResponse getGoodsListById(@RequestBody LmmGoodsListByIdRequest request);
 
     /**
      * 获取价格
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/goodPriceList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/goodPriceList")
     LmmPriceResponse getPriceList(@RequestBody LmmPriceRequest request);
 
     /**
