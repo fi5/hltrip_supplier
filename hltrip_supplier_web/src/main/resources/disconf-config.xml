@@ -55,6 +55,7 @@
 				<value>classpath:/mongo.properties</value>
 				<value>classpath:/druid-primary-db-huolitrip.properties</value>
 				<value>classpath:/supplier_difengyun.properties</value>
+				<value>classpath:/supplier_lvmama.properties </value>
 			</list>
 
 		</property>
