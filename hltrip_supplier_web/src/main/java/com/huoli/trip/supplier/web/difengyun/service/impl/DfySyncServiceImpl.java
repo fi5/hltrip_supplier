@@ -1217,7 +1217,17 @@ public class DfySyncServiceImpl implements DfySyncService {
                 groupTourProductMPO.setChangedFields(changedFields);
             }
         }
-        groupTourProductMPO.setProductName(dfyToursDetail.getProductName());
+        String name = dfyToursDetail.getProductName();
+        String point = null;
+        if(name.startsWith("<")){
+            name = name.substring(1);
+            if(name.indexOf(">") > 0){
+                point = name.substring(name.indexOf(">") + 1);
+                name = name.substring(0, name.indexOf(">"));
+            }
+        }
+        groupTourProductMPO.setProductName(name);
+        groupTourProductMPO.setHighlights(Lists.newArrayList(point));
         Integer goTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficGo());
         Integer backTfc = DfyToursConverter.convertToTraffic(dfyToursDetail.getTrafficBack());
         groupTourProductMPO.setGoTraffic(goTfc == null ? null : goTfc.toString());
