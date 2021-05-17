@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client;
 
 import com.huoli.trip.supplier.feign.client.lvmama.client.impl.LvmamaClientFallback;
+import com.huoli.trip.supplier.feign.client.lvmama.interceptor.LvMaMaFeignInterceptor;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.*;
@@ -17,8 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 版本：1.0<br>
  * 创建日期：2020/6/18<br>
  */
-@FeignClient(name = "lvmam", url = "${lvmama.host.server}"
-        /*,configuration = YaoChuFaFeignInterceptor.class*/
+@FeignClient(name = "lvmama", url = "${lvmama.host.server}"
+        ,configuration = LvMaMaFeignInterceptor.class
         ,fallbackFactory = LvmamaClientFallback.class)
 public interface ILvmamaClient {
 
