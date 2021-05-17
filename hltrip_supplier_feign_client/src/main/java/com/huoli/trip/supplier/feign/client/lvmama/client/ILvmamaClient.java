@@ -32,37 +32,37 @@ public interface ILvmamaClient {
     /**
      * 批量获取景区
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/scenicInfoListByPage")
     LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request);
 
     /**
      * 按id获取景区
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/scenicInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/scenicInfoList")
     LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request);
 
     /**
      * 批量获取产品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/productInfoListByPage")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/productInfoListByPage")
     LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request);
 
     /**
      * 根据id获取产品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/productInfoList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/productInfoList")
     LmmProductListResponse getProductListById(@RequestBody LmmProductListByIdRequest request);
 
     /**
      * 根据id获取商品
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/goodInfoList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/goodInfoList")
     LmmGoodsListByIdResponse getGoodsListById(@RequestBody LmmGoodsListByIdRequest request);
 
     /**
      * 获取价格
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/goodPriceList")
+    @RequestMapping(method = RequestMethod.POST,path = "/scenic/product/distributorApi/2.0/api/ticketProd/goodPriceList")
     LmmPriceResponse getPriceList(@RequestBody LmmPriceRequest request);
 
     /**
