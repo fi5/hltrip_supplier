@@ -34,6 +34,7 @@ public class LvMaMaFeignInterceptor implements RequestInterceptor {
             String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, CONFIG_ITEM_API_SECRET);
             long time = System.currentTimeMillis();
             String sign = MD5Util.encode(String.format("%s%s%s", secretKey, time, secretKey));
+            log.info("公共参数：appKey={},secret={},time={},sign={}", appKey, secretKey, time, sign);
             if(StringUtils.equalsIgnoreCase(requestTemplate.method(), RequestMethod.GET.toString())){
                 requestTemplate.query("appKey", appKey);
                 requestTemplate.query("timestamp", String.valueOf(time));
