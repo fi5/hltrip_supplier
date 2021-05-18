@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -32,32 +33,32 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
         return new ILvmamaClient() {
 
             @Override
-            public LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request){
+            public LmmScenicListResponse getScenicList(@RequestParam("currentPage") int currentPage){
                 return null;
             }
 
             @Override
-            public LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request){
+            public LmmScenicListResponse getScenicListById(@RequestParam("scenicId") String scenicId){
                 return null;
             }
 
             @Override
-            public LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request){
+            public LmmProductListResponse getProductList(@RequestParam("currentPage") int currentPage){
                 return null;
             }
 
             @Override
-            public LmmProductListResponse getProductListById(@RequestBody LmmProductListByIdRequest request){
+            public LmmProductListResponse getProductListById(@RequestParam("productIds") String productIds){
                 return null;
             }
 
             @Override
-            public LmmGoodsListByIdResponse getGoodsListById(@RequestBody LmmGoodsListByIdRequest request){
+            public LmmGoodsListByIdResponse getGoodsListById(@RequestParam("goodsIds") String goodsIds){
                 return null;
             }
 
             @Override
-            public LmmPriceResponse getPriceList(@RequestBody LmmPriceRequest request){
+            public LmmPriceResponse getPriceList(@RequestParam("goodsIds") String goodsIds, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate){
                 return null;
             }
 
