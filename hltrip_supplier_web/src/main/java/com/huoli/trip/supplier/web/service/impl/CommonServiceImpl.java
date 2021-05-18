@@ -690,6 +690,8 @@ public class CommonServiceImpl implements CommonService {
             addressInfo.setDestinationName(county);
         } else if(StringUtils.isNotBlank(cityId)){
             addressInfo.setType("0");
+            addressInfo.setDestinationCode(cityId);
+            addressInfo.setDestinationName(city);
         }
         return addressInfo;
     }
