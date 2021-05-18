@@ -68,7 +68,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
-        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request.getCurrentPage());
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
@@ -77,7 +77,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmScenic> getScenicListById(LmmScenicListByIdRequest request){
-        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request.getScenicId());
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
@@ -108,7 +108,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmProduct> getProductList(LmmProductListRequest request){
-        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request);
+        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request.getCurrentPage());
         if(lmmProductListResponse == null){
             log.error("驴妈妈产品列表接口返回空");
             return null;
@@ -132,7 +132,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmProduct> getProductListById(LmmProductListByIdRequest request){
-        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductListById(request);
+        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductListById(request.getProductIds());
         if(lmmProductListResponse == null){
             log.error("驴妈妈产品列表接口返回空");
             return null;
@@ -156,7 +156,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmGoods> getGoodsListById(LmmGoodsListByIdRequest request){
-        LmmGoodsListByIdResponse lmmGoodsListByIdResponse = lvmamaClient.getGoodsListById(request);
+        LmmGoodsListByIdResponse lmmGoodsListByIdResponse = lvmamaClient.getGoodsListById(request.getGoodsIds());
         if(lmmGoodsListByIdResponse == null){
             log.error("驴妈妈商品列表接口返回空");
             return null;
@@ -180,7 +180,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmPriceProduct> getPriceList(LmmPriceRequest request){
-        LmmPriceResponse lmmPriceResponse = lvmamaClient.getPriceList(request);
+        LmmPriceResponse lmmPriceResponse = lvmamaClient.getPriceList(request.getGoodsIds(), request.getBeginDate(), request.getEndDate());
         if(lmmPriceResponse == null){
             log.error("驴妈妈价格接口返回空");
             return null;

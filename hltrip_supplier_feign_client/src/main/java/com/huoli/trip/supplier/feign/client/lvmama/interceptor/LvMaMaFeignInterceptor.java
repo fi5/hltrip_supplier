@@ -9,6 +9,8 @@ import com.huoli.trip.supplier.self.lvmama.vo.request.LmmBaseRequest;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 
 import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CONFIG_ITEM_API_KEY;
@@ -30,18 +32,24 @@ public class LvMaMaFeignInterceptor implements RequestInterceptor {
         try {
             String appKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, CONFIG_ITEM_API_KEY);
             String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, CONFIG_ITEM_API_SECRET);
-            byte[] body = requestTemplate.body();
-            if(body != null && body.length > 0){
-                long time = System.currentTimeMillis();
-                LmmBaseRequest request = JSONObject.parseObject(body, LmmBaseRequest.class);
-                String sign = MD5Util.encode(String.format("%s%s%s", secretKey, time, secretKey));
-                request.setAppKey(appKey);
-                request.setSign(sign);
-                request.setTimestamp(String.valueOf(time));
-                log.info("驴妈妈feign拦截器，最终请求参数，request = {}", JSON.toJSONString(request));
-                requestTemplate.body(JSON.toJSONString(request));
-            } else {
-                log.error("驴妈妈feign拦截器，没有请求体，过滤掉。");
+            long time = System.currentTimeMillis();
+            String sign = MD5Util.encode(String.format("%s%s%s", secretKey, time, secretKey));
+            if(StringUtils.equalsIgnoreCase(requestTemplate.method(), RequestMethod.GET.toString())){
+                requestTemplate.query("appKey", appKey);
+                requestTemplate.query("timestamp", String.valueOf(time));
+                requestTemplate.query("sign", sign);
+            } else if(StringUtils.equalsIgnoreCase(requestTemplate.method(), RequestMethod.POST.toString())){
+                byte[] body = requestTemplate.body();
+                if(body != null && body.length > 0){
+                    LmmBaseRequest request = JSONObject.parseObject(body, LmmBaseRequest.class);
+                    request.setAppKey(appKey);
+                    request.setSign(sign);
+                    request.setTimestamp(String.valueOf(time));
+                    log.info("驴妈妈feign拦截器POST，最终请求参数，request = {}", JSON.toJSONString(request));
+                    requestTemplate.body(JSON.toJSONString(request));
+                } else {
+                    log.error("驴妈妈feign拦截器POST，没有请求体，过滤掉。");
+                }
             }
         } catch (Throwable e) {
             log.error("设置驴妈妈公共请求参数异常，", e);
