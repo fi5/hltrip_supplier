@@ -675,6 +675,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
             ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setRuleName("退改规则");
             ruleMPO.setChannel(SUPPLIER_CODE_YCF);
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setIsCouponRule(0);

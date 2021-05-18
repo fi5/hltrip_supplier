@@ -942,6 +942,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
             ruleMPO = new ScenicSpotRuleMPO();
             ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setRuleName("退改规则");
             ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
             ruleMPO.setRuleCode(String.valueOf(System.currentTimeMillis() + (Math.random() * 1000)));
             ruleMPO.setIsCouponRule(0);
