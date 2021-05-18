@@ -1187,6 +1187,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setSupplierProductId(productId);
             groupTourProductMPO.setMerchantCode(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+            if (ListUtils.isEmpty(dfyToursDetail.getProductPicList())) {
+                groupTourProductMPO.setImages(null);
+                groupTourProductMPO.setMainImage(null);
+            } else {
+                groupTourProductMPO.setImages(dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()));
+                groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
+            }
             add = true;
         } else {
             GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
