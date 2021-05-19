@@ -241,9 +241,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             List<ImageBasePO> images = null;
             List<ImageBasePO> mainImages = null;
             if (oldItem == null) {
-                oldItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // 笛风云跟团游默认审核通过
-                oldItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                newItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
             } else {
                 imageDetails = oldItem.getImageDetails();
                 images = oldItem.getImages();
