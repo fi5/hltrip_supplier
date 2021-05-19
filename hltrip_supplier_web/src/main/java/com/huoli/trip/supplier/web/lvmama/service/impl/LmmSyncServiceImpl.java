@@ -96,6 +96,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmScenicResponse));
+        lmmScenicResponse = JSON.parseObject(str, LmmScenicListResponse.class);
         return lmmScenicResponse.getScenicNameList();
     }
 
@@ -105,6 +107,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmScenicResponse));
+        lmmScenicResponse = JSON.parseObject(str, LmmScenicListResponse.class);
         return lmmScenicResponse.getScenicNameList();
     }
 
@@ -130,6 +134,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return true;
     }
 
+    private String removeCDATA(String str){
+        String newStr = str.replace("<![CDATA[", "");
+        newStr = newStr.replace("]]>", "");
+        return newStr;
+    }
+
     @Override
     public List<LmmProduct> getProductList(LmmProductListRequest request){
         LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request.getCurrentPage());
@@ -151,6 +161,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmProductListResponse));
+        lmmProductListResponse = JSON.parseObject(str, LmmProductListResponse.class);
         return lmmProductListResponse.getProductList();
     }
 
@@ -175,6 +187,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmProductListResponse));
+        lmmProductListResponse = JSON.parseObject(str, LmmProductListResponse.class);
         return lmmProductListResponse.getProductList();
     }
 
@@ -206,6 +220,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈商品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmGoodsListByIdResponse));
+        lmmGoodsListByIdResponse = JSON.parseObject(str, LmmGoodsListByIdResponse.class);
         return lmmGoodsListByIdResponse.getGoodList();
     }
 
@@ -230,6 +246,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmPriceResponse));
+        lmmPriceResponse = JSON.parseObject(str, LmmPriceResponse.class);
         return lmmPriceResponse.getPriceList();
     }
 
@@ -277,8 +295,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             List<ImageBasePO> images = null;
             List<ImageBasePO> mainImages = null;
             if (oldItem == null) {
-                oldItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                oldItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                newItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
             } else {
                 imageDetails = oldItem.getImageDetails();
                 images = oldItem.getImages();
