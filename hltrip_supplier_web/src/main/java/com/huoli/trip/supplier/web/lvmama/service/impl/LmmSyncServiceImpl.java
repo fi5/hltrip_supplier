@@ -495,10 +495,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         List<LmmPriceProduct> priceList = getPriceList(request);
         priceList.forEach(p -> {
-            if(ListUtils.isEmpty(p.getGoodsList())){
+            if(ListUtils.isEmpty(p.getGoodsList().getGoods())){
                 return;
             }
-            p.getGoodsList().forEach(g -> {
+            p.getGoodsList().getGoods().forEach(g -> {
                 if(ListUtils.isEmpty(g.getPrices())){
                     return;
                 }
@@ -989,10 +989,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 String scenicSpotProductId = scenicSpotProductMPO.getId();
                 String ruleId = ruleMPO.getId();
                 priceList.forEach(p -> {
-                    if(ListUtils.isEmpty(p.getGoodsList())){
+                    if(ListUtils.isEmpty(p.getGoodsList().getGoods())){
                         return;
                     }
-                    p.getGoodsList().forEach(gl -> {
+                    p.getGoodsList().getGoods().forEach(gl -> {
                         if(ListUtils.isEmpty(gl.getPrices())){
                             return;
                         }
