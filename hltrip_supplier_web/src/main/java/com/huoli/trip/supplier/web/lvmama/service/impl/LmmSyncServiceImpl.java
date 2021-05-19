@@ -288,6 +288,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         lmmScenicList.forEach(s -> {
             ProductItemPO newItem = LmmTicketConverter.convertToProductItemPO(s);
+            if(StringUtils.isBlank(newItem.getCity())){
+                log.error("驴妈妈景点{}没有城市，跳过。。", s.getScenicId());
+                return;
+            }
             ProductItemPO oldItem = productItemDao.selectByCode(newItem.getCode());
             List<ItemFeaturePO> featurePOs = null;
             ProductPO productPO = null;
