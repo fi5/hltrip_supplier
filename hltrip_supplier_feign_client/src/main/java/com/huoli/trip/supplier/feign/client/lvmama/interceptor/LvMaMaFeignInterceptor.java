@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 
+import java.util.Locale;
+
 import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CONFIG_ITEM_API_KEY;
 import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CONFIG_ITEM_API_SECRET;
 
@@ -33,7 +35,7 @@ public class LvMaMaFeignInterceptor implements RequestInterceptor {
             String appKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, CONFIG_ITEM_API_KEY);
             String secretKey = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, CONFIG_ITEM_API_SECRET);
             long time = System.currentTimeMillis();
-            String sign = MD5Util.encode(String.format("%s%s%s", secretKey, time, secretKey));
+            String sign = MD5Util.encode(String.format("%s%s%s", secretKey, time, secretKey)).toLowerCase(Locale.ROOT);
             log.info("公共参数：appKey={},secret={},time={},sign={}", appKey, secretKey, time, sign);
             if(StringUtils.equalsIgnoreCase(requestTemplate.method(), RequestMethod.GET.toString())){
                 requestTemplate.query("appKey", appKey);
