@@ -1160,6 +1160,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         // 设置省市区
         commonService.setCity(newScenic);
+        if(StringUtils.isBlank(newScenic.getCityCode())){
+            log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
+            return;
+        }
         // 同时保存映射关系
         commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, Constants.SUPPLIER_NAME_LMM_TICKET, newScenic);
         // 更新备份
