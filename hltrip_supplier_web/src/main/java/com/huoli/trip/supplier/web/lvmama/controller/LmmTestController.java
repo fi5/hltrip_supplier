@@ -29,6 +29,18 @@ public class LmmTestController {
     @Autowired
     private LmmTicketTask lmmTicketTask;
 
+    @PostMapping(path = "/sync/product/add")
+    public DfyBaseResult syncProductAdd() {
+        lmmTicketTask.syncNewProduct();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/product/update")
+    public DfyBaseResult syncProductUpdate() {
+        lmmTicketTask.syncUpdateProduct();
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/scenic/add")
     public DfyBaseResult syncScenicAdd() {
         lmmTicketTask.syncNewScenic();
@@ -41,4 +53,33 @@ public class LmmTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/product/update/v2")
+    public DfyBaseResult syncProductUpdateV2() {
+        lmmTicketTask.syncUpdateProductV2();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/scenic/update/v2")
+    public DfyBaseResult syncScenicUpdateV2() {
+        lmmTicketTask.syncUpdateScenicV2();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/goods/update/id/v2")
+    public DfyBaseResult syncGoodsUpdateByIdV2(@RequestBody String goodsId) {
+        lmmSyncService.syncGoodsListByIdV2(goodsId);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/product/update/id/v2")
+    public DfyBaseResult syncProductUpdateByIdV2(@RequestBody String productId) {
+        lmmSyncService.syncProductListByIdV2(productId);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/scenic/update/id/v2")
+    public DfyBaseResult syncScenicUpdateByIdV2(@RequestBody String scenicId) {
+        lmmSyncService.syncScenicListByIdV2(scenicId);
+        return DfyBaseResult.success();
+    }
 }
