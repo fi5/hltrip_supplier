@@ -117,6 +117,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 productItemDao.updateByCode(newProductItem);
                 // 拿到最新的景点
                 oldProductItem = productItemDao.selectByCode(newProductItem.getCode());
+            } else {
+                productItemDao.updateItemCoordinateByCode(oldProductItem.getCode(), newProductItem.getItemCoordinate());
             }
             List<DfyTicket> allTickets = Lists.newArrayList();
             if(ListUtils.isNotEmpty(scenicDetail.getTicketList())){

@@ -82,4 +82,11 @@ public class ProductItemDaoImpl implements ProductItemDao {
         return null;
     }
 
+    @Override
+    public void updateItemCoordinateByCode(String code, Double[] itemCoordinate){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("code").is(code));
+        mongoTemplate.updateFirst(query, Update.update("itemCoordinate", itemCoordinate), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
+    }
+
 }
