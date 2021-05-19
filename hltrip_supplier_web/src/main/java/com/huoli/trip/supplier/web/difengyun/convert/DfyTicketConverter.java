@@ -82,11 +82,8 @@ public class DfyTicketConverter {
             try {
                 String[] gaodeArr = scenicDetail.getGlocation().split(",");
                 if(gaodeArr.length == 2){
-                    double[] coordinateArr = CoordinateUtil.gps84_To_Gcj02(Double.valueOf(gaodeArr[0]), Double.valueOf(gaodeArr[1]));
-                    if(coordinateArr != null && coordinateArr.length == 2){
-                        Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
-                        productItemPO.setItemCoordinate(coordinate);
-                    }
+                    Double[] coordinate = new Double[]{Double.valueOf(gaodeArr[1]), Double.valueOf(gaodeArr[0])};
+                    productItemPO.setItemCoordinate(coordinate);
                 }
             } catch (Exception e) {
                 log.error("转换坐标失败，不影响继续执行，", e);
