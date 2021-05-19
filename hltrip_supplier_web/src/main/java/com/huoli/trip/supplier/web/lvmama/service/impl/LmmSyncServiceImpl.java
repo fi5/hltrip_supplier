@@ -1154,6 +1154,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     private void syncScenic(LmmScenic lmmScenic){
         // 转本地结构
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
+        if(StringUtils.isBlank(newScenic.getCity())){
+            log.error("驴妈妈景点[{}],[{}]没有城市v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName());
+            return;
+        }
         // 设置省市区
         commonService.setCity(newScenic);
         // 同时保存映射关系
