@@ -499,7 +499,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 return;
             }
             p.getGoodsList().getGoods().forEach(g -> {
-                if(ListUtils.isEmpty(g.getPrices())){
+                if(ListUtils.isEmpty(g.getPrices().getPrice())){
                     return;
                 }
                 String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, g.getGoodsId());
@@ -509,7 +509,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     return;
                 }
                 List<PriceInfoPO> priceInfoPOs = Lists.newArrayList();
-                g.getPrices().forEach(price -> {
+                g.getPrices().getPrice().forEach(price -> {
                     PriceInfoPO priceInfoPO = new PriceInfoPO();
                     priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(price.getDate())));
                     if(price.getB2bPrice() != null){
@@ -993,10 +993,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         return;
                     }
                     p.getGoodsList().getGoods().forEach(gl -> {
-                        if(ListUtils.isEmpty(gl.getPrices())){
+                        if(ListUtils.isEmpty(gl.getPrices().getPrice())){
                             return;
                         }
-                        gl.getPrices().forEach(price -> {
+                        gl.getPrices().getPrice().forEach(price -> {
                             ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
                             scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                             scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
