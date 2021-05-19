@@ -9,10 +9,7 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
@@ -69,8 +66,31 @@ public class DfyTicketConverter {
         productItemPO.setOriCity(scenicDetail.getCityName());
         productItemPO.setProvince(scenicDetail.getProvinceName());
         if(StringUtils.isNotBlank(scenicDetail.getBlocation())){
-            productItemPO.setItemCoordinate(Arrays.asList(scenicDetail.getBlocation().split(",")).stream().map(l ->
-                    Double.valueOf(l)).collect(Collectors.toList()).toArray(new Double[]{}));
+            try {
+                String[] baiduArr = scenicDetail.getBlocation().split(",");
+                if(baiduArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(baiduArr[0]), Double.valueOf(baiduArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                        productItemPO.setItemCoordinate(coordinate);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
+        } else if(StringUtils.isNotBlank(scenicDetail.getGlocation())){
+            try {
+                String[] gaodeArr = scenicDetail.getGlocation().split(",");
+                if(gaodeArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.gps84_To_Gcj02(Double.valueOf(gaodeArr[0]), Double.valueOf(gaodeArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                        productItemPO.setItemCoordinate(coordinate);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
         }
         productItemPO.setBusinessHours(scenicDetail.getOpenTime());
         productItemPO.setAddress(scenicDetail.getScenicAddress());
