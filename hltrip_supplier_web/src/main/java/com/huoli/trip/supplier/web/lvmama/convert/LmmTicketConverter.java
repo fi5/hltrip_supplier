@@ -364,16 +364,23 @@ public class LmmTicketConverter {
         return scenicSpotMPO;
     }
 
-    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate){
-        if(lmmCoordinate == null || lmmCoordinate.getLatitude() == null || lmmCoordinate.getLongitude() == null){
-            return null;
-        }
-        double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
-        if(coordinateArr != null && coordinateArr.length == 2){
-            Coordinate coordinate = new Coordinate();
-            coordinate.setLatitude(coordinateArr[0]);
-            coordinate.setLongitude(coordinateArr[1]);
-            return coordinate;
+    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate, String map){
+        if(lmmCoordinate != null){
+            try {
+                Coordinate coordinate = new Coordinate();
+                double[] coordinateArr = null;
+                if(StringUtils.equals("bd", map)){
+                    coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
+                } else if(StringUtils.equals("gg", map)){
+                    coordinateArr = CoordinateUtil.gps84_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
+                }
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    coordinate.setLatitude(coordinateArr[0]);
+                    coordinate.setLongitude(coordinateArr[1]);
+                    return coordinate;
+                }
+            } catch (Exception e) {
+            }
         }
         return null;
     }
