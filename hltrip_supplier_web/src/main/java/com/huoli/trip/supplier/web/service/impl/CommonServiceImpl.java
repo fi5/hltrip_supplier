@@ -705,12 +705,12 @@ public class CommonServiceImpl implements CommonService {
             scenicSpotBackupMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             scenicSpotBackupMPO.setSupplierId(channel);
             scenicSpotBackupMPO.setSupplierScenicId(channelScenicId);
-            scenicSpotBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotBackupMPO.setCreateTime(new Date());
             log.info("创建新的景点备份，scenicId={}, name={}, channel={}，channelScenicId={}", newScenic.getId(), newScenic.getName(), channel, channelScenicId);
         }
         scenicSpotBackupMPO.setScenicSpotMPO(newScenic);
         scenicSpotBackupMPO.setOriginContent(JSON.toJSONString(origin));
-        scenicSpotBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotBackupMPO.setUpdateTime(new Date());
         scenicSpotBackupDao.saveScenicSpotBackup(scenicSpotBackupMPO);
         log.info("景点副本保存成功id={}", scenicSpotBackupMPO.getId());
     }
@@ -739,11 +739,11 @@ public class CommonServiceImpl implements CommonService {
             poiReviewMPO.setChannelName(channelName);
             poiReviewMPO.setPoiName(newScenic.getName());
             poiReviewMPO.setStatus(0);
-            poiReviewMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setCreateTime(new Date());
             poiReviewMPO.setCityName(newScenic.getCity());
             poiReviewMPO.setPoiId(newScenic.getId());
             poiReviewMPO.setPoiType(0);
-            poiReviewMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setUpdateTime(new Date());
             poiReviewDao.addPoiReview(poiReviewMPO);
             log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
         } else {
@@ -755,8 +755,8 @@ public class CommonServiceImpl implements CommonService {
         scenicSpotMappingMPO.setChannelScenicSpotId(channelScenicId);
         scenicSpotMappingMPO.setScenicSpotId(scenicId);
         scenicSpotMappingMPO.setChannel(channel);
-        scenicSpotMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        scenicSpotMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotMappingMPO.setCreateTime(new Date());
+        scenicSpotMappingMPO.setUpdateTime(new Date());
         scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
         log.info("{}景点{}已关联本地景点id={}", channel, channelScenicId, newScenic.getId());
     }
@@ -774,8 +774,8 @@ public class CommonServiceImpl implements CommonService {
         HotelMPO existHotel = hotelDao.getHotelByNameAndAddress(hotelMPO.getName(), hotelMPO.getAddress());
         String hotelId;
         if(existHotel == null){
-            hotelMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-            hotelMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            hotelMPO.setCreateTime(new Date());
+            hotelMPO.setUpdateTime(new Date());
             hotelMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_HOTEL)));
             // 没有找到映射就往本地新增一条
             hotelDao.addHotel(hotelMPO);
@@ -787,11 +787,11 @@ public class CommonServiceImpl implements CommonService {
             poiReviewMPO.setChannelName(channelName);
             poiReviewMPO.setPoiName(hotelMPO.getName());
             poiReviewMPO.setStatus(0);
-            poiReviewMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setCreateTime(new Date());
             poiReviewMPO.setCityName(hotelMPO.getCity());
             poiReviewMPO.setPoiId(hotelMPO.getId());
             poiReviewMPO.setPoiType(1);
-            poiReviewMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            poiReviewMPO.setUpdateTime(new Date());
             poiReviewDao.addPoiReview(poiReviewMPO);
             log.info("不存在同名同址酒店，添加新的酒店记录和申请单，酒店id={}，申请单id={}", hotelId, poiReviewMPO.getId());
         } else {
@@ -803,8 +803,8 @@ public class CommonServiceImpl implements CommonService {
         hotelMappingMPO.setChannelHotelId(channelHotelId);
         hotelMappingMPO.setHotelId(hotelId);
         hotelMappingMPO.setChannel(channel);
-        hotelMappingMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        hotelMappingMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        hotelMappingMPO.setCreateTime(new Date());
+        hotelMappingMPO.setUpdateTime(new Date());
         hotelMappingDao.addHotelMapping(hotelMappingMPO);
         log.info("{}酒店{}已关联本地酒店id={}", channel, channelHotelId, hotelMPO.getId());
     }
@@ -835,7 +835,7 @@ public class CommonServiceImpl implements CommonService {
             if(groupTourProductMPO == null ){
                 groupTourProductMPO = new GroupTourProductMPO();
                 groupTourProductMPO.setId(getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
-                groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                groupTourProductMPO.setCreateTime(new Date());
                 add = true;
             }
             groupTourProductMPO.setSupplierProductId(productPO.getSupplierProductId());
@@ -870,7 +870,7 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setGoTraffic(productPO.getGoTraffic() == null ? null : productPO.getGoTraffic().toString());
             groupTourProductMPO.setBackTraffice(productPO.getReturnTraffic() == null ? null : productPO.getReturnTraffic().toString());
             groupTourProductMPO.setIsDel(0);
-            groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            groupTourProductMPO.setUpdateTime(new Date());
             if(StringUtils.isNotBlank(productPO.getOriCity())){
                 groupTourProductMPO.setDepInfos(Arrays.asList(productPO.getOriCity().split(",")).stream().map(c ->
                         setCity(null, c, null)).filter(c -> StringUtils.isNotBlank(c.getCityCode())).collect(Collectors.toList()));
@@ -1132,13 +1132,13 @@ public class CommonServiceImpl implements CommonService {
                 scenicSpotOpenTime.setTimeDesc(productItemPO.getBusinessHours());
                 scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
             }
-            scenicSpotMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotMPO.setCreateTime(new Date());
             scenicSpotMPO.setProposalPlayTime(productItemPO.getSuggestPlaytime());
             scenicSpotMPO.setOperatingStatus(1);
             scenicSpotMPO.setSpotOfficialWeb(productItemPO.getWebsite());
             scenicSpotMPO.setStatus(1);
             scenicSpotMPO.setTages(productItemPO.getTags());
-            scenicSpotMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotMPO.setUpdateTime(new Date());
             // 同时保存映射关系
             updateScenicSpotMapping(productItemPO.getCode(), productItemPO.getSupplierId(), "晟和", scenicSpotMPO);
             // 更新备份
@@ -1173,7 +1173,7 @@ public class CommonServiceImpl implements CommonService {
                 ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), scenicSpotProductMPO.getId());
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
-                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setCreateTime(new Date());
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(scenicSpotProductMPO.getId());
                     noticeMPO.setChannel(scenicSpotProductMPO.getChannel());
@@ -1184,7 +1184,7 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setType(0);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
-                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                noticeMPO.setUpdateTime(new Date());
                 if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
                     noticeMPO.setProductImageUrl(scenicSpotProductMPO.getImages().get(0));
                 }
@@ -1268,7 +1268,7 @@ public class CommonServiceImpl implements CommonService {
                 ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(0, subscribe.getUserId(), productMPO.getId());
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
-                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setCreateTime(new Date());
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(productMPO.getId());
                     noticeMPO.setChannel(productMPO.getChannel());
@@ -1279,7 +1279,7 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setType(2);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
-                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                noticeMPO.setUpdateTime(new Date());
                 if(ListUtils.isNotEmpty(productMPO.getImages())){
                     noticeMPO.setProductImageUrl(productMPO.getImages().get(0));
                 }
@@ -1327,7 +1327,7 @@ public class CommonServiceImpl implements CommonService {
                 ProductUpdateNoticeMPO noticeMPO = productUpdateNoticeDao.getUnreadNotice(1, subscribe.getUserId(), groupTourProductMPO.getId());
                 if(noticeMPO == null){
                     noticeMPO = new ProductUpdateNoticeMPO();
-                    noticeMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    noticeMPO.setCreateTime(new Date());
                     noticeMPO.setId(getId(BizTagConst.BIZ_SUBSCRIBE_PRODUCT));
                     noticeMPO.setProductId(groupTourProductMPO.getId());
                     noticeMPO.setChannel(groupTourProductMPO.getChannel());
@@ -1338,7 +1338,7 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setType(1);
                     noticeMPO.setUserId(subscribe.getUserId());
                 }
-                noticeMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                noticeMPO.setUpdateTime(new Date());
                 if(ListUtils.isNotEmpty(groupTourProductMPO.getImages())){
                     noticeMPO.setProductImageUrl(groupTourProductMPO.getImages().get(0));
                 }

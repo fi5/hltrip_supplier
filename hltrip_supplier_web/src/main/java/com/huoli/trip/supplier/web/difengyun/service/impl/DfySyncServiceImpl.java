@@ -752,7 +752,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                scenicSpotProductMPO.setCreateTime(new Date());
                 scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
                 if(ListUtils.isNotEmpty(scenicSpotMPO.getImages())){
                     scenicSpotProductMPO.setImages(scenicSpotMPO.getImages());
@@ -792,7 +792,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
             }
             // 默认未删除
-            scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotProductMPO.setUpdateTime(new Date());
             // 目前更新供应商端信息全覆盖
             scenicSpotProductMPO.setName(dfyTicketDetail.getProductName());
             // 基础设置
@@ -802,7 +802,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                 baseSetting.setAppSource(backChannelEntry.getAppSource());
             }
             // 默认当前
-            baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            baseSetting.setLaunchDateTime(new Date());
             // 默认及时
             baseSetting.setLaunchType(1);
             baseSetting.setStockCount(0);
@@ -948,7 +948,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setIsCouponRule(0);
             ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
             ruleMPO.setValid(1);
-            ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            ruleMPO.setCreateTime(new Date());
         } else {
             ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
         }
@@ -1071,7 +1071,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
         }
 
-        ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        ruleMPO.setUpdateTime(new Date());
         if(scenicSpotProductBackupMPO != null){
             List<String> changedFields = Lists.newArrayList();
             DfyTicketDetail backup = JSON.parseObject(scenicSpotProductBackupMPO.getOriginContent(), DfyTicketDetail.class);
@@ -1183,7 +1183,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         if(groupTourProductMPO == null ){
             groupTourProductMPO = new GroupTourProductMPO();
             groupTourProductMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
-            groupTourProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            groupTourProductMPO.setCreateTime(new Date());
             groupTourProductMPO.setSupplierProductId(productId);
             groupTourProductMPO.setMerchantCode(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
@@ -1236,7 +1236,7 @@ public class DfySyncServiceImpl implements DfySyncService {
         groupTourProductMPO.setGoTraffic(goTfc == null ? null : goTfc.toString());
         groupTourProductMPO.setBackTraffice(backTfc == null ? null : backTfc.toString());
         groupTourProductMPO.setIsDel(0);
-        groupTourProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        groupTourProductMPO.setUpdateTime(new Date());
         setCity(groupTourProductMPO, dfyToursDetail);
         GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
         productPayInfo.setSellType(1);

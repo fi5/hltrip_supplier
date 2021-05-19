@@ -578,7 +578,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             scenicSpotProductMPO = new ScenicSpotProductMPO();
             scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-            scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            scenicSpotProductMPO.setCreateTime(new Date());
             scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
             scenicSpotProductMPO.setIsDel(0);
             scenicSpotProductMPO.setSellType(1);
@@ -627,7 +627,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
         }
         scenicSpotProductMPO.setName(ycfProduct.getProductName());
-        scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        scenicSpotProductMPO.setUpdateTime(new Date());
         ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
         if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
             transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
@@ -639,9 +639,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             baseSetting.setAppSource(backChannelEntry.getAppSource());
         }
         // 默认当前
-        baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        baseSetting.setLaunchDateTime(new Date());
         if(StringUtils.isNotBlank(ycfProduct.getStartDate())){
-            baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(ycfProduct.getStartDate())));
+            baseSetting.setLaunchDateTime(DateTimeUtil.parseDate(ycfProduct.getStartDate()));
         }
         // 默认及时
         baseSetting.setLaunchType(1);
@@ -838,7 +838,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(hotelScenicSpotProductMPO == null){
             hotelScenicSpotProductMPO = new HotelScenicSpotProductMPO();
             hotelScenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
-            hotelScenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+            hotelScenicSpotProductMPO.setCreateTime(new Date());
             hotelScenicSpotProductMPO.setIsDel(0);
             hotelScenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
             hotelScenicSpotProductMPO.setMerchantCode(ycfProduct.getProductID());
@@ -1086,7 +1086,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }).collect(Collectors.toList()));
         }
         hotelScenicSpotProductMPO.setProductName(ycfProduct.getProductName());
-        hotelScenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        hotelScenicSpotProductMPO.setUpdateTime(new Date());
 
         if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
             hotelScenicSpotProductMPO.setStatus(1);
@@ -1099,8 +1099,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
         hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
         hotelScenicSpotProductBackupMPO.setSupplierProductId(ycfProduct.getProductID());
-        hotelScenicSpotProductBackupMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        hotelScenicSpotProductBackupMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+        hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
+        hotelScenicSpotProductBackupMPO.setUpdateTime(new Date());
         hotelScenicSpotProductBackupMPO.setProductMPO(hotelScenicSpotProductMPO);
         hotelScenicSpotProductBackupMPO.setSetMealMPO(setMealMPO);
         hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));

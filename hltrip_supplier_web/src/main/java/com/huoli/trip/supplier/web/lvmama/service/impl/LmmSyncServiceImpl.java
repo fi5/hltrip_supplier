@@ -624,7 +624,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                     scenicSpotProductMPO = new ScenicSpotProductMPO();
                     scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                    scenicSpotProductMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                    scenicSpotProductMPO.setCreateTime(new Date());
                     scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
                     scenicSpotProductMPO.setIsDel(0);
                     scenicSpotProductMPO.setSellType(1);
@@ -718,7 +718,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 } else {
                     scenicSpotProductMPO.setStatus(3);
                 }
-                scenicSpotProductMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                scenicSpotProductMPO.setUpdateTime(new Date());
                 // 目前更新供应商端信息全覆盖
                 scenicSpotProductMPO.setName(g.getGoodsName());
                 // 基础设置
@@ -728,7 +728,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     baseSetting.setAppSource(backChannelEntry.getAppSource());
                 }
                 // 默认当前
-                baseSetting.setLaunchDateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                baseSetting.setLaunchDateTime(new Date());
                 // 默认及时
                 baseSetting.setLaunchType(1);
                 baseSetting.setStockCount(0);
@@ -933,8 +933,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                 }
                 ruleMPO.setInAddress(g.getVisitAddress());
-                ruleMPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                ruleMPO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                ruleMPO.setCreateTime(new Date());
+                ruleMPO.setUpdateTime(new Date());
                 ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
                 ruleMPO.setValid(1);
                 if(backupMPO != null){
