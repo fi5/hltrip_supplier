@@ -8,6 +8,7 @@ import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
@@ -101,11 +102,23 @@ public class LmmTicketConverter {
         productItemPO.setProvince(lmmScenic.getPlaceProvince());
         productItemPO.setCountry(lmmScenic.getPlaceCountry());
         if(lmmScenic.getBaiduData() != null){
-            List<Double> coordinate = Lists.newArrayList(lmmScenic.getBaiduData().getLongitude(), lmmScenic.getBaiduData().getLatitude());
-            productItemPO.setItemCoordinate(coordinate.toArray(new Double[]{}));
+            try {
+                double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmScenic.getBaiduData().getLatitude(), lmmScenic.getBaiduData().getLongitude());
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                    productItemPO.setItemCoordinate(coordinate);
+                }
+            } catch (Exception e) {
+            }
         } else if(lmmScenic.getGoogleData() != null){
-            List<Double> coordinate = Lists.newArrayList(lmmScenic.getGoogleData().getLongitude(), lmmScenic.getGoogleData().getLatitude());
-            productItemPO.setItemCoordinate(coordinate.toArray(new Double[]{}));
+            try {
+                double[] coordinateArr = CoordinateUtil.gps84_To_Gcj02(lmmScenic.getGoogleData().getLatitude(), lmmScenic.getGoogleData().getLongitude());
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                    productItemPO.setItemCoordinate(coordinate);
+                }
+            } catch (Exception e) {
+            }
         }
         return productItemPO;
     }
