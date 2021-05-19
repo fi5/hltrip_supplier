@@ -27,11 +27,11 @@ public class LmmPriceProduct {
      */
     private String productStatus;
 
-    private List<LmmPriceGoods> goodsList;
+    private LmmGoodsList goodsList;
 
     @Getter
     @Setter
-    public class LmmPriceGoods{
+    public static class LmmPriceGoods{
 
         /**
          * 商品 Id
@@ -57,5 +57,11 @@ public class LmmPriceProduct {
          * 价格
          */
         private List<LmmPrice> prices;
+    }
+
+    @Getter
+    @Setter
+    public static class LmmGoodsList{
+        private List<LmmPriceGoods> goods;
     }
 }
