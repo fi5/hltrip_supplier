@@ -102,7 +102,7 @@ public class LmmProduct {
 
     @Setter
     @Getter
-    public class Post{
+    public static class Post{
         /**
          * 公告内容
          */
@@ -121,7 +121,7 @@ public class LmmProduct {
 
     @Getter
     @Setter
-    public class BookInfo{
+    public static class BookInfo{
 
         /**
          * 免票政策
@@ -151,7 +151,7 @@ public class LmmProduct {
 
     @Getter
     @Setter
-    public class PlayAttraction{
+    public static class PlayAttraction{
         /**
          * 游玩景点
          */

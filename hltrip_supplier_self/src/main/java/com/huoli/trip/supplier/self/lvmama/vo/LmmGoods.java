@@ -198,7 +198,7 @@ public class LmmGoods {
      */
     @Getter
     @Setter
-    public class Traveller{
+    public static class Traveller{
         /**
          * 游玩人姓名
          */
@@ -235,7 +235,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class Booker{
+    public static class Booker{
         /**
          * 名字是否必须填
          */
@@ -254,7 +254,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class Limitation{
+    public static class Limitation{
         /**
          * 限制类型，手机号、身份证限购
          * phoneNum 代表手机号，
@@ -318,7 +318,7 @@ public class LmmGoods {
     
     @Getter
     @Setter
-    public class Notice{
+    public static class Notice{
 
         /**
          * 取票时间(入园 须知内容项)
@@ -348,7 +348,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class PassLimit{
+    public static class PassLimit{
 
         private String goodsName;
 
@@ -357,7 +357,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class EnterLimit{
+    public static class EnterLimit{
         /**
          * 是否有入园限制
          */
@@ -371,7 +371,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class Rule{
+    public static class Rule{
         /**
          * 是否可退
          */
@@ -401,7 +401,7 @@ public class LmmGoods {
 
     @Getter
     @Setter
-    public class PassTimeLimit{
+    public static class PassTimeLimit{
 
         private List<PassLimit> passLimit;
     }

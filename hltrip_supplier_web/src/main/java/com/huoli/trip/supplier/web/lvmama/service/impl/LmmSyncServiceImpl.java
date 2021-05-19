@@ -454,7 +454,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         || backChannelEntry.getStatus() != 1){
                     newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
                 }
-                if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                if(backChannelEntry != null && StringUtils.isNotBlank(backChannelEntry.getAppSource())){
                     List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
                     newProduct.setAppFrom(appFroms);
                 }
