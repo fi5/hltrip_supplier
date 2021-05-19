@@ -352,7 +352,11 @@ public class LmmTicketConverter {
         scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
         scenicSpotMPO.setName(lmmScenic.getScenicName());
         scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());
-        scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData()));
+        if(lmmScenic.getBaiduData() != null){
+            scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData(), "bd"));
+        } else if (lmmScenic.getGoogleData() != null){
+            scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getGoogleData(), "gg"));
+        }
         scenicSpotMPO.setCountry(lmmScenic.getPlaceCountry());
         scenicSpotMPO.setProvince(lmmScenic.getPlaceProvince());
         scenicSpotMPO.setLevel(lmmScenic.getPlaceLevel());
