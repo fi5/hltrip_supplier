@@ -19,7 +19,7 @@ public class LmmGoodsListByIdResponse extends LmmListBaseResponse{
 
 
     /**
-     * 产品
+     * 商品
      */
     private List<LmmGoods> goodsList;
 

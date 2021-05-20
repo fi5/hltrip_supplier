@@ -83,12 +83,12 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             }
 
             @Override
-            public OrderResponse cancelOrder(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId) {
+            public OrderResponse cancelOrder(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId) {
+            public LmmBaseResponse refundTicket(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
 

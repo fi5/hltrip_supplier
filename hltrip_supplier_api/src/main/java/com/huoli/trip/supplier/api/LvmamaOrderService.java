@@ -63,4 +63,11 @@ public interface LvmamaOrderService {
      */
     LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request);
 
+    /**
+     * 重发凭证
+     * @param request
+     * @return
+     */
+    LmmBaseResponse resendCode(LmmResendCodeRequest request);
+
 }

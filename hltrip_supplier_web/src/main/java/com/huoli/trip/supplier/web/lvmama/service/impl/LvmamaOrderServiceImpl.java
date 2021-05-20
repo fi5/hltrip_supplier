@@ -65,7 +65,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
             reqInnerOrder.setPartnerOrderNos(request.getOrderId());
             lmmDetailReq.setOrder(reqInnerOrder);
 
-            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(getRequest(request));
+            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(getRequest(lmmDetailReq));
             LvOrderDetail detail=lmmOrderDetailResponse.getOrder();
             String gjStatus="待确认";
             if(StringUtils.equals(detail.getPaymentStatus(),"PAYED")){
@@ -225,6 +225,12 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     public LmmBaseResponse refundTicket(OrderCancelRequest request) {
         return iLvmamaClient.refundTicket(request.getPartnerOrderNo(), request.getOrderId());
     }
+
+    @Override
+    public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+        return iLvmamaClient.resendCode(getRequest(request));
+    }
+
 
     private <T> String getRequest(T obj){
         LmmBodyRequest<T> bodyRequest = new LmmBodyRequest<>();

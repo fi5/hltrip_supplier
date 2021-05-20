@@ -63,7 +63,7 @@ public interface ILvmamaClient {
     /**
      * 订单详情
      */
-    @RequestMapping(method = RequestMethod.GET,path = "/getOrderInfo")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestParam("request") String request);
 
     /**
@@ -86,18 +86,19 @@ public interface ILvmamaClient {
     /**
      * 申请取消订单
      */
-    @RequestMapping(method = RequestMethod.GET,path = "/orderUnpaidCancel")
-    OrderResponse cancelOrder(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/orderUnpaidCancel")
+    OrderResponse cancelOrder(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId);
 
     /**
      * 退票申请
      */
-    @RequestMapping(method = RequestMethod.GET,path = "/orderCancel")
-    LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/orderCancel")
+    LmmBaseResponse refundTicket(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId);
 
     /**
-     * 退票申请
+     * 重发凭证
      */
     @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/resendCode")
     LmmBaseResponse resendCode(@RequestParam("request") String request);
+
 }
