@@ -93,11 +93,11 @@ public interface ILvmamaClient {
      * 退票申请
      */
     @RequestMapping(method = RequestMethod.GET,path = "/orderCancel")
-    LmmBaseResponse rufundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId));
+    LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
 
     /**
      * 退票申请
      */
     @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/resendCode")
-    LmmBaseResponse resendCode(LmmResendCodeRequest request);
+    LmmBaseResponse resendCode(@RequestParam("request") String request);
 }

@@ -93,7 +93,7 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             }
 
             @Override
-            public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+            public LmmBaseResponse resendCode(@RequestParam("request") String request){
                 return null;
             }
         };
