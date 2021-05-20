@@ -91,6 +91,11 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             public LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
+
+            @Override
+            public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+                return null;
+            }
         };
     }
 }

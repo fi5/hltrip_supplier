@@ -63,35 +63,41 @@ public interface ILvmamaClient {
     /**
      * 订单详情
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
+    @RequestMapping(method = RequestMethod.GET,path = "/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestParam("request") String request);
 
     /**
      * 可预订检查
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/validateOrder")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/validateOrder")
     LmmBaseResponse getCheckInfos(@RequestParam("request") String request);
     /**
      * 支付订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderPayment")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/orderPayment")
     OrderResponse payOrder(@RequestParam("request") String request);
 
     /**
      * 创建订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/createOrder")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/createOrder")
     OrderResponse createOrder(@RequestParam("request") String request);
 
     /**
      * 申请取消订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderUnpaidCancel")
+    @RequestMapping(method = RequestMethod.GET,path = "/orderUnpaidCancel")
     OrderResponse cancelOrder(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
 
     /**
      * 退票申请
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderCancel")
-    LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
+    @RequestMapping(method = RequestMethod.GET,path = "/orderCancel")
+    LmmBaseResponse rufundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId));
+
+    /**
+     * 退票申请
+     */
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/resendCode")
+    LmmBaseResponse resendCode(LmmResendCodeRequest request);
 }

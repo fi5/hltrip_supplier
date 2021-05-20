@@ -11,11 +11,11 @@ import lombok.Data;
  */
 @Data
 public class OrderUnpaidCancelRequest extends LmmBaseRequest {
-    private String PartnerOrderNo;
+    private String partnerOrderNo;
     private String orderId;
 
     public OrderUnpaidCancelRequest(String partnerOrderNo, String orderId) {
-        PartnerOrderNo = partnerOrderNo;
+        this.partnerOrderNo = partnerOrderNo;
         this.orderId = orderId;
     }
 }
