@@ -63,37 +63,37 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             }
 
             @Override
-            public LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request) {
+            public LmmOrderDetailResponse orderDetail(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
+            public LmmBaseResponse getCheckInfos(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse payOrder(OrderPaymentRequest req) {
+            public OrderResponse payOrder(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse createOrder(CreateOrderRequest req) {
+            public OrderResponse createOrder(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse cancelOrder(OrderUnpaidCancelRequest req) {
+            public OrderResponse cancelOrder(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse rufundTicket(OrderCancelRequest request) {
+            public LmmBaseResponse refundTicket(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+            public LmmBaseResponse resendCode(@RequestParam("request") String request){
                 return null;
             }
         };

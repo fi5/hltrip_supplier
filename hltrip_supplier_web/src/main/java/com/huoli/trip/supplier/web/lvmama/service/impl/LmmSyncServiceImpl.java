@@ -186,13 +186,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     lmmGoodsListByIdResponse.getState().getSolution());
             return null;
         }
-        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodList())){
+        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodsList())){
             log.error("驴妈妈商品列表接口返回的数据为空");
             return null;
         }
         String str = removeCDATA(JSON.toJSONString(lmmGoodsListByIdResponse));
         lmmGoodsListByIdResponse = JSON.parseObject(str, LmmGoodsListByIdResponse.class);
-        return lmmGoodsListByIdResponse.getGoodList();
+        return lmmGoodsListByIdResponse.getGoodsList();
     }
 
     @Override

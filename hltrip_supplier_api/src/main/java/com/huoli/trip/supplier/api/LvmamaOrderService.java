@@ -47,7 +47,7 @@ public interface LvmamaOrderService {
      * @param request
      * @return
      */
-    LmmBaseResponse rufundTicket(OrderCancelRequest request);
+    LmmBaseResponse refundTicket(OrderCancelRequest request);
 
 	/**
      * 订单状态推送
@@ -62,5 +62,12 @@ public interface LvmamaOrderService {
      * @return
      */
     LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request);
+
+    /**
+     * 重发凭证
+     * @param request
+     * @return
+     */
+    LmmBaseResponse resendCode(LmmResendCodeRequest request);
 
 }
