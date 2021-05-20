@@ -404,6 +404,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return true;
     }
 
+    @Override
+    public boolean syncProductListById(String productId, int syncMode){
+        LmmProductListByIdRequest request = new LmmProductListByIdRequest();
+        request.setProductIds(productId);
+        return syncProductListById(request, syncMode);
+    }
 
     @Override
     public boolean syncGoodsListById(LmmGoodsListByIdRequest request, int syncMode){
@@ -423,6 +429,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             updateProduct(lmmProduct, v, syncMode);
         });
         return true;
+    }
+
+    @Override
+    public boolean syncGoodsListById(String goodsId, int syncMode){
+        LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
+        request.setGoodsIds(goodsId);
+        return syncGoodsListById(request, syncMode);
     }
 
     private void updateProduct(LmmProduct lmmProduct, List<LmmGoods> goodsList, int syncMode){
