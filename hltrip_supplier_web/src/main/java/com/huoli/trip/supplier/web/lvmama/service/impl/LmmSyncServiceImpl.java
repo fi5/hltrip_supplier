@@ -528,7 +528,16 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                     priceInfoPOs.add(priceInfoPO);
                 });
-                PricePO pricePO = new PricePO();
+                PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
+                if(pricePO == null){
+                    pricePO = new PricePO();
+                    pricePO.setProductCode(productPO.getCode());
+                    pricePO.setSupplierProductId(g.getGoodsId());
+                    pricePO.setOperator(Constants.SUPPLIER_CODE_LMM_TICKET);
+                    pricePO.setOperatorName(Constants.SUPPLIER_NAME_LMM_TICKET);
+                    pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                }
+                pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 pricePO.setPriceInfos(priceInfoPOs);
                 priceDao.updateByProductCode(pricePO);
             });
