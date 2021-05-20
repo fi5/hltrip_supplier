@@ -1,9 +1,12 @@
 package com.huoli.trip.supplier.web.lvmama.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
+import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,10 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/lmm/product")
 public class LmmProductController {
 
-    @PostMapping(path = "/receive")
-    public LmmBaseResponse productUpdate(@RequestBody LmmRefundPushRequest request) {
-        // todo 接收推送
-        log.info("：{}", JSONObject.toJSONString(request));
-        return null;
+    @Autowired
+    private LmmSyncService lmmSyncService;
+
+    @PostMapping(path = "/pushProductChangeInfo")
+    public LmmBaseResponse productUpdate(@RequestBody LmmProductPushRequest request) {
+        try {
+            lmmSyncService.pushUpdate(request);
+        } catch (Exception e){
+
+        }
+
+        return LmmBaseResponse.success();
     }
 }

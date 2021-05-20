@@ -15,4 +15,12 @@ import java.io.Serializable;
 @Data
 public class LmmBaseResponse implements Serializable {
     private State state;
+
+    public static LmmBaseResponse success(){
+        LmmBaseResponse response = new LmmBaseResponse();
+        State stateResponse = new State();
+        stateResponse.setCode("1000");
+        stateResponse.setMessage("接收成功");
+        return response;
+    }
 }

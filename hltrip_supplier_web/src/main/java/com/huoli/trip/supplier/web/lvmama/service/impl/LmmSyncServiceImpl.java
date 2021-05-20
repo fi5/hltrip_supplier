@@ -15,6 +15,7 @@ import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmGoodsListByIdResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmPriceResponse;
@@ -216,13 +217,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     lmmGoodsListByIdResponse.getState().getSolution());
             return null;
         }
-        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodList())){
+        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodsList())){
             log.error("驴妈妈商品列表接口返回的数据为空");
             return null;
         }
         String str = removeCDATA(JSON.toJSONString(lmmGoodsListByIdResponse));
         lmmGoodsListByIdResponse = JSON.parseObject(str, LmmGoodsListByIdResponse.class);
-        return lmmGoodsListByIdResponse.getGoodList();
+        return lmmGoodsListByIdResponse.getGoodsList();
     }
 
     @Override
@@ -614,9 +615,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     @Override
-    public boolean syncGoodsListByIdV2(String productIds){
+    public boolean syncGoodsListByIdV2(String goodsId){
         LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
-        request.setGoodsIds(productIds);
+        request.setGoodsIds(goodsId);
         return syncGoodsListByIdV2(request);
     }
 
@@ -1178,6 +1179,23 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     @Override
     public List<String> getSupplierProductIdsV2(){
         return scenicSpotProductDao.getSupplierProductIdByChannel(Constants.SUPPLIER_CODE_LMM_TICKET);
+    }
+
+    @Override
+    public void pushUpdate(LmmProductPushRequest request){
+        if(Arrays.asList("product_create", "product_info_change").contains(request.getChangeType())){
+            syncProductListByIdV2(request.getProductId().toString());
+        } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(request.getChangeType())){
+            syncGoodsListByIdV2(request.getGoodsId().toString());
+        } else if(StringUtils.equals("product_online", request.getChangeType())){
+
+        } else if(StringUtils.equals("product_offline", request.getChangeType())){
+
+        } else if(StringUtils.equals("goods_online", request.getChangeType())){
+
+        } else if(StringUtils.equals("goods_offline", request.getChangeType())){
+
+        }
     }
 
 }

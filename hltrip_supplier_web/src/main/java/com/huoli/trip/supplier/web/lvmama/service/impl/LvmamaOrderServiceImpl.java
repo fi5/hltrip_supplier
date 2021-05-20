@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
@@ -64,7 +65,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
             reqInnerOrder.setPartnerOrderNos(request.getOrderId());
             lmmDetailReq.setOrder(reqInnerOrder);
 
-            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(lmmDetailReq);
+            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(getRequest(request));
             LvOrderDetail detail=lmmOrderDetailResponse.getOrder();
             String gjStatus="待确认";
             if(StringUtils.equals(detail.getPaymentStatus(),"PAYED")){
@@ -202,27 +203,32 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
 
     @Override
     public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
-        return iLvmamaClient.getCheckInfos(request);
+        return iLvmamaClient.getCheckInfos(getRequest(request));
     }
 
     @Override
     public OrderResponse payOrder(OrderPaymentRequest request) {
-        return iLvmamaClient.payOrder(request);
+        return iLvmamaClient.payOrder(getRequest(request));
     }
 
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
-        return iLvmamaClient.createOrder(request);
+        return iLvmamaClient.createOrder(getRequest(request));
     }
 
     @Override
     public OrderResponse cancelOrder(OrderUnpaidCancelRequest request) {
-        return iLvmamaClient.cancelOrder(request);
+        return iLvmamaClient.cancelOrder(request.getPartnerOrderNo(), request.getOrderId());
     }
 
     @Override
-    public LmmBaseResponse rufundTicket(OrderCancelRequest request) {
-        return iLvmamaClient.rufundTicket(request);
+    public LmmBaseResponse refundTicket(OrderCancelRequest request) {
+        return iLvmamaClient.refundTicket(request.getPartnerOrderNo(), request.getOrderId());
     }
 
+    private <T> String getRequest(T obj){
+        LmmBodyRequest<T> bodyRequest = new LmmBodyRequest<>();
+        bodyRequest.setRequest(obj);
+        return JSON.toJSONString(bodyRequest);
+    }
 }

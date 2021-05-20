@@ -25,12 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ILvmamaClient {
 
     /**
-     * 订单详情
-     */
-    @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
-    LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request);
-
-    /**
      * 批量获取景区
      */
     @RequestMapping(method = RequestMethod.GET,path = "/scenic/product/distributorApi/2.0/api/ticketProd/scenicInfoListByPage")
@@ -67,31 +61,37 @@ public interface ILvmamaClient {
     LmmPriceResponse getPriceList(@RequestParam("goodsIds") String goodsIds, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate);
 
     /**
+     * 订单详情
+     */
+    @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
+    LmmOrderDetailResponse orderDetail(@RequestParam("request") String request);
+
+    /**
      * 可预订检查
      */
     @RequestMapping(method = RequestMethod.POST,path = "/validateOrder")
-    LmmBaseResponse getCheckInfos(@RequestBody ValidateOrderRequest request);
+    LmmBaseResponse getCheckInfos(@RequestParam("request") String request);
     /**
      * 支付订单
      */
     @RequestMapping(method = RequestMethod.POST,path = "/orderPayment")
-    OrderResponse payOrder(@RequestBody OrderPaymentRequest req);
+    OrderResponse payOrder(@RequestParam("request") String request);
 
     /**
      * 创建订单
      */
     @RequestMapping(method = RequestMethod.POST,path = "/createOrder")
-    OrderResponse createOrder(@RequestBody CreateOrderRequest req);
+    OrderResponse createOrder(@RequestParam("request") String request);
 
     /**
      * 申请取消订单
      */
     @RequestMapping(method = RequestMethod.POST,path = "/orderUnpaidCancel")
-    OrderResponse cancelOrder(OrderUnpaidCancelRequest req);
+    OrderResponse cancelOrder(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
 
     /**
      * 退票申请
      */
     @RequestMapping(method = RequestMethod.POST,path = "/orderCancel")
-    LmmBaseResponse rufundTicket(OrderCancelRequest request);
+    LmmBaseResponse refundTicket(@RequestParam("PartnerOrderNo") String PartnerOrderNo, @RequestParam("orderId") String orderId);
 }

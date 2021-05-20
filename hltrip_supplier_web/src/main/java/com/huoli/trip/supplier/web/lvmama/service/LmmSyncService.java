@@ -4,6 +4,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmPriceProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 
 import java.util.List;
@@ -215,5 +216,11 @@ public interface LmmSyncService {
      * @return
      */
     List<String> getSupplierProductIdsV2();
+
+    /**
+     * 接收产品推送
+     * @param request
+     */
+    void pushUpdate(LmmProductPushRequest request);
 
 }
