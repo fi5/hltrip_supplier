@@ -27,7 +27,7 @@ public interface ILvmamaClient {
     /**
      * 订单详情
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/getOrderInfo")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request);
 
     /**
@@ -69,29 +69,35 @@ public interface ILvmamaClient {
     /**
      * 可预订检查
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/validateOrder")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/validateOrder")
     LmmBaseResponse getCheckInfos(@RequestBody ValidateOrderRequest request);
     /**
      * 支付订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderPayment")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/orderPayment")
     OrderResponse payOrder(@RequestBody OrderPaymentRequest req);
 
     /**
      * 创建订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/createOrder")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/createOrder")
     OrderResponse createOrder(@RequestBody CreateOrderRequest req);
 
     /**
      * 申请取消订单
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderUnpaidCancel")
+    @RequestMapping(method = RequestMethod.GET,path = "/orderUnpaidCancel")
     OrderResponse cancelOrder(OrderUnpaidCancelRequest req);
 
     /**
      * 退票申请
      */
-    @RequestMapping(method = RequestMethod.POST,path = "/orderCancel")
+    @RequestMapping(method = RequestMethod.GET,path = "/orderCancel")
     LmmBaseResponse rufundTicket(OrderCancelRequest request);
+
+    /**
+     * 退票申请
+     */
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/resendCode")
+    LmmBaseResponse resendCode(LmmResendCodeRequest request);
 }

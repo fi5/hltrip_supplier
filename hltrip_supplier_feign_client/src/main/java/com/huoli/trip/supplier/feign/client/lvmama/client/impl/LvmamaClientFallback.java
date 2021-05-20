@@ -91,6 +91,11 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
             public LmmBaseResponse rufundTicket(OrderCancelRequest request) {
                 return null;
             }
+
+            @Override
+            public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+                return null;
+            }
         };
     }
 }
