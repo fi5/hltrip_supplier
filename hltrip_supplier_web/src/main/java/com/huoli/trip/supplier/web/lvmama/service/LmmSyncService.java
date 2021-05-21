@@ -114,10 +114,26 @@ public interface LmmSyncService {
     boolean syncProductListById(LmmProductListByIdRequest request, int syncMode);
 
     /**
+     * 同步产品
+     * @param productId
+     * @param syncMode
+     * @return
+     */
+    boolean syncProductListById(String productId, int syncMode);
+
+    /**
      * 同步商品
      * @param request
      * @param syncMode
      * @return
      */
     boolean syncGoodsListById(LmmGoodsListByIdRequest request, int syncMode);
+
+    /**
+     * 同步商品
+     * @param goodsId
+     * @param syncMode
+     * @return
+     */
+    boolean syncGoodsListById(String goodsId, int syncMode);
 }

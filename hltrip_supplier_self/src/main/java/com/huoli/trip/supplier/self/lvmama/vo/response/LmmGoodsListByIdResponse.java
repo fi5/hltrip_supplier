@@ -19,9 +19,9 @@ public class LmmGoodsListByIdResponse extends LmmListBaseResponse{
 
 
     /**
-     * 产品
+     * 商品
      */
-    private List<LmmGoods> goodList;
+    private List<LmmGoods> goodsList;
 
     /**
      * 不分销的id

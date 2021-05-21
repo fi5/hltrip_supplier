@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -32,62 +33,67 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
         return new ILvmamaClient() {
 
             @Override
-            public LmmScenicListResponse getScenicList(@RequestBody LmmScenicListRequest request){
+            public LmmScenicListResponse getScenicList(@RequestParam("currentPage") int currentPage){
                 return null;
             }
 
             @Override
-            public LmmScenicListResponse getScenicListById(@RequestBody LmmScenicListByIdRequest request){
+            public LmmScenicListResponse getScenicListById(@RequestParam("scenicId") String scenicId){
                 return null;
             }
 
             @Override
-            public LmmProductListResponse getProductList(@RequestBody LmmProductListRequest request){
+            public LmmProductListResponse getProductList(@RequestParam("currentPage") int currentPage){
                 return null;
             }
 
             @Override
-            public LmmProductListResponse getProductListById(@RequestBody LmmProductListByIdRequest request){
+            public LmmProductListResponse getProductListById(@RequestParam("productIds") String productIds){
                 return null;
             }
 
             @Override
-            public LmmGoodsListByIdResponse getGoodsListById(@RequestBody LmmGoodsListByIdRequest request){
+            public LmmGoodsListByIdResponse getGoodsListById(@RequestParam("goodsIds") String goodsIds){
                 return null;
             }
 
             @Override
-            public LmmPriceResponse getPriceList(@RequestBody LmmPriceRequest request){
+            public LmmPriceResponse getPriceList(@RequestParam("goodsIds") String goodsIds, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate){
                 return null;
             }
 
             @Override
-            public LmmOrderDetailResponse orderDetail(@RequestBody LmmOrderDetailRequest request) {
+            public LmmOrderDetailResponse orderDetail(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
+            public LmmBaseResponse getCheckInfos(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse payOrder(OrderPaymentRequest req) {
+            public OrderResponse payOrder(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse createOrder(CreateOrderRequest req) {
+            public OrderResponse createOrder(@RequestParam("request") String request) {
                 return null;
             }
 
             @Override
-            public OrderResponse cancelOrder(OrderUnpaidCancelRequest req) {
+            public OrderResponse cancelOrder(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
                 return null;
             }
 
             @Override
-            public LmmBaseResponse rufundTicket(OrderCancelRequest request) {
+            public LmmBaseResponse refundTicket(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
+                return null;
+            }
+
+            @Override
+            public LmmBaseResponse resendCode(@RequestParam("request") String request){
                 return null;
             }
         };

@@ -8,6 +8,7 @@ import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.util.CommonUtils;
+import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
@@ -101,11 +102,23 @@ public class LmmTicketConverter {
         productItemPO.setProvince(lmmScenic.getPlaceProvince());
         productItemPO.setCountry(lmmScenic.getPlaceCountry());
         if(lmmScenic.getBaiduData() != null){
-            List<Double> coordinate = Lists.newArrayList(lmmScenic.getBaiduData().getLongitude(), lmmScenic.getBaiduData().getLatitude());
-            productItemPO.setItemCoordinate(coordinate.toArray(new Double[]{}));
+            try {
+                double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmScenic.getBaiduData().getLatitude(), lmmScenic.getBaiduData().getLongitude());
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                    productItemPO.setItemCoordinate(coordinate);
+                }
+            } catch (Exception e) {
+            }
         } else if(lmmScenic.getGoogleData() != null){
-            List<Double> coordinate = Lists.newArrayList(lmmScenic.getGoogleData().getLongitude(), lmmScenic.getGoogleData().getLatitude());
-            productItemPO.setItemCoordinate(coordinate.toArray(new Double[]{}));
+            try {
+                double[] coordinateArr = CoordinateUtil.gps84_To_Gcj02(lmmScenic.getGoogleData().getLatitude(), lmmScenic.getGoogleData().getLongitude());
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
+                    productItemPO.setItemCoordinate(coordinate);
+                }
+            } catch (Exception e) {
+            }
         }
         return productItemPO;
     }
@@ -292,44 +305,62 @@ public class LmmTicketConverter {
         passenger.setRuleType("1");
         passenger.setPeopleLimit(2);
         if(goods.getTraveller() != null){
+            // 按最大范围取
+            if(StringUtils.equals(goods.getTraveller().getName(), "TRAV_NUM_ALL")
+                    || StringUtils.equals(goods.getTraveller().getMobile(), "TRAV_NUM_ALL")
+                    || StringUtils.equals(goods.getTraveller().getEmail(), "TRAV_NUM_ALL")
+                    || StringUtils.equals(goods.getTraveller().getCredentials(), "TRAV_NUM_ALL")
+                    || StringUtils.equals(goods.getTraveller().getEnName(), "TRAV_NUM_ALL")){
+                passenger.setPeopleLimit(0);
+            } else if(StringUtils.equals(goods.getTraveller().getName(), "TRAV_NUM_ONE")
+                    || StringUtils.equals(goods.getTraveller().getMobile(), "TRAV_NUM_ONE")
+                    || StringUtils.equals(goods.getTraveller().getEmail(), "TRAV_NUM_ONE")
+                    || StringUtils.equals(goods.getTraveller().getCredentials(), "TRAV_NUM_ONE")
+                    || StringUtils.equals(goods.getTraveller().getEnName(), "TRAV_NUM_ONE")){
+                passenger.setPeopleLimit(1);
+            }
             if(!StringUtils.equals(goods.getTraveller().getName(), "TRAV_NUM_NO")){
-                if(StringUtils.equals(goods.getTraveller().getName(), "TRAV_NUM_ONE")){
-                    passenger.setPeopleLimit(1);
-                } else {
-                    passenger.setPeopleLimit(0);
-                }
-                passenger.setEmail(true);
-                passenger.setPhone(true);
                 passenger.setCnName(true);
+            }
+            if(!StringUtils.equals(goods.getTraveller().getEnName(), "TRAV_NUM_NO")){
                 passenger.setEnName(true);
+            }
+            if(!StringUtils.equals(goods.getTraveller().getEmail(), "TRAV_NUM_NO")){
+                passenger.setEmail(true);
+            }
+            if(!StringUtils.equals(goods.getTraveller().getMobile(), "TRAV_NUM_NO")){
+                passenger.setPhone(true);
+            }
+            if(!StringUtils.equals(goods.getTraveller().getCredentials(), "TRAV_NUM_NO")){
                 passenger.setCredential(true);
-                if(StringUtils.isNotBlank(goods.getTraveller().getCredentialsType())){
-                    passenger.setCredentials(Arrays.asList(goods.getTraveller().getCredentialsType().split("-")).stream().map(t -> {
-                        switch (t) {
-                            case "ID_CARD":
-                              return Certificate.ID_CARD.getCode();
-                            case "HUZHAO":
-                                return Certificate.PASSPORT.getCode();
-                            case "GANGAO":
-                                return Certificate.HKM_PASS.getCode();
-                            case "TAIBAO":
-                                return Certificate.TW_PASS.getCode();
-                            case "TAIBAOZHENG":
-                                return Certificate.TW_CARD.getCode();
-                            case "CHUSHENGZHENGMING":
-                            case "HUKOUBO":
-                                return Certificate.OTHER.getCode();
-                            case "SHIBING":
-                                return Certificate.SOLDIERS.getCode();
-                            case "JUNGUAN":
-                                return Certificate.OFFICER.getCode();
-                            case "HUIXIANG":
-                                return Certificate.HOME_CARD.getCode();
-                            default:
-                                return Certificate.ID_CARD.getCode();
-                        }
-                    }).collect(Collectors.toList()));
-                }
+            }
+
+            if(StringUtils.isNotBlank(goods.getTraveller().getCredentialsType())){
+                passenger.setCredentials(Arrays.asList(goods.getTraveller().getCredentialsType().split("-")).stream().map(t -> {
+                    switch (t) {
+                        case "ID_CARD":
+                          return Certificate.ID_CARD.getCode();
+                        case "HUZHAO":
+                            return Certificate.PASSPORT.getCode();
+                        case "GANGAO":
+                            return Certificate.HKM_PASS.getCode();
+                        case "TAIBAO":
+                            return Certificate.TW_PASS.getCode();
+                        case "TAIBAOZHENG":
+                            return Certificate.TW_CARD.getCode();
+                        case "CHUSHENGZHENGMING":
+                        case "HUKOUBO":
+                            return Certificate.OTHER.getCode();
+                        case "SHIBING":
+                            return Certificate.SOLDIERS.getCode();
+                        case "JUNGUAN":
+                            return Certificate.OFFICER.getCode();
+                        case "HUIXIANG":
+                            return Certificate.HOME_CARD.getCode();
+                        default:
+                            return Certificate.ID_CARD.getCode();
+                    }
+                }).collect(Collectors.toList()));
             }
         }
         List<BookRulePO> bookRulePOs = Lists.newArrayList(booker, passenger);

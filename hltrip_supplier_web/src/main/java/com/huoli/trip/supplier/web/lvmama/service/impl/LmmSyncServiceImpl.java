@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
@@ -68,19 +69,23 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
-        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicList(request.getCurrentPage());
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmScenicResponse));
+        lmmScenicResponse = JSON.parseObject(str, LmmScenicListResponse.class);
         return lmmScenicResponse.getScenicNameList();
     }
 
     @Override
     public List<LmmScenic> getScenicListById(LmmScenicListByIdRequest request){
-        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request);
+        LmmScenicListResponse lmmScenicResponse = lvmamaClient.getScenicListById(request.getScenicId());
         if(!checkLmmScenicListResponse(lmmScenicResponse)){
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmScenicResponse));
+        lmmScenicResponse = JSON.parseObject(str, LmmScenicListResponse.class);
         return lmmScenicResponse.getScenicNameList();
     }
 
@@ -106,9 +111,15 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return true;
     }
 
+    private String removeCDATA(String str){
+        String newStr = str.replace("<![CDATA[", "");
+        newStr = newStr.replace("]]>", "");
+        return newStr;
+    }
+
     @Override
     public List<LmmProduct> getProductList(LmmProductListRequest request){
-        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request);
+        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductList(request.getCurrentPage());
         if(lmmProductListResponse == null){
             log.error("驴妈妈产品列表接口返回空");
             return null;
@@ -127,12 +138,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmProductListResponse));
+        lmmProductListResponse = JSON.parseObject(str, LmmProductListResponse.class);
         return lmmProductListResponse.getProductList();
     }
 
     @Override
     public List<LmmProduct> getProductListById(LmmProductListByIdRequest request){
-        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductListById(request);
+        LmmProductListResponse lmmProductListResponse = lvmamaClient.getProductListById(request.getProductIds());
         if(lmmProductListResponse == null){
             log.error("驴妈妈产品列表接口返回空");
             return null;
@@ -151,12 +164,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmProductListResponse));
+        lmmProductListResponse = JSON.parseObject(str, LmmProductListResponse.class);
         return lmmProductListResponse.getProductList();
     }
 
     @Override
     public List<LmmGoods> getGoodsListById(LmmGoodsListByIdRequest request){
-        LmmGoodsListByIdResponse lmmGoodsListByIdResponse = lvmamaClient.getGoodsListById(request);
+        LmmGoodsListByIdResponse lmmGoodsListByIdResponse = lvmamaClient.getGoodsListById(request.getGoodsIds());
         if(lmmGoodsListByIdResponse == null){
             log.error("驴妈妈商品列表接口返回空");
             return null;
@@ -171,16 +186,18 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     lmmGoodsListByIdResponse.getState().getSolution());
             return null;
         }
-        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodList())){
+        if(ListUtils.isEmpty(lmmGoodsListByIdResponse.getGoodsList())){
             log.error("驴妈妈商品列表接口返回的数据为空");
             return null;
         }
-        return lmmGoodsListByIdResponse.getGoodList();
+        String str = removeCDATA(JSON.toJSONString(lmmGoodsListByIdResponse));
+        lmmGoodsListByIdResponse = JSON.parseObject(str, LmmGoodsListByIdResponse.class);
+        return lmmGoodsListByIdResponse.getGoodsList();
     }
 
     @Override
     public List<LmmPriceProduct> getPriceList(LmmPriceRequest request){
-        LmmPriceResponse lmmPriceResponse = lvmamaClient.getPriceList(request);
+        LmmPriceResponse lmmPriceResponse = lvmamaClient.getPriceList(request.getGoodsIds(), request.getBeginDate(), request.getEndDate());
         if(lmmPriceResponse == null){
             log.error("驴妈妈价格接口返回空");
             return null;
@@ -199,6 +216,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("驴妈妈产品列表接口返回的数据为空");
             return null;
         }
+        String str = removeCDATA(JSON.toJSONString(lmmPriceResponse));
+        lmmPriceResponse = JSON.parseObject(str, LmmPriceResponse.class);
         return lmmPriceResponse.getPriceList();
     }
 
@@ -234,6 +253,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         lmmScenicList.forEach(s -> {
             ProductItemPO newItem = LmmTicketConverter.convertToProductItemPO(s);
+            if(StringUtils.isBlank(newItem.getCity())){
+                log.error("驴妈妈景点{}没有城市，跳过。。", s.getScenicId());
+                return;
+            }
             ProductItemPO oldItem = productItemDao.selectByCode(newItem.getCode());
             List<ItemFeaturePO> featurePOs = null;
             ProductPO productPO = null;
@@ -241,9 +264,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             List<ImageBasePO> images = null;
             List<ImageBasePO> mainImages = null;
             if (oldItem == null) {
-                oldItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // 笛风云跟团游默认审核通过
-                oldItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
+                newItem.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                newItem.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
             } else {
                 imageDetails = oldItem.getImageDetails();
                 images = oldItem.getImages();
@@ -268,7 +290,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 log.info("{}没有列表图、轮播图，设置待审核", newItem.getCode());
                 newItem.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
             }
-            productItemDao.updateByCode(newItem);
+            // 已存在的景点不更新
+            if(oldItem == null){
+                productItemDao.updateByCode(newItem);
+            }
         });
         return true;
     }
@@ -379,6 +404,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return true;
     }
 
+    @Override
+    public boolean syncProductListById(String productId, int syncMode){
+        LmmProductListByIdRequest request = new LmmProductListByIdRequest();
+        request.setProductIds(productId);
+        return syncProductListById(request, syncMode);
+    }
 
     @Override
     public boolean syncGoodsListById(LmmGoodsListByIdRequest request, int syncMode){
@@ -398,6 +429,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             updateProduct(lmmProduct, v, syncMode);
         });
         return true;
+    }
+
+    @Override
+    public boolean syncGoodsListById(String goodsId, int syncMode){
+        LmmGoodsListByIdRequest request = new LmmGoodsListByIdRequest();
+        request.setGoodsIds(goodsId);
+        return syncGoodsListById(request, syncMode);
     }
 
     private void updateProduct(LmmProduct lmmProduct, List<LmmGoods> goodsList, int syncMode){
@@ -528,7 +566,16 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                     priceInfoPOs.add(priceInfoPO);
                 });
-                PricePO pricePO = new PricePO();
+                PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
+                if(pricePO == null){
+                    pricePO = new PricePO();
+                    pricePO.setProductCode(productPO.getCode());
+                    pricePO.setSupplierProductId(g.getGoodsId());
+                    pricePO.setOperator(Constants.SUPPLIER_CODE_LMM_TICKET);
+                    pricePO.setOperatorName(Constants.SUPPLIER_NAME_LMM_TICKET);
+                    pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
+                }
+                pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 pricePO.setPriceInfos(priceInfoPOs);
                 priceDao.updateByProductCode(pricePO);
             });
