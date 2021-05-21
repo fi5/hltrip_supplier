@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 public class CreateOrderRequest {
     private OrderInfo orderInfo;
-    private Booker book;
+    private Booker booker;
     private List<Traveller> traveller;
     private Recipient recipient;
 }
