@@ -863,21 +863,15 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
                 if(g.getMaximum() > 0){
                     ruleMPO.setLimitBuy(1);
-                    // -1 这些是为了防止0起作用，实际只为设置maxcount
-                    ruleMPO.setLimitBuyType(-1);
-                    ruleMPO.setRangeType(-1);
-                    ruleMPO.setDistinguishUser(-1);
                     ruleMPO.setMaxCount(g.getMaximum());
                 }
                 // limitType 限购类型在本地要加字典值，身份证、身份证+手机号
                 // limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
-                if(g.getLimitation() != null){
+                // 只有限购数量>0才有意义，否则不视为限购
+                if(g.getLimitation() != null && g.getLimitation().getLimitAmount() > 0){
                     LmmGoods.Limitation limitation = g.getLimitation();
                     ruleMPO.setLimitBuy(1);
                     // -1 这些是为了防止0起作用，实际只为设置maxcount
-                    ruleMPO.setLimitBuyType(-1);
-                    ruleMPO.setRangeType(0);
-                    ruleMPO.setDistinguishUser(-1);
                     ruleMPO.setLimitWay(-1);
                     if(StringUtils.isNotBlank(limitation.getTimeType())){
                         if(StringUtils.equals(limitation.getTimeType(), "orderTime")){

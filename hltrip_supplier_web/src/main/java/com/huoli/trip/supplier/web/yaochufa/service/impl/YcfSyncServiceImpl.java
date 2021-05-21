@@ -684,10 +684,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         if(ycfProduct.getMaxNum() != null){
             ruleMPO.setLimitBuy(1);
-            // -1 这些是为了防止0起作用，实际只为设置maxcount
-            ruleMPO.setLimitBuyType(-1);
-            ruleMPO.setRangeType(-1);
-            ruleMPO.setDistinguishUser(-1);
             ruleMPO.setMaxCount(ycfProduct.getMaxNum());
         }
         if(ycfProduct.getRefundType() != null){
