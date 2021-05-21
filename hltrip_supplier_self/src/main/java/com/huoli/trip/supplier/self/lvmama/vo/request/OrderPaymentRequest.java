@@ -11,6 +11,6 @@ import lombok.Data;
  * @date 2021/3/1517:28
  */
 @Data
-public class OrderPaymentRequest {
+public class OrderPaymentRequest  extends LmmBaseRequest{
     private OrderPaymentInfo order;
 }

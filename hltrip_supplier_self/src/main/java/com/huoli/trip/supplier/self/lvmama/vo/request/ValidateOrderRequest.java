@@ -6,6 +6,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.Traveller;
 import lombok.Data;
 
 import java.awt.print.Book;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
  * @date 2021/3/1514:55
  */
 @Data
-public class ValidateOrderRequest {
+public class ValidateOrderRequest  extends LmmBaseRequest {
     private OrderInfo orderInfo;
     private Book book;
     private List<Traveller> traveller;
