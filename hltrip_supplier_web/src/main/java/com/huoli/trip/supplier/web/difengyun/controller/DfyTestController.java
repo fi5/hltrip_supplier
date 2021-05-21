@@ -167,6 +167,12 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/update/product/id/v2")
+    DfyBaseResult syncUpdateProductByIdV2(@RequestBody String productId) {
+        dfySyncService.syncProductV2(productId);
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/tours/list")
     DfyBaseResult syncToursList(@RequestBody DfyToursListRequest request) {
         return DfyBaseResult.success(dfySyncService.syncToursList(request));
