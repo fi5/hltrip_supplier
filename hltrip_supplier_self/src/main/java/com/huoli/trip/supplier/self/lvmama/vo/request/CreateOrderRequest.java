@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2021/3/1517:21
  */
 @Data
-public class CreateOrderRequest {
+public class CreateOrderRequest extends LmmBaseRequest {
     private OrderInfo orderInfo;
     private Booker booker;
     private List<Traveller> traveller;
