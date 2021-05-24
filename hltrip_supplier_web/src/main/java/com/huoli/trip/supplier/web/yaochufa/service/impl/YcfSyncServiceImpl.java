@@ -782,6 +782,17 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 ruleMPO.setDescInfos(Lists.newArrayList(feeExclude));
             }
         }
+        // 产品要求增加的
+        if(StringUtils.isNotBlank(ycfProduct.getGetTicketMode())){
+            DescInfo descInfo = new DescInfo();
+            descInfo.setTitle("取票方式描述");
+            descInfo.setContent(ycfProduct.getGetTicketMode());
+            if(ruleMPO.getDescInfos() != null){
+                ruleMPO.getDescInfos().addAll(Lists.newArrayList(descInfo));
+            } else {
+                ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
+            }
+        }
         scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
         scenicSpotProductMPO.setRuleId(ruleMPO.getId());
         scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
