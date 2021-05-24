@@ -32,7 +32,7 @@ public class OrderInfo implements Serializable {
     private Product product;
 
     private Booker booker;
-    private Travellers traveller;
+    private Travellers travellers;
     private Recipient expressag;
 
     public OrderInfo() {
