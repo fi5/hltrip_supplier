@@ -18,7 +18,5 @@ import java.util.List;
 @Data
 public class ValidateOrderRequest  extends LmmBaseRequest {
     private OrderInfo orderInfo;
-    private Booker booker;
-    private List<Traveller> traveller;
-    private Recipient recipient;
+
 }

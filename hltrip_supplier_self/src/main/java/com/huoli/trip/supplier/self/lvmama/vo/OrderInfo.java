@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.self.lvmama.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author lunatic
@@ -30,6 +31,13 @@ public class OrderInfo implements Serializable {
     private String seasonId;
 
     private Product product;
+
+    private Booker booker;
+    private List<Traveller> travellers;
+    private Recipient expressag;
+
+    public OrderInfo() {
+    }
 
     public OrderInfo(String partnerOrderNo, String orderAmount, String seasonId) {
         this.partnerOrderNo = partnerOrderNo;
