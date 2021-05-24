@@ -16,6 +16,6 @@ import java.io.Serializable;
 public class LmmBaseRequest extends TraceRequest implements Serializable {
     private String appKey;
     private String timestamp;
-    private String messageFormat = "json";
+    private String messageFormat;
     private String sign;
 }
