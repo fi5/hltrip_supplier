@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.lvmama.service.impl;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
@@ -443,6 +444,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             newProduct.setOperatorName(Constants.SUPPLIER_NAME_LMM_TICKET);
             newProduct.setValidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.trancateToDate(new Date())));
             newProduct.setInvalidTime(MongoDateUtils.handleTimezoneInput(DateTimeUtil.addDay(new Date(), 30)));
+            Map<String, String> params = Maps.newHashMap();
+            params.put("productId", lmmProduct.getProductId());
+            newProduct.setExtendParams(params);
             if(oldProduct == null){
                 newProduct.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
                 // todo 暂时默认通过

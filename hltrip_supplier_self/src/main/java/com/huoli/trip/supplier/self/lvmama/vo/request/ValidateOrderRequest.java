@@ -1,11 +1,11 @@
 package com.huoli.trip.supplier.self.lvmama.vo.request;
 
+import com.huoli.trip.supplier.self.lvmama.vo.Booker;
 import com.huoli.trip.supplier.self.lvmama.vo.OrderInfo;
 import com.huoli.trip.supplier.self.lvmama.vo.Recipient;
 import com.huoli.trip.supplier.self.lvmama.vo.Traveller;
 import lombok.Data;
 
-import java.awt.print.Book;
 import java.util.List;
 
 /**
@@ -16,9 +16,9 @@ import java.util.List;
  * @date 2021/3/1514:55
  */
 @Data
-public class ValidateOrderRequest {
+public class ValidateOrderRequest  extends LmmBaseRequest {
     private OrderInfo orderInfo;
-    private Book book;
+    private Booker booker;
     private List<Traveller> traveller;
     private Recipient recipient;
 }

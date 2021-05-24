@@ -41,6 +41,7 @@ public class LvMaMaFeignInterceptor implements RequestInterceptor {
                 requestTemplate.query("appKey", appKey);
                 requestTemplate.query("timestamp", String.valueOf(time));
                 requestTemplate.query("sign", sign);
+                requestTemplate.query("messageFormat", "json");
             } else if(StringUtils.equalsIgnoreCase(requestTemplate.method(), RequestMethod.POST.toString())){
                 byte[] body = requestTemplate.body();
                 if(body != null && body.length > 0){

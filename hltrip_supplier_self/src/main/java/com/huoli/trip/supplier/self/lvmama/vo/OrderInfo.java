@@ -29,6 +29,8 @@ public class OrderInfo implements Serializable {
      */
     private String seasonId;
 
+    private Product product;
+
     public OrderInfo(String partnerOrderNo, String orderAmount, String seasonId) {
         this.partnerOrderNo = partnerOrderNo;
         this.orderAmount = orderAmount;
