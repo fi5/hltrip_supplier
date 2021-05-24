@@ -65,7 +65,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
             reqInnerOrder.setPartnerOrderNos(request.getOrderId());
             lmmDetailReq.setOrder(reqInnerOrder);
 
-            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(getRequest(lmmDetailReq));
+            LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(JSON.toJSONString(lmmDetailReq));
             LvOrderDetail detail=lmmOrderDetailResponse.getOrder();
             String gjStatus="待确认";
             if(StringUtils.equals(detail.getPaymentStatus(),"PAYED")){
@@ -203,17 +203,17 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
 
     @Override
     public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
-        return iLvmamaClient.getCheckInfos(getRequest(request));
+        return iLvmamaClient.getCheckInfos(JSON.toJSONString(request));
     }
 
     @Override
     public OrderResponse payOrder(OrderPaymentRequest request) {
-        return iLvmamaClient.payOrder(getRequest(request));
+        return iLvmamaClient.payOrder(JSON.toJSONString(request));
     }
 
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
-        return iLvmamaClient.createOrder(getRequest(request));
+        return iLvmamaClient.createOrder(JSON.toJSONString(request));
     }
 
     @Override
@@ -228,7 +228,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
 
     @Override
     public LmmBaseResponse resendCode(LmmResendCodeRequest request){
-        return iLvmamaClient.resendCode(getRequest(request));
+        return iLvmamaClient.resendCode(JSON.toJSONString(request));
     }
 
 
