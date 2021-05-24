@@ -273,6 +273,7 @@ public class LmmTicketConverter {
                     break;
             }
             ticketInfoPO.setTicketType(ticketType);
+            ticketInfoPO.setBaseNum(1);
             TicketPO ticketPO = new TicketPO();
             ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
             productPO.setTicket(ticketPO);
