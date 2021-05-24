@@ -987,6 +987,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setFeeInclude(g.getCostInclude());
                     buildRefundDesc(ruleMPO, g);
                 }
+                if(StringUtils.isNotBlank(g.getCostNoinclude())){
+                    List<DescInfo> descInfos = Lists.newArrayList();
+                    DescInfo exclude = new DescInfo();
+                    exclude.setTitle("费用不包含");
+                    exclude.setContent(g.getCostNoinclude());
+                    descInfos.add(exclude);
+                    ruleMPO.setDescInfos(descInfos);
+                }
                 scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
                 scenicSpotProductMPO.setRuleId(ruleMPO.getId());
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
@@ -1114,12 +1122,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     private List<DescInfo> buildDescInfos(LmmProduct lmmProduct, LmmGoods g){
         List<DescInfo> descInfos = Lists.newArrayList();
-        if(StringUtils.isNotBlank(g.getCostNoinclude())){
-            DescInfo exclude = new DescInfo();
-            exclude.setTitle("费用不包含");
-            exclude.setContent(g.getCostNoinclude());
-            descInfos.add(exclude);
-        }
+        // 产品要求这个放到规则里
+//        if(StringUtils.isNotBlank(g.getCostNoinclude())){
+//            DescInfo exclude = new DescInfo();
+//            exclude.setTitle("费用不包含");
+//            exclude.setContent(g.getCostNoinclude());
+//            descInfos.add(exclude);
+//        }
         // 又要放回电脑端描述了。。。。
 //        if(StringUtils.isNotBlank(lmmProduct.getIntrodution())){
 //            DescInfo productDesc = new DescInfo();
