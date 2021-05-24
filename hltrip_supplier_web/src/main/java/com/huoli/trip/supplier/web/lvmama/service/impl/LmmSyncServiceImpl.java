@@ -701,11 +701,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                                 }
                             }
                         }
-                        // 这个放到动态里了
-//                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
-//                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
-//                            changedFields.add("pcDescription");
-//                        }
+//                         这个放到动态里了
+                        // 又放回来了。。。
+                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
+                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
+                            changedFields.add("pcDescription");
+                        }
                         List<DescInfo> newDescInfos = buildDescInfos(lmmProduct, g);
                         scenicSpotProductMPO.setChangedFields(changedFields);
                         if(ListUtils.isEmpty(backup.getDescInfos())){
@@ -1115,12 +1116,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             exclude.setContent(g.getCostNoinclude());
             descInfos.add(exclude);
         }
-        if(StringUtils.isNotBlank(lmmProduct.getIntrodution())){
-            DescInfo productDesc = new DescInfo();
-            productDesc.setTitle("产品简介");
-            productDesc.setContent(lmmProduct.getIntrodution());
-            descInfos.add(productDesc);
-        }
+        // 又要放回电脑端描述了。。。。
+//        if(StringUtils.isNotBlank(lmmProduct.getIntrodution())){
+//            DescInfo productDesc = new DescInfo();
+//            productDesc.setTitle("产品简介");
+//            productDesc.setContent(lmmProduct.getIntrodution());
+//            descInfos.add(productDesc);
+//        }
         if(g.getNotice() != null){
             LmmGoods.Notice notice = g.getNotice();
             StringBuffer sb = new StringBuffer();
