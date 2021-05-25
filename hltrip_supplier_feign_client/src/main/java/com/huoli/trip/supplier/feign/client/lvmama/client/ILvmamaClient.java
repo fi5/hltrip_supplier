@@ -63,7 +63,7 @@ public interface ILvmamaClient {
     /**
      * 订单详情
      */
-    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/getOrderInfo")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/order/getOrderInfo")
     LmmOrderDetailResponse orderDetail(@RequestParam("request") String request);
 
     /**
