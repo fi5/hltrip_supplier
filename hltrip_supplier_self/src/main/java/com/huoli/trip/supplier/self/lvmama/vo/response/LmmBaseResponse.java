@@ -23,4 +23,12 @@ public class LmmBaseResponse implements Serializable {
         stateResponse.setMessage("接收成功");
         return response;
     }
+
+    public static LmmBaseResponse fail(){
+        LmmBaseResponse response = new LmmBaseResponse();
+        State stateResponse = new State();
+        stateResponse.setCode("10099");
+        stateResponse.setMessage("接收失败");
+        return response;
+    }
 }

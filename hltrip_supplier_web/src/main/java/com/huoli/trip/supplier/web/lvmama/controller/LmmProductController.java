@@ -33,9 +33,9 @@ public class LmmProductController {
         try {
             lmmSyncService.pushUpdate(request);
         } catch (Exception e){
-
+            log.error("接收驴妈妈产品通知异常", e);
+            return LmmBaseResponse.fail();
         }
-
         return LmmBaseResponse.success();
     }
 }
