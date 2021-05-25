@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 描述：<br/>
@@ -61,4 +62,12 @@ public interface ScenicSpotProductDao {
      * @return
      */
     ScenicSpotProductMPO getByProductId(String productId);
+
+    /**
+     * 根据扩展参数查询
+     * @param channel
+     * @param cond
+     * @return
+     */
+    List<ScenicSpotProductMPO> getByCond(String channel, Map<String, String> cond);
 }

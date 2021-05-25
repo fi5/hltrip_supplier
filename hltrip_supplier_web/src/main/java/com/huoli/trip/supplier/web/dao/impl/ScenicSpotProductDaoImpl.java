@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -81,5 +82,14 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     public ScenicSpotProductMPO getByProductId(String productId){
         return mongoTemplate.findOne(new Query(Criteria.where("_id")
                 .is(productId)), ScenicSpotProductMPO.class);
+    }
+
+    @Override
+    public List<ScenicSpotProductMPO> getByCond(String channel, Map<String, String> cond){
+        Criteria criteria = Criteria.where("channel").is(channel);
+        for (String s : cond.keySet()) {
+            criteria.and(s).is(cond.get(s));
+        }
+        return mongoTemplate.find(new Query(criteria), ScenicSpotProductMPO.class);
     }
 }

@@ -1201,18 +1201,34 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public void pushUpdate(LmmProductPushRequest request){
+        log.info("接收驴妈妈产品通知。。");
         if(Arrays.asList("product_create", "product_info_change").contains(request.getChangeType())){
             syncProductListByIdV2(request.getProductId().toString());
         } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(request.getChangeType())){
             syncGoodsListByIdV2(request.getGoodsId().toString());
-        } else if(StringUtils.equals("product_online", request.getChangeType())){
+        } else if(Arrays.asList("product_online", "product_offline").contains(request.getChangeType())){
+            Map<String, String> cond = Maps.newHashMap();
+            cond.put("extendParams.productId", request.getProductId().toString());
+            List<ScenicSpotProductMPO> productMPOs = scenicSpotProductDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
+            if(ListUtils.isNotEmpty(productMPOs)){
+                productMPOs.forEach(p -> {
+                    if(StringUtils.equals("product_online", request.getChangeType())){
+                        scenicSpotProductDao.updateStatusById(p.getId(), 1);
+                    } else if(StringUtils.equals("product_offline", request.getChangeType())){
+                        scenicSpotProductDao.updateStatusById(p.getId(), 3);
+                    }
+                });
 
-        } else if(StringUtils.equals("product_offline", request.getChangeType())){
-
-        } else if(StringUtils.equals("goods_online", request.getChangeType())){
-
-        } else if(StringUtils.equals("goods_offline", request.getChangeType())){
-
+            }
+        } else if(Arrays.asList("goods_online", "goods_offline").contains(request.getChangeType())){
+            ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(request.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
+            if(productMPO != null){
+                if(StringUtils.equals("goods_online", request.getChangeType())){
+                    scenicSpotProductDao.updateStatusById(productMPO.getId(), 1);
+                } else if(StringUtils.equals("goods_offline", request.getChangeType())){
+                    scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);
+                }
+            }
         }
     }
 
