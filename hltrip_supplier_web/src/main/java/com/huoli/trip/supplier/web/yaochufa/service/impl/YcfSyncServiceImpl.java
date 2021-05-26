@@ -1113,7 +1113,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
         hotelScenicProductBackupDao.saveHotelScenicSpotProductBackup(hotelScenicSpotProductBackupMPO);
 
-        commonService.refreshList(0, hotelScenicSpotProductMPO.getId(), 1, fresh);
+        commonService.refreshList(2, hotelScenicSpotProductMPO.getId(), 1, fresh);
 
         if(ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getChangedFields())
                 || ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getPayInfo().getChangedFields())
