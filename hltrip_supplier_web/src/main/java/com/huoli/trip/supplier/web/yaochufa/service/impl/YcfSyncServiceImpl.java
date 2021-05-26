@@ -159,6 +159,12 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             productDao.updateByCode(productPO);
             commonService.saveBackupProduct(backup);
+            YcfGetPriceRequest request = new YcfGetPriceRequest();
+            request.setPartnerProductID(productPO.getCode());
+            request.setProductID(productPO.getSupplierProductId());
+            request.setStartDate(DateTimeUtil.formatDate(new Date()));
+            request.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), 30)));
+            getPrice(request);
             commonService.checkProduct(productPO, DateTimeUtil.trancateToDate(new Date()));
         });
     }
