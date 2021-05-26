@@ -1041,9 +1041,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         log.error("景点{}不存在", scenicSpotMappingMPO.getScenicSpotId());
 //                    return null;
                     } else {
-                        scenicName = scenicSpotMPO.getId();
-                        scenicId = scenicSpotMPO.getCityCode();
-                        scenicCityCode = scenicSpotMPO.getName();
+                        scenicName = scenicSpotMPO.getName();
+                        scenicId = scenicSpotMPO.getId();
+                        scenicCityCode = scenicSpotMPO.getCityCode();
                         scenicCityName = scenicSpotMPO.getCity();
                     }
                 }
