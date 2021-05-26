@@ -978,13 +978,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         });
                     }
                 }
+                hotelScenicSpotProductMPO.setDescInfos(Lists.newArrayList(bookNotice));
             }
         }
         if(setMealMPO == null){
             setMealMPO = new HotelScenicSpotProductSetMealMPO();
             setMealMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
         }
-        setMealMPO.setHotelScenicSpotProductId(hotelScenicSpotProductMPO.getSupplierProductId());
+        setMealMPO.setHotelScenicSpotProductId(hotelScenicSpotProductMPO.getId());
         setMealMPO.setName(ycfProduct.getProductName());
         List<HotelScenicSpotProductHotelElement> hotelElements = ycfProduct.getRoomList().stream().map(r -> {
             HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
