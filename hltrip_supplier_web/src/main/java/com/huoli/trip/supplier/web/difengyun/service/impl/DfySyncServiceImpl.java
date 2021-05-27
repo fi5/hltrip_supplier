@@ -1099,6 +1099,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ruleMPO.setChangedFields(changedFields);
         } else {
+            ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
+            ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
             DescInfo descInfo = new DescInfo();
             descInfo.setTitle("预订须知");
             descInfo.setContent(dfyTicketDetail.getBookNotice());
