@@ -949,6 +949,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
             ruleMPO.setValid(1);
             ruleMPO.setCreateTime(new Date());
+            ruleMPO.setRefundCondition(2);
         } else {
             ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
         }
