@@ -994,9 +994,21 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             String hotelId = null;
             String hotelCityCode = null;
             String hotelCityName = null;
-            // 要出发酒景元素有相同poi情况，没有的元素是没办法关联，没有是正常的
             if(hotelMappingMPO == null){
-                log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                // 要出发存在酒店和景点有相同poiid的情况，领导要求如果poiid相同了就把基础信息同时赋给酒店和景点；这里主要在做的是如果poiid在酒店里没有，就从景点里查；下面景点部分也一样处理
+                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+                if(scenicSpotMappingMPO != null) {
+                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    if (scenicSpotMPO != null) {
+                        hotelName = scenicSpotMPO.getName();
+                        // id不能赋，使用的时候无法区分是酒店还是景点的id
+//                        hotelId = hotelMPO.getId();
+                        hotelCityCode = scenicSpotMPO.getCityCode();
+                        hotelCityName = scenicSpotMPO.getCity();
+                    }
+                } else {
+                    log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                }
 //                return null;
             } else {
                 HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
@@ -1028,13 +1040,26 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
             List<HotelScenicSpotProductScenicSpotElement> scenicSpotElements = ycfProduct.getTicketList().stream().map(t -> {
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
-                String scenicName = t.getTicketName();
+                String scenicName = null;
                 String scenicId = null;
                 String scenicCityCode = null;
                 String scenicCityName = null;
                 // 跟酒店情况一样
                 if(scenicSpotMappingMPO == null){
-                    log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+
+                    HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+                    if(hotelMappingMPO != null){
+                        HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                        if(hotelMPO != null){
+                            scenicName = hotelMPO.getName();
+                            // id不能赋，使用的时候无法区分是酒店还是景点的id
+//                            scenicId = scenicSpotMPO.getId();
+                            scenicCityCode = hotelMPO.getCityCode();
+                            scenicCityName = hotelMPO.getCity();
+                        }
+                    } else {
+                        log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                    }
 //                    return null;
                 } else {
                     ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
