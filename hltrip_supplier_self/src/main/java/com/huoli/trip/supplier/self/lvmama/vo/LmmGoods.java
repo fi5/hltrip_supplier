@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.lvmama.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -375,7 +376,8 @@ public class LmmGoods {
         /**
          * 是否可退
          */
-        private boolean isChange;
+        @JsonProperty("isChange")
+        private boolean change;
 
         /**
          * 退款申请前时间或游玩日后时间，单位分。
