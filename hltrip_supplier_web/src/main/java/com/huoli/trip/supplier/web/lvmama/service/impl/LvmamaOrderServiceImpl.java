@@ -210,16 +210,19 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
 
     @Override
     public LmmBaseResponse getCheckInfos(ValidateOrderRequest request) {
+        request.setTraceId(null);
         return iLvmamaClient.getCheckInfos(JSON.toJSONString(request));
     }
 
     @Override
     public OrderResponse payOrder(OrderPaymentRequest request) {
+        request.setTraceId(null);
         return iLvmamaClient.payOrder(JSON.toJSONString(request));
     }
 
     @Override
     public OrderResponse createOrder(CreateOrderRequest request) {
+        request.setTraceId(null);
         return iLvmamaClient.createOrder(JSON.toJSONString(request));
     }
 
