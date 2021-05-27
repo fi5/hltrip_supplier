@@ -7,6 +7,7 @@ import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
@@ -1095,11 +1096,41 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         hotelScenicSpotProductMPO.setProductName(ycfProduct.getProductName());
         hotelScenicSpotProductMPO.setUpdateTime(new Date());
-
         if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
             hotelScenicSpotProductMPO.setStatus(1);
         } else {
             hotelScenicSpotProductMPO.setStatus(3);
+        }
+        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMappingMPO != null){
+            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+            if(scenicSpotMPO != null){
+                AddressInfo addressInfo = new AddressInfo();
+                addressInfo.setCityName(scenicSpotMPO.getCity());
+                addressInfo.setCityCode(scenicSpotMPO.getCityCode());
+                addressInfo.setType("0");
+                addressInfo.setDestinationName(scenicSpotMPO.getCity());
+                addressInfo.setDestinationCode(scenicSpotMPO.getCityCode());
+                addressInfo.setProvinceCode(scenicSpotMPO.getProvinceCode());
+                addressInfo.setProvinceName(scenicSpotMPO.getProvince());
+                hotelScenicSpotProductMPO.setAddressInfo(Lists.newArrayList(addressInfo));
+            }
+        } else {
+            HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+            if(hotelMappingMPO != null){
+                HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                if(hotelMPO != null){
+                    AddressInfo addressInfo = new AddressInfo();
+                    addressInfo.setCityName(hotelMPO.getCity());
+                    addressInfo.setCityCode(hotelMPO.getCityCode());
+                    addressInfo.setType("0");
+                    addressInfo.setDestinationName(hotelMPO.getCity());
+                    addressInfo.setDestinationCode(hotelMPO.getCityCode());
+                    addressInfo.setProvinceCode(hotelMPO.getProvinceCode());
+                    addressInfo.setProvinceName(hotelMPO.getProvinceName());
+                    hotelScenicSpotProductMPO.setAddressInfo(Lists.newArrayList(addressInfo));
+                }
+            }
         }
         hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
         hotelScenicProductSetMealDao.saveProduct(setMealMPO);
