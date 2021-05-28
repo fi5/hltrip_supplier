@@ -28,7 +28,7 @@ public class LmmProductController {
     @Autowired
     private LmmSyncService lmmSyncService;
 
-    @PostMapping(path = "/pushProductChangeInfo")
+    @PostMapping(path = "/pushProductChangeInfo", produces = "text/plain")
     public LmmBaseResponse productUpdate(@RequestBody LmmProductPushRequest request) {
         try {
             lmmSyncService.pushUpdate(request);

@@ -996,7 +996,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             String hotelCityName = null;
             if(hotelMappingMPO == null){
                 // 要出发存在酒店和景点有相同poiid的情况，领导要求如果poiid相同了就把基础信息同时赋给酒店和景点；这里主要在做的是如果poiid在酒店里没有，就从景点里查；下面景点部分也一样处理
-                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
                 if(scenicSpotMappingMPO != null) {
                     ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                     if (scenicSpotMPO != null) {
@@ -1007,7 +1007,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                         hotelCityName = scenicSpotMPO.getCity();
                     }
                 } else {
-                    log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                    log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), r.getPoiId());
                 }
 //                return null;
             } else {
@@ -1046,8 +1046,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 String scenicCityName = null;
                 // 跟酒店情况一样
                 if(scenicSpotMappingMPO == null){
-
-                    HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+                    HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
                     if(hotelMappingMPO != null){
                         HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
                         if(hotelMPO != null){
