@@ -7,10 +7,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 描述：<br/>
@@ -28,10 +25,10 @@ public class LmmProductController {
     @Autowired
     private LmmSyncService lmmSyncService;
 
-    @PostMapping(path = "/pushProductChangeInfo", produces = "text/plain")
-    public LmmBaseResponse productUpdate(@RequestBody LmmProductPushRequest request) {
+    @PostMapping(path = "/pushProductChangeInfo")
+    public LmmBaseResponse productUpdate(@RequestParam("product") String product) {
         try {
-            lmmSyncService.pushUpdate(request);
+            lmmSyncService.pushUpdate(product);
         } catch (Exception e){
             log.error("接收驴妈妈产品通知异常", e);
             return LmmBaseResponse.fail();

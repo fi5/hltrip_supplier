@@ -7,6 +7,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 
+import javax.xml.bind.JAXBException;
 import java.util.List;
 
 /**
@@ -219,8 +220,8 @@ public interface LmmSyncService {
 
     /**
      * 接收产品推送
-     * @param request
+     * @param product
      */
-    void pushUpdate(LmmProductPushRequest request);
+    void pushUpdate(String product) throws JAXBException;
 
 }

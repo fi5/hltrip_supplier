@@ -28,12 +28,14 @@ import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.service.CommonService;
+import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
@@ -1200,36 +1202,38 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     @Override
-    public void pushUpdate(LmmProductPushRequest request){
+    public void pushUpdate(String product) throws JAXBException {
         log.info("接收驴妈妈产品通知。。");
-        if(Arrays.asList("product_create", "product_info_change").contains(request.getChangeType())){
-            syncProductListByIdV2(request.getProductId().toString());
-        } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(request.getChangeType())){
-            syncGoodsListByIdV2(request.getGoodsId().toString());
-        } else if(Arrays.asList("product_online", "product_offline").contains(request.getChangeType())){
+        LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
+        String changeType = request.getBody().getChangeType();
+        LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
+        if(Arrays.asList("product_create", "product_info_change").contains(changeType)){
+            syncProductListByIdV2(lmmPushProduct.getProductId().toString());
+        } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(changeType)){
+            syncGoodsListByIdV2(lmmPushProduct.getGoodsId().toString());
+        } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
             Map<String, String> cond = Maps.newHashMap();
-            cond.put("extendParams.productId", request.getProductId().toString());
+            cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
             List<ScenicSpotProductMPO> productMPOs = scenicSpotProductDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
             if(ListUtils.isNotEmpty(productMPOs)){
                 productMPOs.forEach(p -> {
-                    if(StringUtils.equals("product_online", request.getChangeType())){
+                    if(StringUtils.equals("product_online", changeType)){
                         scenicSpotProductDao.updateStatusById(p.getId(), 1);
-                    } else if(StringUtils.equals("product_offline", request.getChangeType())){
+                    } else if(StringUtils.equals("product_offline", changeType)){
                         scenicSpotProductDao.updateStatusById(p.getId(), 3);
                     }
                 });
 
             }
-        } else if(Arrays.asList("goods_online", "goods_offline").contains(request.getChangeType())){
-            ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(request.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
+        } else if(Arrays.asList("goods_online", "goods_offline").contains(changeType)){
+            ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
             if(productMPO != null){
-                if(StringUtils.equals("goods_online", request.getChangeType())){
+                if(StringUtils.equals("goods_online", changeType)){
                     scenicSpotProductDao.updateStatusById(productMPO.getId(), 1);
-                } else if(StringUtils.equals("goods_offline", request.getChangeType())){
+                } else if(StringUtils.equals("goods_offline", changeType)){
                     scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);
                 }
             }
         }
     }
-
 }
