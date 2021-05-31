@@ -403,7 +403,6 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
-
         PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
