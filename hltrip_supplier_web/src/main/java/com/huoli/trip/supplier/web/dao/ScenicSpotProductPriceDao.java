@@ -33,4 +33,6 @@ public interface ScenicSpotProductPriceDao {
      * @param scenicSpotProductPriceMPO
      */
     void saveScenicSpotProductPrice(ScenicSpotProductPriceMPO scenicSpotProductPriceMPO);
+
+    ScenicSpotProductPriceMPO getPriceByPackageId(String packageId);
 }

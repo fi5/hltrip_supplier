@@ -9,6 +9,14 @@ import javax.validation.constraints.NotNull;
 public class HllxBookCheckReq  extends TraceRequest {
     //产品编号
     private String productId;
+    /**
+     * 套餐ID
+     */
+    private String packageId;
+    /**
+     * 类目
+     */
+    private String category;
     //开始日期
     @NotNull(message = "开始日期为空")
     private String beginDate;

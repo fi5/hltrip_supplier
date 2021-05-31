@@ -39,4 +39,6 @@ public interface GroupTourProductSetMealDao {
      * @return
      */
     List<GroupTourProductSetMealMPO> getSetMealByProductId(String groupTourProductId);
+
+    GroupTourProductSetMealMPO getSetMealByPackageId(String packageId);
 }
