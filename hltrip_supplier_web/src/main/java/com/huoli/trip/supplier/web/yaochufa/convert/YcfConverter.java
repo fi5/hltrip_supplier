@@ -513,7 +513,7 @@ public class YcfConverter {
         hotelMPO.setCity(productItem.getCity());
         hotelMPO.setAddress(productItem.getAddress());
         hotelMPO.setTel(productItem.getPhone());
-        hotelMPO.setDesc(productItem.getDescription());
+        hotelMPO.setDescription(productItem.getDescription());
         List<HotelPic> images = Lists.newArrayList();
         if(ListUtils.isNotEmpty(productItem.getImageList())){
             images.addAll(productItem.getImageList().stream().map(i -> {
