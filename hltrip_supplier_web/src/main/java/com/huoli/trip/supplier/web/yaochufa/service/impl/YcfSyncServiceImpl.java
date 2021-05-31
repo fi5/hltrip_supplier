@@ -566,17 +566,17 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         ScenicSpotMPO scenicSpotMPO = null;
         boolean fresh = false;
         ScenicSpotProductBackupMPO backupMPO = null;
+        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMappingMPO == null){
+            log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+            return;
+        }
+        scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+        if(scenicSpotMPO == null){
+            log.error("景点{}不存在", scenicSpotMappingMPO.getId());
+            return;
+        }
         if(scenicSpotProductMPO == null){
-            ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
-            if(scenicSpotMappingMPO == null){
-                log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
-                return;
-            }
-            scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
-            if(scenicSpotMPO == null){
-                log.error("景点{}不存在", scenicSpotMappingMPO.getId());
-                return;
-            }
             scenicSpotProductMPO = new ScenicSpotProductMPO();
             scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             scenicSpotProductMPO.setCreateTime(new Date());
