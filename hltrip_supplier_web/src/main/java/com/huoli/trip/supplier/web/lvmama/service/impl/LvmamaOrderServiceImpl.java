@@ -19,6 +19,7 @@ import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.lvmama.vo.LvOrderDetail;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
@@ -28,11 +29,13 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
+import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +48,7 @@ import java.util.List;
  * @date 2021/3/1517:48
  */
 @Slf4j
-@Service(timeout = 10000,group = "hltrip")
+@Service(timeout = 10000, group = "hltrip")
 public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Autowired
     private ILvmamaClient iLvmamaClient;
@@ -61,49 +64,49 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     public BaseResponse<LvOrderDetail> orderDetail(BaseOrderRequest request) {
         try {
 
-            LmmOrderDetailRequest lmmDetailReq=new LmmOrderDetailRequest();
-            LmmOrderDetailRequest.LmmOrderReq reqInnerOrder=new LmmOrderDetailRequest.LmmOrderReq();
+            LmmOrderDetailRequest lmmDetailReq = new LmmOrderDetailRequest();
+            LmmOrderDetailRequest.LmmOrderReq reqInnerOrder = new LmmOrderDetailRequest.LmmOrderReq();
             reqInnerOrder.setPartnerOrderNos(request.getOrderId());
             lmmDetailReq.setOrder(reqInnerOrder);
 
             LmmOrderDetailResponse lmmOrderDetailResponse = iLvmamaClient.orderDetail(JSON.toJSONString(lmmDetailReq));
             List<LvOrderDetail> orderList = lmmOrderDetailResponse.getOrderList();
-            if(ListUtils.isNotEmpty(orderList)){
+            if (ListUtils.isNotEmpty(orderList)) {
                 LvOrderDetail detail = orderList.get(0);
-                String gjStatus="待确认";
-                if(StringUtils.equals(detail.getPaymentStatus(),"PAYED")){
-                    if(StringUtils.equals(detail.getCredenctStatus(),"CREDENCE_SEND"))
-                        gjStatus="已发送";
-                    if(StringUtils.equals(detail.getCredenctStatus(),"CREDENCE_NO_SEND"))
-                        gjStatus="未发送";
-                    if(StringUtils.equals(detail.getStatus(),"CANCEL"))
-                        gjStatus="已退款";
-                }else{
-                    if(StringUtils.equals(detail.getStatus(),"NORMAL"))
-                        gjStatus="待付款";
-                    if(StringUtils.equals(detail.getStatus(),"CANCEL"))
-                        gjStatus="已取消";
+                String gjStatus = "待确认";
+                if (StringUtils.equals(detail.getPaymentStatus(), "PAYED")) {
+                    if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_SEND"))
+                        gjStatus = "已发送";
+                    if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_NO_SEND"))
+                        gjStatus = "未发送";
+                    if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                        gjStatus = "已退款";
+                } else {
+                    if (StringUtils.equals(detail.getStatus(), "NORMAL"))
+                        gjStatus = "待付款";
+                    if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                        gjStatus = "已取消";
                 }
 
-                if(StringUtils.equals(detail.getPerformStatus(),"USED"))
-                    gjStatus="已消费";
-                if(StringUtils.equals(detail.getPerformStatus(),"UNUSE"))
-                    gjStatus="未使用";
+                if (StringUtils.equals(detail.getPerformStatus(), "USED"))
+                    gjStatus = "已消费";
+                if (StringUtils.equals(detail.getPerformStatus(), "UNUSE"))
+                    gjStatus = "未使用";
 
                 TripOrder tripOrder = tripOrderMapper.getOrderByOutOrderId(detail.getOrderId());
                 TripOrderRefund refundOrder = tripOrderRefundMapper.getRefundingOrderByOrderId(tripOrder.getOrderId());
-                if(refundOrder!=null && refundOrder.getChannelRefundStatus()==0) {//写退款失败
-                    gjStatus="申请退款中";
+                if (refundOrder != null && refundOrder.getChannelRefundStatus() == 0) {//写退款失败
+                    gjStatus = "申请退款中";
                 }
 
                 detail.setGjStatus(gjStatus);
                 return BaseResponse.success(detail);
-            }else{
+            } else {
                 return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
             }
 
         } catch (Exception e) {
-        	log.error("信息{}",e);
+            log.error("信息{}", e);
             return BaseResponse.fail(CentralError.ERROR_NO_ORDER);
         }
     }
@@ -111,16 +114,16 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Override
     public LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request) {
         try {
-            BaseOrderRequest detailReq=new BaseOrderRequest();
+            BaseOrderRequest detailReq = new BaseOrderRequest();
             BaseResponse<LvOrderDetail> lvOrderDetail = orderDetail(detailReq);
             LvOrderDetail detail = lvOrderDetail.getData();
-            PushOrderStatusReq req =new PushOrderStatusReq();
+            PushOrderStatusReq req = new PushOrderStatusReq();
             req.setStrStatus(detail.getGjStatus());
             req.setPartnerOrderId(request.getOrder().getPartnerOrderNo());
             req.setVochers(genTicketsVoucher(detail));
             orderStatusNotice(req);
         } catch (Exception e) {
-        	log.error("信息{}",e);
+            log.error("信息{}", e);
         }
 
         return null;
@@ -168,29 +171,36 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     }
 
     @Override
-    public LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request) {
+    public LmmBaseResponse pushOrderRefund(String request) {
 
-        LmmRefundPushRequest.LmmRefundPushBody refundBody = request.getOrder();
-        RefundNoticeReq req=new RefundNoticeReq();
-        req.setPartnerOrderId(refundBody.getPartnerOrderID());
+        LmmRefundPushRequest refundBody = null;
+        try {
+            refundBody = XmlConvertUtil.convertToJava(request, LmmRefundPushRequest.class);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        ;//request.getOrder();
+        LmmRefundPushRequest.RefundPushBody refundPushBody = refundBody.getBody();
+        LmmRefundPushRequest.PushOrder pushOrder = refundPushBody.getPushOrder();
+        RefundNoticeReq req = new RefundNoticeReq();
+        req.setPartnerOrderId(pushOrder.getPartnerOrderID());
         req.setRefundFrom(2);
-        req.setRefundPrice(new BigDecimal(refundBody.getRefundAmount()*100));
-//        req.setResponseTime();
+        req.setRefundPrice(new BigDecimal(pushOrder.getRefundAmount() * 100));
         req.setSource("lvmama");
-        BigDecimal refundCharge=new BigDecimal(refundBody.getFactorage()*100);
+        BigDecimal refundCharge = new BigDecimal(pushOrder.getFactorage() * 100);
         req.setRefundCharge(refundCharge);
         req.setRefundStatus(1);
 
 
-        String refundNotiUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
-        log.info("doRefund请求的地址:"+refundNotiUrl+",参数:"+ JSONObject.toJSONString(req));
+        String refundNotiUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/refundNotice";
+        log.info("doRefund请求的地址:" + refundNotiUrl + ",参数:" + JSONObject.toJSONString(req));
         String res = HttpUtil.doPostWithTimeout(refundNotiUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundNotiUrl));
-        log.info("中台refundNotice返回:"+res);
+        log.info("中台refundNotice返回:" + res);
 
 
-        PushOrderStatusReq statusReq =new PushOrderStatusReq();
+        PushOrderStatusReq statusReq = new PushOrderStatusReq();
         statusReq.setStrStatus("退款成功");
-        statusReq.setPartnerOrderId(refundBody.getPartnerOrderID());
+        statusReq.setPartnerOrderId(pushOrder.getPartnerOrderID());
         orderStatusNotice(statusReq);
 
         return null;
@@ -199,8 +209,8 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     public void orderStatusNotice(PushOrderStatusReq req) {
         req.setType(5);
         try {
-            log.info("中台订单推送传参json:" +  JSONObject.toJSONString(req));
-            String statusUrl=ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/orderStatusNotice";
+            log.info("中台订单推送传参json:" + JSONObject.toJSONString(req));
+            String statusUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/orderStatusNotice";
             String res = HttpUtil.doPostWithTimeout(statusUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, statusUrl));
             log.info("驴妈妈orderStatusNotice推给中台orderStatusNotice返回:" + res);
         } catch (Exception e) {
@@ -237,12 +247,12 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     }
 
     @Override
-    public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+    public LmmBaseResponse resendCode(LmmResendCodeRequest request) {
         return iLvmamaClient.resendCode(JSON.toJSONString(request));
     }
 
 
-    private <T> String getRequest(T obj){
+    private <T> String getRequest(T obj) {
         LmmBodyRequest<T> bodyRequest = new LmmBodyRequest<>();
         bodyRequest.setRequest(obj);
         return JSON.toJSONString(bodyRequest);

@@ -8,10 +8,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author lunatic
@@ -35,8 +32,8 @@ public class LmmOrderPushController {
     }
 
     @PostMapping(path = "/pushOrderRefund")
-    LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request) {
-        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(request));
-        return lvmamaOrderService.pushOrderRefund(request);
+    LmmBaseResponse pushOrderRefund(@RequestParam("refund") String refund) {
+        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(refund));
+        return lvmamaOrderService.pushOrderRefund(refund);
     }
 }
