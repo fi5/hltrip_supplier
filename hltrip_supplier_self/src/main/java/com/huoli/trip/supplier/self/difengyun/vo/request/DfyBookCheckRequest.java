@@ -20,7 +20,7 @@ public class DfyBookCheckRequest extends TraceRequest implements Serializable {
     /**
      * 套餐ID
      */
-    private String packageid;
+    private String packageId;
     /**
      * 类目
      */
