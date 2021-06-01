@@ -32,8 +32,8 @@ public class LmmOrderPushController {
     }
 
     @PostMapping(path = "/pushOrderRefund")
-    LmmBaseResponse pushOrderRefund(@RequestParam("refund") String refund) {
-        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(refund));
-        return lvmamaOrderService.pushOrderRefund(refund);
+    LmmBaseResponse pushOrderRefund(@RequestParam("order") String order) {
+        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(order));
+        return lvmamaOrderService.pushOrderRefund(order);
     }
 }

@@ -189,8 +189,12 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         req.setSource("lvmama");
         BigDecimal refundCharge = new BigDecimal(pushOrder.getFactorage() * 100);
         req.setRefundCharge(refundCharge);
-        req.setRefundStatus(1);
-
+        //判断退款状态
+        if (pushOrder.getRequestStatus() != null && pushOrder.getRequestStatus().equals("已退款")) {
+            req.setRefundStatus(1);
+        } else {
+            req.setRefundStatus(2);
+        }
 
         String refundNotiUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/refundNotice";
         log.info("doRefund请求的地址:" + refundNotiUrl + ",参数:" + JSONObject.toJSONString(req));
