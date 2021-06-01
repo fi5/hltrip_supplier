@@ -1038,6 +1038,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 //            return;
 //        }
         setMealMPO.setHotelElements(hotelElements);
+        if(ListUtils.isNotEmpty(hotelElements)){
+            hotelScenicSpotProductMPO.setNight(hotelElements.get(0).getNight());
+        }
         if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
             List<HotelScenicSpotProductScenicSpotElement> scenicSpotElements = ycfProduct.getTicketList().stream().map(t -> {
                 ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
