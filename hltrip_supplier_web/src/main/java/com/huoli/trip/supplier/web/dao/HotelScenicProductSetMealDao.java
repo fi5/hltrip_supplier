@@ -26,4 +26,6 @@ public interface HotelScenicProductSetMealDao {
      * @param setMealMPO
      */
     void saveProduct(HotelScenicSpotProductSetMealMPO setMealMPO);
+
+    HotelScenicSpotProductSetMealMPO getSetMealByPackageId(String packageId);
 }

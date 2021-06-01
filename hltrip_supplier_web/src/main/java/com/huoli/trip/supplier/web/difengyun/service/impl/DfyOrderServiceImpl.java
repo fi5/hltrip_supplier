@@ -409,6 +409,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
+        log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
         String category = bookCheckReq.getCategory();
         if(StringUtils.isNotBlank(category)){
             DfyBookCheckResponse dfyBookCheckResponse = null;

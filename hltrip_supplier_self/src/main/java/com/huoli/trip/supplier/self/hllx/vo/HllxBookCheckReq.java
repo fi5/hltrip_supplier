@@ -23,4 +23,8 @@ public class HllxBookCheckReq  extends TraceRequest {
     //结束日期
     @NotNull(message = "结束日期为空")
     private String endDate;
+    /* 成人数量 */
+    private int adtNum;
+    /* 儿童数量 */
+    private int chdNum;
 }
