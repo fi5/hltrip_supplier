@@ -988,6 +988,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         setMealMPO.setHotelScenicSpotProductId(hotelScenicSpotProductMPO.getId());
         setMealMPO.setName(ycfProduct.getProductName());
+        setMealMPO.setBuyMax(ycfProduct.getMaxNum());
+        setMealMPO.setBuyMin(ycfProduct.getMinNum());
         List<HotelScenicSpotProductHotelElement> hotelElements = ycfProduct.getRoomList().stream().map(r -> {
             HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
             String hotelName = null;
