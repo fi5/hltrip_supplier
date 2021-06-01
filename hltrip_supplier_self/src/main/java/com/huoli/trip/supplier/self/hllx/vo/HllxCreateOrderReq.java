@@ -10,4 +10,6 @@ public class HllxCreateOrderReq  extends TraceRequest implements Serializable {
     private String productId;
     private int qunatity;
     private String date;
+    private String packageId;
+    private String category;
 }

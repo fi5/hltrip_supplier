@@ -4,24 +4,35 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotPriceStock;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductPriceMPO;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
 import com.huoli.trip.supplier.api.HllxService;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyBookSaleInfo;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBookCheckResponse;
 import com.huoli.trip.supplier.self.hllx.vo.*;
+import com.huoli.trip.supplier.web.dao.GroupTourProductSetMealDao;
+import com.huoli.trip.supplier.web.dao.HotelScenicProductSetMealDao;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
 import com.huoli.trip.supplier.web.util.SendMessageUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service(timeout = 10000, group = "hltrip")
@@ -39,12 +50,87 @@ public class HllxServiceImpl implements HllxService {
     @Autowired
     private SendMessageUtil sendMessageUtil;
 
+    @Autowired
+    private GroupTourProductSetMealDao groupTourProductSetMealDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private HotelScenicProductSetMealDao hotelScenicProductSetMealDao;
+
 
 
     @Override
     public HllxBaseResult<HllxBookCheckRes> getCheckInfos(HllxBookCheckReq req) {
         log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
-        PricePO pricePO = priceDao.getByProductCode(req.getProductId());
+        String category = req.getCategory();
+        if(StringUtils.isNotBlank(category)){
+            HllxBookCheckRes hllxBookCheckRes = null;
+            switch (category){
+                case "d_ss_ticket":
+                    ScenicSpotProductPriceMPO priceMPO = scenicSpotProductPriceDao.getPriceByPackageId(req.getPackageId());
+                    if(priceMPO != null && priceMPO.getStock() >= req.getAdtNum()){
+                        hllxBookCheckRes = new HllxBookCheckRes();
+                        hllxBookCheckRes.setProductId(req.getProductId());
+                        hllxBookCheckRes.setPackageId(req.getPackageId());
+                        List<HllxBookSaleInfo> saleInfos = new ArrayList<>();
+                        hllxBookCheckRes.setSaleInfos(saleInfos);
+                        HllxBookSaleInfo hllxBookSaleInfo = new HllxBookSaleInfo();
+                        hllxBookSaleInfo.setDate(DateTimeUtil.parseDate(req.getBeginDate()));
+                        hllxBookSaleInfo.setPrice(priceMPO.getSellPrice());
+                        hllxBookSaleInfo.setTotalStock(priceMPO.getStock());
+                        saleInfos.add(hllxBookSaleInfo);
+                    }
+                    break;
+                case "group_tour":
+                    GroupTourProductSetMealMPO groupTourProductSetMealMPO = groupTourProductSetMealDao.getSetMealByPackageId(req.getPackageId());
+                    List<GroupTourPrice> groupTourPrices = groupTourProductSetMealMPO.getGroupTourPrices();
+                    if(CollectionUtils.isNotEmpty(groupTourPrices)){
+                        groupTourPrices = groupTourPrices.stream().filter(a -> StringUtils.equals(a.getDate(), req.getBeginDate())).collect(Collectors.toList());
+                    }
+                    if (CollectionUtils.isNotEmpty(groupTourPrices)) {
+                        GroupTourPrice groupTourPrice = groupTourPrices.get(0);
+                        if(groupTourPrice.getAdtStock() >= req.getAdtNum() && groupTourPrice.getChdStock() >= req.getChdNum()){
+                            hllxBookCheckRes = new HllxBookCheckRes();
+                            hllxBookCheckRes.setProductId(req.getProductId());
+                            hllxBookCheckRes.setPackageId(req.getPackageId());
+                            List<HllxBookSaleInfo> saleInfos = new ArrayList<>();
+                            hllxBookCheckRes.setSaleInfos(saleInfos);
+                            HllxBookSaleInfo hllxBookSaleInfo = new HllxBookSaleInfo();
+                            hllxBookSaleInfo.setDate(DateTimeUtil.parseDate(groupTourPrice.getDate()));
+                            hllxBookSaleInfo.setPrice(groupTourPrice.getAdtSellPrice());
+                            hllxBookSaleInfo.setTotalStock(groupTourPrice.getAdtStock());
+                            saleInfos.add(hllxBookSaleInfo);
+                        }
+                    }
+                    break;
+                case "hotel_scenicSpot":
+                    HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO = hotelScenicProductSetMealDao.getSetMealByPackageId(req.getPackageId());
+                    List<HotelScenicSpotPriceStock> priceStocks = hotelScenicSpotProductSetMealMPO.getPriceStocks();
+                    if (CollectionUtils.isNotEmpty(priceStocks)) {
+                        priceStocks = priceStocks.stream().filter(a -> StringUtils.equals(a.getDate(), req.getBeginDate())).collect(Collectors.toList());
+                    }
+                    if (CollectionUtils.isNotEmpty(priceStocks)) {
+                        HotelScenicSpotPriceStock hotelScenicSpotPriceStock = priceStocks.get(0);
+                        if(hotelScenicSpotPriceStock.getAdtStock() >= req.getAdtNum() && hotelScenicSpotPriceStock.getChdStock() >= req.getChdNum()){
+                            hllxBookCheckRes = new HllxBookCheckRes();
+                            hllxBookCheckRes.setProductId(req.getProductId());
+                            hllxBookCheckRes.setPackageId(req.getPackageId());
+                            List<HllxBookSaleInfo> saleInfos = new ArrayList<>();
+                            hllxBookCheckRes.setSaleInfos(saleInfos);
+                            HllxBookSaleInfo hllxBookSaleInfo = new HllxBookSaleInfo();
+                            hllxBookSaleInfo.setDate(DateTimeUtil.parseDate(hotelScenicSpotPriceStock.getDate()));
+                            hllxBookSaleInfo.setPrice(hotelScenicSpotPriceStock.getAdtSellPrice());
+                            hllxBookSaleInfo.setTotalStock(hotelScenicSpotPriceStock.getAdtStock());
+                            saleInfos.add(hllxBookSaleInfo);
+                        }
+                    }
+                    break;
+            }
+            return new HllxBaseResult(true, 200, hllxBookCheckRes);
+        }
+        /*PricePO pricePO = priceDao.getByProductCode(req.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
@@ -74,7 +160,7 @@ public class HllxServiceImpl implements HllxService {
                     }
                 }
             }
-        }
+        }*/
         return new HllxBaseResult(true, 200, null);
     }
 

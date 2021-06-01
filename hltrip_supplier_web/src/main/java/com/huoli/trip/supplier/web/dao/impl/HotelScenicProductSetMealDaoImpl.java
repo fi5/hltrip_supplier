@@ -43,4 +43,11 @@ public class HotelScenicProductSetMealDaoImpl implements HotelScenicProductSetMe
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_HOTEL_SCENICSPOT_PRODUCT_SETMEAL);
     }
+
+    @Override
+    public HotelScenicSpotProductSetMealMPO getSetMealByPackageId(String packageId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(packageId));
+        return mongoTemplate.findOne(query, HotelScenicSpotProductSetMealMPO.class);
+    }
 }

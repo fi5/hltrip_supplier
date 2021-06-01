@@ -44,6 +44,15 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
     }
 
     @Override
+    public ScenicSpotProductPriceMPO getPriceByPackageId(String packageId) {
+        Query query = new Query();
+        Criteria criteria = new Criteria();
+        criteria.and("_id").is(packageId);
+        query.addCriteria(criteria);
+        return mongoTemplate.findOne(query, ScenicSpotProductPriceMPO.class);
+    }
+
+    @Override
     public List<ScenicSpotProductPriceMPO> getByProductId(String productId){
         return mongoTemplate.find(new Query(Criteria.where("scenicSpotProductId").is(productId)), ScenicSpotProductPriceMPO.class);
     }

@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao.impl;
 import com.huoli.trip.common.constant.MongoConst;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.vo.v2.GroupTourProductSetMeal;
 import com.huoli.trip.supplier.web.dao.GroupTourProductSetMealDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,14 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
     @Override
     public List<GroupTourProductSetMealMPO> getSetMealByProductId(String groupTourProductId){
         return mongoTemplate.find(new Query(Criteria.where("groupTourProductId").is(groupTourProductId)), GroupTourProductSetMealMPO.class);
+    }
+
+    @Override
+    public GroupTourProductSetMealMPO getSetMealByPackageId(String packageId) {
+        Query query = new Query();
+        Criteria criteria = new Criteria();
+        criteria.and("_id").is(packageId);
+        query.addCriteria(criteria);
+        return mongoTemplate.findOne(query, GroupTourProductSetMealMPO.class);
     }
 }
