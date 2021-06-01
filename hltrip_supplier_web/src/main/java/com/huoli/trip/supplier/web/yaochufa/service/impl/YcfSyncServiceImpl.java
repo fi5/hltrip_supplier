@@ -1030,6 +1030,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             hotelElement.setCityName(hotelCityName);
             hotelElement.setRelationHotelLib(1);
             hotelElement.setRoomName(r.getRoomName());
+            hotelElement.setNight(r.getRoomBaseNight());
             return hotelElement;
         }).collect(Collectors.toList());
 //        if(hotelElements.stream().anyMatch(h -> h == null)){
