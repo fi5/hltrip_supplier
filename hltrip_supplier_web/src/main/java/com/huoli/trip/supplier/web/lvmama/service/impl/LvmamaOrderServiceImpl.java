@@ -251,7 +251,8 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     }
 
     @Override
-    public LmmBaseResponse resendCode(LmmResendCodeRequest request) {
+    public LmmBaseResponse resendCode(LmmResendCodeRequest request){
+        request.setTraceId(null);
         return iLvmamaClient.resendCode(JSON.toJSONString(request));
     }
 
