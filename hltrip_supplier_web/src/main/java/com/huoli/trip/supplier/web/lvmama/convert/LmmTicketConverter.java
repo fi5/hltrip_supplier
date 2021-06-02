@@ -231,6 +231,7 @@ public class LmmTicketConverter {
             sb.append("取票时间：").append(ticketInfoPO.getObtainTicketTime()).append("<br>")
                     .append("取票地址：").append(ticketInfoPO.getDrawAddress()).append("<br>")
                     .append("取票方式：").append(ticketInfoPO.getAdmissionVoucherDesc()).append("<br>")
+                    .append("入园时间：").append(ticketInfoPO.getAdmissionTime()).append("<br>");
             descriptionPO.setContent(sb.toString());
             if(ListUtils.isNotEmpty(productPO.getBookDescList())){
                 productPO.getBookDescList().add(descriptionPO);
