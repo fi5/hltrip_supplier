@@ -98,7 +98,7 @@ public interface ILvmamaClient {
     /**
      * 重发凭证
      */
-    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/ticket/resendCode")
+    @RequestMapping(method = RequestMethod.GET,path = "/scenic/order/distributorApi/2.0/api/order/resendCode")
     LmmBaseResponse resendCode(@RequestParam("request") String request);
 
 }
