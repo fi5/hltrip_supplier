@@ -8,6 +8,7 @@ import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -549,6 +550,41 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             });
         });
         return true;
+    }
+
+    @Override
+    public void pushUpdate(String product) throws JAXBException {
+        log.info("接收驴妈妈产品通知。。");
+        LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
+        String changeType = request.getBody().getChangeType();
+        LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
+        if(Arrays.asList("product_create", "product_info_change").contains(changeType)){
+            syncProductListById(lmmPushProduct.getProductId().toString(), 0);
+        } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(changeType)){
+            syncGoodsListById(lmmPushProduct.getGoodsId().toString(), 0);
+        } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
+            Map<String, String> cond = Maps.newHashMap();
+            cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
+            List<ProductPO> productPOs = productDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
+            if(ListUtils.isNotEmpty(productPOs)){
+                productPOs.forEach(p -> {
+                    if(StringUtils.equals("product_online", changeType)){
+                        productDao.updateStatusByCode(p.getCode(), 1);
+                    } else if(StringUtils.equals("product_offline", changeType)){
+                        productDao.updateStatusByCode(p.getCode(), 0);
+                    }
+                });
+            }
+        } else if(Arrays.asList("goods_online", "goods_offline").contains(changeType)){
+            ProductPO productPO = productDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString());
+            if(productPO != null){
+                if(StringUtils.equals("goods_online", changeType)){
+                    productDao.updateStatusByCode(productPO.getCode(), 1);
+                } else if(StringUtils.equals("goods_offline", changeType)){
+                    productDao.updateStatusByCode(productPO.getCode(), 0);
+                }
+            }
+        }
     }
 
 

@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao;
 import com.huoli.trip.common.entity.ProductPO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 描述：<br/>
@@ -126,5 +127,13 @@ public interface ProductDao {
      * @return
      */
     List<ProductPO> getBySupplierId(String supplierId);
+
+    /**
+     *
+     * @param channel
+     * @param cond
+     * @return
+     */
+    List<ProductPO> getByCond(String channel, Map<String, String> cond);
 
 }

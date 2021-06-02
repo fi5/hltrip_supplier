@@ -146,11 +146,19 @@ public interface LmmSyncService {
 
     /**
      * 同步商品
-     * @param productIds
+     * @param goodsId
      * @param syncMode
      * @return
      */
-    boolean syncGoodsListById(String productIds, int syncMode);
+    boolean syncGoodsListById(String goodsId, int syncMode);
+
+    /**
+     * 推送更新
+     * @param product
+     * @throws JAXBException
+     */
+    void pushUpdate(String product) throws JAXBException;
+
 
     /**
      * 同步景点
@@ -223,5 +231,4 @@ public interface LmmSyncService {
      * @param product
      */
     void pushUpdateV2(String product) throws JAXBException;
-
 }
