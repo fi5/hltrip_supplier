@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.lvmama.vo.request;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2021/6/2<br>
  */
 @Data
-public class LmmResendCodeOrder {
+public class LmmResendCodeOrder implements Serializable {
     /**
      * 分销商订单号
      */
