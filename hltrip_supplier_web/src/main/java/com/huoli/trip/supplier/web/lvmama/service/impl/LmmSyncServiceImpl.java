@@ -13,6 +13,7 @@ import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmGoodsListByIdResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmPriceResponse;
@@ -24,6 +25,7 @@ import com.huoli.trip.supplier.web.dao.ProductItemDao;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.service.CommonService;
+import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -596,9 +598,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         String changeType = request.getBody().getChangeType();
         LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
         if(Arrays.asList("product_create", "product_info_change").contains(changeType)){
-            syncProductListByIdV2(lmmPushProduct.getProductId().toString());
+            syncProductListById(lmmPushProduct.getProductId().toString(), 0);
         } else if(Arrays.asList("goods_create", "goods_info_change", "price_change").contains(changeType)){
-            syncGoodsListByIdV2(lmmPushProduct.getGoodsId().toString());
+            syncGoodsListById(lmmPushProduct.getGoodsId().toString(), 0);
         } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
             Map<String, String> cond = Maps.newHashMap();
             cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
