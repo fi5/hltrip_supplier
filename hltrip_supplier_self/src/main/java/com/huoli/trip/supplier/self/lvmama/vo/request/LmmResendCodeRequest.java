@@ -4,18 +4,9 @@ import lombok.Data;
 
 @Data
 public class LmmResendCodeRequest extends LmmBaseRequest {
-    /**
-     * 分销商订单号
-     */
-    private String partnerOrderNo;
 
     /**
-     * 驴妈妈订单号
+     * 重发凭证
      */
-    private String orderId;
-
-    public LmmResendCodeRequest(String partnerOrderNo, String orderId) {
-        this.partnerOrderNo = partnerOrderNo;
-        this.orderId = orderId;
-    }
+    private LmmResendCodeOrder order;
 }
