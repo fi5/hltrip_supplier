@@ -27,7 +27,7 @@ public class LmmProductController {
     @Autowired
     private LmmSyncService lmmSyncService;
 
-    @Qualifier("threadPool")
+    @Autowired
     private AsyncTaskExecutor threadPool;
 
     @PostMapping(path = "/pushProductChangeInfo")
