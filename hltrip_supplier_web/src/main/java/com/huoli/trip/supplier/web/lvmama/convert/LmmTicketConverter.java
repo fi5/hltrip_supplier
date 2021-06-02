@@ -225,6 +225,19 @@ public class LmmTicketConverter {
             if(goods.getNotice().getEnterLimit() != null){
                 ticketInfoPO.setAdmissionTime(goods.getNotice().getEnterLimit().getLimitTime());
             }
+            DescriptionPO descriptionPO = new DescriptionPO();
+            descriptionPO.setTitle("入园须知");
+            StringBuffer sb = new StringBuffer();
+            sb.append("取票时间：").append(ticketInfoPO.getObtainTicketTime()).append("<br>")
+                    .append("取票地址：").append(ticketInfoPO.getDrawAddress()).append("<br>")
+                    .append("取票方式：").append(ticketInfoPO.getAdmissionVoucherDesc()).append("<br>")
+                    .append("入园时间").append(ticketInfoPO.getAdmissionTime()).append("<br>");
+            descriptionPO.setContent(sb.toString());
+            if(ListUtils.isNotEmpty(productPO.getBookDescList())){
+                productPO.getBookDescList().add(descriptionPO);
+            } else {
+                productPO.setBookDescList(Lists.newArrayList(descriptionPO));
+            }
             Integer ticketType = null;
             switch (goods.getTicketType()){
                 case "PARENTAGE":
