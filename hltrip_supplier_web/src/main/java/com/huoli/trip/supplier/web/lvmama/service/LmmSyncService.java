@@ -222,6 +222,6 @@ public interface LmmSyncService {
      * 接收产品推送
      * @param product
      */
-    void pushUpdate(String product) throws JAXBException;
+    void pushUpdateV2(String product) throws JAXBException;
 
 }

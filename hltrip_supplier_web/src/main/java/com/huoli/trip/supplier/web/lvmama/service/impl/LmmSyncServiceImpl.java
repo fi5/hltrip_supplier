@@ -1202,8 +1202,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     @Override
-    public void pushUpdate(String product) throws JAXBException {
-        log.info("接收驴妈妈产品通知。。");
+    public void pushUpdateV2(String product) throws JAXBException {
+        log.info("接收驴妈妈产品通知v2。。");
         LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
         String changeType = request.getBody().getChangeType();
         LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();

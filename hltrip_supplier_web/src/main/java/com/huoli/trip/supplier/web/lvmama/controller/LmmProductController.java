@@ -28,9 +28,9 @@ public class LmmProductController {
     @PostMapping(path = "/pushProductChangeInfo")
     public LmmBaseResponse productUpdate(@RequestParam("product") String product) {
         try {
-            lmmSyncService.pushUpdate(product);
+            lmmSyncService.pushUpdateV2(product);
         } catch (Exception e){
-            log.error("接收驴妈妈产品通知异常", e);
+            log.error("接收驴妈妈产品通知异常v2", e);
             return LmmBaseResponse.fail();
         }
         return LmmBaseResponse.success();
