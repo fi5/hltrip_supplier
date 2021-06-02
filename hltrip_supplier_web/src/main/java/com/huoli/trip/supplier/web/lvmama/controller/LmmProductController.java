@@ -7,6 +7,8 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -25,12 +27,21 @@ public class LmmProductController {
     @Autowired
     private LmmSyncService lmmSyncService;
 
+    @Qualifier("threadPool")
+    private AsyncTaskExecutor threadPool;
+
     @PostMapping(path = "/pushProductChangeInfo")
     public LmmBaseResponse productUpdate(@RequestParam("product") String product) {
         try {
-            lmmSyncService.pushUpdate(product);
-        } catch (Exception e){
-            log.error("接收驴妈妈产品通知异常", e);
+            threadPool.execute(() -> {
+                try {
+                    lmmSyncService.pushUpdate(product);
+                } catch (Exception e){
+                    log.error("接收驴妈妈产品通知异常", e);
+                }
+            });
+        } catch (Exception e) {
+            log.error("接受驴妈妈产品线程池异常", e);
             return LmmBaseResponse.fail();
         }
         return LmmBaseResponse.success();
