@@ -1,5 +1,7 @@
 package com.huoli.trip.supplier.self.lvmama.vo.request;
 
+import lombok.Data;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -8,6 +10,7 @@ package com.huoli.trip.supplier.self.lvmama.vo.request;
  * 版本：1.0<br>
  * 创建日期：2021/6/2<br>
  */
+@Data
 public class LmmResendCodeOrder {
     /**
      * 分销商订单号
