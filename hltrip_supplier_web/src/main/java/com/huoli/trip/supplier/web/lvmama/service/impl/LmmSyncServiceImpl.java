@@ -604,24 +604,23 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
             Map<String, String> cond = Maps.newHashMap();
             cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
-            List<ScenicSpotProductMPO> productMPOs = scenicSpotProductDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
-            if(ListUtils.isNotEmpty(productMPOs)){
-                productMPOs.forEach(p -> {
+            List<ProductPO> productPOs = productDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
+            if(ListUtils.isNotEmpty(productPOs)){
+                productPOs.forEach(p -> {
                     if(StringUtils.equals("product_online", changeType)){
-                        scenicSpotProductDao.updateStatusById(p.getId(), 1);
+                        productDao.updateStatusByCode(p.getCode(), 1);
                     } else if(StringUtils.equals("product_offline", changeType)){
-                        scenicSpotProductDao.updateStatusById(p.getId(), 3);
+                        productDao.updateStatusByCode(p.getCode(), 0);
                     }
                 });
-
             }
         } else if(Arrays.asList("goods_online", "goods_offline").contains(changeType)){
-            ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
-            if(productMPO != null){
+            ProductPO productPO = productDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString());
+            if(productPO != null){
                 if(StringUtils.equals("goods_online", changeType)){
-                    scenicSpotProductDao.updateStatusById(productMPO.getId(), 1);
+                    productDao.updateStatusByCode(productPO.getCode(), 1);
                 } else if(StringUtils.equals("goods_offline", changeType)){
-                    scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);
+                    productDao.updateStatusByCode(productPO.getCode(), 0);
                 }
             }
         }

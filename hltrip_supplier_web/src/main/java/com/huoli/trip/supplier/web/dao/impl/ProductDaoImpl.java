@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 描述：<br/>
@@ -175,6 +177,15 @@ public class ProductDaoImpl implements ProductDao {
     public void updateVerifyStatusByCode(String code, int verifyStatus){
         mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
                 Update.update("auditStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+    }
+
+    @Override
+    public List<ProductPO> getByCond(String channel, Map<String, String> cond){
+        Criteria criteria = Criteria.where("channel").is(channel);
+        for (String s : cond.keySet()) {
+            criteria.and(s).is(cond.get(s));
+        }
+        return mongoTemplate.find(new Query(criteria), ProductPO.class);
     }
 
 }
