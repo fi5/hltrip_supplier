@@ -380,7 +380,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     newProduct.setBookDescList(oldProduct.getBookDescList());
                     newProduct.setDescriptions(oldProduct.getDescriptions());
                     newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
-                    commonService.compareProduct(newProduct);
+                    commonService.compareProduct(newProduct, oldProduct);
                 }
                 productDao.updateByCode(newProduct);
                 syncPrice(g.getGoodsId());
@@ -513,7 +513,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 newProduct.setBookDescList(oldProduct.getBookDescList());
                 newProduct.setDescriptions(oldProduct.getDescriptions());
                 newProduct.setBookNoticeList(oldProduct.getBookNoticeList());
-                commonService.compareProduct(newProduct);
+                commonService.compareProduct(newProduct, oldProduct);
             }
             productDao.updateByCode(newProduct);
             syncPrice(g.getGoodsId());
