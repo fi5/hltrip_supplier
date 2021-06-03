@@ -59,6 +59,13 @@ public interface ProductItemDao {
     List<String> selectCodesBySupplierId(String supplierId);
 
     /**
+     * 更新坐标
+     * @param code
+     * @param itemCoordinate
+     */
+    void updateItemCoordinateByCode(String code, Double[] itemCoordinate);
+
+    /**
      * 获取渠道item编码
      * @param supplierId
      * @param itemType

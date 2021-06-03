@@ -5,6 +5,8 @@ import com.huoli.trip.common.entity.HodometerPO;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 
+import java.util.Date;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -22,9 +24,9 @@ public interface CommonService {
      */
     BackChannelEntry getSupplierById(String supplierId);
 
-    void compareProduct(ProductPO product);
+    void compareProduct(ProductPO product, ProductPO existProduct);
 
-    void compareToursProduct(ProductPO product);
+    void compareToursProduct(ProductPO product, ProductPO existProduct);
 
     void compareProductItem(ProductItemPO productItem);
 
@@ -35,4 +37,11 @@ public interface CommonService {
     void saveBackupProductItem(ProductItemPO productItem);
 
     void saveBackupHodometer(HodometerPO hodometerPO);
+
+    /**
+     * 检查产品状态
+     * @param productPO
+     * @param date
+     */
+    void checkProduct(ProductPO productPO, Date date);
 }
