@@ -14,6 +14,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Notice;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.*;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
@@ -79,6 +80,16 @@ public class DfyTicketConverter {
                         Double[] coordinate = new Double[]{coordinateArr[1], coordinateArr[0]};
                         productItemPO.setItemCoordinate(coordinate);
                     }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
+        } else if(StringUtils.isNotBlank(scenicDetail.getGlocation())){
+            try {
+                String[] gaodeArr = scenicDetail.getGlocation().split(",");
+                if(gaodeArr.length == 2){
+                    Double[] coordinate = new Double[]{Double.valueOf(gaodeArr[1]), Double.valueOf(gaodeArr[0])};
+                    productItemPO.setItemCoordinate(coordinate);
                 }
             } catch (Exception e) {
                 log.error("转换坐标失败，不影响继续执行，", e);

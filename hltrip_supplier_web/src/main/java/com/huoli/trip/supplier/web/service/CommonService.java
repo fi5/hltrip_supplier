@@ -12,6 +12,8 @@ import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSe
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
+import java.util.Date;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -42,6 +44,13 @@ public interface CommonService {
     void saveBackupProductItem(ProductItemPO productItem);
 
     void saveBackupHodometer(HodometerPO hodometerPO);
+
+    /**
+     * 检查产品状态
+     * @param productPO
+     * @param date
+     */
+    void checkProduct(ProductPO productPO, Date date);
 
     void setCity(ScenicSpotMPO scenic);
 

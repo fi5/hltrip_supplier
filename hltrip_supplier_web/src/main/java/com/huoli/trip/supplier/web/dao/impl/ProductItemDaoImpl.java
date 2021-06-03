@@ -83,6 +83,13 @@ public class ProductItemDaoImpl implements ProductItemDao {
     }
 
     @Override
+    public void updateItemCoordinateByCode(String code, Double[] itemCoordinate){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("code").is(code));
+        mongoTemplate.updateFirst(query, Update.update("itemCoordinate", itemCoordinate), Constants.COLLECTION_NAME_TRIP_PRODUCT_ITEM);
+    }
+
+    @Override
     public List<String> selectSupplierItemIdsBySupplierIdAndType(String supplierId, Integer itemType){
         Query query = new Query(Criteria.where("supplierId").is(supplierId).and("itemType").is(itemType));
         query.fields().include("supplierItemId").exclude("_id");

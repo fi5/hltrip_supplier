@@ -202,6 +202,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             productDao.updateByCode(productPO);
             commonService.saveBackupProduct(backup);
+            commonService.checkProduct(productPO, DateTimeUtil.trancateToDate(new Date()));
         });
     }
 
@@ -345,6 +346,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         priceInfoPOs.addAll(newPriceInfos);
         priceInfoPOs.sort(Comparator.comparing(po -> po.getSaleDate().getTime(), Long::compareTo));
         priceDao.updateByProductCode(pricePO);
+        // 因为价格是后推过来的，在之前同步产品的时候没有价格状态被置成6了，在这里先改成1再重新检查一遍；否则有了价格以后还是6，就有问题了
+        productDao.updateStatusByCode(productCode, Constants.PRODUCT_STATUS_VALID);
+        ProductPO productPO = productDao.getByCode(productCode);
+        commonService.checkProduct(productPO, DateTimeUtil.trancateToDate(new Date()));
         // 更新价格要刷新item的低价产品(异步)
         dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(productCode));
     }
