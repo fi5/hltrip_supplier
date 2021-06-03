@@ -193,7 +193,9 @@ public class CommonServiceImpl implements CommonService {
                 }
                 if(ListUtils.isNotEmpty(product.getBookDescList()) && ListUtils.isNotEmpty(existProduct.getBookDescList())){
                     // 取数据库数据与供应商数据差集，因为可能有的元素有变化，有变化的数据会多个changedFields，所以不能直接合并，直接合并可能会丢失changedFields
-                    List<DescriptionPO> diff = existProduct.getBookDescList().stream().filter(ep -> product.getBookDescList().stream().filter(p -> !StringUtils.equals(p.getTitle(), ep.getTitle())).findFirst().orElse(null) != null).collect(Collectors.toList());
+                    List<DescriptionPO> diff = existProduct.getBookDescList().stream().filter(ep ->
+                            product.getBookDescList().stream().filter(p ->
+                                    StringUtils.equals(p.getTitle(), ep.getTitle())).findFirst().orElse(null) == null).collect(Collectors.toList());
                     product.getBookDescList().addAll(diff);
                 }
             }
@@ -358,7 +360,9 @@ public class CommonServiceImpl implements CommonService {
                 }
                 if(ListUtils.isNotEmpty(product.getBookDescList()) && ListUtils.isNotEmpty(existProduct.getBookDescList())){
                     // 取数据库数据与供应商数据差集，因为可能有的元素有变化，有变化的数据会多个changedFields，所以不能直接合并，直接合并可能会丢失changedFields
-                    List<DescriptionPO> diff = existProduct.getBookDescList().stream().filter(ep -> product.getBookDescList().stream().filter(p -> !StringUtils.equals(p.getTitle(), ep.getTitle())).findFirst().orElse(null) != null).collect(Collectors.toList());
+                    List<DescriptionPO> diff = existProduct.getBookDescList().stream().filter(ep ->
+                            product.getBookDescList().stream().filter(p ->
+                                    StringUtils.equals(p.getTitle(), ep.getTitle())).findFirst().orElse(null) == null).collect(Collectors.toList());
                     product.getBookDescList().addAll(diff);
                 }
             }
