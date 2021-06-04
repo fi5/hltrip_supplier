@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 版本：1.0<br>
  * 创建日期：2020/6/18<br>
  */
-@FeignClient(name = "lvmama", url = "${lvmama.host.server.product}"
-//        ,configuration = LvMaMaFeignInterceptor.class
+@FeignClient(name = "lvmama_product", url = "${lvmama.host.server.product}"
+        ,configuration = LvMaMaFeignInterceptor.class
         ,fallbackFactory = LvmamaProductClientFallback.class)
 public interface ILvmamaProductClient {
 

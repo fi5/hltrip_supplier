@@ -28,7 +28,6 @@ import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CO
  * 创建日期：2020/12/8<br>
  */
 @Slf4j
-@Component
 public class LvMaMaFeignInterceptor implements RequestInterceptor {
 
     @Override
