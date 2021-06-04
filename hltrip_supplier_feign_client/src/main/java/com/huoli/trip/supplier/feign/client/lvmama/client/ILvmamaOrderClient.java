@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 创建日期：2020/6/18<br>
  */
 @FeignClient(name = "lvmama", url = "${lvmama.host.server.order}"
-        ,configuration = LvMaMaFeignInterceptor.class
+//        ,configuration = LvMaMaFeignInterceptor.class
         ,fallbackFactory = LvmamaOrderClientFallback.class)
 public interface ILvmamaOrderClient {
     /**
