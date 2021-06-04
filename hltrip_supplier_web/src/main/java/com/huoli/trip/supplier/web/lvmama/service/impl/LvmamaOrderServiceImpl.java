@@ -15,8 +15,8 @@ import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.LvmamaOrderService;
-import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
-import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaOrderClient;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.LvOrderDetail;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
@@ -48,7 +48,7 @@ import java.util.List;
 @Service(timeout = 10000,group = "hltrip")
 public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Autowired
-    private ILvmamaClient iLvmamaClient;
+    private ILvmamaOrderClient iLvmamaClient;
     @Autowired
     private HuoliTrace huoliTrace;
 

@@ -6,13 +6,12 @@ import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
-import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
@@ -56,7 +55,7 @@ import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.PRODU
 public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
-    private ILvmamaClient lvmamaClient;
+    private ILvmamaProductClient lvmamaClient;
 
     @Autowired
     private ProductItemDao productItemDao;
