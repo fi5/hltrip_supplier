@@ -29,6 +29,18 @@ public class LmmTestController {
     @Autowired
     private LmmTicketTask lmmTicketTask;
 
+    @PostMapping(path = "/sync/product/add")
+    public DfyBaseResult syncProductAdd() {
+        lmmTicketTask.syncNewProduct();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/product/update")
+    public DfyBaseResult syncProductUpdate() {
+        lmmTicketTask.syncUpdateProduct();
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/scenic/add")
     public DfyBaseResult syncScenicAdd() {
         lmmTicketTask.syncNewScenic();
