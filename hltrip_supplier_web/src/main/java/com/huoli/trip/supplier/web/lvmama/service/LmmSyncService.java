@@ -144,4 +144,10 @@ public interface LmmSyncService {
      * @throws JAXBException
      */
     void pushUpdate(String product) throws JAXBException;
+
+    /**
+     * 获取渠道产品id
+     * @return
+     */
+    List<String> getSupplierProductIds();
 }

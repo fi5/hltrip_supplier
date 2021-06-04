@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.CommonUtils;
@@ -536,4 +537,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             }
         }
     }
-}
+
+    @Override
+    public List<String> getSupplierProductIds(){
+        return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
+                ProductType.SCENIC_TICKET.getCode());
+    }
