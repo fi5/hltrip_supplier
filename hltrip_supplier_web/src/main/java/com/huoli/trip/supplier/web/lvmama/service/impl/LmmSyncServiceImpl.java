@@ -463,11 +463,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         List<LmmPriceProduct> priceList = getPriceList(request);
         priceList.forEach(p -> {
-            if(ListUtils.isEmpty(p.getGoodsList())){
+            if(ListUtils.isEmpty(p.getGoodsList().getGoods())){
                 return;
             }
-            p.getGoodsList().forEach(g -> {
-                if(ListUtils.isEmpty(g.getPrices())){
+            p.getGoodsList().getGoods().forEach(g -> {
+                if(ListUtils.isEmpty(g.getPrices().getPrice())){
                     return;
                 }
                 String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, g.getGoodsId());
@@ -477,7 +477,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     return;
                 }
                 List<PriceInfoPO> priceInfoPOs = Lists.newArrayList();
-                g.getPrices().forEach(price -> {
+                g.getPrices().getPrice().forEach(price -> {
                     PriceInfoPO priceInfoPO = new PriceInfoPO();
                     priceInfoPO.setSaleDate(MongoDateUtils.handleTimezoneInput(DateTimeUtil.parseDate(price.getDate())));
                     if(price.getB2bPrice() != null){
