@@ -121,4 +121,12 @@ public interface ProductDao {
      */
     List<ProductPO> getByCond(String channel, Map<String, String> cond);
 
+    /**
+     * 根据渠道和类型获取产品
+     * @param supplierId
+     * @param productType
+     * @return
+     */
+    List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType);
+
 }

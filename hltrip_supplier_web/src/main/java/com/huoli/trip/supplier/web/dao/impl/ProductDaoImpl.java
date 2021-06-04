@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -186,6 +187,17 @@ public class ProductDaoImpl implements ProductDao {
             criteria.and(s).is(cond.get(s));
         }
         return mongoTemplate.find(new Query(criteria), ProductPO.class);
+    }
+
+    @Override
+    public List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("productType").is(productType));
+        query.fields().include("supplierProductId").exclude("_id");
+        List<ProductPO> productPOs = mongoTemplate.find(query, ProductPO.class);
+        if(ListUtils.isNotEmpty(productPOs)){
+            return productPOs.stream().map(ProductPO::getSupplierProductId).collect(Collectors.toList());
+        }
+        return null;
     }
 
 }

@@ -539,7 +539,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     @Override
-    public List<String> getSupplierProductIds(){
+    public List<String> getSupplierProductIds() {
         return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
                 ProductType.SCENIC_TICKET.getCode());
     }
+}
