@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.lvmama.vo.push;
 
 import lombok.Data;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -29,23 +31,39 @@ refundInfo refundInfo 备注说明
 order
  **/
 @Data
+@XmlRootElement(name = "request")
 public class LmmRefundPushRequest implements Serializable {
 
-	private LmmRefundPushBody order;
+
+	private LmmRefundPushRequest.RefundPushBody body;
+
+	@XmlElement(name = "body")
+	public LmmRefundPushRequest.RefundPushBody getBody() {
+		return body;
+	}
+
+	public void setBody(LmmRefundPushRequest.RefundPushBody body) {
+		this.body = body;
+	}
 
 	@Data
-	public static class LmmRefundPushBody implements Serializable {
+	public static class RefundPushBody implements Serializable {
 
+		private PushOrder order;
+	}
+
+	@Data
+	public static class PushOrder implements Serializable {
 		private String orderId;
 		private String partnerOrderID;
 		private String orderStatus;
 		/**
 		 * PASS:
-		 已退款
-		 REVIEWING:
-		 审核中
-		 REJECT:
-		 申请驳回
+		 * 已退款
+		 * REVIEWING:
+		 * 审核中
+		 * REJECT:
+		 * 申请驳回
 		 */
 		private String requestStatus;
 
@@ -53,6 +71,5 @@ public class LmmRefundPushRequest implements Serializable {
 		private Double factorage;//手续费
 		private String ndInfo;
 	}
-
 
 }
