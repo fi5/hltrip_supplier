@@ -111,7 +111,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     }
 
     @Override
-    public LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request) {
+    public LmmBaseResponse orderStatusNotice(String request) {
         try {
             LmmOrderPushRequest orderPushRequest = null;
             try {
@@ -178,7 +178,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     }
 
     @Override
-    public LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request) {
+    public LmmBaseResponse pushOrderRefund(String request) {
 
         LmmRefundPushRequest refundBody = null;
         try {
