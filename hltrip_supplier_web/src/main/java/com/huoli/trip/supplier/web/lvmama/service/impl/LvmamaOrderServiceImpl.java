@@ -180,30 +180,44 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Override
     public LmmBaseResponse pushOrderRefund(LmmRefundPushRequest request) {
 
-        LmmRefundPushRequest.LmmRefundPushBody refundBody = request.getOrder();
-        RefundNoticeReq req=new RefundNoticeReq();
-        req.setPartnerOrderId(refundBody.getPartnerOrderID());
+        LmmRefundPushRequest refundBody = null;
+        try {
+            refundBody = XmlConvertUtil.convertToJava(request, LmmRefundPushRequest.class);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        ;//request.getOrder();
+        LmmRefundPushRequest.RefundPushBody refundPushBody = refundBody.getBody();
+        LmmRefundPushRequest.PushOrder pushOrder = refundPushBody.getOrder();
+        RefundNoticeReq req = new RefundNoticeReq();
+        req.setPartnerOrderId(pushOrder.getPartnerOrderID());
         req.setRefundFrom(2);
-        req.setRefundPrice(new BigDecimal(refundBody.getRefundAmount()*100));
-//        req.setResponseTime();
+        req.setRefundPrice(new BigDecimal(pushOrder.getRefundAmount() * 100));
         req.setSource("lvmama");
-        BigDecimal refundCharge=new BigDecimal(refundBody.getFactorage()*100);
+        BigDecimal refundCharge = new BigDecimal(pushOrder.getFactorage() * 100);
         req.setRefundCharge(refundCharge);
-        req.setRefundStatus(1);
+        //判断退款状态
+        String strStatus = "退款申请中";
+        if (pushOrder.getRequestStatus() == null || pushOrder.getRequestStatus().equals("REVIEWING"))
+            req.setRefundStatus(0);
+        if (pushOrder.getRequestStatus().equals("PASS")) {
+            req.setRefundStatus(1);
+            strStatus = "已退款";
+        } else if (pushOrder.getRequestStatus().equals("REJECT")) {
+            req.setRefundStatus(2);
+            strStatus = "退款失败";
+        }
 
-
-        String refundNotiUrl= ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral")+"/recSupplier/refundNotice";
-        log.info("doRefund请求的地址:"+refundNotiUrl+",参数:"+ JSONObject.toJSONString(req));
+        String refundNotiUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/refundNotice";
+        log.info("doRefund请求的地址:" + refundNotiUrl + ",参数:" + JSONObject.toJSONString(req));
         String res = HttpUtil.doPostWithTimeout(refundNotiUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundNotiUrl));
-        log.info("中台refundNotice返回:"+res);
+        log.info("中台refundNotice返回:" + res);
 
-
-        PushOrderStatusReq statusReq =new PushOrderStatusReq();
-        statusReq.setStrStatus("退款成功");
-        statusReq.setPartnerOrderId(refundBody.getPartnerOrderID());
+        PushOrderStatusReq statusReq = new PushOrderStatusReq();
+        statusReq.setStrStatus(strStatus);
+        statusReq.setPartnerOrderId(pushOrder.getPartnerOrderID());
         orderStatusNotice(statusReq);
-
-        return null;
+        return LmmBaseResponse.success();
     }
 
     public void orderStatusNotice(PushOrderStatusReq req) {
