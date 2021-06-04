@@ -27,7 +27,7 @@ public class LmmPriceProduct {
      */
     private String productStatus;
 
-    private List<LmmPriceGoods> goodsList;
+    private LmmGoodsList goodsList;
 
     @Getter
     @Setter
@@ -56,6 +56,18 @@ public class LmmPriceProduct {
         /**
          * 价格
          */
-        private List<LmmPrice> prices;
+        private LmmPriceList prices;
+    }
+
+    @Getter
+    @Setter
+    public static class LmmGoodsList{
+        private List<LmmPriceGoods> goods;
+    }
+
+    @Getter
+    @Setter
+    public static class LmmPriceList{
+        private List<LmmPrice> price;
     }
 }
