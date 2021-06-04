@@ -426,7 +426,24 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         || backChannelEntry.getStatus() != 1){
                     newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
                 }
+                if(backChannelEntry != null && StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                    List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                    newProduct.setAppFrom(appFroms);
+                }
             } else {
+                if(oldProduct.getSupplierStatus() == null
+                        || ListUtils.isEmpty(oldProduct.getAppFrom())){
+                    BackChannelEntry backChannelEntry = commonService.getSupplierById(newProduct.getSupplierId());
+                    if(backChannelEntry == null
+                            || backChannelEntry.getStatus() == null
+                            || backChannelEntry.getStatus() != 1){
+                        newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                    }
+                    if(backChannelEntry != null && StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                        List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                        newProduct.setAppFrom(appFroms);
+                    }
+                }
                 newProduct.setAuditStatus(oldProduct.getAuditStatus());
                 newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
                 newProduct.setRecommendFlag(oldProduct.getRecommendFlag());
