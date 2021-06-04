@@ -27,13 +27,13 @@ public class LmmOrderPushController {
 
     @PostMapping(path = "/pushOrderStatus")
     LmmBaseResponse pushOrderStatus(@RequestParam("order") String order) {
-        log.info("驴妈供应商触发了订单推送 订单号：{}", order);
+        log.info("驴妈供应商触发了订单推送：{}", order);
         return lvmamaOrderService.orderStatusNotice(order);
     }
 
     @PostMapping(path = "/pushOrderRefund")
     LmmBaseResponse pushOrderRefund(@RequestParam("order") String order) {
-        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(order));
+        log.info("驴妈供应商触发了退款推送：{}", order);
         return lvmamaOrderService.pushOrderRefund(order);
     }
 }

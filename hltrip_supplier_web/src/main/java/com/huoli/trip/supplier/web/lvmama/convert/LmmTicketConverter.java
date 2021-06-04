@@ -134,7 +134,7 @@ public class LmmTicketConverter {
         Map<String, String> extend = Maps.newHashMap();
         extend.put("productId", lmmProduct.getProductId());
         productPO.setExtendParams(extend);
-        productPO.setName(goods.getGoodsName());
+        productPO.setName(String.format("%s %s", lmmProduct.getProductName(), goods.getGoodsName()));
         productPO.setCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, goods.getGoodsId()));
         productPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
         productPO.setSupplierProductId(goods.getGoodsId());
