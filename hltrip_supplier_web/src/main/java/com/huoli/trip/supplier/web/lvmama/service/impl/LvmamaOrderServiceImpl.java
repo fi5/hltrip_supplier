@@ -28,11 +28,13 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
+import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,19 +113,27 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Override
     public LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request) {
         try {
-            BaseOrderRequest detailReq=new BaseOrderRequest();
-            BaseResponse<LvOrderDetail> lvOrderDetail = orderDetail(detailReq);
-            LvOrderDetail detail = lvOrderDetail.getData();
-            PushOrderStatusReq req =new PushOrderStatusReq();
-            req.setStrStatus(detail.getGjStatus());
-            req.setPartnerOrderId(request.getOrder().getPartnerOrderNo());
-            req.setVochers(genTicketsVoucher(detail));
+            LmmOrderPushRequest orderPushRequest = null;
+            try {
+                orderPushRequest = XmlConvertUtil.convertToJava(request, LmmOrderPushRequest.class);
+            } catch (JAXBException e) {
+                e.printStackTrace();
+            }
+            if (orderPushRequest == null) return LmmBaseResponse.fail();
+            log.info("orderPushRequest={}", JSON.toJSONString(orderPushRequest));
+            BaseOrderRequest detailReq = new BaseOrderRequest();
+            LvOrderDetail order = orderPushRequest.getBody().getOrder();
+            detailReq.setSupplierOrderId(order.getOrderId());
+            PushOrderStatusReq req = new PushOrderStatusReq();
+            req.setStrStatus(getGjStatus(order));
+            req.setPartnerOrderId(order.getPartnerOrderNo());
+            req.setVochers(genTicketsVoucher(order));
             orderStatusNotice(req);
         } catch (Exception e) {
-        	log.error("信息{}",e);
+            log.error("信息{}", e);
         }
 
-        return null;
+        return LmmBaseResponse.success();
     }
 
     private List<PushOrderStatusReq.Voucher> genTicketsVoucher(LvOrderDetail detail) {
