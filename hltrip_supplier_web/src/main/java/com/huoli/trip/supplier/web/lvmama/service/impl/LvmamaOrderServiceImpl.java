@@ -110,6 +110,29 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         }
     }
 
+    private String getGjStatus(LvOrderDetail detail) {
+        String gjStatus = "待确认";
+        if (StringUtils.equals(detail.getPaymentStatus(), "PAYED")) {
+            if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_SEND"))
+                gjStatus = "已发送";
+            if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_NO_SEND"))
+                gjStatus = "未发送";
+            if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                gjStatus = "已退款";
+        } else {
+            if (StringUtils.equals(detail.getStatus(), "NORMAL"))
+                gjStatus = "待付款";
+            if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                gjStatus = "已取消";
+        }
+
+        if (StringUtils.equals(detail.getPerformStatus(), "USED"))
+            gjStatus = "已消费";
+        if (StringUtils.equals(detail.getPerformStatus(), "UNUSE"))
+            gjStatus = "未使用";
+        return gjStatus;
+    }
+
     @Override
     public LmmBaseResponse orderStatusNotice(String request) {
         try {
