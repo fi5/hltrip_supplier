@@ -97,7 +97,7 @@ public class LmmScenic {
 
     @Getter
     @Setter
-    public class Coordinate{
+    public static class Coordinate{
 
         /**
          * 景区所在经度

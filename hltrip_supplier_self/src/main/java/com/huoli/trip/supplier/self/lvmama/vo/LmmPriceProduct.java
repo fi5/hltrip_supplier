@@ -31,7 +31,7 @@ public class LmmPriceProduct {
 
     @Getter
     @Setter
-    public class LmmPriceGoods{
+    public static class LmmPriceGoods{
 
         /**
          * 商品 Id
