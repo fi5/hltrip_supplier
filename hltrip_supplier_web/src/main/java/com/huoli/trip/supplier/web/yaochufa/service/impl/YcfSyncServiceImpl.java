@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.BizTagConst;
+import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
@@ -12,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.entity.po.PassengerTemplatePO;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
@@ -22,8 +24,10 @@ import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
 import com.huoli.trip.supplier.web.dao.*;
+import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +107,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private ScenicSpotBackupDao scenicSpotBackupDao;
+
+    @Autowired
+    private PassengerTemplateMapper passengerTemplateMapper;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -1167,6 +1174,43 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
             }
         }
+
+        // 出行人模板
+        if(ListUtils.isNotEmpty(ycfProduct.getBookRules())){
+            List<String> idInfos = Lists.newArrayList();
+            List<String> passengerInfos = Lists.newArrayList();
+            ycfProduct.getBookRules().stream().filter(br -> StringUtils.equals(br.getPersonType(), "1")).findFirst().ifPresent(bookRule -> {
+                if(bookRule.getCName() != null && bookRule.getCName()){
+                    passengerInfos.add("2");
+                }
+                if(bookRule.getMobile() != null && bookRule.getMobile()){
+                    passengerInfos.add("6");
+                }
+                if(bookRule.getCredential() != null && bookRule.getCredential()){
+                    idInfos.addAll(bookRule.getCredentialType().stream().map(String::valueOf).collect(Collectors.toList()));
+                }
+                if(bookRule.getEmail() != null && bookRule.getEmail()){
+                    passengerInfos.add("10");
+                }
+            });
+            String passengerInfo = passengerInfos.stream().collect(Collectors.joining(","));
+            String idInfo = idInfos.stream().collect(Collectors.joining(","));
+            // 创建默认的出行人模板
+            PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(SUPPLIER_CODE_YCF, 1,
+                    passengerInfo, idInfo);
+            if(passengerTemplatePO == null){
+                passengerTemplatePO = new PassengerTemplatePO();
+                passengerTemplatePO.setChannel(Constants.SUPPLIER_CODE_YCF);
+                passengerTemplatePO.setCreateTime(new Date());
+                passengerTemplatePO.setStatus(1);
+                passengerTemplatePO.setIdInfo(idInfo);
+                passengerTemplatePO.setPassengerInfo(passengerInfo);
+                passengerTemplatePO.setPeopleLimit(1);
+                passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
+            }
+            hotelScenicSpotProductMPO.setTravellerTemplateId(passengerTemplatePO.getId().toString());
+        }
+
         hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
         hotelScenicProductSetMealDao.saveProduct(setMealMPO);
 

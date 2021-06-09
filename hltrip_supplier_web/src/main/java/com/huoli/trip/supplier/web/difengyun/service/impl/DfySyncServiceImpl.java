@@ -9,6 +9,7 @@ import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.entity.po.PassengerTemplatePO;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
@@ -20,6 +21,7 @@ import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyTicketConverter;
 import com.huoli.trip.supplier.web.difengyun.convert.DfyToursConverter;
 import com.huoli.trip.supplier.web.difengyun.service.DfySyncService;
+import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -95,6 +97,9 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Autowired
     private GroupProductBackupDao groupProductBackupDao;
+
+    @Autowired
+    private PassengerTemplateMapper passengerTemplateMapper;
 
     private boolean imageChanged = false;
 
@@ -1261,6 +1266,22 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setImages(dfyToursDetail.getProductPicList().stream().map(DfyImage::getPath).collect(Collectors.toList()));
             groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
         }
+        // 创建默认的出行人模板
+        String idInfo = String.join(",", (CharSequence) Arrays.asList(Certificate.ID_CARD.getCode(),
+                Certificate.PASSPORT.getCode(), Certificate.OFFICER.getCode(), Certificate.HKM_PASS.getCode(), Certificate.TW_CARD.getCode()));
+        String passengerInfo = "2,6,10";
+        PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_DFY_TOURS, 1, passengerInfo, idInfo);
+        if(passengerTemplatePO == null){
+            passengerTemplatePO = new PassengerTemplatePO();
+            passengerTemplatePO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+            passengerTemplatePO.setCreateTime(new Date());
+            passengerTemplatePO.setStatus(1);
+            passengerTemplatePO.setIdInfo(idInfo);
+            passengerTemplatePO.setPassengerInfo(passengerInfo);
+            passengerTemplatePO.setPeopleLimit(1);
+            passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
+        }
+        groupTourProductMPO.setTravelerTemplateId(passengerTemplatePO.getId());
         // 笛风云没有退改
         groupTourProductDao.saveProduct(groupTourProductMPO);
 
