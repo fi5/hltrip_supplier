@@ -87,7 +87,7 @@ public class DfyTestController {
     }
 
     /**
-     * 接收产品更新通知
+     * 更新新产品
      *
      * @return
      */
@@ -98,7 +98,7 @@ public class DfyTestController {
     }
 
     /**
-     * 接收产品更新通知
+     * 更新已有产品
      *
      * @return
      */
@@ -122,7 +122,7 @@ public class DfyTestController {
     }
 
     /**
-     * 接收产品更新通知
+     * 同步景点
      *
      * @param request
      * @return

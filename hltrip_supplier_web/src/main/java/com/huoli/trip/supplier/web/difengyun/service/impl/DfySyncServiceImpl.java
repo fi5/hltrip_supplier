@@ -728,7 +728,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
                 ticketIds.addAll(scenicDetail.getDisTickets().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
             }
-            ticketIds.forEach(id -> syncProductV2(id));
+            // todo 真正上线的时候要发开这里，现在只为了落景点数据
+//            ticketIds.forEach(id -> syncProductV2(id));
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }
@@ -1469,16 +1470,18 @@ public class DfySyncServiceImpl implements DfySyncService {
                             }
 
                             if (type == DfyConstants.MODULE_TYPE_FOOD && journeyModule.getFood() != null) {
-                                GroupTourProductTripItem item = new GroupTourProductTripItem();
-                                item.setTime(journeyModule.getMoment());
-                                item.setPlayTime(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
-                                item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
-                                item.setPoiName(journeyModule.getFood().getTitle());
-                                item.setPoiDesc(journeyModule.getDescription());
-                                if(ListUtils.isNotEmpty(journeyModule.getPicture())){
-                                    item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
-                                }
-                                if(ListUtils.isNotEmpty(journeyModule.getFood().getHasList())){
+                                // 餐饮类型管理后台必填，没有就不要这条记录
+                                if(ListUtils.isNotEmpty(journeyModule.getFood().getHasList())
+                                    && journeyModule.getFood().getHasList().stream().anyMatch(f -> f.getHas() == 1)){
+                                    GroupTourProductTripItem item = new GroupTourProductTripItem();
+                                    item.setTime(journeyModule.getMoment());
+                                    item.setPlayTime(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
+                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
+                                    item.setPoiName(journeyModule.getFood().getTitle());
+                                    item.setPoiDesc(journeyModule.getDescription());
+                                    if(ListUtils.isNotEmpty(journeyModule.getPicture())){
+                                        item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
+                                    }
                                     StringBuffer sb = new StringBuffer();
                                     journeyModule.getFood().getHasList().forEach(h -> {
                                         if(StringUtils.equals("breakfast", h.getType())){
@@ -1488,12 +1491,17 @@ public class DfySyncServiceImpl implements DfySyncService {
                                         } else if(StringUtils.equals("dinner", h.getType())){
                                             sb.append("晚餐：");
                                         }
-                                        sb.append(h.getHas() == 1 ? "含" : "敬请自理");
+                                        if(h.getHas() == 1){
+                                            sb.append("含;");
+                                            item.setSubType("20");
+                                        } else {
+                                            sb.append("敬请自理;");
+                                        }
                                     });
                                     item.setPoiName(sb.toString());
+                                    item.setCostInclude(-1);
+                                    items.add(item);
                                 }
-                                item.setCostInclude(-1);
-                                items.add(item);
                             }
                             if (type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())) {
                                 for (DfyJourneyDetail.ModuleShop moduleShop : journeyModule.getShopList()) {
