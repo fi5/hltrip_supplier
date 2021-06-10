@@ -1474,6 +1474,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 if(ListUtils.isNotEmpty(journeyModule.getFood().getHasList())
                                     && journeyModule.getFood().getHasList().stream().anyMatch(f -> f.getHas() == 1)){
                                     GroupTourProductTripItem item = new GroupTourProductTripItem();
+                                    // 含餐
+                                    item.setSubType("20");
                                     item.setTime(journeyModule.getMoment());
                                     item.setPlayTime(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
                                     item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
@@ -1493,7 +1495,6 @@ public class DfySyncServiceImpl implements DfySyncService {
                                         }
                                         if(h.getHas() == 1){
                                             sb.append("含;");
-                                            item.setSubType("20");
                                         } else {
                                             sb.append("敬请自理;");
                                         }
