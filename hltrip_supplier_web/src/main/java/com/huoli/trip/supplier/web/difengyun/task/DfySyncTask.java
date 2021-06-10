@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.task;
 
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyToursListRequest;
@@ -237,7 +238,7 @@ public class DfySyncTask {
                 return;
             }
             long begin = System.currentTimeMillis();
-            log.info("开始执行定时任务，同步笛风云产品。。");
+            log.info("开始执行定时任务V2，同步笛风云产品。。");
             DfyScenicListRequest request = new DfyScenicListRequest();
             request.setPage(1);
             request.setPageSize(100);
@@ -245,7 +246,7 @@ public class DfySyncTask {
                 long sTime = System.currentTimeMillis();
                 boolean success = dfySyncService.syncScenicListV2(request);
                 long useTime = System.currentTimeMillis() - sTime;
-                log.info("同步第{}页景点，用时{}毫秒", request.getPage(), useTime);
+                log.info("同步第{}页景点V2，用时{}毫秒", request.getPage(), useTime);
                 if(!success) {
                     break;
                 }
@@ -256,16 +257,17 @@ public class DfySyncTask {
                     Thread.sleep(310 - useTime);
                 }
             }
-            log.info("同步笛风云产品定时任务执行完成，共同步{}页，用时{}秒", request.getPage(), (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步笛风云产品定时任务执行完成V2，共同步{}页，用时{}秒", request.getPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
-            log.error("执行笛风云定时更新景点、产品任务异常", e);
+            log.error("执行笛风云定时更新景点、产品任务异常V2", e);
         }
     }
 
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 5-23/3 ? * *")
+    // todo 真正上线的时候要发开这里，现在只为了落景点数据
+//    @Scheduled(cron = "0 0 5-23/3 ? * *")
     public void syncUpdateToursProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -273,25 +275,25 @@ public class DfySyncTask {
             }
             long begin = System.currentTimeMillis();
             log.info("开始执行定时任务，同步笛风云跟团游产品V2（只更新本地已有产品）。。");
-            List<ProductPO> products = dfySyncService.getSupplierProductIds(ProductType.TRIP_GROUP.getCode());
-            if(ListUtils.isEmpty(products)){
+            List<String> ids = dfySyncService.getSupplierToursProductIdsV2();
+            if(ListUtils.isEmpty(ids)){
                 log.error("同步笛风云跟团游产品定时任务执行完成V2（只更新本地已有产品），没有找到笛风云的产品。");
                 return;
             }
             int i = 1;
-            for (ProductPO product : products) {
+            for (String id : ids) {
                 try {
                     long sTime = System.currentTimeMillis();
-                    dfySyncService.syncToursDetail(product.getSupplierProductId(), PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    dfySyncService.syncToursDetailV2(id);
                     long useTime = System.currentTimeMillis() - sTime;
-                    log.info("同步第{}个跟团游产品V2 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, product.getSupplierProductId(), useTime);
+                    log.info("同步第{}个跟团游产品V2 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, id, useTime);
                     // 如果执行时间超过310毫秒就不用睡了
                     if(useTime < 310){
                         // 限制一分钟不超过200次
                         Thread.sleep(310 - useTime);
                     }
                 } catch (Exception e) {
-                    log.error("同步第{}个跟团游产品supplierProductCode={}异常V2（只更新本地已有产品），", i, product.getSupplierProductId(), e);
+                    log.error("同步第{}个跟团游产品supplierProductCode={}异常V2（只更新本地已有产品），", i, id, e);
                 }
                 i++;
             }
@@ -304,7 +306,8 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    // todo 真正上线的时候要发开这里，现在只为了落景点数据
+//    @Scheduled(cron = "0 0 3 * * ?")
     public void syncNewToursProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -318,7 +321,7 @@ public class DfySyncTask {
                 request.setStart(start * 100);
                 request.setLimit(100);
                 long sTime = System.currentTimeMillis();
-                boolean success = dfySyncService.syncToursList(request, PRODUCT_SYNC_MODE_ONLY_ADD);
+                boolean success = dfySyncService.syncToursListV2(request);
                 long useTime = System.currentTimeMillis() - sTime;
 
                 log.info("同步第{}页跟团游V2，用时{}毫秒", (start + 1), useTime);

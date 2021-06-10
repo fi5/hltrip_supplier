@@ -144,6 +144,12 @@ public interface DfySyncService {
     List<String> getSupplierProductIdsV2();
 
     /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierToursProductIdsV2();
+
+    /**
      * 同步跟团游列表，新版
      * @param request
      * @return

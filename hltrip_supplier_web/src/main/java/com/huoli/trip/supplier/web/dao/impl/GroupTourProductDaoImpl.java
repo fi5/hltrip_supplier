@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao.impl;
 import com.huoli.trip.common.constant.MongoConst;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.GroupTourProductDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -51,5 +55,16 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
     public void updateStatus(String supplierProductId, String channel){
         mongoTemplate.updateFirst(new Query(Criteria.where("supplierProductId")
                 .is(supplierProductId).and("channel").is(channel)), Update.update("status", 3), GroupTourProductMPO.class);
+    }
+
+    @Override
+    public List<String> getSupplierProductIdByChannel(String channel){
+        Query query = new Query(Criteria.where("channel").is(channel));
+        query.fields().include("supplierProductId");
+        List<GroupTourProductMPO> groupTourProductMPOs = mongoTemplate.find(query, GroupTourProductMPO.class);
+        if(ListUtils.isNotEmpty(groupTourProductMPOs)){
+            return groupTourProductMPOs.stream().map(GroupTourProductMPO::getSupplierProductId).collect(Collectors.toList());
+        }
+        return null;
     }
 }

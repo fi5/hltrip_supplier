@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -38,4 +40,11 @@ public interface GroupTourProductDao {
      * @param channel
      */
     void updateStatus(String supplierProductId, String channel);
+
+    /**
+     * 根据渠道获取渠道产品码
+     * @param channel
+     * @return
+     */
+    List<String> getSupplierProductIdByChannel(String channel);
 }

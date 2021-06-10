@@ -188,7 +188,8 @@ public class LmmTicketTask {
     /**
      * 只更新本地已有景点
      */
-    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+    // todo 真正上线的时候要发开这里，现在只为了落景点数据
+//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     public void syncUpdateScenicV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -228,7 +229,8 @@ public class LmmTicketTask {
     /**
      * 只更新本地已有商品
      */
-    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
+    // todo 真正上线的时候要发开这里，现在只为了落景点数据
+//    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
     public void syncUpdateProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){

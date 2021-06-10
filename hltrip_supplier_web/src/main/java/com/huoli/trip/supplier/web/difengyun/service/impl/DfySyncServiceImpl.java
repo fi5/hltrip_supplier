@@ -1127,6 +1127,11 @@ public class DfySyncServiceImpl implements DfySyncService {
     }
 
     @Override
+    public List<String> getSupplierToursProductIdsV2(){
+        return groupTourProductDao.getSupplierProductIdByChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+    }
+
+    @Override
     public boolean syncToursListV2(DfyToursListRequest request){
         DfyBaseResult<DfyToursListResponse> baseResult = getToursList(request);
         if(baseResult == null){
