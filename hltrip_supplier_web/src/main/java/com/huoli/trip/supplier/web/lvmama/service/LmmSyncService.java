@@ -4,6 +4,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmPriceProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 
 import javax.xml.bind.JAXBException;
@@ -42,6 +43,12 @@ public interface LmmSyncService {
      * @return
      */
     List<String> getSupplierScenicIds();
+
+    /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierProductIds();
 
     /**
      * 同步产品、商品
@@ -93,6 +100,13 @@ public interface LmmSyncService {
     List<LmmProduct> getProductListById(LmmProductListByIdRequest request);
 
     /**
+     * 获取商品
+     * @param goodsId
+     * @return
+     */
+    List<LmmGoods> getGoodsListById(String goodsId);
+
+    /**
      * 获取商品列表，id
      * @param request
      * @return
@@ -116,11 +130,11 @@ public interface LmmSyncService {
 
     /**
      * 同步产品
-     * @param productId
+     * @param productIds
      * @param syncMode
      * @return
      */
-    boolean syncProductListById(String productId, int syncMode);
+    boolean syncProductListById(String productIds, int syncMode);
 
     /**
      * 同步商品
@@ -150,4 +164,77 @@ public interface LmmSyncService {
      * @return
      */
     List<String> getSupplierProductIds();
+
+
+    /**
+     * 同步景点
+     * @param request
+     * @return
+     */
+    boolean syncScenicListV2(LmmScenicListRequest request);
+
+    /**
+     * 根据id同步
+     * @param request
+     */
+    void syncScenicListByIdV2(LmmScenicListByIdRequest request);
+
+    /**
+     * 根据id同步
+     * @param id
+     */
+    void syncScenicListByIdV2(String id);
+
+    /**
+     * 同步商品，分页
+     * @param request
+     * @return
+     */
+    boolean syncProductListV2(LmmProductListRequest request);
+
+    /**
+     * 同步产品，id
+     * @param request
+     * @return
+     */
+    boolean syncProductListByIdV2(LmmProductListByIdRequest request);
+
+    /**
+     * 同步产品，id
+     * @param productIds
+     * @return
+     */
+    boolean syncProductListByIdV2(String productIds);
+
+    /**
+     * 同步商品，id
+     * @param request
+     * @return
+     */
+    boolean syncGoodsListByIdV2(LmmGoodsListByIdRequest request);
+
+    /**
+     * 同步商品，id
+     * @param goodsId
+     * @return
+     */
+    boolean syncGoodsListByIdV2(String goodsId);
+
+    /**
+     * 获取供应商景点id
+     * @return
+     */
+    List<String> getSupplierScenicIdsV2();
+
+    /**
+     * 获取供应商商品id
+     * @return
+     */
+    List<String> getSupplierProductIdsV2();
+
+    /**
+     * 接收产品推送
+     * @param product
+     */
+    void pushUpdateV2(String product) throws JAXBException;
 }

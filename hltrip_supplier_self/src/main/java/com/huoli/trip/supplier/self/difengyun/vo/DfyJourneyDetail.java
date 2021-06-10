@@ -37,7 +37,7 @@ public class DfyJourneyDetail {
         /**
          * 行程附注
          */
-        private String content;
+        private String content;  // 不要
 
         private List<Journey> data;
     }
@@ -107,15 +107,15 @@ public class DfyJourneyDetail {
         /**
          * 时间点 13:00，新数据里的“上午下午”以及“00：00”时间点统一的放到moment字段内
          */
-        private String moment;
+        private String moment;  // 这个目前对应到 time 但是可能有汉字，没关系不格式化
         /**
          * 备注
          */
-        private String remark;
+        private String remark;  // 不要
         /**
          * 描述
          */
-        private String description;
+        private String description;  // 优先取元素内的content,或者根据类型从不同地方取
         /**
          * 图片
          */
@@ -124,7 +124,7 @@ public class DfyJourneyDetail {
          * 模块类型为景点时
          * 景点---是否为并关系 0-或，1-并
          */
-        private Integer relative;
+        private Integer relative; // 本地没有,不要
         /**
          * 景点
          */
@@ -162,7 +162,7 @@ public class DfyJourneyDetail {
         /**
          * 景点 poi id（必填）
          */
-        private Integer id;
+        private Integer id;  // 是否关联本地景点库，目前没有，不需要关联
         /**
          * 标题（必填）
          */
@@ -170,11 +170,11 @@ public class DfyJourneyDetail {
         /**
          * 游玩时间
          */
-        private Integer times;
+        private Integer times;  // 对应到playTime，转成hh:mm
         /**
          * 正文（必填）
          */
-        private String content;
+        private String content; // 本地没有，也对应了poiDesc,优先用此项
         /**
          * 图片
          */
@@ -187,7 +187,7 @@ public class DfyJourneyDetail {
         /**
          * 酒店POI id，自行输入时，id为0（必填）
          */
-        private Integer id;
+        private Integer id; // 是否对应本地酒店，目前没有，不需要
         /**
          * 酒店id，自行输入时，id为0（必填）
          */
@@ -199,11 +199,11 @@ public class DfyJourneyDetail {
         /**
          * 来自哪个系统
          */
-        private Integer origin;
+        private Integer origin; // 本地没有，不要
         /**
          * 是否属于国内酒店
          */
-        private Integer source;
+        private Integer source; // 本地没有，不要
         /**
          * 酒店星级，1，2，3，4，5
          */
@@ -211,7 +211,7 @@ public class DfyJourneyDetail {
         /**
          * 房间
          */
-        private List<ModuleHotelRoom> room;
+        private List<ModuleHotelRoom> room; //  本地只有一个房型，目前把集合拼成一个，把酒店描述和房型描述合并起来，名字用逗号分隔
         /**
          * 说明
          */
@@ -241,7 +241,7 @@ public class DfyJourneyDetail {
         /**
          * 出发地
          */
-        private String from;
+        private String from;  // from meansType to 拼到poiname
         /**
          * 出发地id
          */
@@ -291,7 +291,7 @@ public class DfyJourneyDetail {
         /**
          * 餐食
          */
-        private List<HasFood> hasList;
+        private List<HasFood> hasList;  // 早餐：含/敬请自理 这种格式放到poiname
     }
 
     @Getter
@@ -312,7 +312,7 @@ public class DfyJourneyDetail {
         /**
          * 营业产品（必填）
          */
-        private String product;
+        private String product;  // 拼到说明后面
         /**
          * 说明（必填）
          */

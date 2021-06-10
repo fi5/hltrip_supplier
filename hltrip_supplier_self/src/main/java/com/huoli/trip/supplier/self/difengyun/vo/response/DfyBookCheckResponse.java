@@ -20,5 +20,7 @@ public class DfyBookCheckResponse implements Serializable {
     private String productId;
     //价格库存列表
     private List<DfyBookSaleInfo> saleInfos;
+    //套餐ID
+    private String packageId;
 
 }

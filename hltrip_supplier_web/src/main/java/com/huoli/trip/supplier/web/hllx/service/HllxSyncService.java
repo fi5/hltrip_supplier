@@ -5,8 +5,10 @@ import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrderOperationLog;
 import com.huoli.trip.common.util.ConfigGetter;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.vo.TripNotice;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.central.OrderStatusKafka;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
@@ -52,7 +54,9 @@ public class HllxSyncService {
             List<PushOrderStatusReq.Voucher> list = new ArrayList<>();
             vouchers.forEach(hllxVoucher -> {
                 PushOrderStatusReq.Voucher voucher = new PushOrderStatusReq.Voucher();
-                if(hllxVoucher.getType() == 2 || hllxVoucher.getType() ==3){
+                voucher.setType(hllxVoucher.getType());
+                voucher.setInType(hllxVoucher.getInType());
+                if(hllxVoucher.getType() == 2 || hllxVoucher.getType() ==3 || hllxVoucher.getType() == 6){
                     voucher.setVocherUrl(hllxVoucher.getVoucherInfo());
                 }else{
                     voucher.setVocherNo(hllxVoucher.getVoucherInfo());
@@ -98,6 +102,29 @@ public class HllxSyncService {
         } catch (Exception e) {
 
         }
+    }
+
+    /**
+     * 发送出团通知
+     * @return
+     */
+    public boolean tripNotice(TripNotice request){
+        String url = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON,"hltrip.centtral") + "/recSupplier/tripNotice";
+        try {
+            HttpUtil.doPostWithTimeout(url, JSONObject.toJSONString(request), 10000, TraceConfig.traceHeaders(huoliTrace, url));
+        } catch (Exception e) {
+            log.error("请求出团通知异常", e);
+        }
+        try {
+            TripOrderOperationLog tripOrderOperationLog = new TripOrderOperationLog();
+            BeanUtils.copyProperties(request,tripOrderOperationLog);
+            String updateTime = DateTimeUtil.formatDate(new Date());
+            tripOrderOperationLog.setUpdateTime(updateTime);
+            tripOrderOperationLogMapper.insertOperationLog(tripOrderOperationLog);
+        }catch (Exception exception){
+            log.error("写入操作日志出现异常：", exception);
+        }
+        return true;
     }
 
 

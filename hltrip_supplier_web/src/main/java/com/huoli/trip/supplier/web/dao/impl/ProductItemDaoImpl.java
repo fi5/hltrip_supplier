@@ -100,4 +100,9 @@ public class ProductItemDaoImpl implements ProductItemDao {
         return null;
     }
 
+    @Override
+    public List<ProductItemPO> selectAll(){
+        return mongoTemplate.find(new Query(Criteria.where("itemType").is(2)), ProductItemPO.class);
+    }
+
 }

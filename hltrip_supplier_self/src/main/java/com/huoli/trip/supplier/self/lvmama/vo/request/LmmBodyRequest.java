@@ -17,3 +17,4 @@ public class LmmBodyRequest<T> implements Serializable {
 
     private T request;
 }
+

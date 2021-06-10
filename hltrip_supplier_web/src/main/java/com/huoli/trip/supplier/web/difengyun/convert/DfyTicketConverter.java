@@ -9,12 +9,18 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Notice;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyAdmissionVoucher;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyPriceCalendar;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -323,5 +329,66 @@ public class DfyTicketConverter {
         bookRulePO.setPeopleLimit(limit);
 //        bookRulePO.setPeopleNum(1);
         return bookRulePO;
+    }
+
+    public static ScenicSpotMPO convertToScenicSpotMPO(DfyScenicDetail scenicDetail){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        // 默认待审核
+        scenicSpotMPO.setStatus(0);
+        scenicSpotMPO.setAddress(scenicDetail.getScenicAddress());
+        scenicSpotMPO.setCity(scenicDetail.getCityName());
+        if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
+            scenicSpotMPO.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
+        }
+
+        scenicSpotMPO.setName(scenicDetail.getScenicName());
+        scenicSpotMPO.setDetailDesc(scenicDetail.getScenicDescription());
+        scenicSpotMPO.setCoordinate(convertToCoordinate(scenicDetail.getBlocation(), scenicDetail.getGlocation()));
+        scenicSpotMPO.setProvince(scenicDetail.getProvinceName());
+        if(StringUtils.isNotBlank(scenicDetail.getOpenTime())){
+            ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
+            scenicSpotOpenTime.setTimeDesc(scenicDetail.getOpenTime());
+            scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
+        }
+        Notice notice = new Notice();
+        notice.setContent(scenicDetail.getBookNotice());
+        notice.setContent("预定须知");
+//        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
+        scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
+        return scenicSpotMPO;
+    }
+
+    public static Coordinate convertToCoordinate(String baidu, String google){
+        Coordinate coordinate = null;
+        if(StringUtils.isNotBlank(baidu)){
+            try {
+                String[] baiduArr = baidu.split(",");
+                if(baiduArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(baiduArr[0]), Double.valueOf(baiduArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        coordinate = new Coordinate();
+                        coordinate.setLongitude(coordinateArr[1]);
+                        coordinate.setLatitude(coordinateArr[0]);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
+        } else if(StringUtils.isNotBlank(google)){
+            try {
+                String[] googleArr = google.split(",");
+                if(googleArr.length == 2){
+                    double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.valueOf(googleArr[0]), Double.valueOf(googleArr[1]));
+                    if(coordinateArr != null && coordinateArr.length == 2){
+                        coordinate = new Coordinate();
+                        coordinate.setLongitude(coordinateArr[1]);
+                        coordinate.setLatitude(coordinateArr[0]);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("转换坐标失败，不影响继续执行，", e);
+            }
+        }
+        return coordinate;
     }
 }

@@ -7,10 +7,12 @@ import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductPriceMPO;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
-import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
@@ -23,26 +25,24 @@ import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.request.DfyOrderDetailRequest;
 import com.huoli.trip.supplier.self.difengyun.vo.response.*;
-import com.huoli.trip.supplier.self.hllx.vo.HllxBaseResult;
-import com.huoli.trip.supplier.self.hllx.vo.HllxBookCheckRes;
-import com.huoli.trip.supplier.self.hllx.vo.HllxBookSaleInfo;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
+import com.huoli.trip.supplier.web.dao.GroupTourProductSetMealDao;
+import com.huoli.trip.supplier.web.dao.HotelScenicProductSetMealDao;
 import com.huoli.trip.supplier.web.dao.PriceDao;
+import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author :zhouwenbin
@@ -66,6 +66,12 @@ public class DfyOrderServiceImpl implements DfyOrderService {
 
     @Autowired
     private HuoliTrace huoliTrace;
+
+    @Autowired
+    private GroupTourProductSetMealDao groupTourProductSetMealDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
 
     public BaseResponse<DfyOrderDetail> orderDetail(BaseOrderRequest request){
 
@@ -403,8 +409,52 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
-
-        PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
+        log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
+        String category = bookCheckReq.getCategory();
+        if(StringUtils.isNotBlank(category)){
+            DfyBookCheckResponse dfyBookCheckResponse = null;
+            switch (category){
+                case "d_ss_ticket":
+                    ScenicSpotProductPriceMPO priceMPO = scenicSpotProductPriceDao.getPriceByPackageId(bookCheckReq.getPackageId());
+                    if(priceMPO != null && priceMPO.getStock() >= bookCheckReq.getAdtNum()){
+                        dfyBookCheckResponse = new DfyBookCheckResponse();
+                        dfyBookCheckResponse.setProductId(bookCheckReq.getProductId());
+                        dfyBookCheckResponse.setPackageId(bookCheckReq.getPackageId());
+                        List<DfyBookSaleInfo> saleInfos = new ArrayList<>();
+                        dfyBookCheckResponse.setSaleInfos(saleInfos);
+                        DfyBookSaleInfo dfyBookSaleInfo = new DfyBookSaleInfo();
+                        dfyBookSaleInfo.setDate(DateTimeUtil.parseDate(priceMPO.getStartDate()));
+                        dfyBookSaleInfo.setPrice(priceMPO.getSellPrice());
+                        dfyBookSaleInfo.setTotalStock(priceMPO.getStock());
+                        saleInfos.add(dfyBookSaleInfo);
+                    }
+                    break;
+                case "group_tour":
+                    GroupTourProductSetMealMPO groupTourProductSetMealMPO = groupTourProductSetMealDao.getSetMealByPackageId(bookCheckReq.getPackageId());
+                    List<GroupTourPrice> groupTourPrices = groupTourProductSetMealMPO.getGroupTourPrices();
+                    if(CollectionUtils.isNotEmpty(groupTourPrices)){
+                        groupTourPrices = groupTourPrices.stream().filter(a -> StringUtils.equals(a.getDate(), bookCheckReq.getBeginDate())).collect(Collectors.toList());
+                    }
+                    if (CollectionUtils.isNotEmpty(groupTourPrices)) {
+                        GroupTourPrice groupTourPrice = groupTourPrices.get(0);
+                        if(groupTourPrice.getAdtStock() >= bookCheckReq.getAdtNum() && groupTourPrice.getChdStock() >= bookCheckReq.getChdNum()){
+                            dfyBookCheckResponse = new DfyBookCheckResponse();
+                            dfyBookCheckResponse.setProductId(bookCheckReq.getProductId());
+                            dfyBookCheckResponse.setPackageId(bookCheckReq.getPackageId());
+                            List<DfyBookSaleInfo> saleInfos = new ArrayList<>();
+                            dfyBookCheckResponse.setSaleInfos(saleInfos);
+                            DfyBookSaleInfo dfyBookSaleInfo = new DfyBookSaleInfo();
+                            dfyBookSaleInfo.setDate(DateTimeUtil.parseDate(groupTourPrice.getDate()));
+                            dfyBookSaleInfo.setPrice(groupTourPrice.getAdtPrice());
+                            dfyBookSaleInfo.setTotalStock(groupTourPrice.getAdtStock());
+                            saleInfos.add(dfyBookSaleInfo);
+                        }
+                    }
+                    break;
+            }
+            return new DfyBaseResult(true, 200, dfyBookCheckResponse);
+        }
+        /*PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
@@ -433,7 +483,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     }
                 }
             }
-        }
+        }*/
         return new DfyBaseResult(true, 200, null);
     }
 

@@ -56,4 +56,36 @@ public interface YcfSyncService {
      * @param ycfPrice
      */
     void syncFullPrice(YcfPrice ycfPrice);
+
+    /**
+     * 同步产品，新版
+     * @param ycfProducts
+     */
+    void syncScenicProduct(List<YcfProduct> ycfProducts);
+
+    /**
+     * 同步景点，新版
+     * @param scenicIds
+     */
+    List<String> syncScenic(List<String> scenicIds);
+
+    /**
+     * 同步酒店，新版
+     * @param hotelIds
+     * @return
+     */
+    List<String> syncHotel(List<String> hotelIds);
+
+    /**
+     * 同步价格，新版
+     * @param request
+     * @return
+     */
+    void syncPriceV2(YcfGetPriceRequest request);
+
+    /**
+     * 被动同步价格，新版
+     * @param ycfPrice
+     */
+    void syncPriceV2(YcfPrice ycfPrice);
 }

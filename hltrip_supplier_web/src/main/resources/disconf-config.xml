@@ -34,7 +34,7 @@
 	<!-- disconf 配置 -->
 	<bean id="disconfMgrBean" class="com.baidu.disconf.client.DisconfMgrBean"
 		destroy-method="destroy">
-		<property name="scanPackage" value="com.huoli.trip.common.config" />
+		<property name="scanPackage" value="com.huoli" />
 	</bean>
 	<bean id="disconfMgrBean2" class="com.baidu.disconf.client.DisconfMgrBeanSecond"
 		init-method="init" destroy-method="destroy">
@@ -71,4 +71,16 @@
 			</list>
 		</property>
 	</bean>
+
+
+
+	<!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="propertiesArray">
+			<list>
+				<ref bean="configproperties_disconf"/>
+			</list>
+		</property>
+	</bean>-->
 </beans>

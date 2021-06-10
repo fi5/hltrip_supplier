@@ -10,7 +10,7 @@ import lombok.Data;
  * @date 2021/3/1517:36
  */
 @Data
-public class OrderCancelRequest extends LmmBaseRequest {
+public class  OrderCancelRequest extends LmmBaseRequest {
     private String partnerOrderNo;
     private String orderId;
 

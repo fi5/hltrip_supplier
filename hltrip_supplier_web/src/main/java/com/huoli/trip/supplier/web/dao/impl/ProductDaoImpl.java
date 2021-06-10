@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.DateTimeUtil;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -178,6 +180,23 @@ public class ProductDaoImpl implements ProductDao {
     public void updateVerifyStatusByCode(String code, int verifyStatus){
         mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
                 Update.update("auditStatus", verifyStatus), Constants.COLLECTION_NAME_TRIP_PRODUCT);
+    }
+
+    @Override
+    public List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("productType").is(productType));
+        query.fields().include("supplierProductId").exclude("_id");
+        List<ProductPO> productPOs = mongoTemplate.find(query, ProductPO.class);
+        if(ListUtils.isNotEmpty(productPOs)){
+            return productPOs.stream().map(ProductPO::getSupplierProductId).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Override
+    public List<ProductPO> getBySupplierId(String supplierId){
+        Query query = new Query(Criteria.where("supplierId").is(supplierId));
+        return mongoTemplate.find(query, ProductPO.class);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
+import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class CommonController {
 
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
+
+    @Autowired
+    private CommonService commonService;
 
     @PostMapping("/refresh/item/all")
     public BaseResponse refreshItemAll(@RequestParam @NotBlank(message = "user不能为空") String user){
@@ -63,6 +67,30 @@ public class CommonController {
             dynamicProductItemService.refreshItemByProductCode(productCode);
         } catch (Exception e) {
             log.error("刷新item异常，word={}, productCode={}", user, JSON.toJSONString(productCode), e);
+            return BaseResponse.withFail(-1, "刷新item失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/trans/tours")
+    public BaseResponse transTours(){
+        try {
+            log.info("开始转移录入后台数据。");
+            commonService.transTours();
+        } catch (Exception e) {
+            log.error("转移录入后台数据异常", e);
+            return BaseResponse.withFail(-1, "刷新item失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/trans/scenic")
+    public BaseResponse transScenic(){
+        try {
+            log.info("开始转移录入后台数据。");
+            commonService.transScenic();
+        } catch (Exception e) {
+            log.error("转移录入后台数据异常", e);
             return BaseResponse.withFail(-1, "刷新item失败");
         }
         return BaseResponse.withSuccess();

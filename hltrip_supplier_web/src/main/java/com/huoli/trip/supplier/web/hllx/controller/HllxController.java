@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.hllx.controller;
 
 
+import com.huoli.trip.common.vo.TripNotice;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.hllx.vo.HllxOrderOperationRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
@@ -28,6 +29,17 @@ public class HllxController {
             return  BaseResponse.withSuccess(true);
         }catch (Exception e){
             return  BaseResponse.withFail(1,"推送信息失败");
+        }
+    }
+
+    @PostMapping(path = "/tripNotice")
+    BaseResponse<Boolean> pushOrderStatus(@RequestBody TripNotice request) {
+        try{
+            hllxSyncService.tripNotice(request);
+            return  BaseResponse.withSuccess(true);
+        }catch (Exception e){
+            log.error("处理出团通知异常", e);
+            return  BaseResponse.withFail(1,"处理出团通知失败");
         }
     }
 

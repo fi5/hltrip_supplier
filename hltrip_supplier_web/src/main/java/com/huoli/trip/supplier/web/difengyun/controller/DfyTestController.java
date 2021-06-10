@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_UNLIMITED;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -85,7 +87,7 @@ public class DfyTestController {
     }
 
     /**
-     * 接收产品更新通知
+     * 更新新产品
      *
      * @return
      */
@@ -96,13 +98,78 @@ public class DfyTestController {
     }
 
     /**
-     * 接收产品更新通知
+     * 更新已有产品
      *
      * @return
      */
     @PostMapping(path = "/sync/update/product")
     DfyBaseResult syncUpdateProduct() {
         dfySyncTask.syncUpdateProduct();
+        return DfyBaseResult.success();
+    }
+
+
+    /**
+     * 接收产品更新通知
+     *
+     * @param productId
+     * @return
+     */
+    @PostMapping(path = "/sync/product/v2")
+    DfyBaseResult syncProductV2(@RequestBody String productId) {
+        dfySyncService.syncProductV2(productId);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 同步景点
+     *
+     * @param request
+     * @return
+     */
+    @PostMapping(path = "/sync/scenic/v2")
+    DfyBaseResult syncScenicV2(@RequestBody DfyScenicListRequest request) {
+        dfySyncService.syncScenicListV2(request);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 更新单个景点
+     *
+     * @param ticketId
+     * @return
+     */
+    @PostMapping(path = "/sync/scenic/detail/v2")
+    DfyBaseResult syncScenicDetailV2(@RequestBody String ticketId) {
+        dfySyncService.syncScenicDetailV2(ticketId);
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/new/product/v2")
+    DfyBaseResult syncNewProductV2() {
+        dfySyncTask.syncNewProductV2();
+        return DfyBaseResult.success();
+    }
+
+    /**
+     * 接收产品更新通知
+     *
+     * @return
+     */
+    @PostMapping(path = "/sync/update/product/v2")
+    DfyBaseResult syncUpdateProductV2() {
+        dfySyncTask.syncUpdateProductV2();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/update/product/id/v2")
+    DfyBaseResult syncUpdateProductByIdV2(@RequestBody String productId) {
+        dfySyncService.syncProductV2(productId);
         return DfyBaseResult.success();
     }
 
@@ -113,19 +180,36 @@ public class DfyTestController {
 
     @PostMapping(path = "/sync/tours/detail")
     DfyBaseResult syncToursDetail(@RequestBody String productId) {
-        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        dfySyncService.syncToursDetail(productId, PRODUCT_SYNC_MODE_UNLIMITED);
         return DfyBaseResult.success();
     }
 
     @PostMapping(path = "/sync/tours/multi/detail")
     DfyBaseResult syncToursMultiDetail(@RequestBody String productId) {
-        dfySyncService.syncToursDetail(productId, DfyConstants.PRODUCT_SYNC_MODE_UNLIMITED);
+        dfySyncService.syncToursDetail(productId, PRODUCT_SYNC_MODE_UNLIMITED);
         return DfyBaseResult.success();
     }
 
     @PostMapping(path = "/sync/tours/price")
     DfyBaseResult syncToursPrice(@RequestBody DfyToursCalendarRequest request) {
         dfySyncService.syncToursPrice(String.valueOf(request.getProductId()), String.valueOf(request.getDepartCityCode()));
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/list/v2")
+    DfyBaseResult syncToursListV2(@RequestBody DfyToursListRequest request) {
+        return DfyBaseResult.success(dfySyncService.syncToursListV2(request));
+    }
+
+    @PostMapping(path = "/sync/tours/detail/v2")
+    DfyBaseResult syncToursDetailV2(@RequestBody String productId) {
+        dfySyncService.syncToursDetailV2(productId);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/tours/price/v2")
+    DfyBaseResult syncToursPriceV2(@RequestBody DfyToursCalendarRequest request) {
+        dfySyncService.syncToursPriceV2(String.valueOf(request.getProductId()), String.valueOf(request.getDepartCityCode()));
         return DfyBaseResult.success();
     }
 

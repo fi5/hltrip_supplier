@@ -17,11 +17,23 @@ import java.io.Serializable;
 public class DfyBookCheckRequest extends TraceRequest implements Serializable {
     //产品编号
     private String productId;
+    /**
+     * 套餐ID
+     */
+    private String packageId;
+    /**
+     * 类目
+     */
+    private String category;
     //开始日期
     @NotNull(message = "开始日期为空")
     private String beginDate;
     //结束日期
     @NotNull(message = "结束日期为空")
     private String endDate;
+    /* 成人数量 */
+    private int adtNum;
+    /* 儿童数量 */
+    private int chdNum;
 
 }

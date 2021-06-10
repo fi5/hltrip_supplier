@@ -7,6 +7,9 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.ListUtils;
@@ -15,6 +18,7 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import org.apache.commons.lang3.StringUtils;
+import sun.awt.motif.X11CNS11643;
 
 import java.util.Arrays;
 import java.util.List;
@@ -196,7 +200,6 @@ public class LmmTicketConverter {
             }).collect(Collectors.toList());
             productPO.setDescriptions(descs);
         }
-        // todo characteristic 要不要拼到产品说明，serviceGuarantee 要不要存，在哪儿展示
         if(ListUtils.isNotEmpty(lmmProduct.getImages())){
             List<ImageBasePO> images = lmmProduct.getImages().stream().map(i -> {
                 ImageBasePO imageBasePO = new ImageBasePO();
@@ -382,5 +385,59 @@ public class LmmTicketConverter {
         return productPO;
     }
 
+
+    // ==================================↓↓↓新结构↓↓↓===============================
+
+
+    public static ScenicSpotMPO convertToScenicSpotMPO(LmmScenic lmmScenic){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
+        scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
+        scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
+        scenicSpotMPO.setName(lmmScenic.getScenicName());
+        scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());
+        if(lmmScenic.getBaiduData() != null){
+            scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData(), "bd"));
+        } else if (lmmScenic.getGoogleData() != null){
+            scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getGoogleData(), "gg"));
+        }
+        scenicSpotMPO.setCountry(lmmScenic.getPlaceCountry());
+        scenicSpotMPO.setProvince(lmmScenic.getPlaceProvince());
+        scenicSpotMPO.setLevel(lmmScenic.getPlaceLevel());
+        scenicSpotMPO.setTheme(lmmScenic.getPlaceAct());
+        if(ListUtils.isNotEmpty(lmmScenic.getOpenTimes())){
+            List<ScenicSpotOpenTime> openTimes = lmmScenic.getOpenTimes().stream().map(o -> convertToScenicSpotOpenTime(o)).collect(Collectors.toList());
+            scenicSpotMPO.setScenicSpotOpenTimes(openTimes);
+        }
+        return scenicSpotMPO;
+    }
+
+    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate, String map){
+        if(lmmCoordinate != null){
+            try {
+                Coordinate coordinate = new Coordinate();
+                double[] coordinateArr = null;
+                if(StringUtils.equals("bd", map)){
+                    coordinateArr = CoordinateUtil.bd09_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
+                } else if(StringUtils.equals("gg", map)){
+                    coordinateArr = CoordinateUtil.gps84_To_Gcj02(lmmCoordinate.getLatitude(), lmmCoordinate.getLongitude());
+                }
+                if(coordinateArr != null && coordinateArr.length == 2){
+                    coordinate.setLatitude(coordinateArr[0]);
+                    coordinate.setLongitude(coordinateArr[1]);
+                    return coordinate;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return null;
+    }
+
+    public static ScenicSpotOpenTime convertToScenicSpotOpenTime(LmmOpenTime lmmOpenTime){
+        ScenicSpotOpenTime scenicSpotOpenTime = new ScenicSpotOpenTime();
+        scenicSpotOpenTime.setTimeDesc(lmmOpenTime.getOpenTimeInfo());
+        scenicSpotOpenTime.setDateDesc(String.format("%s-%s", lmmOpenTime.getSightStart(), lmmOpenTime.getSightEnd()));
+        return scenicSpotOpenTime;
+    }
 
 }

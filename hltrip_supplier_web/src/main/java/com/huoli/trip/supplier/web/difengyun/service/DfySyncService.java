@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.difengyun.service;
 
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyProductInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.request.*;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
@@ -116,4 +117,59 @@ public interface DfySyncService {
      * @param city
      */
     void syncToursPrice(String supplierProductId, String city);
+
+    /**
+     * 同步景点，新版
+     * @param request
+     * @return
+     */
+    boolean syncScenicListV2(DfyScenicListRequest request);
+
+    /**
+     * 同步景点，新版
+     * @param scenicId
+     */
+    void syncScenicDetailV2(String scenicId);
+
+    /**
+     * 同步产品，新版
+     * @param productId
+     */
+    void syncProductV2(String productId);
+
+    /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierProductIdsV2();
+
+    /**
+     * 获取供应商产品id
+     * @return
+     */
+    List<String> getSupplierToursProductIdsV2();
+
+    /**
+     * 同步跟团游列表，新版
+     * @param request
+     * @return
+     */
+    boolean syncToursListV2(DfyToursListRequest request);
+
+    /**
+     * 同步跟团游，新版
+     * @param productId
+     */
+    void syncToursDetailV2(String productId);
+
+    /**
+     * 同步跟团游价格，新版
+     * @param supplierProductId
+     * @param city
+     */
+    List<GroupTourPrice> syncToursPriceV2(String supplierProductId, String city);
+
+
 }
+
+

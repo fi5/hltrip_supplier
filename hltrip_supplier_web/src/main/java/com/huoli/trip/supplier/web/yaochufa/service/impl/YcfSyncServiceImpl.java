@@ -3,25 +3,31 @@ package com.huoli.trip.supplier.web.yaochufa.service.impl;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.huoli.trip.common.constant.BizTagConst;
+import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.ProductType;
 import com.huoli.trip.common.entity.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.entity.mpo.AddressInfo;
+import com.huoli.trip.common.entity.mpo.DescInfo;
+import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.entity.po.PassengerTemplatePO;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.self.yaochufa.constant.YcfConfigConstants;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.basevo.YcfBaseResult;
-import com.huoli.trip.supplier.web.dao.PriceDao;
-import com.huoli.trip.supplier.web.dao.ProductDao;
-import com.huoli.trip.supplier.web.dao.ProductItemDao;
+import com.huoli.trip.supplier.web.dao.*;
+import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.yaochufa.convert.YcfConverter;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +36,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_CODE_YCF;
+import static com.huoli.trip.common.constant.Constants.SUPPLIER_NAME_YCF;
+
 
 /**
  * 描述：<br/>
@@ -60,6 +71,45 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     @Autowired
     private CommonService commonService;
+
+    @Autowired
+    private ScenicSpotProductDao scenicSpotProductDao;
+
+    @Autowired
+    private ScenicSpotMappingDao scenicSpotMappingDao;
+
+    @Autowired
+    private ScenicSpotDao scenicSpotDao;
+
+    @Autowired
+    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
+
+    @Autowired
+    private ScenicSpotRuleDao scenicSpotRuleDao;
+
+    @Autowired
+    private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
+
+    @Autowired
+    private HotelScenicProductDao hotelScenicProductDao;
+
+    @Autowired
+    private HotelScenicProductSetMealDao hotelScenicProductSetMealDao;
+
+    @Autowired
+    private HotelMappingDao hotelMappingDao;
+
+    @Autowired
+    private HotelDao hotelDao;
+
+    @Autowired
+    private HotelScenicProductBackupDao hotelScenicProductBackupDao;
+
+    @Autowired
+    private ScenicSpotBackupDao scenicSpotBackupDao;
+
+    @Autowired
+    private PassengerTemplateMapper passengerTemplateMapper;
 
     @Override
     public void syncProduct(List<YcfProduct> ycfProducts){
@@ -281,7 +331,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(ycfProductId) || ListUtils.isEmpty(ycfPriceInfos)){
             return;
         }
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+        String productCode = CommonUtils.genCodeBySupplier(SUPPLIER_CODE_YCF, ycfProductId);
         PricePO pricePO = priceDao.getByProductCode(productCode);
         if(pricePO == null){
             pricePO = new PricePO();
@@ -293,7 +343,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
         }
         pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperator(SUPPLIER_CODE_YCF);
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
         List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
@@ -318,7 +368,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(StringUtils.isBlank(ycfProductId)){
             return;
         }
-        String productCode = CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_YCF, ycfProductId);
+        String productCode = CommonUtils.genCodeBySupplier(SUPPLIER_CODE_YCF, ycfProductId);
         PricePO pricePO = priceDao.getByProductCode(productCode);
         if(pricePO == null){
             pricePO = new PricePO();
@@ -330,7 +380,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             pricePO.setCreateTime(MongoDateUtils.handleTimezoneInput(pricePO.getCreateTime()));
         }
         pricePO.setUpdateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-        pricePO.setOperator(Constants.SUPPLIER_CODE_YCF);
+        pricePO.setOperator(SUPPLIER_CODE_YCF);
         pricePO.setOperatorName(Constants.SUPPLIER_NAME_YCF);
         List<PriceInfoPO> priceInfoPOs = pricePO.getPriceInfos();
         List<PriceInfoPO> newPriceInfos = Lists.newArrayList();
@@ -427,6 +477,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.info("要出发推送的单房，过滤掉。。");
             return false;
         }
+        // 类型是单餐 或者 只有餐饮项有数据的都认为是单餐，过滤
+        if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_FOOD ||
+                (ListUtils.isNotEmpty(ycfProduct.getFoodList()) &&
+                        ListUtils.isEmpty(ycfProduct.getRoomList()) &&
+                        ListUtils.isEmpty(ycfProduct.getTicketList()))){
+            log.info("要出发推送的单餐，过滤掉。。");
+            return false;
+        }
         if(ycfProduct.getRoomChoiceNum() != null && ycfProduct.getRoomOptionNum() != null &&
                 ycfProduct.getRoomChoiceNum().intValue() != ycfProduct.getRoomOptionNum().intValue()){
             log.info("酒店可选和必选不一样（M选N），过滤掉。。");
@@ -442,6 +500,14 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             log.info("景点可选和必选不一样（M选N），过滤掉。。");
             return false;
         }
+        return true;
+    }
+
+    private boolean filterScenicProduct(YcfProduct ycfProduct){
+        if(!filterProduct(ycfProduct)){
+            return false;
+        }
+
         return true;
     }
 
@@ -470,6 +536,891 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return ProductType.RESTAURANT.getCode();
         }
         return productType;
+    }
+
+    // ============================新结构============================
+
+    @Override
+    public void syncScenicProduct(List<YcfProduct> ycfProducts){
+        if(ListUtils.isEmpty(ycfProducts)){
+            log.error("要出发推送的产品列表为空");
+            return;
+        }
+        ycfProducts.forEach(ycfProduct -> {
+            if(!filterProduct(ycfProduct)){
+                return;
+            }
+            // 是单票类型并且只有门票列表有数据
+            if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_TICKET
+                    && ListUtils.isEmpty(ycfProduct.getFoodList()) &&
+                    ListUtils.isEmpty(ycfProduct.getRoomList()) &&
+                    ListUtils.isNotEmpty(ycfProduct.getTicketList())){
+                syncScenicProduct(ycfProduct);
+            }
+            // 套餐类型且酒店列表+其它列表至少两个列表有数据
+            else if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_PACKAGE
+                    && ListUtils.isNotEmpty(ycfProduct.getRoomList())
+                    && (ListUtils.isNotEmpty(ycfProduct.getFoodList()) ||
+                        ListUtils.isNotEmpty(ycfProduct.getTicketList()))){
+                syncHotelScenicProduct(ycfProduct);
+            }
+        });
+    }
+
+    private void syncScenicProduct(YcfProduct ycfProduct){
+        List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+        if(ListUtils.isEmpty(scenicIds)){
+            log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+            return;
+        }
+        syncScenic(scenicIds);
+        ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
+        ScenicSpotMPO scenicSpotMPO = null;
+        boolean fresh = false;
+        ScenicSpotProductBackupMPO backupMPO = null;
+        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMappingMPO == null){
+            log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+            return;
+        }
+        scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+        if(scenicSpotMPO == null){
+            log.error("景点{}不存在", scenicSpotMappingMPO.getId());
+            return;
+        }
+        if(scenicSpotProductMPO == null){
+            scenicSpotProductMPO = new ScenicSpotProductMPO();
+            scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            scenicSpotProductMPO.setCreateTime(new Date());
+            scenicSpotProductMPO.setScenicSpotId(scenicSpotMPO.getId());
+            scenicSpotProductMPO.setIsDel(0);
+            scenicSpotProductMPO.setSellType(1);
+            scenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
+            scenicSpotProductMPO.setPayServiceType(0);
+            scenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
+            if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+            }
+            fresh = true;
+        } else {
+            backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+            if(backupMPO != null){
+                List<String> changedFields = Lists.newArrayList();
+                ScenicSpotProductMPO backup = backupMPO.getScenicSpotProduct();
+                if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(ycfProduct.getProductImageList()))
+                        || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList()))){
+                    changedFields.add("images");
+                    changedFields.add("mainImage");
+                    if(ListUtils.isEmpty(ycfProduct.getProductImageList())){
+                        scenicSpotProductMPO.setImages(null);
+                        scenicSpotProductMPO.setMainImage(null);
+                    } else {
+                        scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                        scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                    }
+                } else if(ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                    if(backup.getImages().size() != ycfProduct.getProductImageList().size()
+                            || backup.getImages().stream().anyMatch(i ->
+                            !ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(i))){
+                        changedFields.add("images");
+                        scenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                        // 原来的图没有了，换一张
+                        if(!ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(scenicSpotProductMPO.getMainImage())){
+                            changedFields.add("mainImage");
+                            scenicSpotProductMPO.setMainImage(scenicSpotProductMPO.getImages().get(0));
+                        }
+                    }
+                }
+                if(!StringUtils.equals(backup.getPcDescription(), ycfProduct.getProductDescription())){
+                    scenicSpotProductMPO.setPcDescription(ycfProduct.getProductDescription());
+                    changedFields.add("pcDescription");
+                }
+                scenicSpotProductMPO.setChangedFields(changedFields);
+            }
+        }
+        scenicSpotProductMPO.setName(ycfProduct.getProductName());
+        scenicSpotProductMPO.setUpdateTime(new Date());
+        ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
+        if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
+            transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
+            scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
+        }
+        ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
+        BackChannelEntry backChannelEntry = commonService.getSupplierById(scenicSpotProductMPO.getChannel());
+        if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+            baseSetting.setAppSource(backChannelEntry.getAppSource());
+        }
+        // 默认当前
+        baseSetting.setLaunchDateTime(new Date());
+        if(StringUtils.isNotBlank(ycfProduct.getStartDate())){
+            baseSetting.setLaunchDateTime(DateTimeUtil.parseDate(ycfProduct.getStartDate()));
+        }
+        // 默认及时
+        baseSetting.setLaunchType(1);
+        baseSetting.setStockCount(0);
+        baseSetting.setCategoryCode("d_ss_ticket");
+        scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
+        if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
+            scenicSpotProductMPO.setStatus(1);
+        } else {
+            scenicSpotProductMPO.setStatus(3);
+        }
+        ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotByScenicSpotId(scenicSpotMPO.getId());
+        DescInfo bookNotice = new DescInfo();
+        if(scenicSpotBackupMPO != null){
+            YcfProductItem ycfProductItem = JSON.parseObject(scenicSpotBackupMPO.getOriginContent(), YcfProductItem.class);
+            if(ListUtils.isNotEmpty(ycfProductItem.getCharacterrList())){
+                ycfProductItem.getCharacterrList().stream().filter(c -> c.getType() == 1).findFirst().ifPresent(c -> {
+                    bookNotice.setTitle("购买须知");
+                    bookNotice.setContent(c.getDetail());
+                });
+            }
+        }
+        if(StringUtils.isNotBlank(bookNotice.getContent())){
+            if(ListUtils.isNotEmpty(scenicSpotProductMPO.getDescInfos())){
+                scenicSpotProductMPO.getDescInfos().add(bookNotice);
+            } else {
+                scenicSpotProductMPO.setDescInfos(Lists.newArrayList(bookNotice));
+            }
+        }
+        ScenicSpotRuleMPO ruleMPO;
+        if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
+            ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setRuleName("退改规则");
+            ruleMPO.setChannel(SUPPLIER_CODE_YCF);
+            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+            ruleMPO.setIsCouponRule(0);
+        } else {
+            ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
+        }
+        if(ycfProduct.getMaxNum() != null){
+            ruleMPO.setLimitBuy(1);
+            ruleMPO.setMaxCount(ycfProduct.getMaxNum());
+        }
+        if(ycfProduct.getRefundType() != null){
+            if(ycfProduct.getRefundType() == 1){
+                ruleMPO.setRefundCondition(0);
+            } else if(ycfProduct.getRefundType() == 2){
+                ruleMPO.setRefundCondition(1);
+            } else if(ycfProduct.getRefundType() == 3){
+                ruleMPO.setRefundCondition(2);
+            }
+        }
+        RefundRule refundRule = new RefundRule();
+        if(ycfProduct.getAdvanceOrDelayType() != null){
+            if(ycfProduct.getAdvanceOrDelayType() == 0){
+                refundRule.setRefundRuleType(1);
+            } else if(ycfProduct.getAdvanceOrDelayType() == 1){
+                refundRule.setRefundRuleType(4);
+            }
+        }
+        if(ycfProduct.getRefundPreMinute() != null){
+            int allMin = ycfProduct.getRefundPreMinute();
+            int day = 0;
+            int hour = 0;
+            int min = 0;
+            // 有天
+            if(allMin >= 1440){
+                day = allMin / 1440;
+                allMin = allMin % 1440;
+            }
+            if(allMin >= 60){
+                hour = allMin / 60;
+                min = allMin % 60;
+            } else {
+                min = allMin;
+            }
+            refundRule.setDay(day);
+            refundRule.setHour(hour);
+            refundRule.setMinute(min);
+        }
+        ruleMPO.setRefundRules(Lists.newArrayList(refundRule));
+        if(ListUtils.isNotEmpty(ycfProduct.getBookRules())){
+            for (YcfProductBookRule bookRule : ycfProduct.getBookRules()) {
+                List<Integer> rules = Lists.newArrayList();
+                if(bookRule.getCName() != null && bookRule.getCName()){
+                    rules.add(0);
+                }
+                if(bookRule.getMobile() != null && bookRule.getMobile()){
+                    rules.add(1);
+                }
+                if(bookRule.getCredential() != null && bookRule.getCredential()){
+                    rules.add(3);
+                }
+                if(bookRule.getEmail() != null && bookRule.getEmail()){
+                    rules.add(4);
+                }
+                if(StringUtils.equals(bookRule.getPersonType(), "0")){
+                    ruleMPO.setTicketInfos(rules);
+                    ruleMPO.setTicketCardTypes(bookRule.getCredentialType());
+                } else if(StringUtils.equals(bookRule.getPersonType(), "1")){
+                    ruleMPO.setTravellerInfos(rules);
+                    ruleMPO.setTravellerTypes(bookRule.getCredentialType());
+                }
+            }
+        }
+        if(backupMPO != null){
+            List<String> ruleChanged = Lists.newArrayList();
+            YcfProduct backup = JSON.parseObject(backupMPO.getOriginContent(), YcfProduct.class);
+            if(!StringUtils.equals(backup.getRefundNote(), ycfProduct.getRefundNote())){
+                ruleChanged.add("refundRuleDesc");
+                ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+            }
+            if(!StringUtils.equals(backup.getFeeInclude(), ycfProduct.getFeeInclude())){
+                ruleChanged.add("feeInclude");
+                ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            }
+            if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
+                DescInfo descInfo = new DescInfo();
+                descInfo.setTitle("费用不包含");
+                descInfo.setContent(ycfProduct.getFeeExclude());
+                if(StringUtils.isNotBlank(backup.getFeeExclude())){
+                    if(!StringUtils.equals(backup.getFeeExclude(), ycfProduct.getFeeExclude())){
+                        descInfo.setChangedFields(Lists.newArrayList("content"));
+                    }
+                }
+                ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
+            }
+            ruleMPO.setChangedFields(ruleChanged);
+        } else {
+            ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+            ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
+                // 规则加动态说明 费用不包含
+                DescInfo feeExclude = new DescInfo();
+                feeExclude.setTitle("费用不包含");
+                feeExclude.setContent(ycfProduct.getFeeExclude());
+                ruleMPO.setDescInfos(Lists.newArrayList(feeExclude));
+            }
+        }
+        // 产品要求增加的
+        if(StringUtils.isNotBlank(ycfProduct.getGetTicketMode())){
+            DescInfo descInfo = new DescInfo();
+            descInfo.setTitle("取票方式描述");
+            descInfo.setContent(ycfProduct.getGetTicketMode());
+            if(ruleMPO.getDescInfos() != null){
+                ruleMPO.getDescInfos().addAll(Lists.newArrayList(descInfo));
+            } else {
+                ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
+            }
+        }
+        scenicSpotRuleDao.addScenicSpotRule(ruleMPO);
+        scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+        scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+        Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
+        days = days == null ? Integer.valueOf(30) : days;
+        String start = DateTimeUtil.formatDate(new Date());
+        String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
+        YcfGetPriceRequest request = new YcfGetPriceRequest();
+        request.setPartnerProductID(scenicSpotProductMPO.getId());
+        request.setProductID(ycfProduct.getProductID());
+        request.setStartDate(start);
+        request.setEndDate(end);
+        List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString(), ycfProduct.getProductID());
+
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+        scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+        scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
+        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+        scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+
+        commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
+
+        if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
+            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+        }
+    }
+
+    private void syncHotelScenicProduct(YcfProduct ycfProduct){
+        List<String> poiIds = Lists.newArrayList();
+        if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
+            List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+            if(ListUtils.isEmpty(scenicIds)){
+                log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+                return;
+            }
+            poiIds.addAll(scenicIds);
+        }
+        List<String> hotelIds = ycfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
+        if(ListUtils.isEmpty(hotelIds)){
+            log.error("要出发产品{}酒店不存在，跳过", ycfProduct.getProductID());
+            return;
+        }
+        syncScenic(poiIds);
+        syncHotel(hotelIds);
+        HotelScenicSpotProductMPO hotelScenicSpotProductMPO = hotelScenicProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
+        HotelScenicSpotProductSetMealMPO setMealMPO = null;
+        HotelScenicSpotProductBackupMPO backupMPO = null;
+        boolean fresh = false;
+        if(hotelScenicSpotProductMPO == null){
+            hotelScenicSpotProductMPO = new HotelScenicSpotProductMPO();
+            hotelScenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+            hotelScenicSpotProductMPO.setCreateTime(new Date());
+            hotelScenicSpotProductMPO.setIsDel(0);
+            hotelScenicSpotProductMPO.setSupplierProductId(ycfProduct.getProductID());
+            hotelScenicSpotProductMPO.setMerchantCode(ycfProduct.getProductID());
+            hotelScenicSpotProductMPO.setChannel(SUPPLIER_CODE_YCF);
+            if(ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                hotelScenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                hotelScenicSpotProductMPO.setMainImage(hotelScenicSpotProductMPO.getImages().get(0));
+            }
+            hotelScenicSpotProductMPO.setCategory("hotel_scenicSpot");
+            hotelScenicSpotProductMPO.setComputerDesc(ycfProduct.getProductDescription());
+
+            HotelScenicSpotProductPayInfo payInfo = new HotelScenicSpotProductPayInfo();
+            payInfo.setSellType(1);
+            payInfo.setConfirmType(1);
+            payInfo.setThemeElements(1);
+            // 没有费用包含 交易设置里加动态说明放进去
+            payInfo.setCostExclude(ycfProduct.getFeeExclude());
+            if(StringUtils.isNotBlank(ycfProduct.getFeeInclude())){
+                DescInfo descInfo = new DescInfo();
+                descInfo.setTitle("费用不包含");
+                descInfo.setContent(ycfProduct.getFeeInclude());
+                payInfo.setBookNotices(Lists.newArrayList(descInfo));
+            }
+            hotelScenicSpotProductMPO.setPayInfo(payInfo);
+            HotelScenisSpotProductBaseSetting baseSetting = new HotelScenisSpotProductBaseSetting();
+            baseSetting.setStockCount(0);
+            baseSetting.setLaunchDateTime(StringUtils.isNotBlank(ycfProduct.getStartDate()) ? DateTimeUtil.parseDate(ycfProduct.getStartDate()) : new Date());
+            if(baseSetting.getLaunchDateTime().getTime() > new Date().getTime()){
+                baseSetting.setLaunchType(2);
+                hotelScenicSpotProductMPO.setStatus(4);
+            } else {
+                baseSetting.setLaunchType(1);
+                hotelScenicSpotProductMPO.setStatus(1);
+            }
+            baseSetting.setCategoryCode(hotelScenicSpotProductMPO.getCategory());
+            BackChannelEntry backChannelEntry = commonService.getSupplierById(hotelScenicSpotProductMPO.getChannel());
+            if(backChannelEntry != null || StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                baseSetting.setAppSource(backChannelEntry.getAppSource());
+            }
+            hotelScenicSpotProductMPO.setBaseSetting(baseSetting);
+            fresh = true;
+        } else {
+            List<HotelScenicSpotProductSetMealMPO> setMealMPOs = hotelScenicProductSetMealDao.getByProductId(hotelScenicSpotProductMPO.getId());
+            if(ListUtils.isNotEmpty(setMealMPOs)){
+                setMealMPO = setMealMPOs.get(0);
+            }
+            backupMPO = hotelScenicProductBackupDao.getHotelScenicSpotProductBackupByProductId(hotelScenicSpotProductMPO.getId());
+            if(backupMPO != null){
+                List<String> changedFields = Lists.newArrayList();
+                HotelScenicSpotProductMPO backup = backupMPO.getProductMPO();
+                if((ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isEmpty(ycfProduct.getProductImageList()))
+                        || (ListUtils.isEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList()))){
+                    changedFields.add("images");
+                    changedFields.add("mainImage");
+                    if(ListUtils.isEmpty(ycfProduct.getProductImageList())){
+                        hotelScenicSpotProductMPO.setImages(null);
+                        hotelScenicSpotProductMPO.setMainImage(null);
+                    } else {
+                        hotelScenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                        hotelScenicSpotProductMPO.setMainImage(hotelScenicSpotProductMPO.getImages().get(0));
+                    }
+                } else if(ListUtils.isNotEmpty(backup.getImages()) && ListUtils.isNotEmpty(ycfProduct.getProductImageList())){
+                    if(backup.getImages().size() != ycfProduct.getProductImageList().size()
+                            || backup.getImages().stream().anyMatch(i ->
+                            !ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(i))){
+                        changedFields.add("images");
+                        hotelScenicSpotProductMPO.setImages(ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+                        // 原来的图没有了，换一张
+                        if(!ycfProduct.getProductImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()).contains(hotelScenicSpotProductMPO.getMainImage())){
+                            changedFields.add("mainImage");
+                            hotelScenicSpotProductMPO.setMainImage(hotelScenicSpotProductMPO.getImages().get(0));
+                        }
+                    }
+                }
+                hotelScenicSpotProductMPO.setChangedFields(changedFields);
+                if(!StringUtils.equals(backup.getPayInfo().getCostExclude(), ycfProduct.getFeeExclude())){
+                    hotelScenicSpotProductMPO.getPayInfo().setCostExclude(ycfProduct.getFeeExclude());
+                    hotelScenicSpotProductMPO.getPayInfo().setChangedFields(Lists.newArrayList("costExclude"));
+                }
+                if(ListUtils.isNotEmpty(backup.getPayInfo().getBookNotices())){
+                    DescInfo descInfo = backup.getPayInfo().getBookNotices().stream().filter(n -> StringUtils.equals(n.getTitle(), "费用不包含")).findFirst().orElse(null);
+                    if(descInfo == null){
+                        // 新增
+                        if(StringUtils.isNotBlank(ycfProduct.getFeeInclude())){
+                            DescInfo newDesc = new DescInfo();
+                            newDesc.setTitle("费用不包含");
+                            newDesc.setContent(ycfProduct.getFeeInclude());
+                            newDesc.setChangedFields(Lists.newArrayList("title", "content"));
+                            hotelScenicSpotProductMPO.getPayInfo().setBookNotices(Lists.newArrayList(newDesc));
+                        }
+                    } else {
+                        if(StringUtils.isBlank(ycfProduct.getFeeInclude())){
+                            // 删除
+                            hotelScenicSpotProductMPO.getPayInfo().getBookNotices().removeIf(n -> StringUtils.equals(n.getTitle(), "费用不包含"));
+                        } else {
+                            if(!StringUtils.equals(ycfProduct.getFeeInclude(), descInfo.getContent())){
+                                if(ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getPayInfo().getBookNotices())){
+                                    // 变化
+                                    hotelScenicSpotProductMPO.getPayInfo().getBookNotices().stream().filter(n ->
+                                            StringUtils.equals(n.getTitle(), "费用不包含")).findFirst().ifPresent(n -> {
+                                        n.setContent(ycfProduct.getFeeInclude());
+                                        n.setChangedFields(Lists.newArrayList("content"));
+                                    });
+                                } else {
+                                    // 新增
+                                    DescInfo newDesc = new DescInfo();
+                                    newDesc.setTitle("费用不包含");
+                                    newDesc.setContent(ycfProduct.getFeeInclude());
+                                    newDesc.setChangedFields(Lists.newArrayList("title", "content"));
+                                    hotelScenicSpotProductMPO.getPayInfo().setBookNotices(Lists.newArrayList(newDesc));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        ScenicSpotMappingMPO scenicSpotMapping = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMapping != null){
+            ScenicSpotMPO scenicSpot = scenicSpotDao.getScenicSpotById(scenicSpotMapping.getScenicSpotId());
+            if(scenicSpot != null){
+                ScenicSpotBackupMPO scenicSpotBackupMPO = scenicSpotBackupDao.getScenicSpotByScenicSpotId(scenicSpot.getId());
+                DescInfo bookNotice = new DescInfo();
+                if(scenicSpotBackupMPO != null){
+                    YcfProductItem ycfProductItem = JSON.parseObject(scenicSpotBackupMPO.getOriginContent(), YcfProductItem.class);
+                    if(ListUtils.isNotEmpty(ycfProductItem.getCharacterrList())){
+                        ycfProductItem.getCharacterrList().stream().filter(c -> c.getType() == 1).findFirst().ifPresent(c -> {
+                            bookNotice.setTitle("购买须知");
+                            bookNotice.setContent(c.getDetail());
+                        });
+                    }
+                }
+                hotelScenicSpotProductMPO.setDescInfos(Lists.newArrayList(bookNotice));
+            }
+        }
+        if(setMealMPO == null){
+            setMealMPO = new HotelScenicSpotProductSetMealMPO();
+            setMealMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+        }
+        setMealMPO.setHotelScenicSpotProductId(hotelScenicSpotProductMPO.getId());
+        setMealMPO.setName(ycfProduct.getProductName());
+        setMealMPO.setBuyMax(ycfProduct.getMaxNum());
+        setMealMPO.setBuyMin(ycfProduct.getMinNum());
+        List<HotelScenicSpotProductHotelElement> hotelElements = ycfProduct.getRoomList().stream().map(r -> {
+            HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
+            String hotelName = null;
+            String hotelId = null;
+            String hotelCityCode = null;
+            String hotelCityName = null;
+            if(hotelMappingMPO == null){
+                // 要出发存在酒店和景点有相同poiid的情况，领导要求如果poiid相同了就把基础信息同时赋给酒店和景点；这里主要在做的是如果poiid在酒店里没有，就从景点里查；下面景点部分也一样处理
+                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
+                if(scenicSpotMappingMPO != null) {
+                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    if (scenicSpotMPO != null) {
+                        hotelName = scenicSpotMPO.getName();
+                        // id不能赋，使用的时候无法区分是酒店还是景点的id
+//                        hotelId = hotelMPO.getId();
+                        hotelCityCode = scenicSpotMPO.getCityCode();
+                        hotelCityName = scenicSpotMPO.getCity();
+                    }
+                } else {
+                    log.error("要出发产品{}没有查到关联酒店{}", ycfProduct.getProductID(), r.getPoiId());
+                }
+//                return null;
+            } else {
+                HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                if(hotelMPO == null){
+                    log.error("景点{}不存在", hotelMappingMPO.getHotelId());
+//                return null;
+                } else {
+                    hotelName = hotelMPO.getName();
+                    hotelId = hotelMPO.getId();
+                    hotelCityCode = hotelMPO.getCityCode();
+                    hotelCityName = hotelMPO.getCity();
+                }
+            }
+
+            HotelScenicSpotProductHotelElement hotelElement = new HotelScenicSpotProductHotelElement();
+            hotelElement.setHotelName(hotelName);
+            hotelElement.setHotelId(hotelId);
+            hotelElement.setCityCode(hotelCityCode);
+            hotelElement.setCityName(hotelCityName);
+            hotelElement.setRelationHotelLib(1);
+            hotelElement.setRoomName(r.getRoomName());
+            hotelElement.setNight(r.getRoomBaseNight());
+            return hotelElement;
+        }).collect(Collectors.toList());
+//        if(hotelElements.stream().anyMatch(h -> h == null)){
+//            log.error("产品{}酒店有空元素，跳过", ycfProduct.getProductID());
+//            return;
+//        }
+        setMealMPO.setHotelElements(hotelElements);
+        if(ListUtils.isNotEmpty(hotelElements)){
+            hotelScenicSpotProductMPO.setNight(hotelElements.get(0).getNight());
+        }
+        if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
+            List<HotelScenicSpotProductScenicSpotElement> scenicSpotElements = ycfProduct.getTicketList().stream().map(t -> {
+                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
+                String scenicName = null;
+                String scenicId = null;
+                String scenicCityCode = null;
+                String scenicCityName = null;
+                // 跟酒店情况一样
+                if(scenicSpotMappingMPO == null){
+                    HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(t.getPoiId(), SUPPLIER_CODE_YCF);
+                    if(hotelMappingMPO != null){
+                        HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                        if(hotelMPO != null){
+                            scenicName = hotelMPO.getName();
+                            // id不能赋，使用的时候无法区分是酒店还是景点的id
+//                            scenicId = scenicSpotMPO.getId();
+                            scenicCityCode = hotelMPO.getCityCode();
+                            scenicCityName = hotelMPO.getCity();
+                        }
+                    } else {
+                        log.error("要出发产品{}没有查到关联景点{}", ycfProduct.getProductID(), ycfProduct.getPoiId());
+                    }
+//                    return null;
+                } else {
+                    ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+                    if(scenicSpotMPO == null){
+                        log.error("景点{}不存在", scenicSpotMappingMPO.getScenicSpotId());
+//                    return null;
+                    } else {
+                        scenicName = scenicSpotMPO.getName();
+                        scenicId = scenicSpotMPO.getId();
+                        scenicCityCode = scenicSpotMPO.getCityCode();
+                        scenicCityName = scenicSpotMPO.getCity();
+                    }
+                }
+
+                HotelScenicSpotProductScenicSpotElement scenicSpotElement = new HotelScenicSpotProductScenicSpotElement();
+                scenicSpotElement.setScenicSpotId(scenicId);
+                scenicSpotElement.setCityCode(scenicCityCode);
+                scenicSpotElement.setScenicSpotName(scenicName);
+                scenicSpotElement.setCityName(scenicCityName);
+                scenicSpotElement.setRelationLib(1);
+                scenicSpotElement.setCount(t.getTicketBaseNum());
+                scenicSpotElement.setTicketKind(t.getTicketName());
+                return scenicSpotElement;
+            }).collect(Collectors.toList());
+//            if(scenicSpotElements.stream().anyMatch(s -> s == null)){
+//                log.error("产品{}门票有空元素，跳过", ycfProduct.getProductID());
+//                return;
+//            }
+            setMealMPO.setScenicSpotElements(scenicSpotElements);
+        }
+        if(ListUtils.isNotEmpty(ycfProduct.getFoodList())){
+            List<HotelScenicSpotProductRestaurantElement> restaurantElements = ycfProduct.getFoodList().stream().map(f -> {
+                HotelScenicSpotProductRestaurantElement restaurantElement = new HotelScenicSpotProductRestaurantElement();
+                restaurantElement.setCount(f.getFoodBaseNum());
+                restaurantElement.setName(f.getFoodName());
+                return restaurantElement;
+            }).collect(Collectors.toList());
+            setMealMPO.setRestaurantElements(restaurantElements);
+        }
+        YcfGetPriceRequest request = new YcfGetPriceRequest();
+        request.setPartnerProductID(hotelScenicSpotProductMPO.getId());
+        request.setProductID(ycfProduct.getProductID());
+        Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
+        days = days == null ? Integer.valueOf(30) : days;
+        String start = DateTimeUtil.formatDate(new Date());
+        String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
+        request.setStartDate(start);
+        request.setEndDate(end);
+        List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
+        if(ListUtils.isNotEmpty(ycfPriceInfos)){
+            setMealMPO.setPriceStocks(ycfPriceInfos.stream().map(p -> {
+                HotelScenicSpotPriceStock priceStock = new HotelScenicSpotPriceStock();
+                priceStock.setAdtPrice(p.getSettlementPrice());
+                priceStock.setAdtSellPrice(p.getPrice());
+                priceStock.setAdtStock(p.getStock());
+                priceStock.setDate(DateTimeUtil.formatDate(p.getDate()));
+                return priceStock;
+            }).collect(Collectors.toList()));
+        }
+        hotelScenicSpotProductMPO.setProductName(ycfProduct.getProductName());
+        hotelScenicSpotProductMPO.setUpdateTime(new Date());
+        if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
+            hotelScenicSpotProductMPO.setStatus(1);
+        } else {
+            hotelScenicSpotProductMPO.setStatus(3);
+        }
+        ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+        if(scenicSpotMappingMPO != null){
+            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+            if(scenicSpotMPO != null){
+                AddressInfo addressInfo = new AddressInfo();
+                addressInfo.setCityName(scenicSpotMPO.getCity());
+                addressInfo.setCityCode(scenicSpotMPO.getCityCode());
+                addressInfo.setType("0");
+                addressInfo.setDestinationName(scenicSpotMPO.getCity());
+                addressInfo.setDestinationCode(scenicSpotMPO.getCityCode());
+                addressInfo.setProvinceCode(scenicSpotMPO.getProvinceCode());
+                addressInfo.setProvinceName(scenicSpotMPO.getProvince());
+                hotelScenicSpotProductMPO.setAddressInfo(Lists.newArrayList(addressInfo));
+            }
+        } else {
+            HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(ycfProduct.getPoiId(), SUPPLIER_CODE_YCF);
+            if(hotelMappingMPO != null){
+                HotelMPO hotelMPO = hotelDao.getById(hotelMappingMPO.getHotelId());
+                if(hotelMPO != null){
+                    AddressInfo addressInfo = new AddressInfo();
+                    addressInfo.setCityName(hotelMPO.getCity());
+                    addressInfo.setCityCode(hotelMPO.getCityCode());
+                    addressInfo.setType("0");
+                    addressInfo.setDestinationName(hotelMPO.getCity());
+                    addressInfo.setDestinationCode(hotelMPO.getCityCode());
+                    addressInfo.setProvinceCode(hotelMPO.getProvinceCode());
+                    addressInfo.setProvinceName(hotelMPO.getProvinceName());
+                    hotelScenicSpotProductMPO.setAddressInfo(Lists.newArrayList(addressInfo));
+                }
+            }
+        }
+
+        // 出行人模板
+        if(ListUtils.isNotEmpty(ycfProduct.getBookRules())){
+            List<String> idInfos = Lists.newArrayList();
+            List<String> passengerInfos = Lists.newArrayList();
+            ycfProduct.getBookRules().stream().filter(br -> StringUtils.equals(br.getPersonType(), "1")).findFirst().ifPresent(bookRule -> {
+                if(bookRule.getCName() != null && bookRule.getCName()){
+                    passengerInfos.add("2");
+                }
+                if(bookRule.getMobile() != null && bookRule.getMobile()){
+                    passengerInfos.add("6");
+                }
+                if(bookRule.getCredential() != null && bookRule.getCredential()){
+                    idInfos.addAll(bookRule.getCredentialType().stream().map(String::valueOf).collect(Collectors.toList()));
+                }
+                if(bookRule.getEmail() != null && bookRule.getEmail()){
+                    passengerInfos.add("10");
+                }
+            });
+            String passengerInfo = passengerInfos.stream().collect(Collectors.joining(","));
+            String idInfo = idInfos.stream().collect(Collectors.joining(","));
+            // 创建默认的出行人模板
+            PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(SUPPLIER_CODE_YCF, 1,
+                    passengerInfo, idInfo);
+            if(passengerTemplatePO == null){
+                passengerTemplatePO = new PassengerTemplatePO();
+                passengerTemplatePO.setChannel(Constants.SUPPLIER_CODE_YCF);
+                passengerTemplatePO.setCreateTime(new Date());
+                passengerTemplatePO.setStatus(1);
+                passengerTemplatePO.setIdInfo(idInfo);
+                passengerTemplatePO.setPassengerInfo(passengerInfo);
+                passengerTemplatePO.setPeopleLimit(1);
+                passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
+            }
+            hotelScenicSpotProductMPO.setTravellerTemplateId(passengerTemplatePO.getId().toString());
+        }
+
+        hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
+        hotelScenicProductSetMealDao.saveProduct(setMealMPO);
+
+        HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
+        hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+        hotelScenicSpotProductBackupMPO.setSupplierProductId(ycfProduct.getProductID());
+        hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
+        hotelScenicSpotProductBackupMPO.setUpdateTime(new Date());
+        hotelScenicSpotProductBackupMPO.setProductMPO(hotelScenicSpotProductMPO);
+        hotelScenicSpotProductBackupMPO.setSetMealMPO(setMealMPO);
+        hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+        hotelScenicProductBackupDao.saveHotelScenicSpotProductBackup(hotelScenicSpotProductBackupMPO);
+
+        commonService.refreshList(2, hotelScenicSpotProductMPO.getId(), 1, fresh);
+
+        if(ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getChangedFields())
+                || ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getPayInfo().getChangedFields())
+                || (ListUtils.isNotEmpty(hotelScenicSpotProductMPO.getPayInfo().getBookNotices())
+                && hotelScenicSpotProductMPO.getPayInfo().getBookNotices().stream().anyMatch(n ->
+                ListUtils.isNotEmpty(n.getChangedFields()))) || fresh){
+            commonService.addHotelProductSubscribe(hotelScenicSpotProductMPO, setMealMPO, fresh);
+        }
+    }
+
+    @Override
+    public List<String> syncScenic(List<String> scenicIds){
+        List<YcfProductItem> ycfProductItems = getPoi(scenicIds);
+        if(ListUtils.isEmpty(ycfProductItems)){
+            return null;
+        }
+       return ycfProductItems.stream().map(item -> {
+            try {
+                if(item.getPoiType() != 2){
+                    log.error("poi {},{} 不是景点类型，跳过。。", item.getPoiID(), item.getPoiName());
+                    return null;
+                }
+                ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
+                // 设置省市区
+                commonService.setCity(newScenic);
+                // 同时保存映射关系
+                commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
+                // 更新备份
+                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+                return newScenic.getId();
+            } catch (Exception e) {
+                log.error("poi落地失败，", e);
+                return null;
+            }
+        }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> syncHotel(List<String> hotelIds){
+        List<YcfProductItem> ycfProductItems = getPoi(hotelIds);
+        if(ListUtils.isEmpty(ycfProductItems)){
+            return null;
+        }
+        return ycfProductItems.stream().map(item -> {
+            try {
+                if(item.getPoiType() != 1){
+                    log.error("poi {},{} 不是酒店类型，跳过。。", item.getPoiID(), item.getPoiName());
+                    return null;
+                }
+                HotelMPO newHotel = YcfConverter.convertToHotelMPO(item);
+                // 设置省市区
+                commonService.setCity(newHotel);
+                // 同时保存映射关系
+                commonService.updateHotelMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newHotel);
+                // 更新备份
+//                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+                return newHotel.getId();
+            } catch (Exception e) {
+                log.error("poi落地失败，", e);
+                return null;
+            }
+        }).filter(id -> StringUtils.isNotBlank(id)).collect(Collectors.toList());
+    }
+
+    @Override
+    public void syncPriceV2(YcfGetPriceRequest request){
+        if(StringUtils.isBlank(request.getEndDate())){
+            request.setEndDate(request.getStartDate());
+        }
+        int diffDays = DateTimeUtil.getDateDiffDays(DateTimeUtil.parseDate(request.getEndDate()), DateTimeUtil.parseDate(request.getStartDate()));
+        // 要出发最多请求30天，
+        int round = diffDays / 30;
+        int tail = diffDays % 30;
+        // 有余数需要循环商+1次
+        int n = round + (tail == 0 ? 0 : 1);
+        // 开始结束日期相同n会=0
+        n = n == 0 ? 1 : n;
+        for(int i = 0; i < n; i++){
+            YcfGetPriceRequest newRequest = new YcfGetPriceRequest();
+            newRequest.setTraceId(request.getTraceId());
+            newRequest.setFull(request.getFull());
+            newRequest.setPartnerProductID(request.getPartnerProductID());
+            newRequest.setProductID(request.getProductID());
+            // 从结束日期+1天开始
+            newRequest.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(request.getStartDate()), i * 30)));
+            // 前后共30天
+            newRequest.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(DateTimeUtil.parseDate(newRequest.getStartDate()), 29)));
+            if(i == n - 1){
+                newRequest.setEndDate(request.getEndDate());
+            }
+            try {
+                log.info("开始同步价格，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                List<YcfPriceInfo> ycfPriceInfos = getPriceV2(newRequest);
+                syncPrice(request.getPartnerProductID(), ycfPriceInfos, request.getProductID());
+                log.info("同步价格完成，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate());
+                // 要出发限制1分钟最多请求200次
+                Thread.sleep(310);
+            } catch (Exception e) {
+                log.info("同步价异常，产品编码 = {} ；日期 = {} 至 {} ", request.getPartnerProductID(), newRequest.getStartDate(), newRequest.getEndDate(), e);
+                continue;
+            }
+        }
+    }
+
+    @Override
+    public void syncPriceV2(YcfPrice ycfPrice){
+        String ycfProductId = ycfPrice.getProductID();
+        List<YcfPriceInfo> ycfPriceInfos = ycfPrice.getSaleInfos();
+        if(StringUtils.isBlank(ycfProductId) || ListUtils.isEmpty(ycfPriceInfos)){
+            log.error("价格同步失败，{}产品id或者价格日历为空", SUPPLIER_CODE_YCF);
+            return;
+        }
+        ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProductId, SUPPLIER_CODE_YCF);
+        if(scenicSpotProductMPO == null){
+            log.error("价格同步失败，{}的产品{}不存在", SUPPLIER_CODE_YCF, ycfProductId);
+            return;
+        }
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, scenicSpotProductMPO.getSupplierProductId());
+    }
+
+    private List<YcfPriceInfo> getPriceV2(YcfGetPriceRequest request){
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(request);
+        log.info("准备请求供应商(要出发)获取价格接口，参数={}", JSON.toJSONString(request));
+        YcfBaseResult<YcfGetPriceResponse> baseResult = yaoChuFaClient.getPrice(ycfBaseRequest);
+        log.info("供应商(要出发)获取价格接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS){
+            YcfGetPriceResponse response = baseResult.getData();
+            if(response == null){
+                log.error("获取价格失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            return response.getSaleInfos();
+        }
+        return null;
+    }
+
+    private List<YcfProductItem> getPoi(List<String> scenicIds){
+        if(ListUtils.isEmpty(scenicIds)){
+            log.error("同步poi失败，poi id集合为空");
+            return null;
+        }
+        log.info("开始同步poi，id list = {}", JSON.toJSONString(scenicIds));
+        YcfGetPoiRequest ycfGetPoiRequest = new YcfGetPoiRequest();
+        ycfGetPoiRequest.setPoiIdList(scenicIds);
+        YcfBaseRequest ycfBaseRequest = new YcfBaseRequest(ycfGetPoiRequest);
+        log.info("准备请求供应商(要出发)获取poi接口，参数={}", JSON.toJSONString(ycfGetPoiRequest));
+        YcfBaseResult<YcfGetPoiResponse> baseResult = yaoChuFaClient.getPoi(ycfBaseRequest);
+        log.info("供应商(要出发)获取poi接口返回，结果={}", JSON.toJSONString(baseResult));
+        if(baseResult.getSuccess() && baseResult.getStatusCode() == YcfConstants.RESULT_CODE_SUCCESS) {
+            YcfGetPoiResponse response = baseResult.getData();
+            if (response == null) {
+                log.error("同步poi失败，供应商（要出发）没有返回data");
+                return null;
+            }
+            List<YcfProductItem> ycfProductItems = response.getPoiList();
+            if (ListUtils.isEmpty(ycfProductItems)) {
+                log.error("同步poi失败，供应商（要出发）没有返回poi信息");
+                return null;
+            }
+            return ycfProductItems;
+        }
+        return null;
+    }
+
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String supplierProductId){
+        syncPrice(productId, ycfPriceInfos, null, null, supplierProductId);
+    }
+
+    private void syncPrice(String productId, List<YcfPriceInfo> ycfPriceInfos, String ruleId, String ticketKind, String supplierProductId){
+        if(StringUtils.isBlank(productId) || ListUtils.isEmpty(ycfPriceInfos)){
+            log.error("同步价格失败，产品id或者价格日历为空");
+            return;
+        }
+        List<ScenicSpotProductPriceMPO> existPrice = scenicSpotProductPriceDao.getByProductId(productId);
+        if(ListUtils.isNotEmpty(existPrice)){
+            ruleId = existPrice.get(0).getScenicSpotRuleId();
+            ticketKind = existPrice.get(0).getTicketKind();
+        }
+        if(StringUtils.isBlank(ruleId)){
+            log.error("同步价格失败，产品{}规则没有获取到规则id", productId);
+            return;
+        }
+        for (YcfPriceInfo yp : ycfPriceInfos) {
+            ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
+            priceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            priceMPO.setScenicSpotProductId(productId);
+            priceMPO.setMerchantCode(supplierProductId);
+            priceMPO.setScenicSpotRuleId(ruleId);
+            priceMPO.setTicketKind(ticketKind);
+            priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));
+            priceMPO.setEndDate(DateTimeUtil.formatDate(yp.getDate()));
+            priceMPO.setSellPrice(yp.getPrice());
+            priceMPO.setSettlementPrice(yp.getSettlementPrice());
+            priceMPO.setStock(yp.getStock());
+            scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
+        }
     }
 
 }

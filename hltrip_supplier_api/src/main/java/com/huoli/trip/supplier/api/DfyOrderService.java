@@ -40,7 +40,7 @@ public interface DfyOrderService {
     /**
      * 可预订检查
      */
-    DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq);
+    DfyBaseResult getCheckInfos(DfyBookCheckRequest bookCheckReq);
     /**
      * 支付订单
      */

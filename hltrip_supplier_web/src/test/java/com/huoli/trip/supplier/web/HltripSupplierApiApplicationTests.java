@@ -158,9 +158,14 @@ class HltripSupplierApiApplicationTests {
         dfySyncService.syncScenicList(request);
     }
 
-    public static void main(String[] args){
+    public static void main0(String[] args){
         HltripSupplierApiApplicationTests test = new HltripSupplierApiApplicationTests();
         log.info(test.format(htmlStr));
+    }
+
+    public static void main(String[] args){
+        System.out.println(-17 % 5);
+        System.out.println(-17 % -5);
     }
 
     private String format(String htmlStr){

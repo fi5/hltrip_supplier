@@ -3,6 +3,9 @@ package com.huoli.trip.supplier.web.yaochufa.convert;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
+import com.huoli.trip.common.entity.mpo.hotel.HotelPic;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.util.CommonUtil;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
@@ -406,5 +409,130 @@ public class YcfConverter {
             element.remove();
         }
         return document.toString();
+    }
+
+    /**
+     * 转换成产品项目数据库对象
+     * @param productItem
+     * @return
+     */
+    public static ScenicSpotMPO convertToScenicSpotMPO(YcfProductItem productItem){
+        ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        scenicSpotMPO.setName(productItem.getPoiName());
+        if(productItem.getLevel() != null){
+            switch (productItem.getLevel()){
+                case 11:
+                    scenicSpotMPO.setLevel("A");
+                    break;
+                case 12:
+                    scenicSpotMPO.setLevel("AA");
+                    break;
+                case 13:
+                    scenicSpotMPO.setLevel("AAA");
+                    break;
+                case 14:
+                    scenicSpotMPO.setLevel("AAAA");
+                    break;
+                case 15:
+                    scenicSpotMPO.setLevel("AAAAA");
+                    break;
+            }
+        }
+        if(ListUtils.isNotEmpty(productItem.getTags())){
+            scenicSpotMPO.setTheme(productItem.getTags().stream().collect(Collectors.joining(",")));
+        }
+        scenicSpotMPO.setCountry(productItem.getCountry());
+        scenicSpotMPO.setProvince(productItem.getProvince());
+        scenicSpotMPO.setCity(productItem.getCity());
+        scenicSpotMPO.setAddress(productItem.getAddress());
+        scenicSpotMPO.setPhone(productItem.getPhone());
+        if(StringUtils.isNotBlank(productItem.getLongitude()) && StringUtils.isNotBlank(productItem.getLatitude())){
+            double[] coordinateArr = CoordinateUtil.bd09_To_Gcj02(Double.parseDouble(productItem.getLatitude()), Double.parseDouble(productItem.getLongitude()));
+            if(coordinateArr != null && coordinateArr.length == 2){
+                Coordinate coordinate = new Coordinate();
+                coordinate.setLongitude(coordinateArr[1]);
+                coordinate.setLatitude(coordinateArr[0]);
+                scenicSpotMPO.setCoordinate(coordinate);
+            }
+        }
+        scenicSpotMPO.setDetailDesc(productItem.getDescription());
+        List<String> images = Lists.newArrayList();
+        if(ListUtils.isNotEmpty(productItem.getImageList())){
+            images.addAll(productItem.getImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+        } else {
+            if(ListUtils.isNotEmpty(productItem.getMainImageList())){
+                images.addAll(productItem.getMainImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
+            }
+        }
+        scenicSpotMPO.setImages(images);
+        // 把购买须知加到产品动态说明，需要加字段
+//        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
+//            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
+//                Notice notice = new Notice();
+//                if(c.getType() == 1){
+//                    notice.setTitle("购买须知");
+//                } else if(c.getType() == 2){
+//                    notice.setTitle("交通指南");
+//                } else if(c.getType() == 3){
+//                    notice.setTitle("酒景图文");
+//                }
+//                notice.setContent(c.getDetail());
+//                return notice;
+//            }).collect(Collectors.toList()));
+//        }
+        return scenicSpotMPO;
+    }
+
+    public static HotelMPO convertToHotelMPO(YcfProductItem productItem){
+        HotelMPO hotelMPO = new HotelMPO();
+        hotelMPO.setName(productItem.getPoiName());
+        if(productItem.getLevel() != null){
+            switch (productItem.getLevel()){
+                case 0:
+                    hotelMPO.setStar("0");
+                    break;
+                case 1:
+                    hotelMPO.setStar("1");
+                    break;
+                case 2:
+                    hotelMPO.setStar("2");
+                    break;
+                case 3:
+                    hotelMPO.setStar("3");
+                    break;
+                case 4:
+                    hotelMPO.setStar("4");
+                    break;
+                case 5:
+                    hotelMPO.setStar("5");
+                    break;
+            }
+        }
+        hotelMPO.setCountyName(productItem.getCountry());
+        hotelMPO.setProvinceName(productItem.getProvince());
+        hotelMPO.setCity(productItem.getCity());
+        hotelMPO.setAddress(productItem.getAddress());
+        hotelMPO.setTel(productItem.getPhone());
+        hotelMPO.setDescription(productItem.getDescription());
+        List<HotelPic> images = Lists.newArrayList();
+        if(ListUtils.isNotEmpty(productItem.getImageList())){
+            images.addAll(productItem.getImageList().stream().map(i -> {
+                HotelPic hotelPic = new HotelPic();
+                hotelPic.setName(i.getImageName());
+                hotelPic.setUrl(i.getImageUrl());
+                return hotelPic;
+            }).collect(Collectors.toList()));
+        } else {
+            if(ListUtils.isNotEmpty(productItem.getMainImageList())){
+                images.addAll(productItem.getMainImageList().stream().map(i -> {
+                    HotelPic hotelPic = new HotelPic();
+                    hotelPic.setName(i.getImageName());
+                    hotelPic.setUrl(i.getImageUrl());
+                    return hotelPic;
+                }).collect(Collectors.toList()));
+            }
+        }
+        hotelMPO.setHotelPics(images);
+        return hotelMPO;
     }
 }
