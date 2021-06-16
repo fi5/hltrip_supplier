@@ -933,6 +933,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
                     scenicSpotProductPriceMPO.setStartDate(p.getDepartDate());
                     scenicSpotProductPriceMPO.setEndDate(p.getDepartDate());
+                    scenicSpotProductPriceMPO.setWeekDay("1,2,3,4,5,6,7");
                     if(ticketKind != null){
                         scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
                     }

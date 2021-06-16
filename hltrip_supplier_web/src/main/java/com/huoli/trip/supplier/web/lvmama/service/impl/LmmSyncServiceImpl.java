@@ -1047,6 +1047,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                             scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
                             scenicSpotProductPriceMPO.setMerchantCode(g.getGoodsId());
                             scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
+                            scenicSpotProductPriceMPO.setWeekDay("1,2,3,4,5,6,7");
                             Integer ticketType;
                             switch (g.getTicketType()){
                                 case "PARENTAGE":
