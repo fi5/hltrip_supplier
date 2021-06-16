@@ -1419,6 +1419,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             priceMPO.setSellPrice(yp.getPrice());
             priceMPO.setSettlementPrice(yp.getSettlementPrice());
             priceMPO.setStock(yp.getStock());
+            priceMPO.setWeekDay("1,2,3,4,5,6,7");
             scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
         }
     }
