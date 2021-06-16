@@ -6,12 +6,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
+import com.huoli.trip.common.entity.mpo.DescInfo;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
@@ -275,12 +278,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     public List<String> getSupplierScenicIds(){
         return productItemDao.selectSupplierItemIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
                 Constants.PRODUCT_ITEM_TYPE_TICKET);
-    }
-
-    @Override
-    public List<String> getSupplierProductIds(){
-        return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
-                ProductType.SCENIC_TICKET.getCode());
     }
 
     private boolean updateScenic(List<LmmScenic> lmmScenicList){

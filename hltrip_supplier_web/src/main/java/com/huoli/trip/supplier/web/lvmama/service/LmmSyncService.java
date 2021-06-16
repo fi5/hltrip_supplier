@@ -45,12 +45,6 @@ public interface LmmSyncService {
     List<String> getSupplierScenicIds();
 
     /**
-     * 获取供应商产品id
-     * @return
-     */
-    List<String> getSupplierProductIds();
-
-    /**
      * 同步产品、商品
      * @param request
      * @param syncMode

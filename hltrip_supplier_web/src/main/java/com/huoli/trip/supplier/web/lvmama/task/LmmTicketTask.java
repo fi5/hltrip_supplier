@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_UNLIMITED;
 import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.*;
 
 /**

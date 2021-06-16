@@ -412,7 +412,7 @@ public class LmmTicketConverter {
         return scenicSpotMPO;
     }
 
-    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate, String map){
+    public static Coordinate convertToCoordinate(LmmScenic.Coordinate lmmCoordinate, String map){
         if(lmmCoordinate != null){
             try {
                 Coordinate coordinate = new Coordinate();

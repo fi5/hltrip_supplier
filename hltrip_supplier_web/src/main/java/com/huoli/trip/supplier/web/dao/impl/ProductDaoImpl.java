@@ -208,15 +208,4 @@ public class ProductDaoImpl implements ProductDao {
         return mongoTemplate.find(new Query(criteria), ProductPO.class);
     }
 
-    @Override
-    public List<String> selectSupplierProductIdsBySupplierIdAndType(String supplierId, Integer productType){
-        Query query = new Query(Criteria.where("supplierId").is(supplierId).and("productType").is(productType));
-        query.fields().include("supplierProductId").exclude("_id");
-        List<ProductPO> productPOs = mongoTemplate.find(query, ProductPO.class);
-        if(ListUtils.isNotEmpty(productPOs)){
-            return productPOs.stream().map(ProductPO::getSupplierProductId).collect(Collectors.toList());
-        }
-        return null;
-    }
-
 }
