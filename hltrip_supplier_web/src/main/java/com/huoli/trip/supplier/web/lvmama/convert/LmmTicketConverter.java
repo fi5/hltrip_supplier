@@ -141,6 +141,7 @@ public class LmmTicketConverter {
         productPO.setName(goods.getGoodsName());
         productPO.setCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, goods.getGoodsId()));
         productPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
+        productPO.setSupplierName(Constants.SUPPLIER_NAME_LMM_TICKET);
         productPO.setSupplierProductId(goods.getGoodsId());
         productPO.setProductType(ProductType.SCENIC_TICKET.getCode());
         if(StringUtils.equals(goods.getStatus(), "true")
