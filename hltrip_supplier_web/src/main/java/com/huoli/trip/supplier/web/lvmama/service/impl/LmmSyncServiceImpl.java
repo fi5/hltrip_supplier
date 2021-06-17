@@ -8,14 +8,13 @@ import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
-import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
@@ -60,7 +59,7 @@ import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC
 public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
-    private ILvmamaClient lvmamaClient;
+    private ILvmamaProductClient lvmamaClient;
 
     @Autowired
     private ProductItemDao productItemDao;
@@ -281,12 +280,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 Constants.PRODUCT_ITEM_TYPE_TICKET);
     }
 
-    @Override
-    public List<String> getSupplierProductIds(){
-        return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
-                ProductType.SCENIC_TICKET.getCode());
-    }
-
     private boolean updateScenic(List<LmmScenic> lmmScenicList){
         if(ListUtils.isEmpty(lmmScenicList)){
             return false;
@@ -467,6 +460,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     newProduct.setAppFrom(appFroms);
                 }
             } else {
+                if(oldProduct.getSupplierStatus() == null
+                        || ListUtils.isEmpty(oldProduct.getAppFrom())){
+                    BackChannelEntry backChannelEntry = commonService.getSupplierById(newProduct.getSupplierId());
+                    if(backChannelEntry == null
+                            || backChannelEntry.getStatus() == null
+                            || backChannelEntry.getStatus() != 1){
+                        newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_CLOSED);
+                    }
+                    if(backChannelEntry != null && StringUtils.isNotBlank(backChannelEntry.getAppSource())){
+                        List<String> appFroms = Arrays.asList(backChannelEntry.getAppSource().split(","));
+                        newProduct.setAppFrom(appFroms);
+                    }
+                }
                 newProduct.setAuditStatus(oldProduct.getAuditStatus());
                 newProduct.setSupplierStatus(oldProduct.getSupplierStatus());
                 newProduct.setRecommendFlag(oldProduct.getRecommendFlag());
@@ -575,6 +581,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 productDao.updateStatusByCode(productPO.getCode(), 0);
             }
         }
+    }
+
+    @Override
+    public List<String> getSupplierProductIds() {
+        return productDao.selectSupplierProductIdsBySupplierIdAndType(Constants.SUPPLIER_CODE_LMM_TICKET,
+                ProductType.SCENIC_TICKET.getCode());
     }
 
 

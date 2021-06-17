@@ -88,16 +88,16 @@ public class LmmScenic {
     /**
      * 景区经纬度(百度)
      */
-    private LmmCoordinate baiduData;
+    private Coordinate baiduData;
 
     /**
      * 景区经纬度(谷歌)
      */
-    private LmmCoordinate googleData;
+    private Coordinate googleData;
 
     @Getter
     @Setter
-    public class LmmCoordinate{
+    public static class Coordinate{
 
         /**
          * 景区所在经度

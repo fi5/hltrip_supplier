@@ -26,14 +26,14 @@ public class LmmOrderPushController {
     LvmamaOrderService lvmamaOrderService;
 
     @PostMapping(path = "/pushOrderStatus")
-    LmmBaseResponse pushOrderStatus(@RequestBody LmmOrderPushRequest request) {
-        log.info("驴妈供应商触发了订单推送 订单号：{}", JSONObject.toJSONString(request));
-        return lvmamaOrderService.orderStatusNotice(request);
+    LmmBaseResponse pushOrderStatus(@RequestParam("order") String order) {
+        log.info("驴妈供应商触发了订单推送：{}", order);
+        return lvmamaOrderService.orderStatusNotice(order);
     }
 
     @PostMapping(path = "/pushOrderRefund")
     LmmBaseResponse pushOrderRefund(@RequestParam("order") String order) {
-        log.info("驴妈供应商触发了退款推送：{}", JSONObject.toJSONString(order));
+        log.info("驴妈供应商触发了退款推送：{}", order);
         return lvmamaOrderService.pushOrderRefund(order);
     }
 }

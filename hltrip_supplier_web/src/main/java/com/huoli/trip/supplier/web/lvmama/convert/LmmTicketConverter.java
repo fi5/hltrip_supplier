@@ -138,7 +138,7 @@ public class LmmTicketConverter {
         Map<String, String> extend = Maps.newHashMap();
         extend.put("productId", lmmProduct.getProductId());
         productPO.setExtendParams(extend);
-        productPO.setName(goods.getGoodsName());
+        productPO.setName(String.format("%s %s", lmmProduct.getProductName(), goods.getGoodsName()));
         productPO.setCode(CommonUtils.genCodeBySupplier(Constants.SUPPLIER_CODE_LMM_TICKET, goods.getGoodsId()));
         productPO.setSupplierId(Constants.SUPPLIER_CODE_LMM_TICKET);
         productPO.setSupplierName(Constants.SUPPLIER_NAME_LMM_TICKET);
@@ -413,7 +413,7 @@ public class LmmTicketConverter {
         return scenicSpotMPO;
     }
 
-    public static Coordinate convertToCoordinate(LmmScenic.LmmCoordinate lmmCoordinate, String map){
+    public static Coordinate convertToCoordinate(LmmScenic.Coordinate lmmCoordinate, String map){
         if(lmmCoordinate != null){
             try {
                 Coordinate coordinate = new Coordinate();

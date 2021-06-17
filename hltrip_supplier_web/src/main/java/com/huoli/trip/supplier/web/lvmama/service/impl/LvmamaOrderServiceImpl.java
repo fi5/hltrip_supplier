@@ -15,11 +15,9 @@ import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.LvmamaOrderService;
-import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
-import com.huoli.trip.supplier.self.difengyun.DfyOrderDetail;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaOrderClient;
 import com.huoli.trip.supplier.self.lvmama.vo.LvOrderDetail;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmOrderPushRequest;
-import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
@@ -51,7 +49,7 @@ import java.util.List;
 @Service(timeout = 10000, group = "hltrip")
 public class LvmamaOrderServiceImpl implements LvmamaOrderService {
     @Autowired
-    private ILvmamaClient iLvmamaClient;
+    private ILvmamaOrderClient iLvmamaClient;
     @Autowired
     private HuoliTrace huoliTrace;
 
@@ -111,22 +109,53 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         }
     }
 
+    private String getGjStatus(LvOrderDetail detail) {
+        String gjStatus = "待确认";
+        if (StringUtils.equals(detail.getPaymentStatus(), "PAYED")) {
+            if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_SEND"))
+                gjStatus = "已发送";
+            if (StringUtils.equals(detail.getCredenctStatus(), "CREDENCE_NO_SEND"))
+                gjStatus = "未发送";
+            if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                gjStatus = "已退款";
+        } else {
+            if (StringUtils.equals(detail.getStatus(), "NORMAL"))
+                gjStatus = "待付款";
+            if (StringUtils.equals(detail.getStatus(), "CANCEL"))
+                gjStatus = "已取消";
+        }
+
+        if (StringUtils.equals(detail.getPerformStatus(), "USED"))
+            gjStatus = "已消费";
+        if (StringUtils.equals(detail.getPerformStatus(), "UNUSE"))
+            gjStatus = "未使用";
+        return gjStatus;
+    }
+
     @Override
-    public LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request) {
+    public LmmBaseResponse orderStatusNotice(String request) {
         try {
+            LmmOrderPushRequest orderPushRequest = null;
+            try {
+                orderPushRequest = XmlConvertUtil.convertToJava(request, LmmOrderPushRequest.class);
+            } catch (JAXBException e) {
+                e.printStackTrace();
+            }
+            if (orderPushRequest == null) return LmmBaseResponse.fail();
+            log.info("orderPushRequest={}", JSON.toJSONString(orderPushRequest));
             BaseOrderRequest detailReq = new BaseOrderRequest();
-            BaseResponse<LvOrderDetail> lvOrderDetail = orderDetail(detailReq);
-            LvOrderDetail detail = lvOrderDetail.getData();
+            LvOrderDetail order = orderPushRequest.getBody().getOrder();
+            detailReq.setSupplierOrderId(order.getOrderId());
             PushOrderStatusReq req = new PushOrderStatusReq();
-            req.setStrStatus(detail.getGjStatus());
-            req.setPartnerOrderId(request.getOrder().getPartnerOrderNo());
-            req.setVochers(genTicketsVoucher(detail));
+            req.setStrStatus(getGjStatus(order));
+            req.setPartnerOrderId(order.getPartnerOrderNo());
+            req.setVochers(genTicketsVoucher(order));
             orderStatusNotice(req);
         } catch (Exception e) {
             log.error("信息{}", e);
         }
 
-        return null;
+        return LmmBaseResponse.success();
     }
 
     private List<PushOrderStatusReq.Voucher> genTicketsVoucher(LvOrderDetail detail) {
@@ -181,7 +210,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         }
         ;//request.getOrder();
         LmmRefundPushRequest.RefundPushBody refundPushBody = refundBody.getBody();
-        LmmRefundPushRequest.PushOrder pushOrder = refundPushBody.getPushOrder();
+        LmmRefundPushRequest.PushOrder pushOrder = refundPushBody.getOrder();
         RefundNoticeReq req = new RefundNoticeReq();
         req.setPartnerOrderId(pushOrder.getPartnerOrderID());
         req.setRefundFrom(2);
@@ -190,10 +219,15 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         BigDecimal refundCharge = new BigDecimal(pushOrder.getFactorage() * 100);
         req.setRefundCharge(refundCharge);
         //判断退款状态
-        if (pushOrder.getRequestStatus() != null && pushOrder.getRequestStatus().equals("已退款")) {
+        String strStatus = "退款申请中";
+        if (pushOrder.getRequestStatus() == null || pushOrder.getRequestStatus().equals("REVIEWING"))
+            req.setRefundStatus(0);
+        if (pushOrder.getRequestStatus().equals("PASS")) {
             req.setRefundStatus(1);
-        } else {
+            strStatus = "已退款";
+        } else if (pushOrder.getRequestStatus().equals("REJECT")) {
             req.setRefundStatus(2);
+            strStatus = "退款失败";
         }
 
         String refundNotiUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/refundNotice";
@@ -201,13 +235,11 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         String res = HttpUtil.doPostWithTimeout(refundNotiUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundNotiUrl));
         log.info("中台refundNotice返回:" + res);
 
-
         PushOrderStatusReq statusReq = new PushOrderStatusReq();
-        statusReq.setStrStatus("退款成功");
+        statusReq.setStrStatus(strStatus);
         statusReq.setPartnerOrderId(pushOrder.getPartnerOrderID());
         orderStatusNotice(statusReq);
-
-        return null;
+        return LmmBaseResponse.success();
     }
 
     public void orderStatusNotice(PushOrderStatusReq req) {

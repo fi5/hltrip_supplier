@@ -54,14 +54,14 @@ public interface LvmamaOrderService {
      * @param request
      * @return
      */
-    LmmBaseResponse orderStatusNotice(LmmOrderPushRequest request);
+    LmmBaseResponse orderStatusNotice(String request);
 
 	/**
      * 退款推送
      * @param request
      * @return
      */
-    LmmBaseResponse pushOrderRefund(String  request);
+    LmmBaseResponse pushOrderRefund(String request);
 
     /**
      * 重发凭证

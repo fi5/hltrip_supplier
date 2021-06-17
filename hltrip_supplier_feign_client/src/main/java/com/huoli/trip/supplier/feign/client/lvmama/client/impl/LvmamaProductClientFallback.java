@@ -1,14 +1,11 @@
 package com.huoli.trip.supplier.feign.client.lvmama.client.impl;
 
-import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaClient;
-import com.huoli.trip.supplier.self.lvmama.vo.request.LmmProductListRequest;
-import com.huoli.trip.supplier.self.lvmama.vo.request.*;
+import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.response.*;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -21,16 +18,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 */
 @Component
 @Slf4j
-public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
+public class LvmamaProductClientFallback implements FallbackFactory<ILvmamaProductClient> {
 
 
     @Override
-    public ILvmamaClient create(Throwable throwable) {
+    public ILvmamaProductClient create(Throwable throwable) {
         String msg = throwable == null ? "" : throwable.getMessage();
         if (!StringUtils.isEmpty(msg)) {
             log.error(msg);
         }
-        return new ILvmamaClient() {
+        return new ILvmamaProductClient() {
 
             @Override
             public LmmScenicListResponse getScenicList(@RequestParam("currentPage") int currentPage){
@@ -59,41 +56,6 @@ public class LvmamaClientFallback implements FallbackFactory<ILvmamaClient> {
 
             @Override
             public LmmPriceResponse getPriceList(@RequestParam("goodsIds") String goodsIds, @RequestParam("beginDate") String beginDate, @RequestParam("endDate") String endDate){
-                return null;
-            }
-
-            @Override
-            public LmmOrderDetailResponse orderDetail(@RequestParam("request") String request) {
-                return null;
-            }
-
-            @Override
-            public LmmBaseResponse getCheckInfos(@RequestParam("request") String request) {
-                return null;
-            }
-
-            @Override
-            public OrderResponse payOrder(@RequestParam("request") String request) {
-                return null;
-            }
-
-            @Override
-            public OrderResponse createOrder(@RequestParam("request") String request) {
-                return null;
-            }
-
-            @Override
-            public OrderResponse cancelOrder(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
-                return null;
-            }
-
-            @Override
-            public LmmBaseResponse refundTicket(@RequestParam("partnerOrderNo") String partnerOrderNo, @RequestParam("orderId") String orderId) {
-                return null;
-            }
-
-            @Override
-            public LmmBaseResponse resendCode(@RequestParam("request") String request){
                 return null;
             }
         };

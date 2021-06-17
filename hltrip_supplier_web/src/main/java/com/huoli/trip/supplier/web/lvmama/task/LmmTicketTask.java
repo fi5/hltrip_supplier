@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_ADD;
 import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_ONLY_UPDATE;
+import static com.huoli.trip.supplier.self.common.SupplierConstants.PRODUCT_SYNC_MODE_UNLIMITED;
+import static com.huoli.trip.supplier.self.difengyun.constant.DfyConstants.*;
 
 /**
  * 描述：<br/>
@@ -37,7 +38,7 @@ public class LmmTicketTask {
     /**
      * 只更新本地已有景点
      */
-    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     public void syncUpdateScenic(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -75,9 +76,9 @@ public class LmmTicketTask {
     }
 
     /**
-     * 只同步本地没有的景点，每天执行一次
+     * 只同步本地没有的景点，每周一次
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 1 ? * SUN")
     public void syncNewScenic(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -90,10 +91,9 @@ public class LmmTicketTask {
             while (true){
                 long sTime = System.currentTimeMillis();
                 boolean success = lmmScenicService.syncScenicList(request);
-                boolean successV2 = lmmScenicService.syncScenicListV2(request);
                 long useTime = System.currentTimeMillis() - sTime;
                 log.info("同步第{}页景点，用时{}毫秒，(拉取本地没有的景点)", request.getCurrentPage(), useTime);
-                if(!success || !successV2) {
+                if(!success) {
                     break;
                 }
                 request.setCurrentPage(request.getCurrentPage() + 1);
@@ -111,8 +111,9 @@ public class LmmTicketTask {
 
     /**
      * 只更新本地已有商品
+     * 驴妈妈不需要，一周全量同步一次
      */
-    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
+//    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
     public void syncUpdateProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -130,7 +131,6 @@ public class LmmTicketTask {
                 try {
                     long sTime = System.currentTimeMillis();
                     lmmScenicService.syncGoodsListById(id, PRODUCT_SYNC_MODE_ONLY_UPDATE);
-                    lmmScenicService.syncGoodsListByIdV2(id);
                     long useTime = System.currentTimeMillis() - sTime;
                     log.info("同步第{}个商品 scenicId={}，用时{}毫秒（只更新本地已有商品）",
                             i, id, useTime);
@@ -151,9 +151,9 @@ public class LmmTicketTask {
     }
 
     /**
-     * 只同步本地没有的商品，每天执行一次
+     * 驴妈妈一周更新一次，周一凌晨1点
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 1 ? * MON")
     public void syncNewProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -165,11 +165,11 @@ public class LmmTicketTask {
             request.setCurrentPage(1);
             while (true){
                 long sTime = System.currentTimeMillis();
-                boolean success = lmmScenicService.syncProductList(request, PRODUCT_SYNC_MODE_ONLY_ADD);
-                boolean successV2 = lmmScenicService.syncProductListV2(request);
+                // 驴妈妈不区分新增和更新，一起执行
+                boolean success = lmmScenicService.syncProductList(request, PRODUCT_SYNC_MODE_UNLIMITED);
                 long useTime = System.currentTimeMillis() - sTime;
                 log.info("同步第{}页商品，用时{}毫秒，(拉取本地没有的商品)", request.getCurrentPage(), useTime);
-                if(!success || !successV2) {
+                if(!success) {
                     break;
                 }
                 request.setCurrentPage(request.getCurrentPage() + 1);
