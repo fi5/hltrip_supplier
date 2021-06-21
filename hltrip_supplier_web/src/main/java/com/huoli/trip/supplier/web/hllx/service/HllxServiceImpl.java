@@ -63,7 +63,7 @@ public class HllxServiceImpl implements HllxService {
 
     @Override
     public HllxBaseResult<HllxBookCheckRes> getCheckInfos(HllxBookCheckReq req) {
-        log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
+        /*log.info("hllx checkinfo req is:{}", JSON.toJSONString(req));
         String category = req.getCategory();
         if(StringUtils.isNotBlank(category)){
             HllxBookCheckRes hllxBookCheckRes = null;
@@ -129,8 +129,8 @@ public class HllxServiceImpl implements HllxService {
                     break;
             }
             return new HllxBaseResult(true, 200, hllxBookCheckRes);
-        }
-        /*PricePO pricePO = priceDao.getByProductCode(req.getProductId());
+        }*/
+        PricePO pricePO = priceDao.getByProductCode(req.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
@@ -160,7 +160,7 @@ public class HllxServiceImpl implements HllxService {
                     }
                 }
             }
-        }*/
+        }
         return new HllxBaseResult(true, 200, null);
     }
 
