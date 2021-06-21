@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -355,6 +356,8 @@ public class DfyTicketConverter {
         notice.setContent("预定须知");
 //        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
         scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
+        scenicSpotMPO.setCreateTime(new Date());
+        scenicSpotMPO.setUpdateTime(new Date());
         return scenicSpotMPO;
     }
 
