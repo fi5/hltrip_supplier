@@ -356,8 +356,6 @@ public class DfyTicketConverter {
         notice.setContent("预定须知");
 //        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
         scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
-        scenicSpotMPO.setCreateTime(new Date());
-        scenicSpotMPO.setUpdateTime(new Date());
         return scenicSpotMPO;
     }
 

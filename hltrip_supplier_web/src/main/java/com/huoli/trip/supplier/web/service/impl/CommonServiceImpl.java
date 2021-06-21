@@ -816,6 +816,8 @@ public class CommonServiceImpl implements CommonService {
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            newScenic.setCreateTime(new Date());
+            newScenic.setUpdateTime(new Date());
             // 没有找到映射就往本地新增一条
             scenicSpotDao.addScenicSpot(newScenic);
             scenicId = newScenic.getId();
