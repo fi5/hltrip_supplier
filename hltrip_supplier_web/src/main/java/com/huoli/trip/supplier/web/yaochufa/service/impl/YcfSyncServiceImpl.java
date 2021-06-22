@@ -1413,6 +1413,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             priceMPO.setScenicSpotProductId(productId);
             priceMPO.setMerchantCode(supplierProductId);
             priceMPO.setScenicSpotRuleId(ruleId);
+            if(StringUtils.isBlank(ticketKind)){
+                // 要出发有的没有tickettype,默认普通票
+                ticketKind = "1";
+            }
             priceMPO.setTicketKind(ticketKind);
             priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));
             priceMPO.setEndDate(DateTimeUtil.formatDate(yp.getDate()));
