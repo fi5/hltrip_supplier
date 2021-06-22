@@ -4,6 +4,7 @@ import com.huoli.trip.common.constant.MongoConst;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
 import com.huoli.trip.supplier.web.dao.ScenicSpotDao;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -28,7 +29,11 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
 
     @Override
     public ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String address){
-        return mongoTemplate.findOne(new Query(Criteria.where("name").is(name).and("address").is(address)), ScenicSpotMPO.class);
+        Criteria criteria = Criteria.where("name").is(name);
+        if(StringUtils.isNotBlank(address)){
+            criteria.and("address").is(address);
+        }
+        return mongoTemplate.findOne(new Query(criteria), ScenicSpotMPO.class);
     }
 
     @Override

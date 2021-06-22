@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.lvmama.controller;
 
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.lvmama.task.LmmTicketTask;
 import lombok.extern.slf4j.Slf4j;
@@ -98,6 +99,20 @@ public class LmmTestController {
     @PostMapping(path = "/sync/scenic/update/id/v2")
     public DfyBaseResult syncScenicUpdateByIdV2(@RequestBody String scenicId) {
         lmmSyncService.syncScenicListByIdV2(scenicId);
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/scenic/update/all/v2")
+    public DfyBaseResult syncScenicUpdateByIdV2() {
+        LmmScenicListRequest request = new LmmScenicListRequest();
+        int i = 1;
+        while (true) {
+            request.setCurrentPage(i++);
+            boolean b = lmmSyncService.syncScenicListV2(request);
+            if(!b){
+                break;
+            }
+        }
         return DfyBaseResult.success();
     }
 }

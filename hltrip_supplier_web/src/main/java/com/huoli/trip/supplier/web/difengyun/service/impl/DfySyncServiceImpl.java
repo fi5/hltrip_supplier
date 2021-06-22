@@ -693,6 +693,61 @@ public class DfySyncServiceImpl implements DfySyncService {
     }
 
     @Override
+    public boolean suppScenicListV2(DfyScenicListRequest request){
+        try {
+            DfyBaseRequest<DfyScenicListRequest> listRequest = new DfyBaseRequest<>(request);
+            DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
+            if(baseResult != null && baseResult.getData() != null && ListUtils.isNotEmpty(baseResult.getData().getRows())){
+                List<DfyScenic> scenics = baseResult.getData().getRows();
+                scenics.forEach(s -> suppScenicDetailV2(s.getScenicId()));
+                return true;
+            } else {
+                log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("笛风云同步景点、产品异常", e);
+            return false;
+        }
+    }
+
+    private void suppScenicDetailV2(String scenicId){
+        DfyScenicDetailRequest detailRequest = new DfyScenicDetailRequest();
+        detailRequest.setScenicId(scenicId);
+        DfyBaseRequest detailBaseRequest = new DfyBaseRequest<>(detailRequest);
+        DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
+        if(detailBaseResult != null && detailBaseResult.getData() != null){
+            DfyScenicDetail scenicDetail = detailBaseResult.getData();
+            ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(scenicDetail.getScenicName(), null);
+            if(existScenic != null){
+                boolean b = false;
+                if(StringUtils.isBlank(existScenic.getTraffic()) && StringUtils.isNotBlank(scenicDetail.getTrafficBus())){
+                    existScenic.setTraffic(scenicDetail.getTrafficBus());
+                    log.info("笛风云补充交通信息{}", existScenic.getId());
+                    b = true;
+                }
+                if(StringUtils.isBlank(existScenic.getDetailDesc()) && StringUtils.isNotBlank(scenicDetail.getScenicDescription())){
+                    existScenic.setDetailDesc(scenicDetail.getScenicDescription());
+                    log.info("笛风云补充详细介绍{}", existScenic.getId());
+                    b = true;
+                }
+                if(ListUtils.isEmpty(existScenic.getImages()) && StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
+                    existScenic.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
+                    log.info("笛风云补充图片{}", existScenic.getId());
+                    b = true;
+                }
+                if(b){
+                    scenicSpotDao.saveScenicSpot(existScenic);
+                    log.info("笛风云补充了一条景点{},{}", existScenic.getId(), existScenic.getName());
+                }
+            }
+
+        } else {
+            log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
+        }
+    }
+
+    @Override
     public void syncScenicDetailV2(String scenicId){
         DfyScenicDetailRequest detailRequest = new DfyScenicDetailRequest();
         detailRequest.setScenicId(scenicId);

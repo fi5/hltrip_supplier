@@ -18,6 +18,13 @@ import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.YcfSyncService;
 import com.huoli.trip.supplier.feign.client.yaochufa.client.IYaoChuFaClient;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyScenic;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyScenicDetail;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyBaseRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicDetailRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.request.DfyScenicListRequest;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
+import com.huoli.trip.supplier.self.difengyun.vo.response.DfyScenicListResponse;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConfigConstants;
 import com.huoli.trip.supplier.self.yaochufa.constant.YcfConstants;
 import com.huoli.trip.supplier.self.yaochufa.vo.*;
@@ -555,16 +562,66 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     && ListUtils.isEmpty(ycfProduct.getFoodList()) &&
                     ListUtils.isEmpty(ycfProduct.getRoomList()) &&
                     ListUtils.isNotEmpty(ycfProduct.getTicketList())){
-                syncScenicProduct(ycfProduct);
+                // todo 正式上线的时候这里要放开
+//                syncScenicProduct(ycfProduct);
+                // todo 补充景点信息，正式上线的时候这里可以去掉
+                suppScenic(ycfProduct);
             }
             // 套餐类型且酒店列表+其它列表至少两个列表有数据
             else if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_PACKAGE
                     && ListUtils.isNotEmpty(ycfProduct.getRoomList())
                     && (ListUtils.isNotEmpty(ycfProduct.getFoodList()) ||
                         ListUtils.isNotEmpty(ycfProduct.getTicketList()))){
-                syncHotelScenicProduct(ycfProduct);
+                // todo 正式上线的时候这里要放开
+//                syncHotelScenicProduct(ycfProduct);
             }
         });
+    }
+
+    private void suppScenic(YcfProduct ycfProduct){
+        List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+        if(ListUtils.isEmpty(scenicIds)){
+            log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+            return;
+        }
+        List<YcfProductItem> ycfProductItems = getPoi(scenicIds);
+        if(ListUtils.isEmpty(ycfProductItems)){
+            return;
+        }
+        ycfProductItems.forEach(item -> {
+            ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(item.getPoiName(), null);
+            if(existScenic != null){
+                boolean b = false;
+                if(StringUtils.isBlank(existScenic.getPhone()) && StringUtils.isNotBlank(item.getPhone())){
+                    existScenic.setPhone(item.getPhone());
+                    log.info("要出发补充电话{}", existScenic.getId());
+                    b = true;
+                }
+                if(StringUtils.isBlank(existScenic.getBriefDesc()) && StringUtils.isNotBlank(item.getDescription())){
+                    existScenic.setBriefDesc(item.getDescription());
+                    log.info("要出发补充简要介绍{}", existScenic.getId());
+                    b = true;
+                }
+                if(ListUtils.isNotEmpty(item.getCharacterrList())){
+                    item.getCharacterrList().stream().filter(c -> c.getType() == 2).findAny().ifPresent(c -> {
+                        if(StringUtils.isBlank(existScenic.getTraffic())){
+                            existScenic.setTraffic(c.getDetail());
+                        }
+                    });
+                    item.getCharacterrList().stream().filter(c -> c.getType() == 3).findAny().ifPresent(c -> {
+                        if(StringUtils.isBlank(existScenic.getDetailDesc())){
+                            existScenic.setDetailDesc(c.getDetail());
+                        }
+                    });
+                    b = true;
+                }
+                if(b){
+                    scenicSpotDao.saveScenicSpot(existScenic);
+                    log.info("笛风云补充了一条景点{},{}", existScenic.getId(), existScenic.getName());
+                }
+            }
+        });
+
     }
 
     private void syncScenicProduct(YcfProduct ycfProduct){

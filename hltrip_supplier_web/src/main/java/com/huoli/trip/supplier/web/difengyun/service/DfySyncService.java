@@ -126,6 +126,13 @@ public interface DfySyncService {
     boolean syncScenicListV2(DfyScenicListRequest request);
 
     /**
+     * 补充本地景点信息
+     * @param request
+     * @return
+     */
+    boolean suppScenicListV2(DfyScenicListRequest request);
+
+    /**
      * 同步景点，新版
      * @param scenicId
      */

@@ -145,6 +145,12 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/scenic/v2")
+    DfyBaseResult syncScenicV2() {
+        dfySyncTask.syncNewProductV2();
+        return DfyBaseResult.success();
+    }
+
     /**
      * 接收产品更新通知
      *
