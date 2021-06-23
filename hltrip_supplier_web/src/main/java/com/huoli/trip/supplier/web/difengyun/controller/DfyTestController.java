@@ -145,9 +145,30 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
-    @PostMapping(path = "/sync/scenic/v2")
+    @PostMapping(path = "/sync/scenic/all/v2")
     DfyBaseResult syncScenicV2() {
-        dfySyncTask.syncNewProductV2();
+        DfyScenicListRequest request = new DfyScenicListRequest();
+        request.setPage(1);
+        request.setPageSize(100);
+        while (true){
+            long sTime = System.currentTimeMillis();
+            boolean success =  dfySyncService.suppScenicListV2(request);
+            long useTime = System.currentTimeMillis() - sTime;
+            log.info("同步第{}页景点V2，用时{}毫秒", request.getPage(), useTime);
+            if(!success) {
+                break;
+            }
+            request.setPage(request.getPage() + 1);
+            // 如果执行时间超过310毫秒就不用睡了
+            if(useTime < 310){
+                // 限制一分钟不超过200次
+                try {
+                    Thread.sleep(310 - useTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         return DfyBaseResult.success();
     }
 
