@@ -795,6 +795,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                     }
                 }
+                // 补充景点数据
+                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
                 if(lmmProduct.getServiceGuarantee() == null){
                     scenicSpotProductMPO.setTags(null);
                 } else {
@@ -1154,7 +1156,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
     }
 
-    private void updateScenic(ScenicSpotMPO scenicSpotMPO, LmmProduct lmmProduct){
+    private void updateScenic(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO productMPO, LmmProduct lmmProduct){
+        if(scenicSpotMPO == null){
+            scenicSpotMPO = scenicSpotDao.getScenicSpotById(productMPO.getScenicSpotId());
+        }
         boolean b = false;
         // 更新景点，用产品的数据填充
         if(StringUtils.isBlank(scenicSpotMPO.getBriefDesc())){
