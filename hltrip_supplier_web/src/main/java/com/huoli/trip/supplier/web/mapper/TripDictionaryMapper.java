@@ -23,7 +23,7 @@ public interface TripDictionaryMapper {
      * @param name
      * @return
      */
-    @Select("select code from trip_dictionary where type = #{type} name = #{name}")
+    @Select("select code from trip_dictionary where type = #{type}, name = #{name}")
     String getCodeByName(@Param("name") String name, @Param("type") Integer type);
 
     @Select("select code from trip_dictionary where type = #{type} order by code desc limit 1")
