@@ -27,6 +27,7 @@ import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
+import com.huoli.trip.supplier.web.mapper.TripDictionaryMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -93,6 +94,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private ScenicSpotProductBackupDao scenicSpotProductBackupDao;
+
+    @Autowired
+    private TripDictionaryMapper tripDictionaryMapper;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -596,6 +600,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     @Override
     public boolean syncScenicListV2(LmmScenicListRequest request){
         List<LmmScenic> lmmScenicList = getScenicList(request);
+        if(ListUtils.isEmpty(lmmScenicList)){
+            return false;
+        }
         syncScenic(lmmScenicList);
         return true;
     }
@@ -698,6 +705,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         log.error("景点{}不存在", scenicSpotMPO.getId());
                         return;
                     }
+                    // 补充景点数据
+                    updateScenic(scenicSpotMPO, lmmProduct);
                     scenicSpotProductMPO = new ScenicSpotProductMPO();
                     scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                     scenicSpotProductMPO.setCreateTime(new Date());
@@ -747,10 +756,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
 //                         这个放到动态里了
                         // 又放回来了。。。
-                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
-                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
-                            changedFields.add("pcDescription");
-                        }
+                        // 这个又放到景点简介里了
+//                        if(!StringUtils.equals(backup.getPcDescription(), lmmProduct.getIntrodution())){
+//                            scenicSpotProductMPO.setPcDescription(lmmProduct.getIntrodution());
+//                            changedFields.add("pcDescription");
+//                        }
                         List<DescInfo> newDescInfos = buildDescInfos(lmmProduct, g);
                         scenicSpotProductMPO.setChangedFields(changedFields);
                         if(ListUtils.isEmpty(backup.getDescInfos())){
@@ -785,6 +795,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                     }
                 }
+                // 补充景点数据
+                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
                 if(lmmProduct.getServiceGuarantee() == null){
                     scenicSpotProductMPO.setTags(null);
                 } else {
@@ -1141,6 +1153,76 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
                 }
             });
+        }
+    }
+
+    private void updateScenic(ScenicSpotMPO scenicSpotMPO, ScenicSpotProductMPO productMPO, LmmProduct lmmProduct){
+        if(scenicSpotMPO == null){
+            scenicSpotMPO = scenicSpotDao.getScenicSpotById(productMPO.getScenicSpotId());
+        }
+        boolean b = false;
+        // 更新景点，用产品的数据填充
+        if(StringUtils.isBlank(scenicSpotMPO.getBriefDesc())){
+            scenicSpotMPO.setBriefDesc(lmmProduct.getIntrodution());
+            b = true;
+        }
+        if(StringUtils.isBlank(scenicSpotMPO.getCharacteristic()) && ListUtils.isNotEmpty(lmmProduct.getCharacteristic())){
+            scenicSpotMPO.setCharacteristic(lmmProduct.getCharacteristic().get(0));
+            b = true;
+        }
+        if((ListUtils.isEmpty(scenicSpotMPO.getCrowdNotices())
+                || !scenicSpotMPO.getCrowdNotices().stream().anyMatch(c -> StringUtils.equals(c.getCrowdType(), "10")))
+                && lmmProduct.getBookingInfo() != null){
+            StringBuffer sb = new StringBuffer();
+            if(StringUtils.isNotBlank(lmmProduct.getBookingInfo().getFreePolicy())){
+                String fp = lmmProduct.getBookingInfo().getFreePolicy().replace("\r\n", "<br>").replace("\n", "<br>");
+                sb.append("免票政策").append("<br>")
+                        .append(fp).append("<br>");
+            }
+            if(StringUtils.isNotBlank(lmmProduct.getBookingInfo().getOfferCrowd())){
+                String oc = lmmProduct.getBookingInfo().getOfferCrowd().replace("\r\n", "<br>").replace("\n", "<br>");
+                sb.append("优惠政策").append("<br>")
+                        .append(oc).append("<br>");
+            }
+            CrowdNotice crowdNotice = new CrowdNotice();
+            crowdNotice.setContent(sb.toString());
+            crowdNotice.setCrowdType("10");
+            scenicSpotMPO.setCrowdNotices(Lists.newArrayList(crowdNotice));
+            b = true;
+        }
+        if(StringUtils.isBlank(scenicSpotMPO.getTheme()) && ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
+            String theme = lmmProduct.getProductTheme().get(0);
+            String code = tripDictionaryMapper.getCodeByName(theme, 21);
+            if(StringUtils.isBlank(code)){
+                String lastCode = tripDictionaryMapper.getLastCodeByType(21);
+                if(StringUtils.isNotBlank(lastCode)){
+                    code = String.valueOf(Integer.parseInt(lastCode) + 1);
+                    tripDictionaryMapper.addDictionary(code, theme, 21);
+                }
+            }
+            scenicSpotMPO.setTheme(code);
+            b = true;
+        }
+        if(ListUtils.isEmpty(scenicSpotMPO.getImages())){
+            scenicSpotMPO.setImages(lmmProduct.getImages());
+            b = true;
+        }
+        if(StringUtils.isBlank(scenicSpotMPO.getDetailDesc()) && ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
+            StringBuffer sb = new StringBuffer();
+            for (LmmProduct.PlayAttraction playAttraction : lmmProduct.getPlayAttractions()) {
+                String info = "";
+                if(StringUtils.isNotBlank(playAttraction.getPlayInfo())){
+                    info = playAttraction.getPlayInfo().replace("\r\n", "<br>").replace("\n", "<br>");
+                }
+                sb.append(playAttraction.getPlayName()).append("<br>")
+                        .append(info).append("<br>")
+                        .append("<img src=\"").append(playAttraction.getPlayImages()).append("\"/>").append("<br>");
+            }
+            scenicSpotMPO.setDetailDesc(sb.toString());
+            b = true;
+        }
+        if(b){
+            scenicSpotDao.saveScenicSpot(scenicSpotMPO);
         }
     }
 
