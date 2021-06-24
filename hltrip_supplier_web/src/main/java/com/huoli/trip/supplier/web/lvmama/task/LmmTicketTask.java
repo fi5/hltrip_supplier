@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.lvmama.task;
 
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmProductListRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
@@ -186,88 +187,42 @@ public class LmmTicketTask {
     }
 
     /**
-     * 只更新本地已有景点
+     * 驴妈妈一周更新一次，周二凌晨1点（周一老版更新）
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
-    public void syncUpdateScenicV2(){
+    // todo 这个时间是前期为了补充景点数据，后面改成一周更新一次
+    @Scheduled(cron = "0 0 4 ? * *")
+    public void syncNewProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
                 return;
             }
             long begin = System.currentTimeMillis();
-            log.info("开始执行定时任务，同步驴妈妈景点（只更新本地已有景点）。。");
-            List<String> ids = lmmScenicService.getSupplierScenicIdsV2();
-            if(ListUtils.isEmpty(ids)){
-                log.error("同步驴妈妈景点定时任务执行完成（只更新本地已有景点），没有找到驴妈妈景点。");
-                return;
-            }
-            int i = 1;
-            for (String id : ids) {
-                try {
-                    long sTime = System.currentTimeMillis();
-                    lmmScenicService.syncScenicListByIdV2(id);
-                    long useTime = System.currentTimeMillis() - sTime;
-                    log.info("同步第{}个景点 scenicId={}，用时{}毫秒（只更新本地已有景点）",
-                            i, id, useTime);
-                    // 如果执行时间超过310毫秒就不用睡了
-                    if(useTime < 310){
-                        // 限制一分钟不超过200次
-                        Thread.sleep(310 - useTime);
-                    }
-                } catch (Exception e) {
-                    log.error("同步第{}个景点scenicId={}异常（只更新本地已有景点），", i, id, e);
+            log.info("开始执行定时任务，同步驴妈妈产品v2。。");
+            LmmProductListRequest request = new LmmProductListRequest();
+            request.setCurrentPage(1);
+            while (true){
+                long sTime = System.currentTimeMillis();
+                // 驴妈妈不区分新增和更新，一起执行
+                boolean success = lmmScenicService.syncProductListV2(request);
+                long useTime = System.currentTimeMillis() - sTime;
+                log.info("同步第{}页产品v2，用时{}毫秒", request.getCurrentPage(), useTime);
+                if(!success) {
+                    break;
                 }
-                i++;
+                request.setCurrentPage(request.getCurrentPage() + 1);
+                // 如果执行时间超过310毫秒就不用睡了
+                if(useTime < 310){
+                    // 限制一分钟不超过200次
+                    Thread.sleep(310 - useTime);
+                }
             }
-            log.info("同步驴妈妈景点定时任务执行完成（只更新本地已有景点），共{}个，用时{}秒（只更新本地已有景点）", i, (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步驴妈妈产品定时任务执行完成v2，共同步{}页，用时{}秒", request.getCurrentPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
-            log.error("执行驴妈妈定时更新景点任务异常（只更新本地已有景点）", e);
+            log.error("执行驴妈妈定时更新产品任务异常v2", e);
         }
     }
 
-    /**
-     * 只更新本地已有商品
-     */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 1,6-22/3 ? * *")
-    public void syncUpdateProductV2(){
-        try {
-            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
-                return;
-            }
-            long begin = System.currentTimeMillis();
-            log.info("开始执行定时任务，同步驴妈妈商品（只更新本地已有商品）。。");
-            List<String> ids = lmmScenicService.getSupplierProductIdsV2();
-            if(ListUtils.isEmpty(ids)){
-                log.error("同步驴妈妈商品定时任务执行完成（只更新本地已有商品），没有找到驴妈妈商品。");
-                return;
-            }
-            int i = 1;
-            for (String id : ids) {
-                try {
-                    long sTime = System.currentTimeMillis();
-                    lmmScenicService.syncGoodsListByIdV2(id);
-                    long useTime = System.currentTimeMillis() - sTime;
-                    log.info("同步第{}个商品 scenicId={}，用时{}毫秒（只更新本地已有商品）",
-                            i, id, useTime);
-                    // 如果执行时间超过310毫秒就不用睡了
-                    if(useTime < 310){
-                        // 限制一分钟不超过200次
-                        Thread.sleep(310 - useTime);
-                    }
-                } catch (Exception e) {
-                    log.error("同步第{}个商品scenicId={}异常（只更新本地已有商品），", i, id, e);
-                }
-                i++;
-            }
-            log.info("同步驴妈妈商品定时任务执行完成（只更新本地已有商品），共{}个，用时{}秒（只更新本地已有商品）", i, (System.currentTimeMillis() - begin) / 1000);
-        } catch (Exception e) {
-            log.error("执行驴妈妈定时更新商品任务异常（只更新本地已有商品）", e);
-        }
-    }
-
-    // todo 这里前期为了落基础数据，后面不用更新这么频繁
+    // todo 这里前期为了落基础数据，后面改成一周更新一次
     @Scheduled(cron = "0 0 1 ? * *")
     public void syncScenicAll(){
         try {
