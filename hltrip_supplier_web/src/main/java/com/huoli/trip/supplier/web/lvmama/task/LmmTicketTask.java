@@ -266,4 +266,42 @@ public class LmmTicketTask {
             log.error("执行驴妈妈定时更新商品任务异常（只更新本地已有商品）", e);
         }
     }
+
+    // todo 这里前期为了落基础数据，后面不用更新这么频繁
+    @Scheduled(cron = "0 0 1 ? * *")
+    public void syncScenicAll(){
+        try {
+            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+                return;
+            }
+            long begin = System.currentTimeMillis();
+            log.info("开始执行定时任务，同步驴妈妈景点（分页同步）。。");
+            LmmScenicListRequest request = new LmmScenicListRequest();
+            int i = 1;
+            while (true) {
+                try {
+                    request.setCurrentPage(i);
+                    long sTime = System.currentTimeMillis();
+                    boolean b = lmmScenicService.syncScenicListV2(request);
+                    if(!b){
+                        break;
+                    }
+                    long useTime = System.currentTimeMillis() - sTime;
+                    log.info("同步第{}页景点 ，用时{}毫秒（分页同步）",
+                            i, useTime);
+                    // 如果执行时间超过310毫秒就不用睡了
+                    if(useTime < 310){
+                        // 限制一分钟不超过200次
+                        Thread.sleep(310 - useTime);
+                    }
+                } catch (Exception e) {
+                    log.error("同步第{}页景点异常（分页同步），", i, e);
+                }
+                i++;
+            }
+            log.info("同步驴妈妈景点定时任务执行完成（分页同步），共{}个，用时{}秒", i, (System.currentTimeMillis() - begin) / 1000);
+        } catch (Exception e) {
+            log.error("执行驴妈妈定时更新景点任务异常（分页同步）", e);
+        }
+    }
 }
