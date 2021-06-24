@@ -705,8 +705,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         log.error("景点{}不存在", scenicSpotMPO.getId());
                         return;
                     }
-                    // 补充景点数据
-                    updateScenic(scenicSpotMPO, lmmProduct);
                     scenicSpotProductMPO = new ScenicSpotProductMPO();
                     scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                     scenicSpotProductMPO.setCreateTime(new Date());
