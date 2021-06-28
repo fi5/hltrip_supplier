@@ -1126,7 +1126,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                             scenicSpotProductPriceMPO.setTicketKind(ticketType.toString());
                             scenicSpotProductPriceMPO.setStartDate(price.getDate());
                             scenicSpotProductPriceMPO.setEndDate(price.getDate());
-                            scenicSpotProductPriceMPO.setStock(price.getStock());
+                            scenicSpotProductPriceMPO.setStock(price.getStock() <= 0 ? 0 : price.getStock());
                             if(price.getB2bPrice() != null){
                                 scenicSpotProductPriceMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
                             }
