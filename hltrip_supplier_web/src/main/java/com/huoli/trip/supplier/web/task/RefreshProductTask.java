@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,7 @@ public class RefreshProductTask {
     private CommonService commonService;
 
     @Scheduled(cron = "0 0 3 * * ?")
+    @Async
     public void refreshItemProduct(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;

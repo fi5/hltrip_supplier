@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -80,6 +81,7 @@ public class LmmTicketTask {
      * 只同步本地没有的景点，每周一次
      */
     @Scheduled(cron = "0 0 1 ? * SUN")
+    @Async
     public void syncNewScenic(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -155,6 +157,7 @@ public class LmmTicketTask {
      * 驴妈妈一周更新一次，周一凌晨1点
      */
     @Scheduled(cron = "0 0 1 ? * MON")
+    @Async
     public void syncNewProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -271,6 +274,7 @@ public class LmmTicketTask {
      */
     // todo 这个时间是前期为了补充景点数据，后面改成一周更新一次
     @Scheduled(cron = "0 0 4 ? * *")
+    @Async
     public void syncNewProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -304,6 +308,7 @@ public class LmmTicketTask {
 
     // todo 这里前期为了落基础数据，后面不需要主动获取
     @Scheduled(cron = "0 0 1 ? * *")
+    @Async
     public void syncScenicAll(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -334,7 +339,7 @@ public class LmmTicketTask {
                 }
                 i++;
             }
-            log.info("同步驴妈妈景点定时任务执行完成（分页同步），共{}个，用时{}秒", i, (System.currentTimeMillis() - begin) / 1000);
+            log.info("同步驴妈妈景点定时任务执行完成（分页同步），共{}页，用时{}秒", i, (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行驴妈妈定时更新景点任务异常（分页同步）", e);
         }

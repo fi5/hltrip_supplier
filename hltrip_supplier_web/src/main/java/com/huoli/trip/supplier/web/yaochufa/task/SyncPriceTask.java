@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,7 @@ public class SyncPriceTask {
     private ScenicSpotProductDao scenicSpotProductDao;
 
     @Scheduled(cron = "0 0 2 ? * 6")
+    @Async
     public void syncFullPrice(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
@@ -71,6 +73,7 @@ public class SyncPriceTask {
 
     // todo 真正上线的时候要发开这里，现在只为了落景点数据
 //    @Scheduled(cron = "0 0 3 ? * 6")
+    @Async
     public void syncFullPriceV2(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
