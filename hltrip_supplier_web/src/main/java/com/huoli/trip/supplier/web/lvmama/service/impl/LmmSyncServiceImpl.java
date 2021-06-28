@@ -1192,11 +1192,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             String theme = lmmProduct.getProductTheme().get(0);
             String code = tripDictionaryMapper.getCodeByName(theme, 21);
             if(StringUtils.isBlank(code)){
-                String lastCode = tripDictionaryMapper.getLastCodeByType(21);
-                if(StringUtils.isNotBlank(lastCode)){
-                    code = String.valueOf(Integer.parseInt(lastCode) + 1);
-                    tripDictionaryMapper.addDictionary(code, theme, 21);
-                }
+                List<String> codes = tripDictionaryMapper.getCodesByType(21);
+                int lastCode = codes.stream().mapToInt(Integer::parseInt).max().getAsInt();
+                tripDictionaryMapper.addDictionary(String.valueOf(lastCode + 1), theme, 21);
             }
             scenicSpotMPO.setTheme(code);
             b = true;

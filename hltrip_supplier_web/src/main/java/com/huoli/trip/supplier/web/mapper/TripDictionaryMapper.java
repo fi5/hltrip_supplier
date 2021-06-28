@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -26,8 +28,8 @@ public interface TripDictionaryMapper {
     @Select("select code from trip_dictionary where type = #{type} and name = #{name}")
     String getCodeByName(@Param("name") String name, @Param("type") Integer type);
 
-    @Select("select code from trip_dictionary where type = #{type} order by code desc limit 1")
-    String getLastCodeByType(@Param("type") Integer type);
+    @Select("select code from trip_dictionary where type = #{type}")
+    List<String> getCodesByType(@Param("type") Integer type);
 
     @Insert("insert into trip_dictionary (code, name, type) values(#{code}, #{name}, #{type})")
     void addDictionary(@Param("code") String code, @Param("name")String name, @Param("type") Integer type);
