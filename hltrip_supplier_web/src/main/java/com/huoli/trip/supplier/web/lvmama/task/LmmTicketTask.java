@@ -273,7 +273,7 @@ public class LmmTicketTask {
      * 驴妈妈一周更新一次，周二凌晨1点（周一老版更新）
      */
     // todo 这个时间是前期为了补充景点数据，后面改成一周更新一次
-    @Scheduled(cron = "0 0 4 ? * *")
+    @Scheduled(cron = "0 0 2 ? * *")
     @Async
     public void syncNewProductV2(){
         try {
