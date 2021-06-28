@@ -1213,8 +1213,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     info = playAttraction.getPlayInfo().replace("\r\n", "<br>").replace("\n", "<br>");
                 }
                 sb.append(playAttraction.getPlayName()).append("<br>")
-                        .append(info).append("<br>")
-                        .append("<img src=\"").append(playAttraction.getPlayImages()).append("\"/>").append("<br>");
+                        .append(info).append("<br>");
+                if(ListUtils.isNotEmpty(playAttraction.getPlayImages())){
+                    playAttraction.getPlayImages().forEach(i ->
+                        sb.append("<img src=\"").append(i).append("\"/>").append("<br>"));
+                }
             }
             scenicSpotMPO.setDetailDesc(sb.toString());
             b = true;
