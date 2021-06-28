@@ -1257,7 +1257,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setSupplierProductId(productId);
             groupTourProductMPO.setMerchantCode(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
-            groupTourProductMPO.setCategory("group_tour");
             add = true;
         } else {
             GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
@@ -1290,6 +1289,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }
                 groupTourProductMPO.setChangedFields(changedFields);
             }
+        }
+        if(StringUtils.isBlank(groupTourProductMPO.getCategory())){
+             groupTourProductMPO.setCategory("group_tour");
         }
         String name = dfyToursDetail.getProductName();
         String point = null;
