@@ -407,7 +407,7 @@ public class LmmTicketConverter {
         scenicSpotMPO.setLevel(lmmScenic.getPlaceLevel());
         scenicSpotMPO.setTheme(lmmScenic.getPlaceAct());
         if(ListUtils.isNotEmpty(lmmScenic.getOpenTimes())){
-            List<ScenicSpotOpenTime> openTimes = lmmScenic.getOpenTimes().stream().map(o -> convertToScenicSpotOpenTime(o)).collect(Collectors.toList());
+            List<ScenicSpotOpenTime> openTimes = lmmScenic.getOpenTimes().stream().distinct().map(o -> convertToScenicSpotOpenTime(o)).collect(Collectors.toList());
             scenicSpotMPO.setScenicSpotOpenTimes(openTimes);
         }
         return scenicSpotMPO;

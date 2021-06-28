@@ -1290,6 +1290,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                 groupTourProductMPO.setChangedFields(changedFields);
             }
         }
+        if(StringUtils.isBlank(groupTourProductMPO.getCategory())){
+             groupTourProductMPO.setCategory("group_tour");
+        }
         String name = dfyToursDetail.getProductName();
         String point = null;
         if(name.startsWith("<")){

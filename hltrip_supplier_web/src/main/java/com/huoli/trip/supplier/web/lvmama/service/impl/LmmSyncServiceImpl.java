@@ -1126,7 +1126,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                             scenicSpotProductPriceMPO.setTicketKind(ticketType.toString());
                             scenicSpotProductPriceMPO.setStartDate(price.getDate());
                             scenicSpotProductPriceMPO.setEndDate(price.getDate());
-                            scenicSpotProductPriceMPO.setStock(price.getStock());
+                            scenicSpotProductPriceMPO.setStock(price.getStock() <= 0 ? 0 : price.getStock());
                             if(price.getB2bPrice() != null){
                                 scenicSpotProductPriceMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
                             }
@@ -1192,11 +1192,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             String theme = lmmProduct.getProductTheme().get(0);
             String code = tripDictionaryMapper.getCodeByName(theme, 21);
             if(StringUtils.isBlank(code)){
-                String lastCode = tripDictionaryMapper.getLastCodeByType(21);
-                if(StringUtils.isNotBlank(lastCode)){
-                    code = String.valueOf(Integer.parseInt(lastCode) + 1);
-                    tripDictionaryMapper.addDictionary(code, theme, 21);
-                }
+                List<String> codes = tripDictionaryMapper.getCodesByType(21);
+                int lastCode = codes.stream().mapToInt(Integer::parseInt).max().getAsInt();
+                tripDictionaryMapper.addDictionary(String.valueOf(lastCode + 1), theme, 21);
             }
             scenicSpotMPO.setTheme(code);
             b = true;
@@ -1213,8 +1211,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     info = playAttraction.getPlayInfo().replace("\r\n", "<br>").replace("\n", "<br>");
                 }
                 sb.append(playAttraction.getPlayName()).append("<br>")
-                        .append(info).append("<br>")
-                        .append("<img src=\"").append(playAttraction.getPlayImages()).append("\"/>").append("<br>");
+                        .append(info).append("<br>");
+                if(ListUtils.isNotEmpty(playAttraction.getPlayImages())){
+                    playAttraction.getPlayImages().forEach(i ->
+                        sb.append("<img src=\"").append(i).append("\"/>").append("<br>"));
+                }
             }
             scenicSpotMPO.setDetailDesc(sb.toString());
             b = true;
