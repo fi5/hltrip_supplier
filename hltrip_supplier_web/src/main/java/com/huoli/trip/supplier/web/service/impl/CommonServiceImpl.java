@@ -1056,13 +1056,13 @@ public class CommonServiceImpl implements CommonService {
                         idInfo = bookRulePO.getCredentials().stream().map(String::valueOf).collect(Collectors.joining(","));
                     }
                     List<String> pi = Lists.newArrayList();
-                    if(bookRulePO.getCnName()){
+                    if(bookRulePO.getCnName() != null && bookRulePO.getCnName()){
                         pi.add("2");
                     }
-                    if(bookRulePO.getPhone()){
+                    if(bookRulePO.getPhone() != null && bookRulePO.getPhone()){
                         pi.add("6");
                     }
-                    if(bookRulePO.getEmail()){
+                    if(bookRulePO.getEmail() != null && bookRulePO.getEmail()){
                         pi.add("10");
                     }
                     String passengerInfo = pi.stream().collect(Collectors.joining(","));
