@@ -3,19 +3,16 @@ package com.huoli.trip.supplier.web.service.impl;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.huoli.trip.common.constant.BizTagConst;
-import com.huoli.trip.common.constant.Constants;
-import com.huoli.trip.common.constant.TripModuleTypeEnum;
+import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.*;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.hotel.HotelMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
+import com.huoli.trip.common.entity.po.PassengerTemplatePO;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
 import com.huoli.trip.common.vo.ImageBase;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
@@ -27,6 +24,7 @@ import com.huoli.trip.supplier.web.dao.PriceDao;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.ChinaCityMapper;
+import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -118,6 +116,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private HotelDao hotelDao;
+
+    @Autowired
+    private PassengerTemplateMapper passengerTemplateMapper;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -931,10 +932,35 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setMerchantCode(productPO.getSupplierProductId());
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
             groupTourProductMPO.setProductName(productPO.getName());
+            if(productPO.getProductType() == ProductType.TRIP_GROUP.getCode()){
+                groupTourProductMPO.setGroupTourType("1");
+            } else if(productPO.getProductType() == ProductType.TRIP_FREE.getCode()){
+                groupTourProductMPO.setGroupTourType("2");
+            } else if(productPO.getProductType() == ProductType.TRIP_GROUP_PRIVATE.getCode()){
+                groupTourProductMPO.setGroupTourType("3");
+            } else if(productPO.getProductType() == ProductType.TRIP_GROUP_SEMI.getCode()){
+                groupTourProductMPO.setGroupTourType("5");
+            } else if(productPO.getProductType() == ProductType.TRIP_GROUP_LOCAL.getCode()){
+                groupTourProductMPO.setGroupTourType("6");
+            }
+            groupTourProductMPO.setRefundDesc(productPO.getRefundDesc());
+            groupTourProductMPO.setFreeInsurance(0);
+            groupTourProductMPO.setContractSigningType(0);
+            groupTourProductMPO.setNonGroupAgreement("1");
+            groupTourProductMPO.setGroupWorkAgreement(1);
             if(productPO.getMainItem() == null){
                 log.info("{}mainitem为空", productPO.getCode());
                 continue;
             }
+            List<String> highs = Lists.newArrayList();
+            if(ListUtils.isNotEmpty(productPO.getMainItem().getTags())){
+                highs = productPO.getMainItem().getTags();
+            }
+            if(StringUtils.isNotBlank(productPO.getMainItem().getSubTitle())){
+                highs.add(productPO.getMainItem().getSubTitle());
+            }
+            groupTourProductMPO.setHighlights(highs);
+
             if(ListUtils.isNotEmpty(productPO.getMainItem().getImages())){
                 groupTourProductMPO.setImages(productPO.getMainItem().getImages().stream().map(i -> i.getUrl()).collect(Collectors.toList()));
             }
@@ -979,6 +1005,12 @@ public class CommonServiceImpl implements CommonService {
             GroupTourProductPayInfo productPayInfo = new GroupTourProductPayInfo();
             productPayInfo.setSellType(1);
             productPayInfo.setConfirmType(1);
+            if(productPO.getBookAheadMin() != null){
+                productPayInfo.setBeforeBookDay(Double.valueOf(BigDecimalUtil.div(BigDecimalUtil.div(productPO.getBookAheadMin(), 60, 0), 24, 0)).intValue());
+            }
+            productPayInfo.setConfirmUploadDay(0);
+            productPayInfo.setLatestBookTime("23:59");
+
             groupTourProductMPO.setGroupTourProductPayInfo(productPayInfo);
             groupTourProductMPO.setStatus(1);
             GroupTourProductBaseSetting baseSetting = new GroupTourProductBaseSetting();
@@ -1015,6 +1047,42 @@ public class CommonServiceImpl implements CommonService {
             groupTourProductMPO.setGroupTourProductBaseSetting(baseSetting);
             // 笛风云没有退改
             groupTourProductDao.saveProduct(groupTourProductMPO);
+            if(ListUtils.isNotEmpty(productPO.getBookRules())){
+                BookRulePO bookRulePO = productPO.getBookRules().stream().filter(b -> StringUtils.equals(b.getRuleType(), "1")).findFirst().orElse(null);
+                if(bookRulePO != null){
+                    // 创建默认的出行人模板
+                    String idInfo = null;
+                    if(ListUtils.isNotEmpty(bookRulePO.getCredentials())){
+                        idInfo = bookRulePO.getCredentials().stream().map(String::valueOf).collect(Collectors.joining(","));
+                    }
+                    List<String> pi = Lists.newArrayList();
+                    if(bookRulePO.getCnName()){
+                        pi.add("2");
+                    }
+                    if(bookRulePO.getPhone()){
+                        pi.add("6");
+                    }
+                    if(bookRulePO.getEmail()){
+                        pi.add("10");
+                    }
+                    String passengerInfo = pi.stream().collect(Collectors.joining(","));
+                    PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_SHENGHE_TICKET, bookRulePO.getPeopleLimit(), passengerInfo, idInfo);
+                    if(passengerTemplatePO == null){
+                        passengerTemplatePO = new PassengerTemplatePO();
+                        passengerTemplatePO.setChannel(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+                        passengerTemplatePO.setCreateTime(new Date());
+                        passengerTemplatePO.setStatus(1);
+                        passengerTemplatePO.setIdInfo(idInfo);
+                        passengerTemplatePO.setPassengerInfo(passengerInfo);
+                        passengerTemplatePO.setPeopleLimit(bookRulePO.getPeopleLimit());
+                        passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
+                    }
+                    groupTourProductMPO.setTravelerTemplateId(passengerTemplatePO.getId());
+                }
+            }
+
+            // 笛风云没有退改
+            groupTourProductDao.saveProduct(groupTourProductMPO);
             if(ListUtils.isEmpty(groupTourProductMPO.getDepInfos())){
                 log.info("{}出发城市为空", productPO.getCode());
                 continue;
@@ -1030,18 +1098,16 @@ public class CommonServiceImpl implements CommonService {
                 setMealMPO.setTripDay(productPO.getTripDays());
                 setMealMPO.setConstInclude(productPO.getIncludeDesc());
                 setMealMPO.setCostExclude(productPO.getExcludeDesc());
-                setMealMPO.setBookNotice(productPO.getBookDesc());
+                StringBuffer sb = new StringBuffer();
+                sb.append("预订须知：<br>").append(productPO.getBookDesc()).append("<br>");
                 if(ListUtils.isNotEmpty(productPO.getBookNoticeList())){
-                    setMealMPO.setBookNotices(productPO.getBookNoticeList().stream().map(b -> {
-                        DescInfo descInfo = new DescInfo();
-                        descInfo.setContent(b.getContent());
-                        descInfo.setTitle(b.getTitle());
-                        return descInfo;
-                    }).collect(Collectors.toList()));
+                    productPO.getBookNoticeList().forEach(b ->
+                        sb.append(b.getTitle()).append("<br>")
+                                .append(b.getContent()).append("<br>"));
                 }
+                setMealMPO.setBookNotice(sb.toString());
                 setMealMPO.setDepCode(addressInfo.getCityCode());
                 setMealMPO.setDepName(addressInfo.getCityName());
-
                 HodometerPO hodometerPO = hodometerDao.getHodometerPO(productPO.getCode());
                 if(hodometerPO == null){
                     log.error("{}行程信息为空", productPO.getCode());
@@ -1056,7 +1122,7 @@ public class CommonServiceImpl implements CommonService {
                         List<GroupTourProductTripItem> items = Lists.newArrayList();
                         if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
                             GroupTourProductTripItem item1 = new GroupTourProductTripItem();
-                            item1.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode()));
+                            item1.setType("5");
                             item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
@@ -1071,47 +1137,49 @@ public class CommonServiceImpl implements CommonService {
                                 int type = route.getMduleType();
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();
                                 if (type == DfyConstants.MODULE_TYPE_SCENIC) {
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode()));
+                                    item.setType("1");
                                     item.setPoiName(route.getTitle());
                                 } else if (type == DfyConstants.MODULE_TYPE_TRAFFIC) {
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode()));
                                     String means = "";
                                     if (route.getTransportationType() > 0) {
                                         switch (route.getTransportationType()) {
                                             case 1:
                                                 means = "飞机";
+                                                item.setType("7");
                                                 break;
                                             case 2:
                                                 means = "火车";
+                                                item.setType("6");
                                                 break;
                                             case 3:
                                                 means = "轮渡";
+                                                item.setType("8");
                                                 break;
                                             case 4:
                                                 means = "汽车";
+                                                item.setType("8");
                                                 break;
                                             case 5:
                                             default:
                                                 means = "自主";
+                                                item.setType("8");
                                                 break;
                                         }
                                     }
                                     if (StringUtils.isBlank(means)) {
+                                        item.setType("8");
                                         item.setPoiName(String.format("从%s到%s", route.getDeparture(), route.getArrival()));
                                     } else {
                                         item.setPoiName(String.format("从%s乘%s到%s", route.getDeparture(), means, route.getArrival()));
                                     }
                                 } else if (type == DfyConstants.MODULE_TYPE_FOOD) {
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
+                                    item.setType("3");
                                     item.setPoiName(route.getName());
                                 } else if (type == DfyConstants.MODULE_TYPE_SHOPPING) {
                                     item.setPoiName(route.getName());
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode()));
+                                    item.setType("4");
                                 } else if (type == DfyConstants.MODULE_TYPE_ACTIVITY) {
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode()));
-                                    item.setPoiName(route.getName());
-                                } else if (type == DfyConstants.MODULE_TYPE_REMINDER) {
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode()));
+                                    item.setType("10");
                                     item.setPoiName(route.getName());
                                 }
                                 item.setTime(route.getDepTime());
