@@ -935,8 +935,8 @@ public class CommonServiceImpl implements CommonService {
                 log.info("{}mainitem为空", productPO.getCode());
                 continue;
             }
-            if(ListUtils.isNotEmpty(productPO.getImages())){
-                groupTourProductMPO.setImages(productPO.getImages().stream().map(i -> i.getUrl()).collect(Collectors.toList()));
+            if(ListUtils.isNotEmpty(productPO.getMainItem().getImages())){
+                groupTourProductMPO.setImages(productPO.getMainItem().getImages().stream().map(i -> i.getUrl()).collect(Collectors.toList()));
             }
             if(ListUtils.isNotEmpty(productPO.getMainItem().getMainImages())){
                 groupTourProductMPO.setMainImage(productPO.getMainItem().getMainImages().get(0).getUrl());
@@ -1057,7 +1057,7 @@ public class CommonServiceImpl implements CommonService {
                         if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
                             GroupTourProductTripItem item1 = new GroupTourProductTripItem();
                             item1.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode()));
-                            hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
+                            item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
                                 groupTourHotel.setRoomName(r.getName());
@@ -1065,7 +1065,7 @@ public class CommonServiceImpl implements CommonService {
                                     groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
                                 }
                                 return groupTourHotel;
-                            }).collect(Collectors.toList());
+                            }).collect(Collectors.toList()));
                             items.add(item1);
                             for (Route route : hodometer.getRoutes()) {
                                 int type = route.getMduleType();
