@@ -940,8 +940,8 @@ public class CommonServiceImpl implements CommonService {
             }
             if(ListUtils.isNotEmpty(productPO.getMainItem().getMainImages())){
                 groupTourProductMPO.setMainImage(productPO.getMainItem().getMainImages().get(0).getUrl());
-            } else {
-                groupTourProductMPO.setMainImage(productPO.getImages().get(0).getUrl());
+            } else if(ListUtils.isNotEmpty(groupTourProductMPO.getImages())){
+                groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
             }
             if(ListUtils.isNotEmpty(productPO.getMainItem().getTopic())){
                 StringBuffer sb = new StringBuffer();
