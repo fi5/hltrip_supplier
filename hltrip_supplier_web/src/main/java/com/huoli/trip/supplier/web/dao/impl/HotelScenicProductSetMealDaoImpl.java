@@ -61,6 +61,7 @@ public class HotelScenicProductSetMealDaoImpl implements HotelScenicProductSetMe
             criteria.and("priceStocks.date").is(hotelScenicSpotPriceStock.getDate());
         }
         query.addCriteria(criteria);
-        mongoTemplate.updateMulti(query, Update.update("priceStocks", hotelScenicSpotProductSetMealMPO.getPriceStocks()), HotelScenicSpotProductMPO.class);
+        mongoTemplate.updateMulti(query, Update.update("priceStocks.$.adtStock", hotelScenicSpotPriceStock.getAdtPrice())
+                .set("priceStocks.$.chdStock", hotelScenicSpotPriceStock.getChdPrice()), HotelScenicSpotProductMPO.class);
     }
 }

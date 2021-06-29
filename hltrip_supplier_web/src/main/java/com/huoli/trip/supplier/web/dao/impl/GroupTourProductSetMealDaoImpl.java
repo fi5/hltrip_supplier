@@ -67,7 +67,7 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
     public void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO, GroupTourPrice groupTourPrice) {
         mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(groupTourProductSetMealMPO.getId())
                 .andOperator(Criteria.where("groupTourPrices.date").is(groupTourPrice.getDate()))),
-                Update.update("groupTourPrices.adtStock", groupTourPrice.getAdtStock())
-                .set("groupTourPrices.chdStock", groupTourPrice.getChdStock()), GroupTourProductSetMealMPO.class);
+                Update.update("groupTourPrices.$.adtStock", groupTourPrice.getAdtStock())
+                .set("groupTourPrices.$.chdStock", groupTourPrice.getChdStock()), GroupTourProductSetMealMPO.class);
     }
 }
