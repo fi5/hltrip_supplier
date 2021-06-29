@@ -935,6 +935,14 @@ public class CommonServiceImpl implements CommonService {
                 log.info("{}mainitem为空", productPO.getCode());
                 continue;
             }
+            if(ListUtils.isNotEmpty(productPO.getImages())){
+                groupTourProductMPO.setImages(productPO.getImages().stream().map(i -> i.getUrl()).collect(Collectors.toList()));
+            }
+            if(ListUtils.isNotEmpty(productPO.getMainItem().getMainImages())){
+                groupTourProductMPO.setMainImage(productPO.getMainItem().getMainImages().get(0).getUrl());
+            } else {
+                groupTourProductMPO.setMainImage(productPO.getImages().get(0).getUrl());
+            }
             if(ListUtils.isNotEmpty(productPO.getMainItem().getTopic())){
                 StringBuffer sb = new StringBuffer();
                 for (BaseCode baseCode : productPO.getMainItem().getTopic()) {
