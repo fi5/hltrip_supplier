@@ -28,4 +28,6 @@ public interface HotelScenicProductSetMealDao {
     void saveProduct(HotelScenicSpotProductSetMealMPO setMealMPO);
 
     HotelScenicSpotProductSetMealMPO getSetMealByPackageId(String packageId);
+
+    void updatePriceStock(HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO);
 }

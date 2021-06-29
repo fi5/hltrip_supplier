@@ -50,4 +50,10 @@ public class HotelScenicProductSetMealDaoImpl implements HotelScenicProductSetMe
         query.addCriteria(Criteria.where("_id").is(packageId));
         return mongoTemplate.findOne(query, HotelScenicSpotProductSetMealMPO.class);
     }
+
+    @Override
+    public void updatePriceStock(HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO) {
+        mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(hotelScenicSpotProductSetMealMPO.getId())),
+                Update.update("priceStocks", hotelScenicSpotProductSetMealMPO.getPriceStocks()), HotelScenicSpotProductMPO.class);
+    }
 }

@@ -53,6 +53,12 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
     }
 
     @Override
+    public void updatePriceStock(ScenicSpotProductPriceMPO priceMPO) {
+        mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(priceMPO.getId())),
+                Update.update("stock", priceMPO.getStock()), ScenicSpotProductPriceMPO.class);
+    }
+
+    @Override
     public List<ScenicSpotProductPriceMPO> getByProductId(String productId){
         return mongoTemplate.find(new Query(Criteria.where("scenicSpotProductId").is(productId)), ScenicSpotProductPriceMPO.class);
     }

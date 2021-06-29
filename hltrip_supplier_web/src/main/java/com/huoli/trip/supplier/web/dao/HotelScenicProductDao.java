@@ -25,4 +25,6 @@ public interface HotelScenicProductDao {
      * @param productMPO
      */
     void saveProduct(HotelScenicSpotProductMPO productMPO);
+
+    HotelScenicSpotProductMPO getByProductId(String productId);
 }

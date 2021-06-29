@@ -41,4 +41,6 @@ public interface GroupTourProductSetMealDao {
     List<GroupTourProductSetMealMPO> getSetMealByProductId(String groupTourProductId);
 
     GroupTourProductSetMealMPO getSetMealByPackageId(String packageId);
+
+    void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO);
 }

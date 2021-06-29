@@ -63,4 +63,10 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
         query.addCriteria(criteria);
         return mongoTemplate.findOne(query, GroupTourProductSetMealMPO.class);
     }
+
+    @Override
+    public void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO) {
+        mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(groupTourProductSetMealMPO.getId())),
+                Update.update("groupTourPrices", groupTourProductSetMealMPO.getGroupTourPrices()), GroupTourProductSetMealMPO.class);
+    }
 }
