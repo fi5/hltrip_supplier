@@ -203,38 +203,32 @@ public class HllxServiceImpl implements HllxService {
                     }
                     groupTourPrice.setAdtStock(groupTourPrice.getAdtStock() - req.getAdtQuantity());
                     groupTourPrice.setChdStock(groupTourPrice.getChdStock() - req.getChildQuantity());
-                    groupTourPriceMap.put(req.getDate(), groupTourPrice);
-                    groupTourPrices = groupTourPriceMap.values().stream().collect(Collectors.toList());
-                    groupTourProductSetMealMPO.setGroupTourPrices(groupTourPrices);
-                    groupTourProductSetMealDao.updatePriceStock(groupTourProductSetMealMPO);
+                    groupTourProductSetMealDao.updatePriceStock(groupTourProductSetMealMPO, groupTourPrice);
                     break;
                 case "hotel_scenicSpot":
                     HotelScenicSpotProductMPO productMPO = hotelScenicProductDao.getByProductId(req.getProductId());
                     HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO = hotelScenicProductSetMealDao.getSetMealByPackageId(req.getPackageId());
                     List<HotelScenicSpotPriceStock> priceStocks = hotelScenicSpotProductSetMealMPO.getPriceStocks();
+                    HotelScenicSpotPriceStock hotelScenicSpotPriceStock = null;
                     if(productMPO.getPayInfo().getSellType() == 0){
-                        HotelScenicSpotPriceStock hotelScenicSpotPriceStock = priceStocks.get(0);
+                        hotelScenicSpotPriceStock = priceStocks.get(0);
                         if(hotelScenicSpotPriceStock.getAdtStock() < req.getAdtQuantity() || hotelScenicSpotPriceStock.getChdStock() < req.getChildQuantity()){
                             log.error("库存不足：adtStock:{},{}; chdStock:{},{}", hotelScenicSpotPriceStock.getAdtStock(), req.getAdtQuantity(), hotelScenicSpotPriceStock.getChdStock(), req.getChildQuantity());
                             return new HllxBaseResult<>(false, 200, "库存不足");
                         }
                         hotelScenicSpotPriceStock.setAdtStock(hotelScenicSpotPriceStock.getAdtStock() - req.getAdtQuantity());
                         hotelScenicSpotPriceStock.setChdStock(hotelScenicSpotPriceStock.getChdStock() - req.getChildQuantity());
-                        priceStocks = Arrays.asList(hotelScenicSpotPriceStock);
                     }else{
                         Map<String, HotelScenicSpotPriceStock> priceStockMap = Maps.uniqueIndex(priceStocks, item -> item.getDate());
-                        HotelScenicSpotPriceStock hotelScenicSpotPriceStock = priceStockMap.get(req.getDate());
+                        hotelScenicSpotPriceStock = priceStockMap.get(req.getDate());
                         if(hotelScenicSpotPriceStock == null || hotelScenicSpotPriceStock.getAdtStock() < req.getAdtQuantity() || hotelScenicSpotPriceStock.getChdStock() < req.getChildQuantity()){
                             log.error("库存不足：adtStock:{},{}; chdStock:{},{}", hotelScenicSpotPriceStock.getAdtStock(), req.getAdtQuantity(), hotelScenicSpotPriceStock.getChdStock(), req.getChildQuantity());
                             return new HllxBaseResult<>(false, 200, "库存不足");
                         }
                         hotelScenicSpotPriceStock.setAdtStock(hotelScenicSpotPriceStock.getAdtStock() - req.getAdtQuantity());
                         hotelScenicSpotPriceStock.setChdStock(hotelScenicSpotPriceStock.getChdStock() - req.getChildQuantity());
-                        priceStockMap.put(hotelScenicSpotPriceStock.getDate(), hotelScenicSpotPriceStock);
-                        priceStocks = priceStockMap.values().stream().collect(Collectors.toList());
                     }
-                    hotelScenicSpotProductSetMealMPO.setPriceStocks(priceStocks);
-                    hotelScenicProductSetMealDao.updatePriceStock(hotelScenicSpotProductSetMealMPO);
+                    hotelScenicProductSetMealDao.updatePriceStock(hotelScenicSpotProductSetMealMPO, hotelScenicSpotPriceStock);
                     break;
             }
         }

@@ -1,9 +1,8 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
-import com.huoli.trip.common.vo.v2.GroupTourProductSetMeal;
 import com.huoli.trip.supplier.web.dao.GroupTourProductSetMealDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,8 +64,10 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
     }
 
     @Override
-    public void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO) {
-        mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(groupTourProductSetMealMPO.getId())),
-                Update.update("groupTourPrices", groupTourProductSetMealMPO.getGroupTourPrices()), GroupTourProductSetMealMPO.class);
+    public void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO, GroupTourPrice groupTourPrice) {
+        mongoTemplate.updateMulti(Query.query(Criteria.where("_id").is(groupTourProductSetMealMPO.getId())
+                .andOperator(Criteria.where("groupTourPrices.date").is(groupTourPrice.getDate()))),
+                Update.update("groupTourPrices.adtStock", groupTourPrice.getAdtStock())
+                .set("groupTourPrices.chdStock", groupTourPrice.getChdStock()), GroupTourProductSetMealMPO.class);
     }
 }

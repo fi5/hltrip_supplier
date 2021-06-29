@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.dao;
 
+import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
 
 import java.util.List;
@@ -42,5 +43,5 @@ public interface GroupTourProductSetMealDao {
 
     GroupTourProductSetMealMPO getSetMealByPackageId(String packageId);
 
-    void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO);
+    void updatePriceStock(GroupTourProductSetMealMPO groupTourProductSetMealMPO, GroupTourPrice groupTourPrice);
 }
