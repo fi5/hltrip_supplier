@@ -1066,7 +1066,8 @@ public class CommonServiceImpl implements CommonService {
                         pi.add("10");
                     }
                     String passengerInfo = pi.stream().collect(Collectors.joining(","));
-                    PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_SHENGHE_TICKET, bookRulePO.getPeopleLimit(), passengerInfo, idInfo);
+                    PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_SHENGHE_TICKET,
+                            bookRulePO.getPeopleLimit() == null ? 0 : bookRulePO.getPeopleLimit(), passengerInfo, idInfo);
                     if(passengerTemplatePO == null){
                         passengerTemplatePO = new PassengerTemplatePO();
                         passengerTemplatePO.setChannel(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
