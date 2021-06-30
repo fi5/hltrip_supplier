@@ -392,6 +392,8 @@ public class LmmTicketConverter {
 
     public static ScenicSpotMPO convertToScenicSpotMPO(LmmScenic lmmScenic){
         ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
+        // todo 正式上线把状态改成默认0
+        scenicSpotMPO.setStatus(1);
         scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
         scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
         scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
