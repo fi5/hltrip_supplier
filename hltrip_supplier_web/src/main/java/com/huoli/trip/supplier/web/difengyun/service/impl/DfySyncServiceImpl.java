@@ -1365,7 +1365,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             GroupTourProductSetMealBackupMPO backupMPO = null;
             if(setMealMPO == null){
                 setMealMPO = new GroupTourProductSetMealMPO();
-                setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+                setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT_MEAL));
                 setMealMPO.setConstInclude(journeyInfo.getCostInclude());
                 setMealMPO.setCostExclude(journeyInfo.getCostExclude());
                 setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
