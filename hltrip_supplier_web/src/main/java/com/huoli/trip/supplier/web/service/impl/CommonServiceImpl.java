@@ -1100,9 +1100,11 @@ public class CommonServiceImpl implements CommonService {
                 setMealMPO.setConstInclude(productPO.getIncludeDesc());
                 setMealMPO.setCostExclude(productPO.getExcludeDesc());
                 StringBuffer sb = new StringBuffer();
-                sb.append("预订须知：<br>").append(productPO.getBookDesc()).append("<br>");
+                if(StringUtils.isNotBlank(productPO.getBookDesc())){
+                    sb.append("预订须知：<br>").append(productPO.getBookDesc()).append("<br>");
+                }
                 if(ListUtils.isNotEmpty(productPO.getBookNoticeList())){
-                    productPO.getBookNoticeList().forEach(b ->
+                    productPO.getBookNoticeList().stream().filter(bn -> StringUtils.isNotBlank(bn.getContent())).forEach(b ->
                         sb.append(b.getTitle()).append("<br>")
                                 .append(b.getContent()).append("<br>"));
                 }
