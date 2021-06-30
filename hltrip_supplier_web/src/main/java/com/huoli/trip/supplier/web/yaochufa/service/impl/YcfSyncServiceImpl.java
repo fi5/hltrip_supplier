@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -1465,23 +1466,49 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             return;
         }
         for (YcfPriceInfo yp : ycfPriceInfos) {
-            ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
-            priceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-            priceMPO.setScenicSpotProductId(productId);
-            priceMPO.setMerchantCode(supplierProductId);
-            priceMPO.setScenicSpotRuleId(ruleId);
-            if(StringUtils.isBlank(ticketKind)){
-                // 要出发有的没有tickettype,默认普通票
-                ticketKind = "1";
+            ScenicSpotProductPriceMPO exist = scenicSpotProductPriceDao.getExistPrice(productId, ruleId, DateTimeUtil.formatDate(yp.getDate()));
+            if(exist != null){
+                boolean b = false;
+                if((exist.getSellPrice() == null && yp.getPrice() != null) || (exist.getSellPrice() != null && yp.getPrice() == null)
+                        || (exist.getSellPrice() != null && yp.getPrice() != null && exist.getSellPrice().compareTo(yp.getPrice()) != 0)){
+                    exist.setSellPrice(yp.getPrice() == null ? null : yp.getPrice());
+                    b = true;
+                }
+                if((exist.getSettlementPrice() == null && yp.getSettlementPrice() != null)
+                        || (exist.getSettlementPrice() != null && yp.getSettlementPrice() == null)
+                        || (exist.getSettlementPrice() != null && yp.getSettlementPrice() != null && exist.getSettlementPrice().compareTo(yp.getSettlementPrice()) != 0)){
+                    exist.setSettlementPrice(yp.getSettlementPrice() == null ? null : yp.getSettlementPrice());
+                    b = true;
+                }
+                // 接口供应商库存不会主动减，所以这里不会有问题
+                int stock = yp.getStock() == null ? 0 : yp.getStock();
+                if(exist.getStock() != stock){
+                    exist.setStock(stock);
+                    b = true;
+                }
+                // 有变化才更新，避免频繁更新，mongo撑不住
+                if(b){
+                    scenicSpotProductPriceDao.saveScenicSpotProductPrice(exist);
+                }
+            } else {
+                ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
+                priceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                priceMPO.setScenicSpotProductId(productId);
+                priceMPO.setMerchantCode(supplierProductId);
+                priceMPO.setScenicSpotRuleId(ruleId);
+                if (StringUtils.isBlank(ticketKind)) {
+                    // 要出发有的没有tickettype,默认普通票
+                    ticketKind = "1";
+                }
+                priceMPO.setTicketKind(ticketKind);
+                priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));
+                priceMPO.setEndDate(DateTimeUtil.formatDate(yp.getDate()));
+                priceMPO.setSellPrice(yp.getPrice());
+                priceMPO.setSettlementPrice(yp.getSettlementPrice());
+                priceMPO.setStock(yp.getStock());
+                priceMPO.setWeekDay("1,2,3,4,5,6,7");
+                scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
             }
-            priceMPO.setTicketKind(ticketKind);
-            priceMPO.setStartDate(DateTimeUtil.formatDate(yp.getDate()));
-            priceMPO.setEndDate(DateTimeUtil.formatDate(yp.getDate()));
-            priceMPO.setSellPrice(yp.getPrice());
-            priceMPO.setSettlementPrice(yp.getSettlementPrice());
-            priceMPO.setStock(yp.getStock());
-            priceMPO.setWeekDay("1,2,3,4,5,6,7");
-            scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
         }
     }
 

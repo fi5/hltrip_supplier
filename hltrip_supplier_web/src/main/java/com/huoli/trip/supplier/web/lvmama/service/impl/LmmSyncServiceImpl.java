@@ -1063,78 +1063,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         if(ListUtils.isEmpty(gl.getPrices().getPrice())){
                             return;
                         }
-                        gl.getPrices().getPrice().forEach(price -> {
-                            ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
-                            scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                            scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
-                            scenicSpotProductPriceMPO.setMerchantCode(g.getGoodsId());
-                            scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
-                            scenicSpotProductPriceMPO.setWeekDay("1,2,3,4,5,6,7");
-                            Integer ticketType;
-                            switch (g.getTicketType()){
-                                case "PARENTAGE":
-                                    ticketType = TicketType.TICKET_TYPE_3.getCode();
-                                    break;
-                                case "FAMILY":
-                                    ticketType = TicketType.TICKET_TYPE_4.getCode();
-                                    break;
-                                case "LOVER":
-                                    ticketType = TicketType.TICKET_TYPE_5.getCode();
-                                    break;
-                                case "COUPE":
-                                    ticketType = TicketType.TICKET_TYPE_6.getCode();
-                                    break;
-                                case "ADULT":
-                                    ticketType = TicketType.TICKET_TYPE_2.getCode();
-                                    break;
-                                case "CHILDREN":
-                                    ticketType = TicketType.TICKET_TYPE_7.getCode();
-                                    break;
-                                case "OLDMAN":
-                                    ticketType = TicketType.TICKET_TYPE_8.getCode();
-                                    break;
-                                case "STUDENT":
-                                    ticketType = TicketType.TICKET_TYPE_9.getCode();
-                                    break;
-                                case "ACTIVITY":
-                                    ticketType = TicketType.TICKET_TYPE_19.getCode();
-                                    break;
-                                case "SOLDIER":
-                                    ticketType = TicketType.TICKET_TYPE_10.getCode();
-                                    break;
-                                case "TEACHER":
-                                    ticketType = TicketType.TICKET_TYPE_11.getCode();
-                                    break;
-                                case "DISABILITY":
-                                    ticketType = TicketType.TICKET_TYPE_12.getCode();
-                                    break;
-                                case "GROUP":
-                                    ticketType = TicketType.TICKET_TYPE_13.getCode();
-                                    break;
-                                case "FREE":
-                                    ticketType = TicketType.TICKET_TYPE_1.getCode();
-                                    break;
-                                case "MAN":
-                                    ticketType = TicketType.TICKET_TYPE_31.getCode();
-                                    break;
-                                case "WOMAN":
-                                    ticketType = TicketType.TICKET_TYPE_30.getCode();
-                                    break;
-                                default:
-                                    ticketType = TicketType.TICKET_TYPE_1.getCode();
-                            }
-                            scenicSpotProductPriceMPO.setTicketKind(ticketType.toString());
-                            scenicSpotProductPriceMPO.setStartDate(price.getDate());
-                            scenicSpotProductPriceMPO.setEndDate(price.getDate());
-                            scenicSpotProductPriceMPO.setStock(price.getStock() == -1 ? 9999 : price.getStock());
-                            if(price.getB2bPrice() != null){
-                                scenicSpotProductPriceMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
-                            }
-                            if(price.getSellPrice() != null){
-                                scenicSpotProductPriceMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
-                            }
-                            scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
-                        });
+                        gl.getPrices().getPrice().forEach(price ->
+                            updatePrice(scenicSpotProductId, ruleId, price, g));
                     });
                 });
 
@@ -1151,6 +1081,105 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
                 }
             });
+        }
+    }
+
+    private void updatePrice(String scenicSpotProductId, String ruleId, LmmPrice price, LmmGoods g){
+        ScenicSpotProductPriceMPO exist = scenicSpotProductPriceDao.getExistPrice(scenicSpotProductId, ruleId, price.getDate());
+        if(exist != null){
+            boolean b = false;
+            if((exist.getSellPrice() == null && price.getB2bPrice() != null) || (exist.getSellPrice() != null && price.getB2bPrice() == null)
+                    || (exist.getSellPrice() != null && price.getB2bPrice() != null && exist.getSellPrice().compareTo(BigDecimal.valueOf(price.getB2bPrice())) != 0)){
+                exist.setSellPrice(price.getB2bPrice() == null ? null : BigDecimal.valueOf(price.getB2bPrice()));
+                b = true;
+            }
+            if((exist.getSettlementPrice() == null && price.getSellPrice() != null)
+                    || (exist.getSettlementPrice() != null && price.getSellPrice() == null)
+                    || (exist.getSettlementPrice() != null && price.getSellPrice() != null && exist.getSettlementPrice().compareTo(BigDecimal.valueOf(price.getSellPrice())) != 0)){
+                exist.setSettlementPrice(price.getSellPrice() == null ? null : BigDecimal.valueOf(price.getSellPrice()));
+                b = true;
+            }
+            // 接口供应商库存不会主动减，所以这里不会有问题
+            int stock = price.getStock() == -1 ? 9999 : price.getStock();
+            if(exist.getStock() != stock){
+                exist.setStock(stock);
+                b = true;
+            }
+            // 有变化才更新，避免频繁更新，mongo撑不住
+            if(b){
+                scenicSpotProductPriceDao.saveScenicSpotProductPrice(exist);
+            }
+        } else {
+            ScenicSpotProductPriceMPO scenicSpotProductPriceMPO = new ScenicSpotProductPriceMPO();
+            scenicSpotProductPriceMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            scenicSpotProductPriceMPO.setScenicSpotProductId(scenicSpotProductId);
+            scenicSpotProductPriceMPO.setMerchantCode(g.getGoodsId());
+            scenicSpotProductPriceMPO.setScenicSpotRuleId(ruleId);
+            scenicSpotProductPriceMPO.setWeekDay("1,2,3,4,5,6,7");
+            Integer ticketType;
+            switch (g.getTicketType()){
+                case "PARENTAGE":
+                    ticketType = TicketType.TICKET_TYPE_3.getCode();
+                    break;
+                case "FAMILY":
+                    ticketType = TicketType.TICKET_TYPE_4.getCode();
+                    break;
+                case "LOVER":
+                    ticketType = TicketType.TICKET_TYPE_5.getCode();
+                    break;
+                case "COUPE":
+                    ticketType = TicketType.TICKET_TYPE_6.getCode();
+                    break;
+                case "ADULT":
+                    ticketType = TicketType.TICKET_TYPE_2.getCode();
+                    break;
+                case "CHILDREN":
+                    ticketType = TicketType.TICKET_TYPE_7.getCode();
+                    break;
+                case "OLDMAN":
+                    ticketType = TicketType.TICKET_TYPE_8.getCode();
+                    break;
+                case "STUDENT":
+                    ticketType = TicketType.TICKET_TYPE_9.getCode();
+                    break;
+                case "ACTIVITY":
+                    ticketType = TicketType.TICKET_TYPE_19.getCode();
+                    break;
+                case "SOLDIER":
+                    ticketType = TicketType.TICKET_TYPE_10.getCode();
+                    break;
+                case "TEACHER":
+                    ticketType = TicketType.TICKET_TYPE_11.getCode();
+                    break;
+                case "DISABILITY":
+                    ticketType = TicketType.TICKET_TYPE_12.getCode();
+                    break;
+                case "GROUP":
+                    ticketType = TicketType.TICKET_TYPE_13.getCode();
+                    break;
+                case "FREE":
+                    ticketType = TicketType.TICKET_TYPE_1.getCode();
+                    break;
+                case "MAN":
+                    ticketType = TicketType.TICKET_TYPE_31.getCode();
+                    break;
+                case "WOMAN":
+                    ticketType = TicketType.TICKET_TYPE_30.getCode();
+                    break;
+                default:
+                    ticketType = TicketType.TICKET_TYPE_1.getCode();
+            }
+            scenicSpotProductPriceMPO.setTicketKind(ticketType.toString());
+            scenicSpotProductPriceMPO.setStartDate(price.getDate());
+            scenicSpotProductPriceMPO.setEndDate(price.getDate());
+            scenicSpotProductPriceMPO.setStock(price.getStock() == -1 ? 9999 : price.getStock());
+            if(price.getB2bPrice() != null){
+                scenicSpotProductPriceMPO.setSellPrice(BigDecimal.valueOf(price.getB2bPrice()));
+            }
+            if(price.getSellPrice() != null){
+                scenicSpotProductPriceMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
+            }
+            scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
         }
     }
 

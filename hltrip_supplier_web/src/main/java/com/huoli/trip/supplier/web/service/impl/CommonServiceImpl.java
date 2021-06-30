@@ -1076,7 +1076,8 @@ public class CommonServiceImpl implements CommonService {
                         passengerTemplatePO.setStatus(1);
                         passengerTemplatePO.setIdInfo(idInfo);
                         passengerTemplatePO.setPassengerInfo(passengerInfo);
-                        passengerTemplatePO.setPeopleLimit(bookRulePO.getPeopleLimit());
+                        passengerTemplatePO.setPeopleLimit(bookRulePO.getPeopleLimit() == null ? 0 : bookRulePO.getPeopleLimit());
+                        passengerTemplatePO.setPayBefore(0);
                         passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
                     }
                     groupTourProductMPO.setTravelerTemplateId(passengerTemplatePO.getId());

@@ -992,13 +992,22 @@ public class DfySyncServiceImpl implements DfySyncService {
                     if(ticketKind != null){
                         scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
                     }
+                    if(StringUtils.isNotBlank(p.getSalePrice())){
+                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                        scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
+                    }
+                    scenicSpotProductPriceMPO.setStock(99);
+                    scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                } else {
+                    // 有变化才更新，避免频繁更新，mongo撑不住
+                    if((scenicSpotProductPriceMPO.getSellPrice() == null && p.getSalePrice() != null)
+                        || (scenicSpotProductPriceMPO.getSellPrice() != null && p.getSalePrice() == null)
+                        || (scenicSpotProductPriceMPO.getSellPrice() != null && p.getSalePrice() != null && scenicSpotProductPriceMPO.getSellPrice().compareTo(new BigDecimal(p.getSalePrice())) != 0)){
+                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                        scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
+                        scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                    }
                 }
-                if(StringUtils.isNotBlank(p.getSalePrice())){
-                    scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
-                    scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
-                }
-                scenicSpotProductPriceMPO.setStock(99);
-                scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
             });
         }
     }
