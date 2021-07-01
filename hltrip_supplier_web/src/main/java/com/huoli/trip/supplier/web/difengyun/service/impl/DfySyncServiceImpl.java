@@ -246,7 +246,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO backup;
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -548,7 +547,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO backup;
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -783,8 +781,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
                 ticketIds.addAll(scenicDetail.getDisTickets().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
             }
-            // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//            ticketIds.forEach(id -> syncProductV2(id));
+            ticketIds.forEach(id -> syncProductV2(id));
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }

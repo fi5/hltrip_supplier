@@ -36,8 +36,7 @@ public class LmmProductController {
         try {
             threadPool.execute(() -> {
                 try {
-                    // todo 价格更新需要优化
-//                    lmmSyncService.pushUpdateV2(product);
+                    lmmSyncService.pushUpdateV2(product);
                 } catch (Exception e) {
                     log.error("接收驴妈妈产品通知异常v2", e);
                 }

@@ -352,7 +352,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             return false;
         }
         lmmProductList.forEach(p -> {
-            // todo 不知道他们是不是每次都返回product下的所有goodsid,如果不是的话本地的有些数据可能变成垃圾，需要查出来一起更新
             String goodsIds = p.getGoodsIds();
             LmmGoodsListByIdRequest lmmGoodsListByIdRequest = new LmmGoodsListByIdRequest();
             lmmGoodsListByIdRequest.setGoodsIds(goodsIds);
@@ -449,7 +448,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             newProduct.setExtendParams(params);
             if(oldProduct == null){
                 newProduct.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 newProduct.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 newProduct.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -637,7 +635,6 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             return false;
         }
         lmmProductList.forEach(p -> {
-            // todo 不知道他们是不是每次都返回product下的所有goodsid,如果不是的话本地的有些数据可能变成垃圾，需要查出来一起更新
             String goodsIds = p.getGoodsIds();
             LmmGoodsListByIdRequest lmmGoodsListByIdRequest = new LmmGoodsListByIdRequest();
             lmmGoodsListByIdRequest.setGoodsIds(goodsIds);

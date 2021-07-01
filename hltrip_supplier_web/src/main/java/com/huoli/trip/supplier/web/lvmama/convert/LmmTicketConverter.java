@@ -295,7 +295,6 @@ public class LmmTicketConverter {
             ticketPO.setTickets(Lists.newArrayList(ticketInfoPO));
             productPO.setTicket(ticketPO);
         }
-        // todo 入园地点、票种说明、通关时间、限购说明 现在没有
         BookRulePO booker = new BookRulePO();
         booker.setCredential(false);
         booker.setEmail(false);
@@ -392,8 +391,7 @@ public class LmmTicketConverter {
 
     public static ScenicSpotMPO convertToScenicSpotMPO(LmmScenic lmmScenic){
         ScenicSpotMPO scenicSpotMPO = new ScenicSpotMPO();
-        // todo 正式上线把状态改成默认0
-        scenicSpotMPO.setStatus(1);
+        scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
         scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
         scenicSpotMPO.setImages(lmmScenic.getPlaceImage());

@@ -71,8 +71,7 @@ public class SyncPriceTask {
     }
 
 
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 3 ? * 6")
+    @Scheduled(cron = "0 0 3 ? * 6")
     @Async
     public void syncFullPriceV2(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){

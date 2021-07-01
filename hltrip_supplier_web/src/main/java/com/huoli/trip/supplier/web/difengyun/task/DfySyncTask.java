@@ -195,8 +195,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     @Async
     public void syncUpdateProductV2(){
         try {
@@ -236,8 +235,7 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     @Async
     public void syncNewProductV2(){
         try {
@@ -273,8 +271,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 5-23/3 ? * *")
+    @Scheduled(cron = "0 0 5-23/3 ? * *")
     @Async
     public void syncUpdateToursProductV2(){
         try {
@@ -314,8 +311,7 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     @Async
     public void syncNewToursProductV2(){
         try {

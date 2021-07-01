@@ -822,21 +822,20 @@ public class CommonServiceImpl implements CommonService {
             // 没有找到映射就往本地新增一条
             scenicSpotDao.addScenicSpot(newScenic);
             scenicId = newScenic.getId();
-            // todo 正式上线这个要放开
             // 景点申请单
-//            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
-//            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
-//            poiReviewMPO.setChannel(channel);
-//            poiReviewMPO.setChannelName(channelName);
-//            poiReviewMPO.setPoiName(newScenic.getName());
-//            poiReviewMPO.setStatus(0);
-//            poiReviewMPO.setCreateTime(new Date());
-//            poiReviewMPO.setCityName(newScenic.getCity());
-//            poiReviewMPO.setPoiId(newScenic.getId());
-//            poiReviewMPO.setPoiType(0);
-//            poiReviewMPO.setUpdateTime(new Date());
-//            poiReviewDao.addPoiReview(poiReviewMPO);
-//            log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
+            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
+            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            poiReviewMPO.setChannel(channel);
+            poiReviewMPO.setChannelName(channelName);
+            poiReviewMPO.setPoiName(newScenic.getName());
+            poiReviewMPO.setStatus(0);
+            poiReviewMPO.setCreateTime(new Date());
+            poiReviewMPO.setCityName(newScenic.getCity());
+            poiReviewMPO.setPoiId(newScenic.getId());
+            poiReviewMPO.setPoiType(0);
+            poiReviewMPO.setUpdateTime(new Date());
+            poiReviewDao.addPoiReview(poiReviewMPO);
+            log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
         } else {
             scenicId = existScenic.getId();
             log.info("已存在同名同址景点，不用新增景点，直接关联，景点id={}", scenicId);
@@ -1453,7 +1452,6 @@ public class CommonServiceImpl implements CommonService {
                 if(ListUtils.isNotEmpty(productMPO.getImages())){
                     noticeMPO.setProductImageUrl(productMPO.getImages().get(0));
                 }
-                // todo 酒景没有名称，这里存什么
 //                noticeMPO.setProductName(hotelScenicSpotProductMPO.getName());
                 noticeMPO.setProductStatus(productMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");

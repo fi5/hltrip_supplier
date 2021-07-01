@@ -272,8 +272,7 @@ public class LmmTicketTask {
     /**
      * 驴妈妈一周更新一次，周二凌晨1点（周一老版更新）
      */
-    // todo 这个时间是前期为了补充景点数据，后面改成一周更新一次
-    @Scheduled(cron = "0 0 2 ? * *")
+    @Scheduled(cron = "0 0 2 ? * 3")
     @Async
     public void syncNewProductV2(){
         try {
@@ -306,8 +305,8 @@ public class LmmTicketTask {
         }
     }
 
-    // todo 这里前期为了落基础数据，后面不需要主动获取
-    @Scheduled(cron = "0 0 1 ? * *")
+    // 这里前期为了落基础数据，后面不需要主动获取
+//    @Scheduled(cron = "0 0 1 ? * *")
     @Async
     public void syncScenicAll(){
         try {

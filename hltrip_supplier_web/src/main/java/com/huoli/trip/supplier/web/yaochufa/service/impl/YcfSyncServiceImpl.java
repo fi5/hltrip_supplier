@@ -184,7 +184,6 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             ProductPO backup;
             if(exist == null){
                 productPO.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                productPO.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 productPO.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 productPO.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -563,18 +562,15 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     && ListUtils.isEmpty(ycfProduct.getFoodList()) &&
                     ListUtils.isEmpty(ycfProduct.getRoomList()) &&
                     ListUtils.isNotEmpty(ycfProduct.getTicketList())){
-                // todo 正式上线的时候这里要放开
-//                syncScenicProduct(ycfProduct);
-                // todo 补充景点信息，正式上线的时候这里可以去掉
-                suppScenic(ycfProduct);
+                syncScenicProduct(ycfProduct);
+//                suppScenic(ycfProduct);
             }
             // 套餐类型且酒店列表+其它列表至少两个列表有数据
             else if(ycfProduct.getProductType() == YcfConstants.PRODUCT_TYPE_PACKAGE
                     && ListUtils.isNotEmpty(ycfProduct.getRoomList())
                     && (ListUtils.isNotEmpty(ycfProduct.getFoodList()) ||
                         ListUtils.isNotEmpty(ycfProduct.getTicketList()))){
-                // todo 正式上线的时候这里要放开
-//                syncHotelScenicProduct(ycfProduct);
+                syncHotelScenicProduct(ycfProduct);
             }
         });
     }
