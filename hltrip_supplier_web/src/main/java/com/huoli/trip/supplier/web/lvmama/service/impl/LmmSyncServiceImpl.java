@@ -790,7 +790,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                     }
                 }
-                // 补充景点数据
+                // todo 补充景点数据，这里后面开始人工维护以后要去掉，否则可能会覆盖
                 updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
                 if(lmmProduct.getServiceGuarantee() == null){
                     scenicSpotProductMPO.setTags(null);
@@ -1189,10 +1189,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(StringUtils.isBlank(scenicSpotMPO.getBriefDesc())){
             scenicSpotMPO.setBriefDesc(lmmProduct.getIntrodution());
             b = true;
+            log.info("驴妈妈补充景点简要介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), lmmProduct.getIntrodution());
         }
         if(StringUtils.isBlank(scenicSpotMPO.getCharacteristic()) && ListUtils.isNotEmpty(lmmProduct.getCharacteristic())){
             scenicSpotMPO.setCharacteristic(lmmProduct.getCharacteristic().get(0));
             b = true;
+            log.info("驴妈妈补充景点特色描述{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), lmmProduct.getCharacteristic().get(0));
         }
         if((ListUtils.isEmpty(scenicSpotMPO.getCrowdNotices())
                 || !scenicSpotMPO.getCrowdNotices().stream().anyMatch(c -> StringUtils.equals(c.getCrowdType(), "10")))
@@ -1213,8 +1215,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             crowdNotice.setCrowdType("10");
             scenicSpotMPO.setCrowdNotices(Lists.newArrayList(crowdNotice));
             b = true;
+            log.info("驴妈妈补充景点结构化说明{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), JSON.toJSONString(Lists.newArrayList(crowdNotice)));
         }
-        if(StringUtils.isBlank(scenicSpotMPO.getTheme()) && ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
+        // TODO 先刷一下主题，后面去掉
+//        if(StringUtils.isBlank(scenicSpotMPO.getTheme()) && ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
+        if(ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
             String theme = lmmProduct.getProductTheme().get(0);
             String code = tripDictionaryMapper.getCodeByName(theme, 21);
             if(StringUtils.isBlank(code)){
@@ -1224,12 +1229,16 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             }
             scenicSpotMPO.setTheme(code);
             b = true;
+            log.info("驴妈妈补充景点主题{}，用产品{}，内容code={},name={}", scenicSpotMPO.getId(), productMPO.getId(), code, theme);
         }
         if(ListUtils.isEmpty(scenicSpotMPO.getImages())){
             scenicSpotMPO.setImages(lmmProduct.getImages());
             b = true;
+            log.info("驴妈妈补充景点图片{}，用产品{}", scenicSpotMPO.getId(), productMPO.getId());
         }
-        if(StringUtils.isBlank(scenicSpotMPO.getDetailDesc()) && ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
+        // TODO 先刷一下详情，后面去掉
+//        if(StringUtils.isBlank(scenicSpotMPO.getDetailDesc()) && ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
+        if(ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
             StringBuffer sb = new StringBuffer();
             for (LmmProduct.PlayAttraction playAttraction : lmmProduct.getPlayAttractions()) {
                 String info = "";
@@ -1245,9 +1254,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             }
             scenicSpotMPO.setDetailDesc(sb.toString());
             b = true;
+            log.info("驴妈妈补充景点详细介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), sb.toString());
         }
         if(b){
             scenicSpotDao.saveScenicSpot(scenicSpotMPO);
+            log.info("驴妈妈补充了一条景点{}，用产品{}", scenicSpotMPO.getId(), productMPO.getId());
         }
     }
 

@@ -614,7 +614,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
                 if(b){
                     scenicSpotDao.saveScenicSpot(existScenic);
-                    log.info("笛风云补充了一条景点{},{}", existScenic.getId(), existScenic.getName());
+                    log.info("要出发补充了一条景点{},{}", existScenic.getId(), existScenic.getName());
                 }
             }
         });

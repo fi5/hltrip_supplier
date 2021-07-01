@@ -272,7 +272,7 @@ public class LmmTicketTask {
     /**
      * 驴妈妈一周更新一次，周二凌晨1点（周一老版更新）
      */
-    @Scheduled(cron = "0 0 2 ? * 3")
+    @Scheduled(cron = "0 0 2 ? * *")
     @Async
     public void syncNewProductV2(){
         try {
