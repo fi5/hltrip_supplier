@@ -46,12 +46,17 @@ public class RefreshProductTask {
         long s = System.currentTimeMillis();
         log.info("开始执行刷新产品状态任务。。。");
         List<ProductPO> products = productDao.getProductsByStatus(Constants.PRODUCT_STATUS_VALID);
+        log.info("一共查到{}个有效产品。。", products.size());
         Date date = DateTimeUtil.trancateToDate(new Date());
-        products.forEach(productPO -> {
+        int i = 1;
+        for (ProductPO productPO : products) {
+            log.info("开始检查第{}个。。", i);
             commonService.checkProduct(productPO, date);
-        });
+            log.info("第{}个检查完。。", i);
+            i++;
+        }
         long t = System.currentTimeMillis() - s;
-        log.info("刷新产品状态任务执行完毕。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
+        log.info("刷新产品状态任务执行完毕，共{}个。用时{}", i, DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
     }
 
 }
