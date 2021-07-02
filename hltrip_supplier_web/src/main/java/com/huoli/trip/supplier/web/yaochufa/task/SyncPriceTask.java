@@ -71,7 +71,7 @@ public class SyncPriceTask {
     }
 
 
-    @Scheduled(cron = "0 0 3 ? * 6")
+//    @Scheduled(cron = "0 0 3 ? * 6")
     @Async
     public void syncFullPriceV2(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
