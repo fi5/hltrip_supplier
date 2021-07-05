@@ -624,7 +624,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if (ListUtils.isEmpty(lmmProductList)) {
             return false;
         }
-        lmmProductList.forEach(p -> updateProductV2(p, p.getGoodsList()));
+        lmmProductList.forEach(p -> {
+            try {
+                updateProductV2(p, p.getGoodsList());
+            } catch (Exception e) {
+                log.error("驴妈妈同步产品{}异常，不影响正常流程，跳过同步下一条。。", p.getProductId(), e);
+                return;
+            }
+        });
         return true;
     }
 

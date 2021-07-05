@@ -294,9 +294,9 @@ public class LmmTicketTask {
                 }
                 request.setCurrentPage(request.getCurrentPage() + 1);
                 // 如果执行时间超过310毫秒就不用睡了
-                if(useTime < 310){
+                if(useTime < 10){
                     // 限制一分钟不超过200次
-                    Thread.sleep(310 - useTime);
+                    Thread.sleep(10 - useTime);
                 }
             }
             log.info("同步驴妈妈产品定时任务执行完成v2，共同步{}页，用时{}秒", request.getCurrentPage(), (System.currentTimeMillis() - begin) / 1000);
