@@ -797,8 +797,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                     }
                 }
-                // todo 补充景点数据，这里后面开始人工维护以后要去掉，否则可能会覆盖
-                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
+                // 补充景点数据，这里后面开始人工维护以后要去掉，否则可能会覆盖
+//                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
                 if(lmmProduct.getServiceGuarantee() == null){
                     scenicSpotProductMPO.setTags(null);
                 } else {
@@ -1224,9 +1224,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             b = true;
             log.info("驴妈妈补充景点结构化说明{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), JSON.toJSONString(Lists.newArrayList(crowdNotice)));
         }
-        // TODO 先刷一下主题，后面去掉
-//        if(StringUtils.isBlank(scenicSpotMPO.getTheme()) && ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
-        if(ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
+        if(StringUtils.isBlank(scenicSpotMPO.getTheme()) && ListUtils.isNotEmpty(lmmProduct.getProductTheme())){
             String theme = lmmProduct.getProductTheme().get(0);
             String code = tripDictionaryMapper.getCodeByName(theme, 21);
             if(StringUtils.isBlank(code)){
@@ -1243,9 +1241,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             b = true;
             log.info("驴妈妈补充景点图片{}，用产品{}", scenicSpotMPO.getId(), productMPO.getId());
         }
-        // TODO 先刷一下详情，后面去掉
-//        if(StringUtils.isBlank(scenicSpotMPO.getDetailDesc()) && ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
-        if(ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
+        if(StringUtils.isBlank(scenicSpotMPO.getDetailDesc()) && ListUtils.isNotEmpty(lmmProduct.getPlayAttractions())){
             StringBuffer sb = new StringBuffer();
             for (LmmProduct.PlayAttraction playAttraction : lmmProduct.getPlayAttractions()) {
                 String info = "";

@@ -796,22 +796,20 @@ public class DfySyncServiceImpl implements DfySyncService {
 
         if (ticketDetailDfyBaseResult != null && ticketDetailDfyBaseResult.getData() != null) {
             DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
-
+            ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
+            if(scenicSpotMappingMPO == null){
+                log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
+                return;
+            }
+            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+            if(scenicSpotMPO == null){
+                log.error("景点{}不存在", scenicSpotMPO.getId());
+                return;
+            }
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
             boolean fresh = false;
-            ScenicSpotMPO scenicSpotMPO = null;
             List<String> changedFields = Lists.newArrayList();
             if(scenicSpotProductMPO == null){
-                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
-                if(scenicSpotMappingMPO == null){
-                    log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
-                    return;
-                }
-                scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
-                if(scenicSpotMPO == null){
-                    log.error("景点{}不存在", scenicSpotMPO.getId());
-                    return;
-                }
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 scenicSpotProductMPO.setCreateTime(new Date());
