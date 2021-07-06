@@ -1336,8 +1336,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
         }
         // 创建默认的出行人模板
-        String idInfo = String.join(",", (CharSequence) Arrays.asList(Certificate.ID_CARD.getCode(),
-                Certificate.PASSPORT.getCode(), Certificate.OFFICER.getCode(), Certificate.HKM_PASS.getCode(), Certificate.TW_CARD.getCode()));
+        String idInfo = String.join(",", Arrays.asList(Certificate.ID_CARD.getCode(),
+                Certificate.PASSPORT.getCode(), Certificate.OFFICER.getCode(),
+                Certificate.HKM_PASS.getCode(), Certificate.TW_CARD.getCode())
+                .stream().map(String::valueOf).collect(Collectors.toList()));
         String passengerInfo = "2,6,10";
         PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_DFY_TOURS, 1, passengerInfo, idInfo);
         if(passengerTemplatePO == null){
