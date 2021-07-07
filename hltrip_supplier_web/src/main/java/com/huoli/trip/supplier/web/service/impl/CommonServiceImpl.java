@@ -1529,4 +1529,159 @@ public class CommonServiceImpl implements CommonService {
             }
         }
     }
+
+    @Override
+    public void transScenic(List<String> codes){
+        List<ProductItemPO> productItemPOs = productItemDao.selectByCodes(codes);
+        for (ProductItemPO productItemPO : productItemPOs) {
+            boolean n = false;
+            ScenicSpotMPO scenicSpotMPO;
+            String supplierItemId = productItemPO.getSupplierItemId();
+            ScenicSpotMappingMPO mappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(supplierItemId, productItemPO.getSupplierId());
+            if(mappingMPO != null){
+                scenicSpotMPO = scenicSpotDao.getScenicSpotById(mappingMPO.getScenicSpotId());
+            } else {
+                scenicSpotMPO = scenicSpotDao.getScenicSpotByNameAndAddress(productItemPO.getName(), null);
+                if(scenicSpotMPO == null){
+                    scenicSpotMPO = new ScenicSpotMPO();
+                    n = true;
+                }
+            }
+            if(StringUtils.isBlank(scenicSpotMPO.getId())){
+                scenicSpotMPO.setId(getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                AddressInfo addressInfo = setCity(null, productItemPO.getCity(), null);
+                if(addressInfo != null){
+                    scenicSpotMPO.setCity(addressInfo.getCityName());
+                    scenicSpotMPO.setCityCode(addressInfo.getCityCode());
+                    scenicSpotMPO.setProvince(addressInfo.getProvinceName());
+                    scenicSpotMPO.setProvinceCode(addressInfo.getProvinceCode());
+                }
+                scenicSpotMPO.setCreateTime(new Date());
+                if(ListUtils.isNotEmpty(productItemPO.getFeatures())){
+                    ItemFeaturePO itemFeaturePO = productItemPO.getFeatures().stream().filter(f -> f.getType() == 3).findFirst().orElse(null);
+                    if(itemFeaturePO != null){
+                        scenicSpotMPO.setDetailDesc(itemFeaturePO.getDetail());
+                    }
+                }
+                scenicSpotMPO.setName(productItemPO.getName());
+                scenicSpotMPO.setOperatingStatus(1);
+                scenicSpotMPO.setAddress(productItemPO.getAddress());
+                scenicSpotMPO.setStatus(1);
+            }
+            List<String> images = Lists.newArrayList();
+            if(ListUtils.isNotEmpty(productItemPO.getMainImages())){
+                images.addAll(productItemPO.getMainImages().stream().map(ImageBasePO::getUrl).collect(Collectors.toList()));
+            }
+            if(ListUtils.isNotEmpty(productItemPO.getImages())){
+                images.addAll(productItemPO.getImages().stream().map(ImageBasePO::getUrl).collect(Collectors.toList()));
+            }
+            if(ListUtils.isNotEmpty(images)){
+                scenicSpotMPO.setImages(images);
+            }
+            if(StringUtils.isNotBlank(productItemPO.getDescription())){
+                scenicSpotMPO.setCharacteristic(productItemPO.getDescription());
+            }
+
+            if(productItemPO.getItemCoordinate() != null
+                    && productItemPO.getItemCoordinate().length == 2
+                    && scenicSpotMPO.getCoordinate() == null){
+                Coordinate coordinate = new Coordinate();
+                coordinate.setLongitude(productItemPO.getItemCoordinate()[0]);
+                coordinate.setLatitude(productItemPO.getItemCoordinate()[1]);
+                scenicSpotMPO.setCoordinate(coordinate);
+            }
+            if(StringUtils.isBlank(scenicSpotMPO.getPhone())){
+                scenicSpotMPO.setPhone(productItemPO.getPhone());
+            }
+
+            if(ListUtils.isNotEmpty(productItemPO.getTopic())){
+                String theme = null;
+                for (BaseCode baseCode : productItemPO.getTopic()) {
+                    if(StringUtils.equals(baseCode.getCode(), "1000")){
+                        theme = "17";
+                    } else if(StringUtils.equals(baseCode.getCode(), "1001")){
+                        theme = "18";
+                    } else if(StringUtils.equals(baseCode.getCode(), "1002")){
+                        theme = "19";
+                    } else if(StringUtils.equals(baseCode.getCode(), "1003")){
+                        theme = "20";
+                    } else {
+                        theme = "16";
+                    }
+                }
+                scenicSpotMPO.setTheme(theme);
+            }
+            if(productItemPO.getLevel() != null){
+                switch (productItemPO.getLevel()){
+                    case 11:
+                        scenicSpotMPO.setLevel("1");
+                        break;
+                    case 12:
+                        scenicSpotMPO.setLevel("2");
+                        break;
+                    case 13:
+                        scenicSpotMPO.setLevel("3");
+                        break;
+                    case 14:
+                        scenicSpotMPO.setLevel("4");
+                        break;
+                    case 15:
+                        scenicSpotMPO.setLevel("5");
+                        break;
+                }
+            }
+            if(ListUtils.isNotEmpty(productItemPO.getFeatures())){
+                ItemFeaturePO itemFeaturePO = productItemPO.getFeatures().stream().filter(f -> f.getType() == 2).findFirst().orElse(null);
+                if(itemFeaturePO != null){
+                    scenicSpotMPO.setTraffic(itemFeaturePO.getDetail());
+                }
+
+                ItemFeaturePO bookNotice = productItemPO.getFeatures().stream().filter(f -> f.getType() == 1).findFirst().orElse(null);
+                ItemFeaturePO important = productItemPO.getFeatures().stream().filter(f -> f.getType() == 4).findFirst().orElse(null);
+                ItemFeaturePO tourNotice = productItemPO.getFeatures().stream().filter(f -> f.getType() == 5).findFirst().orElse(null);
+                StringBuffer sb = new StringBuffer();
+                if(bookNotice != null){
+                    sb.append("购买须知：").append("<br>");
+                    sb.append(bookNotice.getDetail()).append("<br>");
+                }
+                if(important != null){
+                    sb.append("重要条款：").append("<br>");
+                    sb.append(important.getDetail()).append("<br>");
+                }
+                if(tourNotice != null){
+                    sb.append("游玩须知：").append("<br>");
+                    sb.append(tourNotice.getDetail()).append("<br>");
+                }
+                scenicSpotMPO.setImportantDesc(sb.toString());
+            }
+            if(StringUtils.isBlank(scenicSpotMPO.getProposalPlayTime())){
+                scenicSpotMPO.setProposalPlayTime(productItemPO.getSuggestPlaytime());
+            }
+            if(StringUtils.isBlank(scenicSpotMPO.getSpotOfficialWeb())){
+                scenicSpotMPO.setSpotOfficialWeb(productItemPO.getWebsite());
+            }
+            if(ListUtils.isEmpty(scenicSpotMPO.getTages())){
+                scenicSpotMPO.setTages(productItemPO.getTags());
+            }
+            scenicSpotMPO.setUpdateTime(new Date());
+            String supplierName = null;
+            if(StringUtils.equals(productItemPO.getSupplierId(), Constants.SUPPLIER_CODE_YCF)){
+                supplierName = Constants.SUPPLIER_NAME_YCF;
+            }
+            if(StringUtils.equals(productItemPO.getSupplierId(), Constants.SUPPLIER_CODE_DFY)){
+                supplierName = Constants.SUPPLIER_NAME_DFY;
+            }
+            if(StringUtils.equals(productItemPO.getSupplierId(), Constants.SUPPLIER_CODE_LMM_TICKET)){
+                supplierName = Constants.SUPPLIER_NAME_LMM_TICKET;
+            }
+            if(n){
+                // 同时保存映射关系
+                updateScenicSpotMapping(productItemPO.getSupplierItemId(), productItemPO.getSupplierId(), supplierName , scenicSpotMPO);
+            } else {
+                scenicSpotDao.saveScenicSpot(scenicSpotMPO);
+            }
+            // 更新备份
+            updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getSupplierItemId(), productItemPO.getSupplierId(), productItemPO);
+        }
+    }
 }

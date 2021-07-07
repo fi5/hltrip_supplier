@@ -105,4 +105,9 @@ public class ProductItemDaoImpl implements ProductItemDao {
         return mongoTemplate.find(new Query(Criteria.where("itemType").is(2)), ProductItemPO.class);
     }
 
+    @Override
+    public List<ProductItemPO> selectByCodes(List<String> codes){
+        return mongoTemplate.find(new Query(Criteria.where("code").in(codes)), ProductItemPO.class);
+    }
+
 }

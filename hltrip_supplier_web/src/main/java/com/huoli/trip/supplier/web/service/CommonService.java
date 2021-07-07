@@ -13,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -88,5 +89,11 @@ public interface CommonService {
      * @param fresh
      */
     void addToursProductSubscribe(GroupTourProductMPO groupTourProductMPO, boolean fresh);
+
+    /**
+     * 迁移老版景点
+     * @param codes
+     */
+    void transScenic(List<String> codes);
 
 }
