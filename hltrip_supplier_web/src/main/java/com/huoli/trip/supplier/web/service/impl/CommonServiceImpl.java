@@ -1557,12 +1557,6 @@ public class CommonServiceImpl implements CommonService {
                     scenicSpotMPO.setProvinceCode(addressInfo.getProvinceCode());
                 }
                 scenicSpotMPO.setCreateTime(new Date());
-                if(ListUtils.isNotEmpty(productItemPO.getFeatures())){
-                    ItemFeaturePO itemFeaturePO = productItemPO.getFeatures().stream().filter(f -> f.getType() == 3).findFirst().orElse(null);
-                    if(itemFeaturePO != null){
-                        scenicSpotMPO.setDetailDesc(itemFeaturePO.getDetail());
-                    }
-                }
                 scenicSpotMPO.setName(productItemPO.getName());
                 scenicSpotMPO.setOperatingStatus(1);
                 scenicSpotMPO.setAddress(productItemPO.getAddress());
@@ -1598,15 +1592,13 @@ public class CommonServiceImpl implements CommonService {
                 String theme = null;
                 for (BaseCode baseCode : productItemPO.getTopic()) {
                     if(StringUtils.equals(baseCode.getCode(), "1000")){
-                        theme = "17";
+                        theme = "37";
                     } else if(StringUtils.equals(baseCode.getCode(), "1001")){
-                        theme = "18";
+                        theme = "36";
                     } else if(StringUtils.equals(baseCode.getCode(), "1002")){
-                        theme = "19";
+                        theme = "6";
                     } else if(StringUtils.equals(baseCode.getCode(), "1003")){
-                        theme = "20";
-                    } else {
-                        theme = "16";
+                        theme = "9";
                     }
                 }
                 scenicSpotMPO.setTheme(theme);
@@ -1634,6 +1626,11 @@ public class CommonServiceImpl implements CommonService {
                 ItemFeaturePO itemFeaturePO = productItemPO.getFeatures().stream().filter(f -> f.getType() == 2).findFirst().orElse(null);
                 if(itemFeaturePO != null){
                     scenicSpotMPO.setTraffic(itemFeaturePO.getDetail());
+                }
+
+                ItemFeaturePO detail = productItemPO.getFeatures().stream().filter(f -> f.getType() == 3).findFirst().orElse(null);
+                if(detail != null && StringUtils.isBlank(scenicSpotMPO.getDetailDesc())){
+                    scenicSpotMPO.setDetailDesc(detail.getDetail());
                 }
 
                 ItemFeaturePO bookNotice = productItemPO.getFeatures().stream().filter(f -> f.getType() == 1).findFirst().orElse(null);
