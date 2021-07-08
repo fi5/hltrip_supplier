@@ -95,4 +95,16 @@ public class CommonController {
         }
         return BaseResponse.withSuccess();
     }
+
+    @PostMapping("/trans/scenic/code")
+    public BaseResponse transScenic(@RequestBody List<String> codes){
+        try {
+            log.info("开始转移景点,根据code。");
+            commonService.transScenic(codes);
+        } catch (Exception e) {
+            log.error("转移景点,根据code，异常", e);
+            return BaseResponse.withFail(-1, "刷新item失败");
+        }
+        return BaseResponse.withSuccess();
+    }
 }
