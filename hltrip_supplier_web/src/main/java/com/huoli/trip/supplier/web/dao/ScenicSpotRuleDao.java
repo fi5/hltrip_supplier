@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -30,7 +32,7 @@ public interface ScenicSpotRuleDao {
      * @param scenicSpotId
      * @return
      */
-    ScenicSpotRuleMPO getScenicSpotRule(String scenicSpotId);
+    List<ScenicSpotRuleMPO> getScenicSpotRule(String scenicSpotId);
 
     /**
      * 根据id查询

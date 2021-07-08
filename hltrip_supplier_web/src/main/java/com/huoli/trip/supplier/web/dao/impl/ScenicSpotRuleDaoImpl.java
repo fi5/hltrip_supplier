@@ -1,7 +1,6 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.MongoConst;
-import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
 import com.huoli.trip.supplier.web.dao.ScenicSpotRuleDao;
 import org.bson.Document;
@@ -11,6 +10,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -42,8 +43,8 @@ public class ScenicSpotRuleDaoImpl implements ScenicSpotRuleDao {
     }
 
     @Override
-    public ScenicSpotRuleMPO getScenicSpotRule(String scenicSpotId){
-        return mongoTemplate.findOne(new Query(Criteria.where("scenicSpotId").is(scenicSpotId)), ScenicSpotRuleMPO.class);
+    public List<ScenicSpotRuleMPO> getScenicSpotRule(String scenicSpotId){
+        return mongoTemplate.find(new Query(Criteria.where("scenicSpotId").is(scenicSpotId)), ScenicSpotRuleMPO.class);
     }
 
     @Override
