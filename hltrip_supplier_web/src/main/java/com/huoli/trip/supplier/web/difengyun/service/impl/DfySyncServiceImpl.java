@@ -1053,26 +1053,29 @@ public class DfySyncServiceImpl implements DfySyncService {
                 traveller.add(1);
                 traveller.add(2);
             }
+            List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
+                switch (Integer.parseInt(c)){
+                    case DfyConstants.CRED_TYPE_ID:
+                        return Certificate.ID_CARD.getCode();
+                    case DfyConstants.CRED_TYPE_PP:
+                        return Certificate.PASSPORT.getCode();
+                    case DfyConstants.CRED_TYPE_OF:
+                        return Certificate.OFFICER.getCode();
+                    case DfyConstants.CRED_TYPE_HK:
+                        return Certificate.HKM_PASS.getCode();
+                    case DfyConstants.CRED_TYPE_TW:
+                        return Certificate.TW_CARD.getCode();
+                    default:
+                        // 其它类型直接舍弃（笛风云建议这样操作）
+                        return Integer.MIN_VALUE;
+                }
+            }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
+            if(ListUtils.isNotEmpty(creds)){
+                ruleMPO.setTicketCardTypes(creds);
+            }
             if(ListUtils.isNotEmpty(traveller)){
                 ruleMPO.setTravellerInfos(traveller);
                 if(StringUtils.isNotBlank(dfyTicketDetail.getCertificateType())){
-                    List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
-                        switch (Integer.parseInt(c)){
-                            case DfyConstants.CRED_TYPE_ID:
-                                return Certificate.ID_CARD.getCode();
-                            case DfyConstants.CRED_TYPE_PP:
-                                return Certificate.PASSPORT.getCode();
-                            case DfyConstants.CRED_TYPE_OF:
-                                return Certificate.OFFICER.getCode();
-                            case DfyConstants.CRED_TYPE_HK:
-                                return Certificate.HKM_PASS.getCode();
-                            case DfyConstants.CRED_TYPE_TW:
-                                return Certificate.TW_CARD.getCode();
-                            default:
-                                // 其它类型直接舍弃（笛风云建议这样操作）
-                                return Integer.MIN_VALUE;
-                        }
-                    }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
                     ruleMPO.setTravellerTypes(creds);
                 } else {
                     // 如果空的只支持身份证
