@@ -1045,10 +1045,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ruleMPO.setTicketInfos(booker);
             List<Integer> traveller = Lists.newArrayList();
-            if(Arrays.asList(3, 7).contains(dfyTicketDetail.getCustInfoLimit())){
+            if(Arrays.asList(2, 7).contains(dfyTicketDetail.getCustInfoLimit())){
                 traveller.add(0);
                 traveller.add(1);
-            } else if(Arrays.asList(2, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
+            } else if(Arrays.asList(3, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
                 traveller.add(0);
                 traveller.add(1);
                 traveller.add(2);
