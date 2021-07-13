@@ -47,7 +47,6 @@ public class LmmScenic {
     /**
      * 图片 URL
      */
-    // todo 等拿到测试数据看下实际了类型，文档给的不一致
     private List<String> placeImage;
 
     /**

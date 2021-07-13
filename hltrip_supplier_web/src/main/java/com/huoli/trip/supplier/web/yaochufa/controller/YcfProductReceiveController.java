@@ -59,6 +59,7 @@ public class YcfProductReceiveController {
         try {
             log.info("开始接收价格。。{}", JSON.toJSONString(price));
             ycfSyncService.syncPrice(price);
+//            ycfSyncService.syncPriceV2(price);
         } catch (Exception e) {
             return YcfBaseResult.fail();
         }

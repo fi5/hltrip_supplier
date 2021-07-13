@@ -4,6 +4,7 @@ import com.huoli.trip.common.config.ConvertToBigDecimal;
 import com.huoli.trip.common.config.ConvertToDouble;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.util.ConfigGetter;
+import com.mongodb.ReadPreference;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -55,6 +56,8 @@ public class MongoConfig {
 
     @Bean
     public MongoTemplate mongoTemplate(){
-        return new MongoTemplate(this.dbFactory(), this.mappingMongoConverter());
+        MongoTemplate mongoTemplate = new MongoTemplate(this.dbFactory(), this.mappingMongoConverter());
+        mongoTemplate.setReadPreference(ReadPreference.secondaryPreferred());
+        return mongoTemplate;
     }
 }

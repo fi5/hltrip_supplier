@@ -79,4 +79,11 @@ public interface ProductItemDao {
      */
     List<ProductItemPO> selectAll();
 
+    /**
+     * 根据code查
+     * @param codes
+     * @return
+     */
+    List<ProductItemPO> selectByCodes(List<String> codes);
+
 }

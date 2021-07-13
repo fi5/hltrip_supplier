@@ -62,4 +62,10 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
     public List<ScenicSpotProductPriceMPO> getByProductId(String productId){
         return mongoTemplate.find(new Query(Criteria.where("scenicSpotProductId").is(productId)), ScenicSpotProductPriceMPO.class);
     }
+
+    @Override
+    public ScenicSpotProductPriceMPO getExistPrice(String productId, String ruleId, String startDate){
+        return mongoTemplate.findOne(new Query(Criteria.where("scenicSpotProductId").is(productId)
+                .and("scenicSpotRuleId").is(ruleId).and("startDate").is(startDate)), ScenicSpotProductPriceMPO.class);
+    }
 }

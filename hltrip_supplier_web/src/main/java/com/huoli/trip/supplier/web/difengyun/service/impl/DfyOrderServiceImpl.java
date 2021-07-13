@@ -13,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductPriceM
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
@@ -39,9 +40,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -409,7 +412,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
-        log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
+        /*log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
         String category = bookCheckReq.getCategory();
         if(StringUtils.isNotBlank(category)){
             DfyBookCheckResponse dfyBookCheckResponse = null;
@@ -453,8 +456,8 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     break;
             }
             return new DfyBaseResult(true, 200, dfyBookCheckResponse);
-        }
-        /*PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
+        }*/
+        PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         if (pricePO != null) {
             List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
@@ -483,7 +486,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     }
                 }
             }
-        }*/
+        }
         return new DfyBaseResult(true, 200, null);
     }
 

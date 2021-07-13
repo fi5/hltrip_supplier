@@ -11,6 +11,7 @@ import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.entity.po.PassengerTemplatePO;
 import com.huoli.trip.common.util.*;
+import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.difengyun.client.IDiFengYunClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
@@ -25,6 +26,7 @@ import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
@@ -246,7 +248,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO backup;
             if(productPO == null){
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -548,7 +549,6 @@ public class DfySyncServiceImpl implements DfySyncService {
             ProductPO backup;
             if (oldProduct == null) {
                 product.setCreateTime(MongoDateUtils.handleTimezoneInput(new Date()));
-                // todo 暂时默认通过
 //                product.setAuditStatus(Constants.VERIFY_STATUS_WAITING);
                 product.setAuditStatus(Constants.VERIFY_STATUS_PASSING);
                 product.setSupplierStatus(Constants.SUPPLIER_STATUS_OPEN);
@@ -783,8 +783,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
                 ticketIds.addAll(scenicDetail.getDisTickets().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
             }
-            // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//            ticketIds.forEach(id -> syncProductV2(id));
+            ticketIds.forEach(id -> syncProductV2(id));
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }
@@ -799,22 +798,20 @@ public class DfySyncServiceImpl implements DfySyncService {
 
         if (ticketDetailDfyBaseResult != null && ticketDetailDfyBaseResult.getData() != null) {
             DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
-
+            ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
+            if(scenicSpotMappingMPO == null){
+                log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
+                return;
+            }
+            ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
+            if(scenicSpotMPO == null){
+                log.error("景点{}不存在", scenicSpotMPO.getId());
+                return;
+            }
             ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(dfyTicketDetail.getProductId(), Constants.SUPPLIER_CODE_DFY);
             boolean fresh = false;
-            ScenicSpotMPO scenicSpotMPO = null;
             List<String> changedFields = Lists.newArrayList();
             if(scenicSpotProductMPO == null){
-                ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
-                if(scenicSpotMappingMPO == null){
-                    log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
-                    return;
-                }
-                scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
-                if(scenicSpotMPO == null){
-                    log.error("景点{}不存在", scenicSpotMPO.getId());
-                    return;
-                }
                 scenicSpotProductMPO = new ScenicSpotProductMPO();
                 scenicSpotProductMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 scenicSpotProductMPO.setCreateTime(new Date());
@@ -992,13 +989,22 @@ public class DfySyncServiceImpl implements DfySyncService {
                     if(ticketKind != null){
                         scenicSpotProductPriceMPO.setTicketKind(ticketKind.toString());
                     }
+                    if(StringUtils.isNotBlank(p.getSalePrice())){
+                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                        scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
+                    }
+                    scenicSpotProductPriceMPO.setStock(99);
+                    scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                } else {
+                    // 有变化才更新，避免频繁更新，mongo撑不住
+                    if((scenicSpotProductPriceMPO.getSellPrice() == null && p.getSalePrice() != null)
+                        || (scenicSpotProductPriceMPO.getSellPrice() != null && p.getSalePrice() == null)
+                        || (scenicSpotProductPriceMPO.getSellPrice() != null && p.getSalePrice() != null && scenicSpotProductPriceMPO.getSellPrice().compareTo(new BigDecimal(p.getSalePrice())) != 0)){
+                        scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
+                        scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
+                        scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                    }
                 }
-                if(StringUtils.isNotBlank(p.getSalePrice())){
-                    scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
-                    scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
-                }
-                scenicSpotProductPriceMPO.setStock(99);
-                scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
             });
         }
     }
@@ -1039,34 +1045,37 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ruleMPO.setTicketInfos(booker);
             List<Integer> traveller = Lists.newArrayList();
-            if(Arrays.asList(3, 7).contains(dfyTicketDetail.getCustInfoLimit())){
+            if(Arrays.asList(2, 7).contains(dfyTicketDetail.getCustInfoLimit())){
                 traveller.add(0);
                 traveller.add(1);
-            } else if(Arrays.asList(2, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
+            } else if(Arrays.asList(3, 6).contains(dfyTicketDetail.getCustInfoLimit())) {
                 traveller.add(0);
                 traveller.add(1);
                 traveller.add(2);
             }
+            List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
+                switch (Integer.parseInt(c)){
+                    case DfyConstants.CRED_TYPE_ID:
+                        return Certificate.ID_CARD.getCode();
+                    case DfyConstants.CRED_TYPE_PP:
+                        return Certificate.PASSPORT.getCode();
+                    case DfyConstants.CRED_TYPE_OF:
+                        return Certificate.OFFICER.getCode();
+                    case DfyConstants.CRED_TYPE_HK:
+                        return Certificate.HKM_PASS.getCode();
+                    case DfyConstants.CRED_TYPE_TW:
+                        return Certificate.TW_CARD.getCode();
+                    default:
+                        // 其它类型直接舍弃（笛风云建议这样操作）
+                        return Integer.MIN_VALUE;
+                }
+            }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
+            if(ListUtils.isNotEmpty(creds)){
+                ruleMPO.setTicketCardTypes(creds);
+            }
             if(ListUtils.isNotEmpty(traveller)){
                 ruleMPO.setTravellerInfos(traveller);
                 if(StringUtils.isNotBlank(dfyTicketDetail.getCertificateType())){
-                    List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
-                        switch (Integer.parseInt(c)){
-                            case DfyConstants.CRED_TYPE_ID:
-                                return Certificate.ID_CARD.getCode();
-                            case DfyConstants.CRED_TYPE_PP:
-                                return Certificate.PASSPORT.getCode();
-                            case DfyConstants.CRED_TYPE_OF:
-                                return Certificate.OFFICER.getCode();
-                            case DfyConstants.CRED_TYPE_HK:
-                                return Certificate.HKM_PASS.getCode();
-                            case DfyConstants.CRED_TYPE_TW:
-                                return Certificate.TW_CARD.getCode();
-                            default:
-                                // 其它类型直接舍弃（笛风云建议这样操作）
-                                return Integer.MIN_VALUE;
-                        }
-                    }).distinct().filter(c -> c.intValue() != Integer.MIN_VALUE).collect(Collectors.toList());
                     ruleMPO.setTravellerTypes(creds);
                 } else {
                     // 如果空的只支持身份证
@@ -1173,7 +1182,31 @@ public class DfySyncServiceImpl implements DfySyncService {
             descInfo.setContent(dfyTicketDetail.getBookNotice());
             ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
         }
-        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
+        if(ListUtils.isNotEmpty(ruleMPOs)){
+            boolean match = false;
+            for (ScenicSpotRuleMPO mpo : ruleMPOs) {
+                ScenicSpotRuleCompare compareOri = new ScenicSpotRuleCompare();
+                BeanUtils.copyProperties(mpo, compareOri);
+                ScenicSpotRuleCompare compareTgt = new ScenicSpotRuleCompare();
+                BeanUtils.copyProperties(ruleMPO, compareTgt);
+                // 对比规则，内容相同可以重复使用，
+                if(StringUtils.equals(JSON.toJSONString(compareTgt), JSON.toJSONString(compareOri))){
+                    ruleMPO.setId(mpo.getId());
+                    match = true;
+                    log.info("景点{}产品{}匹配到重复景点规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), mpo.getId());
+                    break;
+                }
+            }
+            // 没匹配到就创建新的
+            if(!match){
+                log.info("景点{}产品{}没有匹配到重复规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
+                scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+            }
+        } else {
+            log.info("景点{}产品{}还没有规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
+            scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        }
         return ruleMPO;
     }
 
@@ -1332,8 +1365,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setMainImage(groupTourProductMPO.getImages().get(0));
         }
         // 创建默认的出行人模板
-        String idInfo = String.join(",", (CharSequence) Arrays.asList(Certificate.ID_CARD.getCode(),
-                Certificate.PASSPORT.getCode(), Certificate.OFFICER.getCode(), Certificate.HKM_PASS.getCode(), Certificate.TW_CARD.getCode()));
+        String idInfo = String.join(",", Arrays.asList(Certificate.ID_CARD.getCode(),
+                Certificate.PASSPORT.getCode(), Certificate.OFFICER.getCode(),
+                Certificate.HKM_PASS.getCode(), Certificate.TW_CARD.getCode())
+                .stream().map(String::valueOf).collect(Collectors.toList()));
         String passengerInfo = "2,6,10";
         PassengerTemplatePO passengerTemplatePO = passengerTemplateMapper.getPassengerTemplateByCond(Constants.SUPPLIER_CODE_DFY_TOURS, 1, passengerInfo, idInfo);
         if(passengerTemplatePO == null){
@@ -1365,7 +1400,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             GroupTourProductSetMealBackupMPO backupMPO = null;
             if(setMealMPO == null){
                 setMealMPO = new GroupTourProductSetMealMPO();
-                setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+                setMealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT_MEAL));
                 setMealMPO.setConstInclude(journeyInfo.getCostInclude());
                 setMealMPO.setCostExclude(journeyInfo.getCostExclude());
                 setMealMPO.setBookNotices(DfyToursConverter.buildBookNoticeListV2(journeyInfo));
