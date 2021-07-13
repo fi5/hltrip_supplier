@@ -811,29 +811,28 @@ public class CommonServiceImpl implements CommonService {
             log.info("{}景点{}已有映射id={}，跳过", channel, channelScenicId, exist.getId());
             return;
         }
-        log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName(), newScenic.getAddress());
-        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
+        log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName());
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), null);
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             // 没有找到映射就往本地新增一条
             scenicSpotDao.addScenicSpot(newScenic);
             scenicId = newScenic.getId();
-            // todo 正式上线这个要放开
             // 景点申请单
-//            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
-//            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
-//            poiReviewMPO.setChannel(channel);
-//            poiReviewMPO.setChannelName(channelName);
-//            poiReviewMPO.setPoiName(newScenic.getName());
-//            poiReviewMPO.setStatus(0);
-//            poiReviewMPO.setCreateTime(new Date());
-//            poiReviewMPO.setCityName(newScenic.getCity());
-//            poiReviewMPO.setPoiId(newScenic.getId());
-//            poiReviewMPO.setPoiType(0);
-//            poiReviewMPO.setUpdateTime(new Date());
-//            poiReviewDao.addPoiReview(poiReviewMPO);
-//            log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
+            PoiReviewMPO poiReviewMPO = new PoiReviewMPO();
+            poiReviewMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+            poiReviewMPO.setChannel(channel);
+            poiReviewMPO.setChannelName(channelName);
+            poiReviewMPO.setPoiName(newScenic.getName());
+            poiReviewMPO.setStatus(0);
+            poiReviewMPO.setCreateTime(new Date());
+            poiReviewMPO.setCityName(newScenic.getCity());
+            poiReviewMPO.setPoiId(newScenic.getId());
+            poiReviewMPO.setPoiType(0);
+            poiReviewMPO.setUpdateTime(new Date());
+            poiReviewDao.addPoiReview(poiReviewMPO);
+            log.info("不存在同名同址景点，添加新的景点记录和申请单，景点id={}，申请单id={}", scenicId, poiReviewMPO.getId());
         } else {
             scenicId = existScenic.getId();
             log.info("已存在同名同址景点，不用新增景点，直接关联，景点id={}", scenicId);

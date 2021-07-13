@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
     public void syncUpdateProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -79,7 +80,7 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 0 1 * * ?")
     public void syncNewProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -114,7 +115,7 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    @Scheduled(cron = "0 0 5-23/3 ? * *")
+//    @Scheduled(cron = "0 0 5-23/3 ? * *")
     public void syncUpdateToursProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -153,7 +154,7 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+//    @Scheduled(cron = "0 0 3 * * ?")
     public void syncNewToursProduct(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -190,8 +191,8 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+    @Scheduled(cron = "0 0 0,6-22/3 ? * *")
+    @Async
     public void syncUpdateProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -230,8 +231,8 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
+    @Async
     public void syncNewProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -266,8 +267,8 @@ public class DfySyncTask {
     /**
      * 只更新本地已有产品
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 5-23/3 ? * *")
+    @Scheduled(cron = "0 0 5-23/3 ? * *")
+    @Async
     public void syncUpdateToursProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
@@ -306,8 +307,8 @@ public class DfySyncTask {
     /**
      * 只同步本地没有的产品，每天执行一次
      */
-    // todo 真正上线的时候要发开这里，现在只为了落景点数据
-//    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
+    @Async
     public void syncNewToursProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
