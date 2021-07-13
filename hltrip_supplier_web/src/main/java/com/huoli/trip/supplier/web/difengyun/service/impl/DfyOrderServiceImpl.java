@@ -412,7 +412,7 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     }
 
     public DfyBaseResult<DfyBookCheckResponse> getCheckInfos(DfyBookCheckRequest bookCheckReq) {
-        /*log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
+        log.info("dfy checkinfo req is:{}", JSON.toJSONString(bookCheckReq));
         String category = bookCheckReq.getCategory();
         if(StringUtils.isNotBlank(category)){
             DfyBookCheckResponse dfyBookCheckResponse = null;
@@ -456,37 +456,37 @@ public class DfyOrderServiceImpl implements DfyOrderService {
                     break;
             }
             return new DfyBaseResult(true, 200, dfyBookCheckResponse);
-        }*/
-        PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        if (pricePO != null) {
-            List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
-            if (ListUtils.isNotEmpty(priceInfos)) {
-                Optional<PriceInfoPO> optionalT = priceInfos.stream().filter(priceInfoPO -> {
-                    Date saleDate = priceInfoPO.getSaleDate();
-                    String saleDates = formatter.format(saleDate);
-                    return StringUtils.equals(bookCheckReq.getBeginDate(), saleDates);
-                }).findFirst();
-                if (optionalT.isPresent()) {
-                    PriceInfoPO priceInfoPO = optionalT.get();
-                    log.info("DFY checkinfo PricePO is:{}", JSON.toJSONString(priceInfoPO));
-                    Integer stock = priceInfoPO.getStock();
-                    if (stock != null && stock > 0) {
-                        DfyBookCheckResponse dfyBookCheckResponse = new DfyBookCheckResponse();
-                        dfyBookCheckResponse.setProductId(bookCheckReq.getProductId());
-                        List<DfyBookSaleInfo> saleInfos = new ArrayList<>();
-                        dfyBookCheckResponse.setSaleInfos(saleInfos);
-                        DfyBookSaleInfo dfyBookSaleInfo = new DfyBookSaleInfo();
-                        dfyBookSaleInfo.setDate(priceInfoPO.getSaleDate());
-                        dfyBookSaleInfo.setPrice(priceInfoPO.getSalePrice());
-                        //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
-                        dfyBookSaleInfo.setTotalStock(priceInfoPO.getStock());
-                        saleInfos.add(dfyBookSaleInfo);
-                        return new DfyBaseResult(true, 200, dfyBookCheckResponse);
-                    }
-                }
-            }
         }
+//        PricePO pricePO = priceDao.getByProductCode(bookCheckReq.getProductId());
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+//        if (pricePO != null) {
+//            List<PriceInfoPO> priceInfos = pricePO.getPriceInfos();
+//            if (ListUtils.isNotEmpty(priceInfos)) {
+//                Optional<PriceInfoPO> optionalT = priceInfos.stream().filter(priceInfoPO -> {
+//                    Date saleDate = priceInfoPO.getSaleDate();
+//                    String saleDates = formatter.format(saleDate);
+//                    return StringUtils.equals(bookCheckReq.getBeginDate(), saleDates);
+//                }).findFirst();
+//                if (optionalT.isPresent()) {
+//                    PriceInfoPO priceInfoPO = optionalT.get();
+//                    log.info("DFY checkinfo PricePO is:{}", JSON.toJSONString(priceInfoPO));
+//                    Integer stock = priceInfoPO.getStock();
+//                    if (stock != null && stock > 0) {
+//                        DfyBookCheckResponse dfyBookCheckResponse = new DfyBookCheckResponse();
+//                        dfyBookCheckResponse.setProductId(bookCheckReq.getProductId());
+//                        List<DfyBookSaleInfo> saleInfos = new ArrayList<>();
+//                        dfyBookCheckResponse.setSaleInfos(saleInfos);
+//                        DfyBookSaleInfo dfyBookSaleInfo = new DfyBookSaleInfo();
+//                        dfyBookSaleInfo.setDate(priceInfoPO.getSaleDate());
+//                        dfyBookSaleInfo.setPrice(priceInfoPO.getSalePrice());
+//                        //llxBookSaleInfo.setPriceType(priceInfoPO.getPriceType());
+//                        dfyBookSaleInfo.setTotalStock(priceInfoPO.getStock());
+//                        saleInfos.add(dfyBookSaleInfo);
+//                        return new DfyBaseResult(true, 200, dfyBookCheckResponse);
+//                    }
+//                }
+//            }
+//        }
         return new DfyBaseResult(true, 200, null);
     }
 
