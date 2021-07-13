@@ -728,8 +728,17 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     // 动态说明   入园须知：取票时间、取票地点、有效期、限制时间 拼到一起，换行分隔，限制时间用;分隔
                     List<DescInfo> descInfos = buildDescInfos(lmmProduct, g);
                     scenicSpotProductMPO.setDescInfos(descInfos);
+                    Map<String, String> extendParams = Maps.newHashMap();
+                    extendParams.put("productId", lmmProduct.getProductId());
+                    scenicSpotProductMPO.setExtendParams(extendParams);
                     fresh = true;
                 } else {
+                    if(scenicSpotProductMPO.getExtendParams() == null
+                            || !scenicSpotProductMPO.getExtendParams().containsKey("productId")){
+                        Map<String, String> extendParams = Maps.newHashMap();
+                        extendParams.put("productId", lmmProduct.getProductId());
+                        scenicSpotProductMPO.setExtendParams(extendParams);
+                    }
                     backupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
                     if(backupMPO != null){
                         List<String> changedFields = Lists.newArrayList();
