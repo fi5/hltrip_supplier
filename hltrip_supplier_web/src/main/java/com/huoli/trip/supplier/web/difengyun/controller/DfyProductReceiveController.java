@@ -34,7 +34,8 @@ public class DfyProductReceiveController {
      */
     @PostMapping(path = "/product")
     DfyBaseResult dfyReceiveProduct(@RequestBody DfyBaseRequest<DfyProductNoticeRequest> request) {
-        dfySyncService.productUpdate(request.getData());
+//        dfySyncService.productUpdate(request.getData());
+        dfySyncService.productUpdateV2(request.getData());
         return DfyBaseResult.success();
     }
 }

@@ -187,6 +187,10 @@ public class LmmTicketTask {
         }
     }
 
+
+
+    // ========================= 新结构 ===========================
+
     /**
      * 只更新本地已有景点
      */
@@ -293,42 +297,6 @@ public class LmmTicketTask {
             log.info("同步驴妈妈商品定时任务执行完成v2，共同步{}页，用时{}秒，(拉取本地没有的商品)", request.getCurrentPage(), (System.currentTimeMillis() - begin) / 1000);
         } catch (Exception e) {
             log.error("执行驴妈妈定时更新商品任务异常v2，(拉取本地没有的商品)", e);
-        }
-    }
-
-    /**
-     * 驴妈妈一周更新一次，周二凌晨2点（周一老版更新）
-     */
-    @Scheduled(cron = "0 0 2 ? * 3")
-    @Async
-    public void syncNewProductV2(){
-        try {
-            if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
-                return;
-            }
-            long begin = System.currentTimeMillis();
-            log.info("开始执行定时任务，同步驴妈妈产品v2。。");
-            LmmProductListRequest request = new LmmProductListRequest();
-            request.setCurrentPage(1);
-            while (true){
-                long sTime = System.currentTimeMillis();
-                // 驴妈妈不区分新增和更新，一起执行
-                boolean success = lmmScenicService.syncProductListV2(request);
-                long useTime = System.currentTimeMillis() - sTime;
-                log.info("同步第{}页产品v2，用时{}毫秒", request.getCurrentPage(), useTime);
-                if(!success) {
-                    break;
-                }
-                request.setCurrentPage(request.getCurrentPage() + 1);
-                // 如果执行时间超过310毫秒就不用睡了
-                if(useTime < 10){
-                    // 限制一分钟不超过200次
-                    Thread.sleep(10 - useTime);
-                }
-            }
-            log.info("同步驴妈妈产品定时任务执行完成v2，共同步{}页，用时{}秒", request.getCurrentPage(), (System.currentTimeMillis() - begin) / 1000);
-        } catch (Exception e) {
-            log.error("执行驴妈妈定时更新产品任务异常v2", e);
         }
     }
 

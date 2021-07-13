@@ -1235,35 +1235,35 @@ public class DfySyncServiceImpl implements DfySyncService {
     public void syncToursDetailV2(String productId) {
         DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productId);
         if (baseResult == null) {
-            log.error("笛风云跟团游详情没有返回数据，productId={}", productId);
+            log.error("笛风云跟团游详情没有返回数据v2，productId={}", productId);
             return;
         }
         if(baseResult.getData() == null){
-            log.error("笛风云跟团游详情返回data为空，productId={}", productId);
+            log.error("笛风云跟团游详情返回data为空v2，productId={}", productId);
             if(Arrays.asList("231000", "350204").contains(baseResult.getErrorCode())){
                 // 笛风云的产品下线就不会返回，所以没拿到就认为已下线，当data为空并且code=231000才认为下线，其它情况可能是接口异常，防止误下线
                 GroupTourProductMPO groupTourProductMPO = groupTourProductDao.getTourProduct(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
                 if(groupTourProductMPO != null){
-                    groupTourProductDao.updateStatus(productId, Constants.SUPPLIER_CODE_DFY_TOURS);
+                    groupTourProductDao.updateStatus(productId, Constants.SUPPLIER_CODE_DFY_TOURS, 3);
                     commonService.refreshList(1, groupTourProductMPO.getId(), 1, false);
-                    log.info("笛风云跟团游产品详情返回空，产品已下线，productId = {}", productId);
+                    log.info("笛风云跟团游产品详情返回空v2，产品已下线，productId = {}", productId);
                 }
             }
             return;
         }
         DfyToursDetailResponse dfyToursDetail = baseResult.getData();
         if (dfyToursDetail.getBrandId() == null) {
-            log.error("笛风云跟团游产品{}不是牛人专线[{}]，跳过。。", productId, dfyToursDetail.getBrandName());
+            log.error("笛风云跟团游产品{}不是牛人专线[{}]v2，跳过。。", productId, dfyToursDetail.getBrandName());
             return;
         }
         if (ListUtils.isEmpty(dfyToursDetail.getDepartCitys())) {
-            log.error("笛风云跟团游产品{}没有出发城市，跳过。。", productId);
+            log.error("笛风云跟团游产品{}没有出发城市v2，跳过。。", productId);
             return;
         } else {
             for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
                 if (StringUtils.equals(departCity.getName(), "全国")) {
                     // 过滤全国这种产品，将来放到当地参团单独处理
-                    log.info("过滤全国出发的产品。跳过。");
+                    log.info("过滤全国出发的产品v2。跳过。");
                     return;
                 }
             }
@@ -1277,7 +1277,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     StringUtils.isNotBlank(d.getDesCountryName())
                             && !StringUtils.equals("中国", d.getDesCountryName())).findAny().orElse(null);
             if(position != null){
-                log.error("境外产品，跳过。。包含境外目的地国家={}", position.getDesCountryName());
+                log.error("境外产品v2，跳过。。包含境外目的地国家={}", position.getDesCountryName());
                 return;
             }
         }
@@ -1713,5 +1713,39 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourPrice.setDiffPrice(data.getRoomChargeprice() == null ? null : BigDecimal.valueOf(data.getRoomChargeprice()));
             return groupTourPrice;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Async
+    public void productUpdateV2(DfyProductNoticeRequest request){
+        try {
+            log.info("接收到笛风云产品变更通知V2。。");
+            List<DfyProductNotice> productNotices = request.getProductIds();
+            if(ListUtils.isEmpty(productNotices)){
+                log.error("笛风云通知更新产品列表为空V2");
+                return;
+            }
+            productNotices.forEach(p -> {
+                if(p.getClassBrandParentId() == DfyConstants.BRAND_SELF){
+                    log.error("笛风云通知更新产品 {} 是自助游V2，跳过。", p.getProductId());
+                    return;
+                }
+                // 如果只是更新状态直接在这里改就行
+                if(p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID || p.getNoticeType() == DfyConstants.NOTICE_TYPE_VALID){
+                    GroupTourProductMPO productMPO = groupTourProductDao.getTourProduct(p.getProductId().toString(), Constants.SUPPLIER_CODE_DFY);
+                    // 如果本地有就直接更新
+                    if(productMPO != null){
+                        int status = p.getNoticeType() == DfyConstants.NOTICE_TYPE_INVALID ? 3 : 1;
+                        groupTourProductDao.updateStatusById(productMPO.getId(), status);
+                        commonService.refreshList(1, productMPO.getId(), 1, false);
+                        return;
+                    }
+                }
+                // 如不不是改状态或者产品不存在就走同步
+                syncToursDetailV2(p.getProductId().toString());
+            });
+        } catch (Exception e) {
+            log.error("笛风云接收通知更新产品异常V2，", e);
+        }
     }
 }
