@@ -107,4 +107,16 @@ public class CommonController {
         }
         return BaseResponse.withSuccess();
     }
+
+    @PostMapping("/refresh/product/status")
+    public BaseResponse refreshProductStatus(@RequestParam String productId){
+        try {
+            log.info("开始刷新产品状态。。code={}", productId);
+            commonService.checkProductReverse(productId);
+        } catch (Exception e) {
+            log.error("刷新产品状态异常，code={}", productId, e);
+            return BaseResponse.withFail(-1, "刷新产品状态失败");
+        }
+        return BaseResponse.withSuccess();
+    }
 }

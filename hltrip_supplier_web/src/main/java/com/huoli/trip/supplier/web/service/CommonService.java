@@ -47,11 +47,18 @@ public interface CommonService {
     void saveBackupHodometer(HodometerPO hodometerPO);
 
     /**
-     * 检查产品状态
+     * 检查产品状态，主要把正常状态重置为异常
      * @param productPO
      * @param date
      */
     void checkProduct(ProductPO productPO, Date date);
+
+    /**
+     * 检查产品状态，主要把异常状态重置为正常
+     * @param productPO
+     * @param date
+     */
+    void checkProductReverse(String productCode);
 
     void setCity(ScenicSpotMPO scenic);
 

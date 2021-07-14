@@ -591,40 +591,7 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public void checkProduct(ProductPO productPO, Date date){
         try {
-            if(productPO.getValidTime() != null && date.getTime() < productPO.getValidTime().getTime()){
-                log.error("还没到销售日期。。。code = {}, validDate = {}",
-                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
-                return;
-            }
-            if(productPO.getInvalidTime() != null && date.getTime() > productPO.getInvalidTime().getTime()){
-                log.error("已经过了销售日期。。。code = {}, invalidDate = {}",
-                        productPO.getCode(), DateTimeUtil.formatDate(productPO.getInvalidTime()));
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
-                return;
-            }
-            PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
-            if(pricePO == null || ListUtils.isEmpty(pricePO.getPriceInfos())){
-                log.error("没有价格信息，code = {}", productPO.getCode());
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
-                return;
-            }
-            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
-                    && checkPrice(p.getSalePrice()) && checkStock(p.getStock()))){
-                log.error("没有有效的价格和库存信息，code = {}", productPO.getCode());
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
-                return;
-            }
-            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
-                    && checkPrice(p.getSalePrice()))){
-                log.error("没有有效的价格信息，code = {}", productPO.getCode());
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE);
-                return;
-            }
-            if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
-                    && checkStock(p.getStock()))){
-                log.error("没有有效的库存信息，code = {}", productPO.getCode());
-                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_STOCK);
+            if(!checkProductStatus(productPO, date)){
                 return;
             }
             // 自动上线，这个要放在最后判断，如果放在前面的话价格状态有问题会被再次修改，状态可能会有短暂不准确
@@ -636,13 +603,70 @@ public class CommonServiceImpl implements CommonService {
                         productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
                 // 供应商渠道不自动上线
                 if(!Lists.newArrayList(Constants.SUPPLIER_CODE_YCF, Constants.SUPPLIER_CODE_DFY, Constants.SUPPLIER_CODE_DFY_TOURS).contains(productPO.getSupplierId())){
-                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_VALID);
                 }
                 return;
             }
         } catch (Exception e) {
             log.error("刷新产品状态异常，productCode={}", productPO.getCode(), e);
         }
+    }
+
+    @Override
+    public void checkProductReverse(String productCode){
+        try {
+            ProductPO productPO = productDao.getByCode(productCode);
+            if(productPO == null){
+                log.error("产品{}不存在", productCode);
+                return;
+            }
+            if(checkProductStatus(productPO, new Date())){
+                // 如果以上条件都不满足说明产品没问题。所以应该是上线状态
+                productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_VALID);
+            }
+        } catch (Exception e) {
+            log.error("刷新产品状态异常，productCode={}", productCode, e);
+        }
+    }
+
+    private boolean checkProductStatus(ProductPO productPO, Date date){
+        if(productPO.getValidTime() != null && date.getTime() < productPO.getValidTime().getTime()){
+            log.error("还没到销售日期。。。code = {}, validDate = {}",
+                    productPO.getCode(), DateTimeUtil.formatDate(productPO.getValidTime()));
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+            return false;
+        }
+        if(productPO.getInvalidTime() != null && date.getTime() > productPO.getInvalidTime().getTime()){
+            log.error("已经过了销售日期。。。code = {}, invalidDate = {}",
+                    productPO.getCode(), DateTimeUtil.formatDate(productPO.getInvalidTime()));
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_SALE_DATE);
+            return false;
+        }
+        PricePO pricePO = priceDao.getByProductCode(productPO.getCode());
+        if(pricePO == null || ListUtils.isEmpty(pricePO.getPriceInfos())){
+            log.error("没有价格信息，code = {}", productPO.getCode());
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
+            return false;
+        }
+        if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                && checkPrice(p.getSalePrice()) && checkStock(p.getStock()))){
+            log.error("没有有效的价格和库存信息，code = {}", productPO.getCode());
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE_STOCK);
+            return false;
+        }
+        if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                && checkPrice(p.getSalePrice()))){
+            log.error("没有有效的价格信息，code = {}", productPO.getCode());
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_PRICE);
+            return false;
+        }
+        if(!pricePO.getPriceInfos().stream().anyMatch(p -> checkDate(p.getSaleDate(), date)
+                && checkStock(p.getStock()))){
+            log.error("没有有效的库存信息，code = {}", productPO.getCode());
+            productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_INVALID_STOCK);
+            return false;
+        }
+        return true;
     }
 
     private boolean checkPrice(BigDecimal price){
