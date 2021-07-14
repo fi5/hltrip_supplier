@@ -1290,6 +1290,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             groupTourProductMPO.setSupplierProductId(productId);
             groupTourProductMPO.setMerchantCode(productId);
             groupTourProductMPO.setChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+            groupTourProductMPO.setStatus(1);
             add = true;
         } else {
             GroupTourProductSetMealBackupMPO backupMPO = groupProductBackupDao.getGroupProductBackupByProductId(groupTourProductMPO.getId());
@@ -1325,6 +1326,25 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         if(StringUtils.isBlank(groupTourProductMPO.getCategory())){
              groupTourProductMPO.setCategory("group_tour");
+        }
+        if(StringUtils.isBlank(groupTourProductMPO.getGroupTourType())){
+            // 默认跟团游
+            groupTourProductMPO.setGroupTourType("1");
+        }
+        if(StringUtils.isBlank(groupTourProductMPO.getTravelCrowd())){
+            // 默认同事
+            groupTourProductMPO.setTravelCrowd("3");
+        }
+        if(StringUtils.isBlank(groupTourProductMPO.getRouteType())){
+            if(dfyToursDetail.getTrafficGo() != null && dfyToursDetail.getTrafficGo() != 14){
+                groupTourProductMPO.setRouteType("1");
+            } else {
+                groupTourProductMPO.setRouteType("2");
+            }
+        }
+        if(StringUtils.isBlank(groupTourProductMPO.getTheme())){
+            // 默认其它
+            groupTourProductMPO.setTheme("16");
         }
         String name = dfyToursDetail.getProductName();
         String point = null;
