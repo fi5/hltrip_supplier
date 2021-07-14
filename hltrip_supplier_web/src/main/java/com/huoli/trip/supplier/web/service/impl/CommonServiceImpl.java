@@ -629,6 +629,25 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    @Override
+    public void checkProductReverseByItemId(String itemCode){
+        try {
+            List<ProductPO> productPOs = productDao.getProductListByItemIds(Lists.newArrayList(itemCode));
+            if(ListUtils.isEmpty(productPOs)){
+                log.error("item{}没有关联的产品", itemCode);
+                return;
+            }
+            productPOs.forEach( productPO -> {
+                if(checkProductStatus(productPO, new Date())){
+                    // 如果以上条件都不满足说明产品没问题。所以应该是上线状态
+                    productDao.updateStatusByCode(productPO.getCode(), Constants.PRODUCT_STATUS_VALID);
+                }
+            });
+        } catch (Exception e) {
+            log.error("刷新产品状态异常，itemCode={}", itemCode, e);
+        }
+    }
+
     private boolean checkProductStatus(ProductPO productPO, Date date){
         if(productPO.getValidTime() != null && date.getTime() < productPO.getValidTime().getTime()){
             log.error("还没到销售日期。。。code = {}, validDate = {}",

@@ -109,12 +109,24 @@ public class CommonController {
     }
 
     @PostMapping("/refresh/product/status")
-    public BaseResponse refreshProductStatus(@RequestParam String productId){
+    public BaseResponse refreshProductStatus(@RequestParam String productCode){
         try {
-            log.info("开始刷新产品状态。。code={}", productId);
-            commonService.checkProductReverse(productId);
+            log.info("开始刷新产品状态。。code={}", productCode);
+            commonService.checkProductReverse(productCode);
         } catch (Exception e) {
-            log.error("刷新产品状态异常，code={}", productId, e);
+            log.error("刷新产品状态异常，code={}", productCode, e);
+            return BaseResponse.withFail(-1, "刷新产品状态失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/refresh/product/status/item")
+    public BaseResponse refreshProductStatusByItemId(@RequestParam String itemCode){
+        try {
+            log.info("开始刷新产品状态。。itemCode={}", itemCode);
+            commonService.checkProductReverseByItemId(itemCode);
+        } catch (Exception e) {
+            log.error("刷新产品状态异常，itemCode={}", itemCode, e);
             return BaseResponse.withFail(-1, "刷新产品状态失败");
         }
         return BaseResponse.withSuccess();

@@ -55,10 +55,15 @@ public interface CommonService {
 
     /**
      * 检查产品状态，主要把异常状态重置为正常
-     * @param productPO
-     * @param date
+     * @param productCode
      */
     void checkProductReverse(String productCode);
+
+    /**
+     * 检查产品状态，主要把异常状态重置为正常，根据itemcode
+     * @param itemCode
+     */
+    void checkProductReverseByItemId(String itemCode);
 
     void setCity(ScenicSpotMPO scenic);
 
