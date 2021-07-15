@@ -64,7 +64,7 @@ public class TraceConfig {
         if (StringUtils.isBlank(traceId)) {
             newSpan = huoliTrace.createSpan(name, currentSpan);
         } else {
-            newSpan = huoliTrace.createSpan(name, brave.internal.HexCodec.lowerHexToUnsignedLong(traceId), brave.internal.HexCodec.lowerHexToUnsignedLong(traceId));
+            newSpan = huoliTrace.createSpan(name, HexCodec.lowerHexToUnsignedLong(traceId), HexCodec.lowerHexToUnsignedLong(traceId));
         }
         return newSpan;
     }
