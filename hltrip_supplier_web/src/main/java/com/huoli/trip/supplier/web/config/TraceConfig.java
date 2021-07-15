@@ -9,6 +9,7 @@ import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.eagle.eye.core.statistical.trace.TraceInfo;
 import com.huoli.eagle.report.SleuthSpanESReporter;
 import com.huoli.mj.util.IPAddressUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +61,7 @@ public class TraceConfig {
     public static Object createSpan(String name, BraveTrace huoliTrace, String traceId) {
         Object newSpan;
         Span currentSpan = huoliTrace.currentSpan();
-        if (currentSpan != null) {
+        if (StringUtils.isBlank(traceId)) {
             newSpan = huoliTrace.createSpan(name, currentSpan);
         } else {
             newSpan = huoliTrace.createSpan(name, brave.internal.HexCodec.lowerHexToUnsignedLong(traceId), brave.internal.HexCodec.lowerHexToUnsignedLong(traceId));
