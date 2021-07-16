@@ -994,6 +994,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                         scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
                     }
                     scenicSpotProductPriceMPO.setStock(99);
+                    scenicSpotProductPriceMPO.setCreateTime(new Date());
+                    scenicSpotProductPriceMPO.setUpdateTime(new Date());
                     scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
                 } else {
                     // 有变化才更新，避免频繁更新，mongo撑不住
@@ -1002,6 +1004,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                         || (scenicSpotProductPriceMPO.getSellPrice() != null && p.getSalePrice() != null && scenicSpotProductPriceMPO.getSellPrice().compareTo(new BigDecimal(p.getSalePrice())) != 0)){
                         scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
                         scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
+                        scenicSpotProductPriceMPO.setUpdateTime(new Date());
                         scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
                     }
                 }

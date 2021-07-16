@@ -1510,6 +1510,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 }
                 // 有变化才更新，避免频繁更新，mongo撑不住
                 if(b){
+                    exist.setUpdateTime(new Date());
                     scenicSpotProductPriceDao.saveScenicSpotProductPrice(exist);
                 }
             } else {
@@ -1529,6 +1530,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 priceMPO.setSettlementPrice(yp.getSettlementPrice());
                 priceMPO.setStock(yp.getStock());
                 priceMPO.setWeekDay("1,2,3,4,5,6,7");
+                priceMPO.setCreateTime(new Date());
+                priceMPO.setUpdateTime(new Date());
                 scenicSpotProductPriceDao.addScenicSpotProductPrice(priceMPO);
             }
         }

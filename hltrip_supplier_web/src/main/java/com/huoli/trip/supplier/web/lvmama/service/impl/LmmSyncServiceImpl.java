@@ -1145,6 +1145,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             }
             // 有变化才更新，避免频繁更新，mongo撑不住
             if(b){
+                exist.setUpdateTime(new Date());
                 scenicSpotProductPriceDao.saveScenicSpotProductPrice(exist);
             }
         } else {
@@ -1217,6 +1218,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             if(price.getSellPrice() != null){
                 scenicSpotProductPriceMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
             }
+            scenicSpotProductPriceMPO.setCreateTime(new Date());
+            scenicSpotProductPriceMPO.setUpdateTime(new Date());
             scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
         }
     }
