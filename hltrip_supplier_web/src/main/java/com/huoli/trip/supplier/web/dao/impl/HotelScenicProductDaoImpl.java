@@ -41,4 +41,9 @@ public class HotelScenicProductDaoImpl implements HotelScenicProductDao {
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_HOTEL_SCENICSPOT_PRODUCT);
     }
+
+    @Override
+    public HotelScenicSpotProductMPO getByProductId(String productId) {
+        return mongoTemplate.findOne(new Query(Criteria.where("_id").is(productId)), HotelScenicSpotProductMPO.class);
+    }
 }

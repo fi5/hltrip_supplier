@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.dao;
 
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotPriceStock;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
 
 import java.util.List;
@@ -28,4 +29,6 @@ public interface HotelScenicProductSetMealDao {
     void saveProduct(HotelScenicSpotProductSetMealMPO setMealMPO);
 
     HotelScenicSpotProductSetMealMPO getSetMealByPackageId(String packageId);
+
+    void updatePriceStock(HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO, HotelScenicSpotPriceStock hotelScenicSpotPriceStock);
 }

@@ -2,25 +2,26 @@ package com.huoli.trip.supplier.web.hllx.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotPriceStock;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductPriceMPO;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.response.order.OrderDetailRep;
+import com.huoli.trip.common.vo.v2.GroupTourProductSetMeal;
 import com.huoli.trip.supplier.api.HllxService;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyBookSaleInfo;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBookCheckResponse;
 import com.huoli.trip.supplier.self.hllx.vo.*;
-import com.huoli.trip.supplier.web.dao.GroupTourProductSetMealDao;
-import com.huoli.trip.supplier.web.dao.HotelScenicProductSetMealDao;
-import com.huoli.trip.supplier.web.dao.PriceDao;
-import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
+import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.mapper.BackChannelMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderOperationLogMapper;
@@ -58,6 +59,9 @@ public class HllxServiceImpl implements HllxService {
 
     @Autowired
     private HotelScenicProductSetMealDao hotelScenicProductSetMealDao;
+
+    @Autowired
+    private HotelScenicProductDao hotelScenicProductDao;
 
 
 
@@ -106,9 +110,10 @@ public class HllxServiceImpl implements HllxService {
                     }
                     break;
                 case "hotel_scenicSpot":
+                    HotelScenicSpotProductMPO productMPO = hotelScenicProductDao.getByProductId(req.getProductId());
                     HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO = hotelScenicProductSetMealDao.getSetMealByPackageId(req.getPackageId());
                     List<HotelScenicSpotPriceStock> priceStocks = hotelScenicSpotProductSetMealMPO.getPriceStocks();
-                    if (CollectionUtils.isNotEmpty(priceStocks)) {
+                    if (CollectionUtils.isNotEmpty(priceStocks) && productMPO.getPayInfo().getSellType() == 1) {
                         priceStocks = priceStocks.stream().filter(a -> StringUtils.equals(a.getDate(), req.getBeginDate())).collect(Collectors.toList());
                     }
                     if (CollectionUtils.isNotEmpty(priceStocks)) {
@@ -173,7 +178,61 @@ public class HllxServiceImpl implements HllxService {
     @Override
     public HllxBaseResult<HllxCreateOrderRes> createOrder(HllxCreateOrderReq req) {
         log.info("创建订单请求为：{}", JSON.toJSONString(req));
-        PricePO pricePO = priceDao.getByProductCode(req.getProductId());
+        String category = req.getCategory();
+        if (StringUtils.isNotBlank(category)) {
+            switch (category){
+                case "d_ss_ticket":
+                    ScenicSpotProductPriceMPO priceMPO = scenicSpotProductPriceDao.getPriceByPackageId(req.getPackageId());
+                    if(priceMPO == null){
+                        return new HllxBaseResult<>(false, 200, "无价格库存信息");
+                    }
+                    if(priceMPO.getStock() <=req.getQunatity()){
+                        return new HllxBaseResult<>(false, 200, "库存不足");
+                    }
+                    priceMPO.setStock(priceMPO.getStock() - req.getQunatity());
+                    scenicSpotProductPriceDao.updatePriceStock(priceMPO);
+                    break;
+                case "group_tour":
+                    GroupTourProductSetMealMPO groupTourProductSetMealMPO = groupTourProductSetMealDao.getSetMealByPackageId(req.getPackageId());
+                    List<GroupTourPrice> groupTourPrices = groupTourProductSetMealMPO.getGroupTourPrices();
+                    Map<String, GroupTourPrice> groupTourPriceMap = Maps.uniqueIndex(groupTourPrices, item -> item.getDate());
+                    GroupTourPrice groupTourPrice = groupTourPriceMap.get(req.getDate());
+                    if(groupTourPrice == null || (groupTourPrice.getAdtStock() < req.getAdtQuantity() || groupTourPrice.getChdStock() < req.getChildQuantity())){
+                        log.error("库存不足:adtStock : {},{}; chdStock:{}, {}", groupTourPrice.getAdtPrice(), req.getAdtQuantity(), groupTourPrice.getChdPrice(), req.getChildQuantity());
+                        return new HllxBaseResult<>(false, 200, "库存不足");
+                    }
+                    groupTourPrice.setAdtStock(groupTourPrice.getAdtStock() - req.getAdtQuantity());
+                    groupTourPrice.setChdStock(groupTourPrice.getChdStock() - req.getChildQuantity());
+                    groupTourProductSetMealDao.updatePriceStock(groupTourProductSetMealMPO, groupTourPrice);
+                    break;
+                case "hotel_scenicSpot":
+                    HotelScenicSpotProductMPO productMPO = hotelScenicProductDao.getByProductId(req.getProductId());
+                    HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO = hotelScenicProductSetMealDao.getSetMealByPackageId(req.getPackageId());
+                    List<HotelScenicSpotPriceStock> priceStocks = hotelScenicSpotProductSetMealMPO.getPriceStocks();
+                    HotelScenicSpotPriceStock hotelScenicSpotPriceStock = null;
+                    if(productMPO.getPayInfo().getSellType() == 0){
+                        hotelScenicSpotPriceStock = priceStocks.get(0);
+                        if(hotelScenicSpotPriceStock.getAdtStock() < req.getAdtQuantity() || hotelScenicSpotPriceStock.getChdStock() < req.getChildQuantity()){
+                            log.error("库存不足：adtStock:{},{}; chdStock:{},{}", hotelScenicSpotPriceStock.getAdtStock(), req.getAdtQuantity(), hotelScenicSpotPriceStock.getChdStock(), req.getChildQuantity());
+                            return new HllxBaseResult<>(false, 200, "库存不足");
+                        }
+                        hotelScenicSpotPriceStock.setAdtStock(hotelScenicSpotPriceStock.getAdtStock() - req.getAdtQuantity());
+                        hotelScenicSpotPriceStock.setChdStock(hotelScenicSpotPriceStock.getChdStock() - req.getChildQuantity());
+                    }else{
+                        Map<String, HotelScenicSpotPriceStock> priceStockMap = Maps.uniqueIndex(priceStocks, item -> item.getDate());
+                        hotelScenicSpotPriceStock = priceStockMap.get(req.getDate());
+                        if(hotelScenicSpotPriceStock == null || hotelScenicSpotPriceStock.getAdtStock() < req.getAdtQuantity() || hotelScenicSpotPriceStock.getChdStock() < req.getChildQuantity()){
+                            log.error("库存不足：adtStock:{},{}; chdStock:{},{}", hotelScenicSpotPriceStock.getAdtStock(), req.getAdtQuantity(), hotelScenicSpotPriceStock.getChdStock(), req.getChildQuantity());
+                            return new HllxBaseResult<>(false, 200, "库存不足");
+                        }
+                        hotelScenicSpotPriceStock.setAdtStock(hotelScenicSpotPriceStock.getAdtStock() - req.getAdtQuantity());
+                        hotelScenicSpotPriceStock.setChdStock(hotelScenicSpotPriceStock.getChdStock() - req.getChildQuantity());
+                    }
+                    hotelScenicProductSetMealDao.updatePriceStock(hotelScenicSpotProductSetMealMPO, hotelScenicSpotPriceStock);
+                    break;
+            }
+        }
+        /*PricePO pricePO = priceDao.getByProductCode(req.getProductId());
         log.info("创建订单查询到的原始库存数据为：{}", JSON.toJSONString(pricePO));
         if (pricePO == null) {
             return new HllxBaseResult(false, 200, "无价格库存信息");
@@ -198,7 +257,7 @@ public class HllxServiceImpl implements HllxService {
         }
         pricePO.setPriceInfos(priceInfos);
         log.info("创建订单更新后的库存数据为：{}", JSON.toJSONString(pricePO));
-        priceDao.updateByProductCode(pricePO);
+        priceDao.updateByProductCode(pricePO);*/
         HllxCreateOrderRes hllxCreateOrderRes = new HllxCreateOrderRes();
         hllxCreateOrderRes.setOrderStatus(OrderStatus.TO_BE_PAID.getCode());
         return new HllxBaseResult(true, 200, hllxCreateOrderRes);

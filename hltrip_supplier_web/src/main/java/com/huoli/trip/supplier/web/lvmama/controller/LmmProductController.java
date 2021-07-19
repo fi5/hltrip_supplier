@@ -36,15 +36,15 @@ public class LmmProductController {
         try {
             threadPool.execute(() -> {
                 try {
-//                    lmmSyncService.pushUpdateV2(product);
+                    lmmSyncService.pushUpdateV2(product);
                 } catch (Exception e) {
                     log.error("接收驴妈妈产品通知异常v2", e);
                 }
-                try{
-                    lmmSyncService.pushUpdate(product);
-                } catch (Exception e){
-                    log.error("接收驴妈妈产品通知异常", e);
-                }
+//                try{
+//                    lmmSyncService.pushUpdate(product);
+//                } catch (Exception e){
+//                    log.error("接收驴妈妈产品通知异常", e);
+//                }
             });
         } catch (Exception e) {
             log.error("接受驴妈妈产品线程池异常", e);

@@ -35,7 +35,7 @@ public class RefreshItemTask {
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
 
-    @Scheduled(cron = "0 10 0 * * ?")
+//    @Scheduled(cron = "0 10 0 * * ?")
     public void refreshItemProduct(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;

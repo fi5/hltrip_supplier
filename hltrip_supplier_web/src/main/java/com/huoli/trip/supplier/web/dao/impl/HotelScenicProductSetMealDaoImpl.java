@@ -1,9 +1,11 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotPriceStock;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductMPO;
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
 import com.huoli.trip.supplier.web.dao.HotelScenicProductSetMealDao;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -11,7 +13,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -49,5 +50,18 @@ public class HotelScenicProductSetMealDaoImpl implements HotelScenicProductSetMe
         Query query = new Query();
         query.addCriteria(Criteria.where("_id").is(packageId));
         return mongoTemplate.findOne(query, HotelScenicSpotProductSetMealMPO.class);
+    }
+
+    @Override
+    public void updatePriceStock(HotelScenicSpotProductSetMealMPO hotelScenicSpotProductSetMealMPO, HotelScenicSpotPriceStock hotelScenicSpotPriceStock) {
+        Query query = new Query();
+        Criteria criteria = new Criteria();
+        criteria.and("_id").is(hotelScenicSpotProductSetMealMPO.getId());
+        if (StringUtils.isNotBlank(hotelScenicSpotPriceStock.getDate())) {
+            criteria.and("priceStocks.date").is(hotelScenicSpotPriceStock.getDate());
+        }
+        query.addCriteria(criteria);
+        mongoTemplate.updateMulti(query, Update.update("priceStocks.$.adtStock", hotelScenicSpotPriceStock.getAdtPrice())
+                .set("priceStocks.$.chdStock", hotelScenicSpotPriceStock.getChdPrice()), HotelScenicSpotProductMPO.class);
     }
 }

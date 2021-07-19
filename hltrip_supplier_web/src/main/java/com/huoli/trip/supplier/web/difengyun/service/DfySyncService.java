@@ -176,6 +176,11 @@ public interface DfySyncService {
      */
     List<GroupTourPrice> syncToursPriceV2(String supplierProductId, String city);
 
+    /**
+     * 接收通知
+     * @param request
+     */
+    void productUpdateV2(DfyProductNoticeRequest request);
 
 }
 

@@ -76,11 +76,19 @@ public class DfyCallBackService {
             }
             log.info("orderStatusNotice这的payed:"+payed);
 
-            switch (tripOrder.getProductType()){//产品类型:1-酒+,2-门票,3-跟团,4-餐饮,5-门票+
-            	case 2:
+            //优先取订单类目
+            String category = tripOrder.getCategory();
+            if (StringUtils.isBlank(category)) {
+                category = String.valueOf(tripOrder.getProductType());
+            }
+
+            switch (category){//产品类型:1-酒+,2-门票,3-跟团,4-餐饮,5-门票+
+            	case "2":
+                case "d_ss_ticket":
                     return  handleTicket(tripOrder,orderDetailReq,payed,url);
 
-                case 12://ProductType.TRIP_GROUP:
+                case "12"://ProductType.TRIP_GROUP:
+                case "group_tour":
                     return  handleTours(tripOrder,orderDetailReq,payed,url);
 
             	default:

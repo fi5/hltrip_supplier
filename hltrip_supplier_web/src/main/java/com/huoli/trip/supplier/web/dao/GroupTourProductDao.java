@@ -39,7 +39,7 @@ public interface GroupTourProductDao {
      * @param supplierProductId
      * @param channel
      */
-    void updateStatus(String supplierProductId, String channel);
+    void updateStatus(String supplierProductId, String channel, int status);
 
     /**
      * 根据渠道获取渠道产品码
@@ -47,4 +47,11 @@ public interface GroupTourProductDao {
      * @return
      */
     List<String> getSupplierProductIdByChannel(String channel);
+
+    /**
+     * 根据id更新状态
+     * @param id
+     * @param status
+     */
+    void updateStatusById(String id, int status);
 }

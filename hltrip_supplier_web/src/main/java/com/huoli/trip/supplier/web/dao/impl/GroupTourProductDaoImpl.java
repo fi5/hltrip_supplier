@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,9 +53,15 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
     }
 
     @Override
-    public void updateStatus(String supplierProductId, String channel){
+    public void updateStatus(String supplierProductId, String channel, int status){
         mongoTemplate.updateFirst(new Query(Criteria.where("supplierProductId")
-                .is(supplierProductId).and("channel").is(channel)), Update.update("status", 3), GroupTourProductMPO.class);
+                .is(supplierProductId).and("channel").is(channel)), Update.update("status", status).set("updateTime", new Date()), GroupTourProductMPO.class);
+    }
+
+    @Override
+    public void updateStatusById(String id, int status){
+        mongoTemplate.updateFirst(new Query(Criteria.where("_id")
+                .is(id)), Update.update("status", status).set("updateTime", new Date()), GroupTourProductMPO.class);
     }
 
     @Override

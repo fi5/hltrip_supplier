@@ -855,8 +855,8 @@ public class CommonServiceImpl implements CommonService {
             log.info("{}景点{}已有映射id={}，跳过", channel, channelScenicId, exist.getId());
             return;
         }
-        log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName(), newScenic.getAddress());
-        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
+        log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName());
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), null);
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));

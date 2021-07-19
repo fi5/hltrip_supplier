@@ -45,8 +45,7 @@ public class SyncPriceTask {
     @Autowired
     private ScenicSpotProductDao scenicSpotProductDao;
 
-    @Scheduled(cron = "0 0 2 ? * 6")
-    @Async
+//    @Scheduled(cron = "0 0 2 ? * 6")
     public void syncFullPrice(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
@@ -71,8 +70,7 @@ public class SyncPriceTask {
     }
 
 
-//    @Scheduled(cron = "0 0 3 ? * 6")
-    @Async
+    @Scheduled(cron = "0 0 3 ? * 6")
     public void syncFullPriceV2(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;

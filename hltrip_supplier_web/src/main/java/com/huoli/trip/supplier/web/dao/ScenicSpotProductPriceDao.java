@@ -36,6 +36,8 @@ public interface ScenicSpotProductPriceDao {
 
     ScenicSpotProductPriceMPO getPriceByPackageId(String packageId);
 
+    void updatePriceStock(ScenicSpotProductPriceMPO priceMPO);
+
     /**
      * 查询已有价格
      * @param productId

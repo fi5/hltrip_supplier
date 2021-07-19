@@ -37,8 +37,7 @@ public class RefreshProductTask {
     @Autowired
     private CommonService commonService;
 
-    @Scheduled(cron = "0 0 3 * * ?")
-    @Async
+//    @Scheduled(cron = "0 0 3 * * ?")
     public void refreshItemProduct(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
