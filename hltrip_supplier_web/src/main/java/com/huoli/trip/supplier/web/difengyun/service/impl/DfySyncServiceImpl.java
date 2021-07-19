@@ -1677,17 +1677,17 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
-            GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
-            groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
-            groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
-            groupTourProductSetMealBackupMPO.setId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT);
-            groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
-            groupProductBackupDao.saveGroupProductBackup(groupTourProductSetMealBackupMPO);
             if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
                 // 添加订阅通知
                 commonService.addToursProductSubscribe(groupTourProductMPO, add);
             }
         }
+        GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
+        groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
+//        groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
+        groupTourProductSetMealBackupMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+        groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
+        groupProductBackupDao.saveGroupProductBackup(groupTourProductSetMealBackupMPO);
     }
 
     private void setCity(GroupTourProductMPO groupTourProductMPO, DfyToursDetailResponse dfyToursDetail){
