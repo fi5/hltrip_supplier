@@ -1345,10 +1345,11 @@ public class DfySyncServiceImpl implements DfySyncService {
                 groupTourProductMPO.setRouteType("2");
             }
         }
-        if(StringUtils.isBlank(groupTourProductMPO.getTheme())){
-            // 默认其它
-            groupTourProductMPO.setTheme("16");
-        }
+        // 不需要默认了。
+//        if(StringUtils.isBlank(groupTourProductMPO.getTheme())){
+//            // 默认其它
+//            groupTourProductMPO.setTheme("16");
+//        }
         String name = dfyToursDetail.getProductName();
         String point = null;
         if(name.startsWith("<")){
