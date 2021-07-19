@@ -680,7 +680,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
             if(baseResult != null && baseResult.getData() != null && ListUtils.isNotEmpty(baseResult.getData().getRows())){
                 List<DfyScenic> scenics = baseResult.getData().getRows();
-                scenics.forEach(s -> syncScenicDetailV2(s.getScenicId()));
+                scenics.forEach(s -> {
+                    try {
+                        syncScenicDetailV2(s.getScenicId());
+                    } catch (Exception e) {
+                        log.error("笛风云同步景点{}异常，跳过。。", s.getScenicId(), e);
+                    }
+                });
                 return true;
             } else {
                 log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
@@ -783,7 +789,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
                 ticketIds.addAll(scenicDetail.getDisTickets().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
             }
-            ticketIds.forEach(id -> syncProductV2(id));
+            ticketIds.forEach(id -> {
+                try {
+                    syncProductV2(id);
+                } catch (Exception e) {
+                    log.error("笛风云同步产品{}异常，跳过.", id, e);
+                }
+            });
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }
