@@ -30,7 +30,8 @@ public class GroupProductBackupDaoImpl implements GroupProductBackupDao {
     @Override
     public void saveGroupProductBackup(GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO){
         Query query = new Query();
-        query.addCriteria(Criteria.where("groupTourProductMPO._id").is(groupTourProductSetMealBackupMPO.getId()));
+        query.addCriteria(Criteria.where("groupTourProductMPO._id").is(groupTourProductSetMealBackupMPO.getGroupTourProductMPO().getId())
+                .and("groupTourProductSetMealMPO._id").is(groupTourProductSetMealBackupMPO.getGroupTourProductSetMealMPO().getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(groupTourProductSetMealBackupMPO, document);
         Update update = Update.fromDocument(document);
