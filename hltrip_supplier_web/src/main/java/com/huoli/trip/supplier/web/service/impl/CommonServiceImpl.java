@@ -1201,21 +1201,21 @@ public class CommonServiceImpl implements CommonService {
                                                 break;
                                             case 3:
                                                 means = "轮渡";
-                                                item.setType("8");
+                                                item.setType("13");
                                                 break;
                                             case 4:
                                                 means = "汽车";
                                                 item.setType("8");
+                                                item.setCarType("汽车");
                                                 break;
                                             case 5:
                                             default:
                                                 means = "自主";
-                                                item.setType("8");
+                                                item.setType("14");
                                                 break;
                                         }
                                     }
                                     if (StringUtils.isBlank(means)) {
-                                        item.setType("8");
                                         item.setPoiName(String.format("从%s到%s", route.getDeparture(), route.getArrival()));
                                     } else {
 //                                        item.setPoiName(String.format("从%s乘%s到%s", route.getDeparture(), means, route.getArrival()));
