@@ -1123,11 +1123,11 @@ public class CommonServiceImpl implements CommonService {
                         passengerTemplateMapper.addPassengerTemplate(passengerTemplatePO);
                     }
                     groupTourProductMPO.setTravelerTemplateId(passengerTemplatePO.getId());
+                    // 笛风云没有退改
+                    groupTourProductDao.saveProduct(groupTourProductMPO);
                 }
             }
 
-            // 笛风云没有退改
-            groupTourProductDao.saveProduct(groupTourProductMPO);
             if(ListUtils.isEmpty(groupTourProductMPO.getDepInfos())){
                 log.info("{}出发城市为空", productPO.getCode());
                 continue;
@@ -1141,6 +1141,7 @@ public class CommonServiceImpl implements CommonService {
                 setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
                 setMealMPO.setName(groupTourProductMPO.getProductName());
                 setMealMPO.setTripDay(productPO.getTripDays());
+                setMealMPO.setTripNight(productPO.getTripNights());
                 setMealMPO.setConstInclude(productPO.getIncludeDesc());
                 setMealMPO.setCostExclude(productPO.getExcludeDesc());
                 StringBuffer sb = new StringBuffer();
@@ -1173,7 +1174,7 @@ public class CommonServiceImpl implements CommonService {
                             item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
-                                groupTourHotel.setRoomName(r.getName());
+                                groupTourHotel.setHotelName(r.getName());
                                 if (ListUtils.isNotEmpty(r.getImages())) {
                                     groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
                                 }
@@ -1200,24 +1201,26 @@ public class CommonServiceImpl implements CommonService {
                                                 break;
                                             case 3:
                                                 means = "轮渡";
-                                                item.setType("8");
+                                                item.setType("13");
                                                 break;
                                             case 4:
                                                 means = "汽车";
                                                 item.setType("8");
+                                                item.setCarType("汽车");
                                                 break;
                                             case 5:
                                             default:
                                                 means = "自主";
-                                                item.setType("8");
+                                                item.setType("14");
                                                 break;
                                         }
                                     }
                                     if (StringUtils.isBlank(means)) {
-                                        item.setType("8");
                                         item.setPoiName(String.format("从%s到%s", route.getDeparture(), route.getArrival()));
                                     } else {
-                                        item.setPoiName(String.format("从%s乘%s到%s", route.getDeparture(), means, route.getArrival()));
+//                                        item.setPoiName(String.format("从%s乘%s到%s", route.getDeparture(), means, route.getArrival()));
+                                        // 如果不能确定类型就舍弃这个节点
+                                        continue;
                                     }
                                 } else if (type == DfyConstants.MODULE_TYPE_FOOD) {
                                     item.setType("3");
@@ -1228,6 +1231,10 @@ public class CommonServiceImpl implements CommonService {
                                 } else if (type == DfyConstants.MODULE_TYPE_ACTIVITY) {
                                     item.setType("10");
                                     item.setPoiName(route.getName());
+                                } else if(type == DfyConstants.MODULE_TYPE_REMINDER){
+                                    item.setType("12");
+                                } else {
+                                    continue;
                                 }
                                 item.setTime(route.getDepTime());
                                 item.setPlayTime(route.getDuration());

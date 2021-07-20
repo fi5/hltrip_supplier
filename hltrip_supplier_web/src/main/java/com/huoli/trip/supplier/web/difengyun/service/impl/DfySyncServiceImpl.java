@@ -680,7 +680,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyBaseResult<DfyScenicListResponse> baseResult = diFengYunClient.getScenicList(listRequest);
             if(baseResult != null && baseResult.getData() != null && ListUtils.isNotEmpty(baseResult.getData().getRows())){
                 List<DfyScenic> scenics = baseResult.getData().getRows();
-                scenics.forEach(s -> syncScenicDetailV2(s.getScenicId()));
+                scenics.forEach(s -> {
+                    try {
+                        syncScenicDetailV2(s.getScenicId());
+                    } catch (Exception e) {
+                        log.error("笛风云同步景点{}异常，跳过。。", s.getScenicId(), e);
+                    }
+                });
                 return true;
             } else {
                 log.error("笛风云门票列表返回空，request = {}", JSON.toJSONString(listRequest));
@@ -783,7 +789,13 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(ListUtils.isNotEmpty(scenicDetail.getDisTickets())){
                 ticketIds.addAll(scenicDetail.getDisTickets().stream().map(DfyTicket::getProductId).collect(Collectors.toList()));
             }
-            ticketIds.forEach(id -> syncProductV2(id));
+            ticketIds.forEach(id -> {
+                try {
+                    syncProductV2(id);
+                } catch (Exception e) {
+                    log.error("笛风云同步产品{}异常，跳过.", id, e);
+                }
+            });
         } else {
             log.error("笛风云门票详情返回空，request = {}", JSON.toJSONString(detailBaseRequest));
         }
@@ -1345,10 +1357,11 @@ public class DfySyncServiceImpl implements DfySyncService {
                 groupTourProductMPO.setRouteType("2");
             }
         }
-        if(StringUtils.isBlank(groupTourProductMPO.getTheme())){
-            // 默认其它
-            groupTourProductMPO.setTheme("16");
-        }
+        // 不需要默认了。
+//        if(StringUtils.isBlank(groupTourProductMPO.getTheme())){
+//            // 默认其它
+//            groupTourProductMPO.setTheme("16");
+//        }
         String name = dfyToursDetail.getProductName();
         String point = null;
         if(name.startsWith("<")){
@@ -1485,6 +1498,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
             setMealMPO.setName(groupTourProductMPO.getProductName());
             setMealMPO.setTripDay(dfyToursDetail.getDuration());
+            setMealMPO.setTripNight(dfyToursDetail.getProductNight());
             setMealMPO.setDepCode(addressInfo.getCityCode());
             setMealMPO.setDepName(addressInfo.getCityName());
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null
@@ -1498,7 +1512,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                         StringBuffer sb = new StringBuffer();
                         sb.append(j.getTraffic().getFrom());
                         if(ListUtils.isNotEmpty(j.getTraffic().getToList())){
-                            j.getTraffic().getToList().forEach(t -> sb.append(t.getTo()));
+                            j.getTraffic().getToList().stream().distinct().forEach(t -> sb.append("-").append(t.getTo()));
                         }
                         groupTourTripInfo.setTitle(sb.toString());
                     }
@@ -1512,14 +1526,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     GroupTourProductTripItem item = new GroupTourProductTripItem();
                                     item.setTime(journeyModule.getMoment());
                                     // 计算一下转换成hh:mm
-                                    if(scenic.getTimes() != null){
-                                        int hh = scenic.getTimes() / 60;
-                                        int mm = scenic.getTimes() % 60;
-                                        item.setPlayTime(String.format("%s:%s", hh >= 10 ? hh : String.format("0%s", hh), mm >= 10 ? mm : String.format("0%s", mm)));
-                                    }
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SCENIC.getCode()));
+                                    item.setPlayTime(convertTime(scenic.getTimes()));
+                                    item.setType("1");
                                     item.setPoiName(scenic.getTitle());
-                                    item.setPoiDesc(scenic.getContent());
+                                    item.setPoiDesc(removePre(scenic.getContent()));
                                     if(ListUtils.isNotEmpty(scenic.getPicture())){
                                         item.setImages(scenic.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                     }
@@ -1529,11 +1539,11 @@ public class DfySyncServiceImpl implements DfySyncService {
                             if (type == DfyConstants.MODULE_TYPE_HOTEL
                                     && ListUtils.isNotEmpty(journeyModule.getHotelList())) {
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();
-                                item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_HOTEL.getCode()));
+                                item.setType("5");
                                 item.setGroupTourHotels(journeyModule.getHotelList().stream().map(h -> {
                                     GroupTourHotel groupTourHotel = new GroupTourHotel();
                                     groupTourHotel.setStar(h.getStarName());
-                                    groupTourHotel.setDesc(h.getDescription());
+                                    groupTourHotel.setDesc(removePre(h.getDescription()));
                                     if(ListUtils.isNotEmpty(h.getRoom())){
                                         groupTourHotel.setRoomName(h.getRoom().stream().map(DfyJourneyDetail.ModuleHotelRoom::getTitle).collect(Collectors.joining(",")));
                                         groupTourHotel.setImages(h.getRoom().stream().flatMap(r -> r.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl)).collect(Collectors.toList()));
@@ -1549,39 +1559,46 @@ public class DfySyncServiceImpl implements DfySyncService {
                             }
                             if (type == DfyConstants.MODULE_TYPE_TRAFFIC && journeyModule.getTraffic() != null) {
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();
-                                item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_TRAFFIC.getCode()));
-                                item.setPlayTime(journeyModule.getTraffic().getTimes() == null
-                                        || journeyModule.getTraffic().getTimes() <= 0 ? null : journeyModule.getTraffic().getTimes().toString());
+                                item.setPlayTime(convertTime(journeyModule.getTraffic().getTimes()));
                                 String means = "";
                                 if(journeyModule.getTraffic().getMeansType() != null){
                                     switch (journeyModule.getTraffic().getMeansType()){
                                         case 2:
                                             means = "水飞";
+                                            item.setType("7");
                                             break;
                                         case 3:
                                             means = "内飞";
+                                            item.setType("7");
                                             break;
                                         case 4:
                                             means = "飞机";
+                                            item.setType("7");
                                             break;
                                         case 5:
                                             means = "快艇";
+                                            item.setType("13");
                                             break;
                                         case 6:
                                             means = "轮船";
+                                            item.setType("13");
                                             break;
                                         case 7:
                                             means = "汽车";
+                                            item.setType("8");
                                             break;
                                         case 8:
                                             means = "火车";
+                                            item.setType("6");
                                             break;
                                     }
                                 }
                                 if(StringUtils.isBlank(means)){
                                     item.setPoiName(String.format("从%s到%s", journeyModule.getTraffic().getFrom(), journeyModule.getTraffic().getTo()));
                                 } else {
-                                    item.setPoiName(String.format("从%s乘%s到%s", journeyModule.getTraffic().getFrom(), means, journeyModule.getTraffic().getTo()));
+                                    // 不确定类型的行程元素跳过
+                                    continue;
+//                                    item.setPoiName(String.format("从%s乘%s到%s", journeyModule.getTraffic().getFrom(), means, journeyModule.getTraffic().getTo()));
                                 }
                                 item.setPoiDesc(journeyModule.getDescription());
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
@@ -1599,10 +1616,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     // 含餐
                                     item.setSubType("20");
                                     item.setTime(journeyModule.getMoment());
-                                    item.setPlayTime(journeyModule.getFood().getTimes() == null ? null : journeyModule.getFood().getTimes().toString());
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_FOOD.getCode()));
+                                    item.setPlayTime(convertTime(journeyModule.getFood().getTimes()));
+                                    item.setType("3");
                                     item.setPoiName(journeyModule.getFood().getTitle());
-                                    item.setPoiDesc(journeyModule.getDescription());
+                                    item.setPoiDesc(removePre(journeyModule.getDescription()));
                                     if(ListUtils.isNotEmpty(journeyModule.getPicture())){
                                         item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                     }
@@ -1624,6 +1641,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     item.setPoiName(sb.toString());
                                     item.setCostInclude(-1);
                                     items.add(item);
+                                } else {
+                                    continue;
                                 }
                             }
                             if (type == DfyConstants.MODULE_TYPE_SHOPPING && ListUtils.isNotEmpty(journeyModule.getShopList())) {
@@ -1631,14 +1650,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     GroupTourProductTripItem item = new GroupTourProductTripItem();
                                     item.setTime(journeyModule.getMoment());
                                     item.setPoiName(moduleShop.getTitle());
-                                    if (StringUtils.isNotBlank(moduleShop.getInstruction())) {
-                                        item.setPoiDesc(moduleShop.getInstruction().replace("<pre>", "").replace("</pre>", ""));
-                                    }
+                                    item.setPoiDesc(removePre(moduleShop.getInstruction()));
                                     if(StringUtils.isNotBlank(moduleShop.getProduct())){
-                                        item.setPoiDesc(String.format("%s<br>%s", item.getPoiDesc(), moduleShop.getProduct()));
+                                        item.setPoiDesc(String.format("%s<br>%s", item.getPoiDesc() == null ? "" : item.getPoiDesc(), moduleShop.getProduct()));
                                     }
-                                    item.setPlayTime(moduleShop.getTimes() == null ? null : moduleShop.getTimes().toString());
-                                    item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_SHOPPING.getCode()));
+                                    item.setPlayTime(convertTime(moduleShop.getTimes()));
+                                    item.setType("4");
                                     items.add(item);
                                 }
                             }
@@ -1648,11 +1665,10 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
                                     item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                 }
-                                item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_ACTIVITY.getCode()));
+                                item.setType("10");
                                 item.setPoiName(journeyModule.getActivity().getTitle());
-                                item.setPlayTime(journeyModule.getActivity().getTimes() == null
-                                        || journeyModule.getActivity().getTimes() <= 0 ? null : journeyModule.getActivity().getTimes().toString());
-                                item.setPoiDesc(journeyModule.getDescription());
+                                item.setPlayTime(convertTime(journeyModule.getActivity().getTimes()));
+                                item.setPoiDesc(removePre(journeyModule.getDescription()));
                                 items.add(item);
                             }
                             if (type == DfyConstants.MODULE_TYPE_REMINDER && journeyModule.getRemind() != null) {
@@ -1661,11 +1677,9 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
                                     item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                 }
-                                item.setType(String.valueOf(TripModuleTypeEnum.MODULE_TYPE_REMINDER.getCode()));
+                                item.setType("12");
                                 item.setPoiName(journeyModule.getRemind().getType());
-                                if (StringUtils.isNotBlank(journeyModule.getRemind().getContent())) {
-                                    item.setPoiDesc(journeyModule.getRemind().getContent().replace("<pre>", "").replace("</pre>", ""));
-                                }
+                                item.setPoiDesc(removePre(journeyModule.getRemind().getContent()));
                                 items.add(item);
                             }
                         }
@@ -1676,28 +1690,46 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
-            commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
             GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
             groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
             groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
-            groupTourProductSetMealBackupMPO.setId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT);
+            groupTourProductSetMealBackupMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
             groupProductBackupDao.saveGroupProductBackup(groupTourProductSetMealBackupMPO);
+            commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
             if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
                 // 添加订阅通知
                 commonService.addToursProductSubscribe(groupTourProductMPO, add);
             }
         }
+
+    }
+
+
+    private String removePre(String str){
+        if(StringUtils.isNotBlank(str)){
+            return str.replace("<pre>", "").replace("</pre>", "");
+        }
+        return str;
+    }
+
+    private String convertTime(Integer time){
+        if(time != null){
+            int hh = time / 60;
+            int mm = time % 60;
+            return String.format("%s:%s", hh >= 10 ? hh : String.format("0%s", hh), mm >= 10 ? mm : String.format("0%s", mm));
+        }
+        return null;
     }
 
     private void setCity(GroupTourProductMPO groupTourProductMPO, DfyToursDetailResponse dfyToursDetail){
         if(ListUtils.isNotEmpty(dfyToursDetail.getDepartCitys())){
             groupTourProductMPO.setDepInfos(dfyToursDetail.getDepartCitys().stream().map(d ->
-                    commonService.setCity(null, d.getName(), null)).filter(a -> a != null).collect(Collectors.toList()));
+                    commonService.setCity(null, d.getName(), null)).filter(a -> a != null).distinct().collect(Collectors.toList()));
         }
         if(ListUtils.isNotEmpty(dfyToursDetail.getDesPoiNameList())){
             groupTourProductMPO.setArrInfos(dfyToursDetail.getDesPoiNameList().stream().map(d ->
-                    commonService.setCity(d.getDesProvinceName(), d.getDesCityName(), d.getDesCountyName())).collect(Collectors.toList()));
+                    commonService.setCity(d.getDesProvinceName(), d.getDesCityName(), d.getDesCountyName())).distinct().collect(Collectors.toList()));
         }
     }
 
