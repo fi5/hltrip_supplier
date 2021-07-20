@@ -1173,7 +1173,7 @@ public class CommonServiceImpl implements CommonService {
                             item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
-                                groupTourHotel.setRoomName(r.getName());
+                                groupTourHotel.setHotelName(r.getName());
                                 if (ListUtils.isNotEmpty(r.getImages())) {
                                     groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
                                 }
