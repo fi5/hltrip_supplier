@@ -1591,14 +1591,19 @@ public class DfySyncServiceImpl implements DfySyncService {
                                             means = "火车";
                                             item.setType("6");
                                             break;
+                                        case 9:
+                                            means = "自行安排";
+                                            item.setType("14");
+                                            break;
                                     }
                                 }
                                 if(StringUtils.isBlank(means)){
-                                    item.setPoiName(String.format("从%s到%s", journeyModule.getTraffic().getFrom(), journeyModule.getTraffic().getTo()));
-                                } else {
                                     // 不确定类型的行程元素跳过
                                     continue;
-//                                    item.setPoiName(String.format("从%s乘%s到%s", journeyModule.getTraffic().getFrom(), means, journeyModule.getTraffic().getTo()));
+//                                    item.setPoiName(String.format("从%s到%s", journeyModule.getTraffic().getFrom(), journeyModule.getTraffic().getTo()));
+                                } else {
+                                    item.setPoiName(String.format("从%s乘%s到%s", journeyModule.getTraffic().getFrom(), means, journeyModule.getTraffic().getTo()));
+
                                 }
                                 item.setPoiDesc(journeyModule.getDescription());
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
