@@ -1498,6 +1498,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             setMealMPO.setGroupTourProductId(groupTourProductMPO.getId());
             setMealMPO.setName(groupTourProductMPO.getProductName());
             setMealMPO.setTripDay(dfyToursDetail.getDuration());
+            setMealMPO.setTripNight(dfyToursDetail.getProductNight());
             setMealMPO.setDepCode(addressInfo.getCityCode());
             setMealMPO.setDepName(addressInfo.getCityName());
             if(journeyInfo.getJourneyDescJson() != null && journeyInfo.getJourneyDescJson().getData() != null
