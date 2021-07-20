@@ -1544,6 +1544,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     GroupTourHotel groupTourHotel = new GroupTourHotel();
                                     groupTourHotel.setStar(h.getStarName());
                                     groupTourHotel.setDesc(removePre(h.getDescription()));
+                                    groupTourHotel.setHotelName(h.getTitle());
                                     if(ListUtils.isNotEmpty(h.getRoom())){
                                         groupTourHotel.setRoomName(h.getRoom().stream().map(DfyJourneyDetail.ModuleHotelRoom::getTitle).collect(Collectors.joining(",")));
                                         groupTourHotel.setImages(h.getRoom().stream().flatMap(r -> r.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl)).collect(Collectors.toList()));
