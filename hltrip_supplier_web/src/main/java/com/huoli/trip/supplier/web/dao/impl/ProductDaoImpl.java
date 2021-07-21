@@ -1,12 +1,15 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.MongoConst;
 import com.huoli.trip.common.entity.ProductItemPO;
 import com.huoli.trip.common.entity.ProductPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.web.dao.ProductDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,8 @@ public class ProductDaoImpl implements ProductDao {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Reference(group = "hltrip", timeout = 30000, check = false, retries = 3)
+    ProductDataService productService;
 
     @Override
     public void updateByCode(ProductPO productPO){
@@ -53,6 +58,31 @@ public class ProductDaoImpl implements ProductDao {
         mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("code").is(code)),
                 Update.update("status", status), Constants.COLLECTION_NAME_TRIP_PRODUCT);
     }
+
+    @Override
+    public void updateStatusByCodev2(String productId, int status, String category){
+        switch (category) {
+            //跟团游
+            case "group_tour":
+                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                        Update.update("status", status), MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+                productService.updateProduct(1, productId, 1);
+                break;
+            //门票
+            case "d_ss_ticket":
+                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                        Update.update("status", status), MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT);
+                productService.updateProduct(0, productId, 1);
+                break;
+            //酒景
+            case "hotel_scenicSpot":
+                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                        Update.update("status", status), MongoConst.COLLECTION_NAME_HOTEL_SCENICSPOT_PRODUCT);
+                productService.updateProduct(2, productId, 1);
+                break;
+        }
+    }
+
 
     @Override
     public void updateSupplierStatusByCode(String code, int supplierStatus){

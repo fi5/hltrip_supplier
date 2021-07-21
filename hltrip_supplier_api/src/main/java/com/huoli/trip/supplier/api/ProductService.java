@@ -18,6 +18,12 @@ public interface ProductService {
      * @param status
      */
     void updateStatusByCode(String code, int status);
+    /**
+     * 更新产品状态v2
+     * @param code
+     * @param status
+     */
+    void updateStatusByCodev2(String code, int status, String category);
 
     /**
      * 更新供应商状态

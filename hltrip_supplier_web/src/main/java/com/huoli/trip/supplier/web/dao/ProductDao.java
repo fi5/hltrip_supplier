@@ -64,6 +64,13 @@ public interface ProductDao {
     void updateStatusByCode(String code, int status);
 
     /**
+     * 上下架v2
+     * @param code
+     * @param status
+     */
+    void updateStatusByCodev2(String productId, int status, String category);
+
+    /**
      * 根据状态查询产品
      * @param status
      * @return

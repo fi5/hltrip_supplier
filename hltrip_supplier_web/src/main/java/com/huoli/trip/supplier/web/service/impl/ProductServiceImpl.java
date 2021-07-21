@@ -37,6 +37,11 @@ public class ProductServiceImpl implements ProductService {
         dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
 
     }
+    @Override
+    public void updateStatusByCodev2(String code, int status,String category){
+        productDao.updateStatusByCodev2(code, status,category);
+        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
+    }
 
     @Override
     public void updateSupplierStatusAndAppFromByCode(String code, Integer supplierStatus, List<String> appFroms){
