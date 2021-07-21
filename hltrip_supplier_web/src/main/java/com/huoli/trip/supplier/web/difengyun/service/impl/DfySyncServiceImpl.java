@@ -1557,7 +1557,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                 }).collect(Collectors.toList());
                                 if(ListUtils.isNotEmpty(groupTourHotels)){
                                     if(groupTourHotels.stream().allMatch(h -> StringUtils.isBlank(h.getDesc()))){
-                                        groupTourHotels.get(0).setDesc(journeyModule.getDescription());
+                                        groupTourHotels.get(0).setDesc(removePre(journeyModule.getDescription()));
                                     }
                                     item.setGroupTourHotels(groupTourHotels);
                                 }
@@ -1612,7 +1612,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     item.setPoiName(String.format("从%s乘%s到%s", journeyModule.getTraffic().getFrom(), means, journeyModule.getTraffic().getTo()));
 
                                 }
-                                item.setPoiDesc(journeyModule.getDescription());
+                                item.setPoiDesc(removePre(journeyModule.getDescription()));
                                 if(ListUtils.isNotEmpty(journeyModule.getPicture())){
                                     item.setImages(journeyModule.getPicture().stream().map(DfyJourneyDetail.JourneyPicture::getUrl).collect(Collectors.toList()));
                                 }
