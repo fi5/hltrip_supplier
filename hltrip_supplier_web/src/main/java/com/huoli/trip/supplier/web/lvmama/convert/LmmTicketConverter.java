@@ -18,7 +18,6 @@ import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import org.apache.commons.lang3.StringUtils;
-import sun.awt.motif.X11CNS11643;
 
 import java.util.Arrays;
 import java.util.List;
