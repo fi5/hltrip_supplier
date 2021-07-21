@@ -1668,6 +1668,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     }
                                     item.setPlayTime(convertTime(moduleShop.getTimes()));
                                     item.setType("4");
+                                    item.setSubType("3");
                                     items.add(item);
                                 }
                             }
