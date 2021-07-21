@@ -1,8 +1,10 @@
 package com.huoli.trip.supplier.web.service.impl;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.api.ProductService;
 import com.huoli.trip.supplier.web.dao.ProductDao;
@@ -31,6 +33,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private DynamicProductItemService dynamicProductItemService;
 
+    @Reference(group = "hltrip", timeout = 30000, check = false, retries = 3)
+    ProductDataService productService;
+
     @Override
     public void updateStatusByCode(String code, int status){
         productDao.updateStatusByCode(code, status);
@@ -38,9 +43,24 @@ public class ProductServiceImpl implements ProductService {
 
     }
     @Override
-    public void updateStatusByCodev2(String code, int status,String category){
-        productDao.updateStatusByCodev2(code, status,category);
-        dynamicProductItemService.refreshItemByProductCode(Lists.newArrayList(code));
+    public void updateStatusByCodev2(String productId, int status,String category){
+        switch (category) {
+            //跟团游
+            case "group_tour":
+                productDao.updateGroupTourStatusByCode(productId,status);
+                productService.updateProduct(1, productId, 1);
+                break;
+            //门票
+            case "d_ss_ticket":
+                productDao.updateScenicspotStatusByCode(productId,status);
+                productService.updateProduct(0, productId, 1);
+                break;
+            //酒景
+            case "hotel_scenicSpot":
+                productDao.updateHotelScenicSpotStatusByCode(productId,status);
+                productService.updateProduct(2, productId, 1);
+                break;
+        }
     }
 
     @Override

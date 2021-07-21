@@ -23,7 +23,7 @@ public interface ProductService {
      * @param code
      * @param status
      */
-    void updateStatusByCodev2(String code, int status, String category);
+    void updateStatusByCodev2(String productId, int status, String category);
 
     /**
      * 更新供应商状态

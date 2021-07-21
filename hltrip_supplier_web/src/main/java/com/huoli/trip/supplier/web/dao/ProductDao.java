@@ -64,11 +64,25 @@ public interface ProductDao {
     void updateStatusByCode(String code, int status);
 
     /**
-     * 上下架v2
-     * @param code
+     * 更新跟团游状态
+     * @param productId
      * @param status
      */
-    void updateStatusByCodev2(String productId, int status, String category);
+    void updateGroupTourStatusByCode(String productId, int status);
+
+    /**
+     * 更新门票状态
+     * @param productId
+     * @param status
+     */
+    void updateScenicspotStatusByCode(String productId, int status);
+
+    /**
+     * 更新酒景状态
+     * @param productId
+     * @param status
+     */
+    void updateHotelScenicSpotStatusByCode(String productId, int status);
 
     /**
      * 根据状态查询产品

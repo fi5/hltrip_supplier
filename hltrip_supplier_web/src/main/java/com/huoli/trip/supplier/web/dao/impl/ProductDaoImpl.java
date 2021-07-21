@@ -40,8 +40,6 @@ public class ProductDaoImpl implements ProductDao {
 
     @Autowired
     private MongoTemplate mongoTemplate;
-    @Reference(group = "hltrip", timeout = 30000, check = false, retries = 3)
-    ProductDataService productService;
 
     @Override
     public void updateByCode(ProductPO productPO){
@@ -60,27 +58,21 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
-    public void updateStatusByCodev2(String productId, int status, String category){
-        switch (category) {
-            //跟团游
-            case "group_tour":
-                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
-                        Update.update("status", status), MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
-                productService.updateProduct(1, productId, 1);
-                break;
-            //门票
-            case "d_ss_ticket":
-                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
-                        Update.update("status", status), MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT);
-                productService.updateProduct(0, productId, 1);
-                break;
-            //酒景
-            case "hotel_scenicSpot":
-                mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
-                        Update.update("status", status), MongoConst.COLLECTION_NAME_HOTEL_SCENICSPOT_PRODUCT);
-                productService.updateProduct(2, productId, 1);
-                break;
-        }
+    public void updateGroupTourStatusByCode(String productId, int status){
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                Update.update("status", status), MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+    }
+
+    @Override
+    public void updateScenicspotStatusByCode(String productId, int status){
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                Update.update("status", status), MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT);
+    }
+
+    @Override
+    public void updateHotelScenicSpotStatusByCode(String productId, int status){
+        mongoTemplate.updateFirst(new Query().addCriteria(Criteria.where("_id").is(productId)),
+                Update.update("status", status), MongoConst.COLLECTION_NAME_HOTEL_SCENICSPOT_PRODUCT);
     }
 
 
