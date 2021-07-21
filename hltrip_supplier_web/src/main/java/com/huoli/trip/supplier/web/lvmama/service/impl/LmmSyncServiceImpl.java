@@ -1103,6 +1103,33 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         }
                         gl.getPrices().getPrice().forEach(price ->
                             updatePrice(scenicSpotProductId, ruleId, price, g));
+                        LmmPrice lmmPrice = gl.getPrices().getPrice().stream().filter(price ->
+                                DateTimeUtil.parseDate(price.getDate()).getTime() >=
+                                        DateTimeUtil.trancateToDate(new Date()).getTime()).findFirst().orElse(null);
+                        if(lmmPrice.getAheadHour() > 0){
+                            int min = lmmPrice.getAheadHour();
+                            int day = 0;
+                            String time;
+                            if(min > 0){
+                                int hour = min / 60;
+                                int newMin = min % 60;
+                                day = hour / 24;
+                                int newHour = hour % 24;
+                                time = String.format("%s:%s", newHour < 10 ? String.format("0%s", newHour) : String.valueOf(newHour),
+                                        newMin < 10 ? String.format("0%s", newMin) : String.valueOf(newMin));
+
+                            } else {
+                                min = Math.abs(min);
+                                int hour = min / 60;
+                                int newMin = min % 60;
+                                time = String.format("%s:%s", hour < 10 ? String.format("0%s", hour) : String.valueOf(hour),
+                                        newMin < 10 ? String.format("0%s", newMin) : String.valueOf(newMin));
+                            }
+                            ScenicSpotProductMPO updateProduct = scenicSpotProductDao.getByProductId(scenicSpotProductId);
+                            updateProduct.getScenicSpotProductTransaction().setBookBeforeDay(day);
+                            updateProduct.getScenicSpotProductTransaction().setBookBeforeTime(time);
+                            scenicSpotProductDao.saveProduct(updateProduct);
+                        }
                     });
                 });
 
