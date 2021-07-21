@@ -1540,7 +1540,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                                     && ListUtils.isNotEmpty(journeyModule.getHotelList())) {
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();
                                 item.setType("5");
-                                item.setGroupTourHotels(journeyModule.getHotelList().stream().map(h -> {
+                                List<GroupTourHotel> groupTourHotels = journeyModule.getHotelList().stream().map(h -> {
                                     GroupTourHotel groupTourHotel = new GroupTourHotel();
                                     groupTourHotel.setStar(h.getStarName());
                                     groupTourHotel.setDesc(removePre(h.getDescription()));
@@ -1554,7 +1554,13 @@ public class DfySyncServiceImpl implements DfySyncService {
                                                         String.format("%s<br>%s<br>", r.getTitle(), r.getDescription())).collect(Collectors.joining())));
                                     }
                                     return groupTourHotel;
-                                }).collect(Collectors.toList()));
+                                }).collect(Collectors.toList());
+                                if(ListUtils.isNotEmpty(groupTourHotels)){
+                                    if(groupTourHotels.stream().allMatch(h -> StringUtils.isBlank(h.getDesc()))){
+                                        groupTourHotels.get(0).setDesc(journeyModule.getDescription());
+                                    }
+                                    item.setGroupTourHotels(groupTourHotels);
+                                }
                                 item.setTime(journeyModule.getMoment());
                                 items.add(item);
                             }
@@ -1695,13 +1701,20 @@ public class DfySyncServiceImpl implements DfySyncService {
                 }).collect(Collectors.toList()));
             }
             setMealMPO.setGroupTourPrices(syncToursPriceV2(groupTourProductMPO.getSupplierProductId(), departCity.getCode()));
+            if(setMealMPO.getCreateTime() == null){
+                setMealMPO.setCreateTime(new Date());
+            }
+            setMealMPO.setUpdateTime(new Date());
             groupTourProductSetMealDao.saveSetMeals(setMealMPO);
-            GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
+            GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO = groupProductBackupDao.getGroupProductBackupByProductIdAndSetMealId(groupTourProductMPO.getId(), setMealMPO.getId());
+            if(groupTourProductSetMealBackupMPO == null ){
+                groupTourProductSetMealBackupMPO = new GroupTourProductSetMealBackupMPO();
+                groupTourProductSetMealBackupMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
+            }
             groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
             groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
-            groupTourProductSetMealBackupMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT));
             groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
-            groupProductBackupDao.saveGroupProductBackup(groupTourProductSetMealBackupMPO);
+            groupProductBackupDao.saveGroupProductBackupById(groupTourProductSetMealBackupMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
             if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
                 // 添加订阅通知

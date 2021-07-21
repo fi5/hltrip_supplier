@@ -39,6 +39,16 @@ public class GroupProductBackupDaoImpl implements GroupProductBackupDao {
     }
 
     @Override
+    public void saveGroupProductBackupById(GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("_id").is(groupTourProductSetMealBackupMPO.getId()));
+        Document document = new Document();
+        mongoTemplate.getConverter().write(groupTourProductSetMealBackupMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT_SET_MEAL_BACKUP);
+    }
+
+    @Override
     public GroupTourProductSetMealBackupMPO getGroupProductBackupBySetMealId(String setMealId){
         Query query = new Query();
         query.addCriteria(Criteria.where("groupTourProductSetMealMPO._id").is(setMealId));
@@ -49,6 +59,14 @@ public class GroupProductBackupDaoImpl implements GroupProductBackupDao {
     public GroupTourProductSetMealBackupMPO getGroupProductBackupByProductId(String productId){
         Query query = new Query();
         query.addCriteria(Criteria.where("groupTourProductMPO._id").is(productId));
+        return mongoTemplate.findOne(query, GroupTourProductSetMealBackupMPO.class);
+    }
+
+    @Override
+    public GroupTourProductSetMealBackupMPO getGroupProductBackupByProductIdAndSetMealId(String productId, String setMealId){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("groupTourProductMPO._id").is(productId)
+                .and("groupTourProductSetMealMPO._id").is(setMealId));
         return mongoTemplate.findOne(query, GroupTourProductSetMealBackupMPO.class);
     }
 }

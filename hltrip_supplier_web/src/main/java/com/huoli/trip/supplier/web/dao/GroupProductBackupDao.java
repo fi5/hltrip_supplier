@@ -12,10 +12,38 @@ import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductSetMealBackupM
  */
 public interface GroupProductBackupDao {
 
+    /**
+     * 保存备份
+     * @param groupTourProductSetMealBackupMPO
+     */
     void saveGroupProductBackup(GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO);
 
+    /**
+     * 根据id保存备份
+     * @param groupTourProductSetMealBackupMPO
+     */
+    void saveGroupProductBackupById(GroupTourProductSetMealBackupMPO groupTourProductSetMealBackupMPO);
+
+    /**
+     * 根据套餐id查备份
+     * @param setMealId
+     * @return
+     */
     GroupTourProductSetMealBackupMPO getGroupProductBackupBySetMealId(String setMealId);
 
+    /**
+     * 根据产品id查备份
+     * @param productId
+     * @return
+     */
     GroupTourProductSetMealBackupMPO getGroupProductBackupByProductId(String productId);
+
+    /**
+     * 根据产品id、套餐id查备份
+     * @param productId
+     * @param setMealId
+     * @return
+     */
+    GroupTourProductSetMealBackupMPO getGroupProductBackupByProductIdAndSetMealId(String productId, String setMealId);
 
 }
