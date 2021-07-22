@@ -108,4 +108,9 @@ public interface CommonService {
      */
     void transScenic(List<String> codes);
 
+    /**
+     * 设置审核城市
+     */
+    void setPoiReviewCity();
+
 }

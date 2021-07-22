@@ -131,4 +131,16 @@ public class CommonController {
         }
         return BaseResponse.withSuccess();
     }
+
+    @PostMapping("/refresh/poi/review/city")
+    public BaseResponse refreshProductStatusByItemId(){
+        try {
+            log.info("开始刷新审核列表城市。。");
+            commonService.setPoiReviewCity();
+        } catch (Exception e) {
+            log.error("刷新审核列表城市异常", e);
+            return BaseResponse.withFail(-1, "刷新审核列表城市失败");
+        }
+        return BaseResponse.withSuccess();
+    }
 }

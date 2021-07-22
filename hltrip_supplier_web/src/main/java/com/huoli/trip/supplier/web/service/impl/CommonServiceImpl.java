@@ -29,6 +29,8 @@ import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -1731,5 +1733,28 @@ public class CommonServiceImpl implements CommonService {
             // 更新备份
             updateScenicSpotMPOBackup(scenicSpotMPO, productItemPO.getSupplierItemId(), productItemPO.getSupplierId(), productItemPO);
         }
+    }
+
+    @Override
+    public void setPoiReviewCity(){
+        int i = 1;
+        int size = 100;
+        do{
+            List<PoiReviewMPO> reviewMPOs = poiReviewDao.getPoiReviewByPage(i, size);
+            if(ListUtils.isEmpty(reviewMPOs)){
+                break;
+            }
+            reviewMPOs.forEach(r -> {
+                if(StringUtils.isNotBlank(r.getCityName())){
+                    List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(r.getCityName(), 2, null);
+                    if(ListUtils.isNotEmpty(cites)) {
+                        ChinaCity cityObj = cites.get(0);
+                        r.setCityCode(cityObj.getCode());
+                        poiReviewDao.updateCity(r);
+                    }
+                }
+            });
+            i++;
+        } while (true);
     }
 }
