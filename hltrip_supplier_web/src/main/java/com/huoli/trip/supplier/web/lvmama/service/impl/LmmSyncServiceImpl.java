@@ -809,7 +809,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     }
                 }
                 // 补充景点数据，这里后面开始人工维护以后要去掉，否则可能会覆盖
-                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
+//                updateScenic(scenicSpotMPO, scenicSpotProductMPO, lmmProduct);
                 if(lmmProduct.getServiceGuarantee() == null){
                     scenicSpotProductMPO.setTags(null);
                 } else {
