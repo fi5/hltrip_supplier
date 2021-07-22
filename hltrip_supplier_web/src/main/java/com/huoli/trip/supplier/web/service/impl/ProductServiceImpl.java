@@ -36,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     @Reference(group = "hltrip", timeout = 30000, check = false, retries = 3)
     ProductDataService productService;
 
+
     @Override
     public void updateStatusByCode(String code, int status){
         productDao.updateStatusByCode(code, status);

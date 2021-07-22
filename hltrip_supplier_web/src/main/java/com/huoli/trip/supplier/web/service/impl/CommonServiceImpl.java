@@ -856,7 +856,7 @@ public class CommonServiceImpl implements CommonService {
             return;
         }
         log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName());
-        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), null);
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
@@ -891,7 +891,7 @@ public class CommonServiceImpl implements CommonService {
         scenicSpotMappingMPO.setCreateTime(new Date());
         scenicSpotMappingMPO.setUpdateTime(new Date());
         scenicSpotMappingDao.addScenicSpotMapping(scenicSpotMappingMPO);
-        log.info("{}景点{}已关联本地景点id={}", channel, channelScenicId, newScenic.getId());
+        log.info("{}景点{}已关联本地景点id={}", channel, channelScenicId, scenicId);
     }
 
     @Override
