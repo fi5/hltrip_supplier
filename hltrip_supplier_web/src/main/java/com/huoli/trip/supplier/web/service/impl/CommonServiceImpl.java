@@ -874,6 +874,7 @@ public class CommonServiceImpl implements CommonService {
             poiReviewMPO.setStatus(0);
             poiReviewMPO.setCreateTime(new Date());
             poiReviewMPO.setCityName(newScenic.getCity());
+            poiReviewMPO.setCityCode(newScenic.getCityCode());
             poiReviewMPO.setPoiId(newScenic.getId());
             poiReviewMPO.setPoiType(0);
             poiReviewMPO.setUpdateTime(new Date());
