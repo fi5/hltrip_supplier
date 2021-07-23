@@ -760,7 +760,9 @@ public class DfySyncServiceImpl implements DfySyncService {
         DfyBaseRequest detailBaseRequest = new DfyBaseRequest<>(detailRequest);
         DfyBaseResult<DfyScenicDetail> detailBaseResult = diFengYunClient.getScenicDetail(detailBaseRequest);
         if(detailBaseResult != null && detailBaseResult.getData() != null){
-            DfyScenicDetail scenicDetail = detailBaseResult.getData();
+            String oriContent = JSON.toJSONString(detailBaseResult.getData());
+            DfyScenicDetail scenicDetail = JSON.parseObject(StringUtil.delHTMLTag(oriContent), DfyScenicDetail.class);
+//            DfyScenicDetail scenicDetail = detailBaseResult.getData();
             // 转本地结构
             ScenicSpotMPO newScenic = DfyTicketConverter.convertToScenicSpotMPO(scenicDetail);
             // 设置省市区
@@ -809,7 +811,9 @@ public class DfySyncServiceImpl implements DfySyncService {
         DfyBaseResult<DfyTicketDetail> ticketDetailDfyBaseResult = diFengYunClient.getTicketDetail(ticketDetailBaseRequest);
 
         if (ticketDetailDfyBaseResult != null && ticketDetailDfyBaseResult.getData() != null) {
-            DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
+            String oriContent = JSON.toJSONString(ticketDetailDfyBaseResult.getData());
+            DfyTicketDetail dfyTicketDetail = JSON.parseObject(StringUtil.delHTMLTag(oriContent), DfyTicketDetail.class);
+//            DfyTicketDetail dfyTicketDetail = ticketDetailDfyBaseResult.getData();
             ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(dfyTicketDetail.getScenicId(), Constants.SUPPLIER_CODE_DFY);
             if(scenicSpotMappingMPO == null){
                 log.error("笛风云产品{}没有查到关联景点{}", dfyTicketDetail.getProductId(), dfyTicketDetail.getScenicId());
@@ -907,7 +911,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
             scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
             scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
-            scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(dfyTicketDetail));
+            scenicSpotProductBackupMPO.setOriginContent(oriContent);
             scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
             commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
@@ -1266,7 +1270,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             return;
         }
-        DfyToursDetailResponse dfyToursDetail = baseResult.getData();
+        String oriContent = JSON.toJSONString(baseResult.getData());
+        // 删html
+        DfyToursDetailResponse dfyToursDetail = JSON.parseObject(StringUtil.delHTMLTag(oriContent), DfyToursDetailResponse.class);
         if (dfyToursDetail.getBrandId() == null) {
             log.error("笛风云跟团游产品{}不是牛人专线[{}]v2，跳过。。", productId, dfyToursDetail.getBrandName());
             return;
@@ -1362,6 +1368,12 @@ public class DfySyncServiceImpl implements DfySyncService {
 //            // 默认其它
 //            groupTourProductMPO.setTheme("16");
 //        }
+        // 产品要求添加笛风云默认退改说明
+        if(StringUtils.isBlank(groupTourProductMPO.getRefundDesc())){
+            groupTourProductMPO.setRefundDesc("(1)出发前7 日及以上的，支付旅游费用总额5%的违约金;<br>(2)出发前6日至4\n" +
+                    "日的，支付旅游费用总额10%的违约金;<br>(3)出发前3日至1日的，支付旅游费用总额15%的违约金;<br>(4)出发当日的，支付旅游费用总额20%的违约金。\n" +
+                    "上述款项供应商有权选择在双方合作的后续款项中予以直接扣除，且开具的发票金额按照扣除后金额开具。<br>遇到国家法定节假日出游的客人，因个人原因退团以实际损失为准(损失较大甚至全损)。");
+        }
         String name = dfyToursDetail.getProductName();
         String point = null;
         if(name.startsWith("<")){
@@ -1714,7 +1726,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             groupTourProductSetMealBackupMPO.setGroupTourProductMPO(groupTourProductMPO);
             groupTourProductSetMealBackupMPO.setGroupTourProductSetMealMPO(setMealMPO);
-            groupTourProductSetMealBackupMPO.setOriginContent(JSON.toJSONString(dfyToursDetail));
+            groupTourProductSetMealBackupMPO.setOriginContent(oriContent);
             groupProductBackupDao.saveGroupProductBackupById(groupTourProductSetMealBackupMPO);
             commonService.refreshList(1, groupTourProductMPO.getId(), 1, add);
             if(ListUtils.isNotEmpty(groupTourProductMPO.getChangedFields()) || setMealChanged || add){
