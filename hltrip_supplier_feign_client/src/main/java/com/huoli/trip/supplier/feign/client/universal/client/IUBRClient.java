@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.feign.client.universal.client;
 
 import com.huoli.trip.supplier.feign.client.universal.client.impl.UBRClientFallback;
 import com.huoli.trip.supplier.feign.client.universal.interceptor.UBRFeignInterceptor;
+import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
@@ -43,6 +44,6 @@ public interface IUBRClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, path = "/api/v1/ticket")
-    UBRBaseResponse<> getTicketList();
+    UBRBaseResponse<UBRTicketList> getTicketList();
 
 }
