@@ -75,7 +75,7 @@ public class RedisConfig {
      * @return
      */
     @Bean
-    public JedisConnectionFactory clientJedisConnectionFactory() {
+    public JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory connectionFactory;
         if ("1".equals(ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_REDIS_IS_CLUSTER))) {
             connectionFactory = new JedisConnectionFactory(clusterConfiguration());
@@ -94,7 +94,7 @@ public class RedisConfig {
      */
     @SuppressWarnings("unchecked")
     @Bean(name = "jedisTemplate")
-    public RedisTemplate redisTemplate(@Qualifier("clientJedisConnectionFactory") JedisConnectionFactory jedisConnectionFactory) {
+    public RedisTemplate redisTemplate(@Qualifier("jedisConnectionFactory") JedisConnectionFactory jedisConnectionFactory) {
         RedisTemplate redisTemplate = new RedisTemplate();
         redisTemplate.setConnectionFactory(jedisConnectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
