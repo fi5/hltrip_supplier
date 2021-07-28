@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.config;
 
 import brave.Span;
 import brave.Tracer;
+import brave.internal.HexCodec;
 import com.google.common.collect.Maps;
 import com.huoli.eagle.BraveTrace;
 import com.huoli.eagle.eye.core.HuoliAtrace;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import zipkin2.internal.HexCodec;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
