@@ -31,6 +31,11 @@ public class UBRTicketInfo {
      */
     private String minQuantity;
 
+    /**
+     * 票验证类型 GID/FR 表示证件或人脸识别，QR Code 表示二维码，Alternate Media表示其他方式
+     */
+    private String mediaType;
+
     private String offlineDate;
 
     /**

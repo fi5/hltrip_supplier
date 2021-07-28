@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.feign.client.universal.client.impl;
 import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
 import feign.hystrix.FallbackFactory;
@@ -42,7 +43,12 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
             }
 
             @Override
-            public UBRBaseResponse<UBRTicketList> getTicketList() {
+            public UBRBaseResponse<UBRTicketList> getTicketList(UBRTicketListRequest request) {
+                return null;
+            }
+
+            @Override
+            public UBRBaseResponse init() {
                 return null;
             }
         };
