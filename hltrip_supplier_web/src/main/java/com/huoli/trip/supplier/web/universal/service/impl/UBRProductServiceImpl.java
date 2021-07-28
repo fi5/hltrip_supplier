@@ -15,8 +15,10 @@ import com.xiaoleilu.hutool.lang.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,6 +35,30 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @Autowired
     private IUBRClient ubrClient;
+
+    @Autowired
+    private RedisTemplate jedisTemplate;
+
+    @PostConstruct
+    public void checkUserInfo(){
+        String token;
+        if(!jedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
+            token = getToken();
+        } else {
+            token = jedisTemplate.opsForValue().get(UBRConstants.AUTH_KEY).toString();
+        }
+        if(StringUtils.isNotBlank(token)){
+            token = String.format("%s%s", "Bearer ", token);
+            log.info("环球影城token={}", token);
+        } else {
+            log.error("环球影城token过期了，redis拿不到。");
+            return;
+        }
+        // token 有效期7天。小于24小时的时候就刷新一下
+        if(jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
+            refreshToken();
+        }
+    }
 
     @Override
     public UBRTicketList getTicketList(UBRTicketListRequest request){
@@ -72,63 +98,45 @@ public class UBRProductServiceImpl implements UBRProductService {
         UBRTicketList ubrTicketList = getTicketList(request);
 
     }
-//
-//    String token;
-//            if(!clientJedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
-//        token = getToken();
-//    } else {
-//        token = clientJedisTemplate.opsForValue().get(UBRConstants.AUTH_KEY).toString();
-//    }
-//            if(StringUtils.isNotBlank(token)){
-//        token = String.format("%s%s", "Bearer ", token);
-//        log.info("环球影城token={}", token);
-//    } else {
-//        log.error("环球影城token过期了，redis拿不到。");
-//        return;
-//    }
-//            requestTemplate.header("Authorization", token);
-//    // token 有效期7天。小于24小时的时候就刷新一下
-//            if(clientJedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
-//        refreshToken();
-//    }
-//
-//    private String getToken(){
-//        String account = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_ACCOUNT);
-//        String password = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_PASSWORD);
-//        UBRLoginRequest request = new UBRLoginRequest();
-//        request.setAccount(account);
-//        request.setPassword(Base64.encode(password));
-//        log.info("请求环球影城登录，request={}", JSON.toJSONString(request));
-//        UBRBaseResponse<UBRLoginResponse> response = iubrClient.login(request);
-//        if(response.getCode() != 200){
-//            log.error("环球影城登录失败，code={}, msg={}", response.getCode(), response.getMsg());
-//            return null;
-//        }
-//        if(response.getData() == null || response.getData().getAuth() == null
-//                || StringUtils.isBlank(response.getData().getAuth().getToken())){
-//            log.error("环球影城没有返回正确的登录信息，code={}, msg={}, data={}",
-//                    response.getCode(), response.getMsg(), response.getData() == null ? null : JSON.toJSONString(response.getData()));
-//            return null;
-//        }
-//        String token = response.getData().getAuth().getToken();
-//        clientJedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token);
-//        return token;
-//    }
-//
-//    private String refreshToken(){
-//        UBRBaseResponse<UBRLoginResponse> response = iubrClient.refreshToken();
-//        if(response.getCode() != 200){
-//            log.error("环球影城刷新token失败，code={}, msg={}", response.getCode(), response.getMsg());
-//            return null;
-//        }
-//        if(response.getData() == null || response.getData().getAuth() == null
-//                || StringUtils.isBlank(response.getData().getAuth().getToken())){
-//            log.error("环球影城没有返回正确的鉴权信息，code={}, msg={}, data={}",
-//                    response.getCode(), response.getMsg(), response.getData() == null ? null : JSON.toJSONString(response.getData()));
-//            return null;
-//        }
-//        String token = response.getData().getAuth().getToken();
-//        clientJedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token, (7 * 24), TimeUnit.HOURS);
-//        return token;
-//    }
+
+
+    private String getToken(){
+        String account = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_ACCOUNT);
+        String password = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_PASSWORD);
+        UBRLoginRequest request = new UBRLoginRequest();
+        request.setAccount(account);
+        request.setPassword(Base64.encode(password));
+        log.info("请求环球影城登录，request={}", JSON.toJSONString(request));
+        UBRBaseResponse<UBRLoginResponse> response = ubrClient.login(request);
+        if(response.getCode() != 200){
+            log.error("环球影城登录失败，code={}, msg={}", response.getCode(), response.getMsg());
+            return null;
+        }
+        if(response.getData() == null || response.getData().getAuth() == null
+                || StringUtils.isBlank(response.getData().getAuth().getToken())){
+            log.error("环球影城没有返回正确的登录信息，code={}, msg={}, data={}",
+                    response.getCode(), response.getMsg(), response.getData() == null ? null : JSON.toJSONString(response.getData()));
+            return null;
+        }
+        String token = response.getData().getAuth().getToken();
+        jedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token);
+        return token;
+    }
+
+    private String refreshToken(){
+        UBRBaseResponse<UBRLoginResponse> response = ubrClient.refreshToken();
+        if(response.getCode() != 200){
+            log.error("环球影城刷新token失败，code={}, msg={}", response.getCode(), response.getMsg());
+            return null;
+        }
+        if(response.getData() == null || response.getData().getAuth() == null
+                || StringUtils.isBlank(response.getData().getAuth().getToken())){
+            log.error("环球影城没有返回正确的鉴权信息，code={}, msg={}, data={}",
+                    response.getCode(), response.getMsg(), response.getData() == null ? null : JSON.toJSONString(response.getData()));
+            return null;
+        }
+        String token = response.getData().getAuth().getToken();
+        jedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token, (7 * 24), TimeUnit.HOURS);
+        return token;
+    }
 }
