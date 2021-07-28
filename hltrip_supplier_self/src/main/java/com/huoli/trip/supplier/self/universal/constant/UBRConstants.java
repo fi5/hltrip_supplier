@@ -15,13 +15,22 @@ public class UBRConstants {
      */
     public static String AUTH_KEY = "UBR_AUTH_TOKEN_KEY";
 
+    // 配置文件
+
+    public static final String CONFIG_FILE_UBR = "supplier_ubr.properties";
+
+    // 配置项
+    /**
+     * 服务器地址
+     */
+    public static final String CONFIG_ITEM_HOST_SERVER = "ubr.host.server";
     /**
      * 环球账号
      */
-    public static String ACCOUNT = "UBR_ACCOUNT";
+    public static String CONFIG_ITEM_ACCOUNT = "ubr.account";
 
     /**
      * 环球密码
      */
-    public static String PASSWORD = "UBR_PASSWORD";
+    public static String CONFIG_ITEM_PASSWORD = "ubr.password";
 }

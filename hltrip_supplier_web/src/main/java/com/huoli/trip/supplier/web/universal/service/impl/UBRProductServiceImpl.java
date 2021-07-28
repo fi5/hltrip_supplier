@@ -25,6 +25,7 @@ public class UBRProductServiceImpl implements UBRProductService {
     @Autowired
     private IUBRClient ubrClient;
 
+    @Override
     public UBRTicketList getTicketList(UBRTicketListRequest request){
         UBRBaseResponse<UBRTicketList> response = ubrClient.getTicketList(request);
         if(response == null){
@@ -42,6 +43,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         return response.getData();
     }
 
+    @Override
     public void init(){
         UBRBaseResponse response = ubrClient.init();
         if(response == null){

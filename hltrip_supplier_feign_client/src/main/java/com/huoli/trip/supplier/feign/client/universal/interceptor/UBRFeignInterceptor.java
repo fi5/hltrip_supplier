@@ -68,8 +68,8 @@ public class UBRFeignInterceptor implements RequestInterceptor {
     }
 
     private String getToken(){
-        String account = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, UBRConstants.ACCOUNT);
-        String password = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_LVMAMA, UBRConstants.PASSWORD);
+        String account = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_ACCOUNT);
+        String password = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_PASSWORD);
         UBRLoginRequest request = new UBRLoginRequest();
         request.setAccount(account);
         request.setPassword(Base64.encode(password));
