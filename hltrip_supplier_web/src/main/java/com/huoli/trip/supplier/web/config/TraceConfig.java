@@ -61,7 +61,7 @@ public class TraceConfig {
     public static Object createSpan(String name, BraveTrace huoliTrace, String traceId) {
         Object newSpan;
         Span currentSpan = huoliTrace.currentSpan();
-        if (StringUtils.isBlank(traceId)) {
+        if (currentSpan != null) {
             newSpan = huoliTrace.createSpan(name, currentSpan);
         } else {
             newSpan = huoliTrace.createSpan(name, HexCodec.lowerHexToUnsignedLong(traceId), HexCodec.lowerHexToUnsignedLong(traceId));
