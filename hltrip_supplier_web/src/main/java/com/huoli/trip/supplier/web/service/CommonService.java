@@ -112,5 +112,10 @@ public interface CommonService {
      * 设置审核城市
      */
     void setPoiReviewCity();
+    /**
+     * 将远程图片上传到本地
+     */
+    void upLoadImageToLocal(List<String> ids);
 
+    void refreshScenicSpotDetailDesc(List<String> ids);
 }

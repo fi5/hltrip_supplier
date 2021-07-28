@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -54,5 +56,43 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
         mongoTemplate.getConverter().write(scenicSpotMPO, document);
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_SCENICSPOT);
+    }
+
+    @Override
+    public List<ScenicSpotMPO> getdetailDesc(){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("detailDesc").ne("").ne(null));
+        return mongoTemplate.find(query, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public List<ScenicSpotMPO> getNetImages(){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("images").regex(".*/(?!intticket).*\\.(?!aliyuncs).*"));
+        return mongoTemplate.find(query, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public List<ScenicSpotMPO> getNetImagesByIds(List<String> ids){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("images").regex(".*/(?!intticket).*\\.(?!aliyuncs).*"));
+        query.addCriteria(Criteria.where("_id").in(ids));
+        return mongoTemplate.find(query, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public void updateImagesById(List<String> images,String id){
+        Query query = Query.query(Criteria.where("_id").is(id));
+        Update update = new Update();
+        update.set("images",images);
+        mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public void updateDeatailDescById(String detailDesc,String id){
+        Query query = Query.query(Criteria.where("_id").is(id));
+        Update update = new Update();
+        update.set("detailDesc",detailDesc);
+        mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
     }
 }
