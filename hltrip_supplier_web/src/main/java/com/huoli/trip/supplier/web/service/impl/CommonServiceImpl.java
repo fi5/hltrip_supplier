@@ -29,17 +29,13 @@ import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
+import java.util.*;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -149,6 +145,7 @@ public class CommonServiceImpl implements CommonService {
 //            return;
 //        }
         BackupProductPO backupProductPO = backupProductDao.getBackupProductByCode(product.getCode());
+        log.info("比对产品{}", backupProductPO.getCode());
         if(backupProductPO != null){
             List<String> productFields = Lists.newArrayList();
             ProductPO backupProduct = JSON.parseObject(backupProductPO.getData(), ProductPO.class);
@@ -864,6 +861,9 @@ public class CommonServiceImpl implements CommonService {
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             newScenic.setCreateTime(new Date());
             newScenic.setUpdateTime(new Date());
+            if (!CollectionUtils.isEmpty(newScenic.getImages())) {
+                newScenic.setImages(UploadUtil.getNetUrlAndUpload(newScenic.getImages()));
+            }
             // 没有找到映射就往本地新增一条
             scenicSpotDao.addScenicSpot(newScenic);
             scenicId = newScenic.getId();
@@ -1756,5 +1756,40 @@ public class CommonServiceImpl implements CommonService {
             });
             i++;
         } while (true);
+    }
+    @Override
+    public void upLoadImageToLocal(List<String> ids){
+        log.info("处理景点图片信息.....");
+        List<ScenicSpotMPO> scenicSpotMPOs;
+        if (!CollectionUtils.isEmpty(ids)){
+            scenicSpotMPOs = scenicSpotDao.getNetImagesByIds(ids);
+        } else {
+            scenicSpotMPOs = scenicSpotDao.getNetImages();
+        }
+        for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+            scenicSpotDao.updateImagesById(UploadUtil.getNetUrlAndUpload(scenicSpotMPO.getImages()),scenicSpotMPO.getId());
+        }
+        log.info("处理景点图片信息完毕");
+    }
+
+    @Override
+    public void refreshScenicSpotDetailDesc(List<String> ids){
+        log.info("处理景点描述信息.....");
+        if (!CollectionUtils.isEmpty(ids)){
+            for (String id : ids){
+                ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(id);
+                scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
+                scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
+                scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+            }
+        } else {
+            List<ScenicSpotMPO> scenicSpotMPOs = scenicSpotDao.getdetailDesc();
+            for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+                scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
+                scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
+                scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+            }
+        }
+        log.info("处理景点描述信息完毕.....");
     }
 }

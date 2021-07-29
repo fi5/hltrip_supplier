@@ -6,6 +6,7 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.task.RefreshItemTask;
+import com.huoli.trip.supplier.web.task.UploadImageToLocalTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -140,6 +141,30 @@ public class CommonController {
         } catch (Exception e) {
             log.error("刷新审核列表城市异常", e);
             return BaseResponse.withFail(-1, "刷新审核列表城市失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/refresh/upload/image")
+    public BaseResponse refreshUploadImageTolocal(@RequestBody List<String> ids){
+        try {
+            log.info("开始刷新图片数据");
+            commonService.upLoadImageToLocal(ids);
+        } catch (Exception e) {
+            log.error("刷新图片数据异常", e);
+            return BaseResponse.withFail(-1, "刷新图片数据失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/refresh/scenic/detail")
+    public BaseResponse refreshScenicSpotDetailDesc(@RequestBody List<String> ids){
+        try {
+            log.info("开始更新景点描述");
+            commonService.refreshScenicSpotDetailDesc(ids);
+        } catch (Exception e) {
+            log.error("更新景点描述异常", e);
+            return BaseResponse.withFail(-1, "更新景点描述失败");
         }
         return BaseResponse.withSuccess();
     }
