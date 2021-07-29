@@ -41,18 +41,22 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @PostConstruct
     public void checkUserInfo(){
-        if(!jedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
-            log.info("环球影城token过期，准备重新登录。。");
-            getToken();
-        } else {
-            Long hours = jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS);
-            log.info("环球影城token有效期还有{}小时", hours);
-            // token 有效期7天。小于24小时的时候就刷新一下
-            if(jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
-                log.info("环球影城token有效期小于24小时，准备刷新。。");
-                refreshToken();
-                log.info("环球影城token刷新完成。。");
+        try {
+            if(!jedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
+                log.info("环球影城token过期，准备重新登录。。");
+                getToken();
+            } else {
+                Long hours = jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS);
+                log.info("环球影城token有效期还有{}小时", hours);
+                // token 有效期7天。小于24小时的时候就刷新一下
+                if(jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
+                    log.info("环球影城token有效期小于24小时，准备刷新。。");
+                    refreshToken();
+                    log.info("环球影城token刷新完成。。");
+                }
             }
+        } catch (Throwable e) {
+            log.error("环球影城检查登录信息异常，", e);
         }
     }
 
