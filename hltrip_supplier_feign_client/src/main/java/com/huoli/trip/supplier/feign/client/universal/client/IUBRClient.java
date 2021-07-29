@@ -11,6 +11,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 描述：<br/>
@@ -44,14 +45,14 @@ public interface IUBRClient {
      * 获取门票列表
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, path = "/api/v1/ticket")
-    UBRBaseResponse<UBRTicketList> getTicketList(UBRTicketListRequest request);
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/ticket")
+    UBRBaseResponse<UBRTicketList> getTicketList(@RequestParam("type") String type);
 
     /**
      * 初始化数据
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST, path = "/api/v1/init")
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/init")
     UBRBaseResponse init();
 
 }

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -43,7 +44,7 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
             }
 
             @Override
-            public UBRBaseResponse<UBRTicketList> getTicketList(@RequestBody UBRTicketListRequest request) {
+            public UBRBaseResponse<UBRTicketList> getTicketList(@RequestParam("type") String type) {
                 return null;
             }
 

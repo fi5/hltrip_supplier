@@ -32,7 +32,19 @@ public interface UBRProductService {
     String getToken();
 
     /**
+     * 刷新token
+     * @return
+     */
+    String refreshToken();
+
+    /**
      * 检查登录情况
      */
     void checkUserInfo();
+
+    /**
+     * 同步产品
+     * @param type
+     */
+    void syncProduct(String type);
 }

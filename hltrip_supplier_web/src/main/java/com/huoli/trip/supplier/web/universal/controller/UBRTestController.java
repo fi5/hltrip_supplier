@@ -34,9 +34,21 @@ public class UBRTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/refresh")
+    public DfyBaseResult UBRRefreshToken() {
+        ubrProductService.refreshToken();
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/login")
     public DfyBaseResult UBRLogin() {
         ubrProductService.getToken();
+        return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/sync/product")
+    public DfyBaseResult UBRSyncProduct(@RequestBody String type) {
+        ubrProductService.syncProduct(type);
         return DfyBaseResult.success();
     }
 

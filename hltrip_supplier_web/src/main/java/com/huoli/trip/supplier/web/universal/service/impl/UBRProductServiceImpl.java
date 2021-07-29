@@ -6,27 +6,30 @@ import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.BizTagConst;
 import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.BackChannelEntry;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.ConfigGetter;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.StringUtil;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
+import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
+import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
 import com.huoli.trip.supplier.self.universal.vo.UBRBaseProduct;
+import com.huoli.trip.supplier.self.universal.vo.UBRStock;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketInfo;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
-import com.huoli.trip.supplier.web.dao.ScenicSpotDao;
-import com.huoli.trip.supplier.web.dao.ScenicSpotProductDao;
-import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
-import com.huoli.trip.supplier.web.dao.ScenicSpotRuleDao;
+import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.universal.service.UBRProductService;
 import com.xiaoleilu.hutool.lang.Base64;
@@ -85,6 +88,9 @@ public class UBRProductServiceImpl implements UBRProductService {
     @Autowired
     private CommonService commonService;
 
+    @Autowired
+    private ScenicSpotProductBackupDao productBackupDao;
+
     @PostConstruct
     @Async
     public void checkUserInfo(){
@@ -110,7 +116,7 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @Override
     public UBRTicketList getTicketList(UBRTicketListRequest request){
-        UBRBaseResponse<UBRTicketList> response = ubrClient.getTicketList(request);
+        UBRBaseResponse<UBRTicketList> response = ubrClient.getTicketList(request.getType());
         if(response == null){
             log.error("环球影城门票列表无返回内容");
             return null;
@@ -144,11 +150,14 @@ public class UBRProductServiceImpl implements UBRProductService {
         log.info("环球影城初始化返回：{}", JSON.toJSONString(response));
     }
 
+    @Override
     public void syncProduct(String type){
         UBRTicketListRequest request = new UBRTicketListRequest();
         request.setType(type);
         UBRTicketList ubrTicketList = getTicketList(request);
-
+        String oriContent = JSON.toJSONString(ubrTicketList.getProduction());
+        List<UBRTicketInfo> infoList = JSON.parseArray(StringUtil.delHTMLTag(oriContent), UBRTicketInfo.class);
+        infoList.forEach(info -> convertToProduct(info, oriContent));
     }
 
     @Override
@@ -180,7 +189,8 @@ public class UBRProductServiceImpl implements UBRProductService {
         return token;
     }
 
-    private String refreshToken(){
+    @Override
+    public String refreshToken(){
         UBRBaseResponse<UBRLoginResponse> response = ubrClient.refreshToken();
         if(response == null){
             log.error("环球影城刷新token无返回内容");
@@ -202,8 +212,9 @@ public class UBRProductServiceImpl implements UBRProductService {
         return token;
     }
 
-    public ScenicSpotProductMPO convertToProduct(UBRTicketInfo ticketInfo){
+    public void convertToProduct(UBRTicketInfo ticketInfo, String oriContent){
         ScenicSpotProductMPO productMPO = productDao.getBySupplierProductId(ticketInfo.getBaseProduct().getCode(), Constants.SUPPLIER_CODE_BTG_TICKET);
+        boolean fresh = false;
         if(productMPO == null){
             productMPO = new ScenicSpotProductMPO();
             productMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
@@ -216,8 +227,8 @@ public class UBRProductServiceImpl implements UBRProductService {
             // todo 景点需要后台创建
             String scenicId = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_SCENIC_ID);
             productMPO.setScenicSpotId(scenicId);
+            fresh = true;
         }
-        String scenicId = productMPO.getScenicSpotId();
         String productId = productMPO.getId();
         UBRBaseProduct baseProduct = ticketInfo.getBaseProduct();
         productMPO.setName(baseProduct.getName());
@@ -245,29 +256,59 @@ public class UBRProductServiceImpl implements UBRProductService {
         ScenicSpotRuleMPO ruleMPO = convertToRule(productMPO, ticketInfo);
         productMPO.setRuleId(ruleMPO.getId());
         productMPO.setPcDescription(ticketInfo.getDescription());
+        convertPrice(baseProduct, productId, ruleMPO.getId());
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+        scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+        scenicSpotProductBackupMPO.setScenicSpotProduct(productMPO);
+        scenicSpotProductBackupMPO.setOriginContent(oriContent);
+        productBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+        commonService.refreshList(0, productId, 1, fresh);
+    }
 
-
+    private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId){
         if(ListUtils.isNotEmpty(baseProduct.getPrices())){
-            baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).map(p -> {
-                ScenicSpotProductPriceMPO priceMPO = new ScenicSpotProductPriceMPO();
-                priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
-                priceMPO.setScenicSpotProductId(productId);
-                priceMPO.setScenicSpotRuleId(ruleMPO.getId());
-                priceMPO.setUpdateTime(new Date());
-                priceMPO.setCreateTime(new Date());
-                priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
-                priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                priceMPO.setStartDate(p.getDatetime());
-                priceMPO.setEndDate(priceMPO.getStartDate());
-                baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
-                        && StringUtils.isNotBlank(s.getStatus())
-                        && StringUtils.equals(s.getStatus(), "normal")).findFirst().ifPresent(s -> {
-                    priceMPO.setStock(999);
-                });
-                return priceMPO;
-            }).filter(price -> price.getStock() > 0).collect(Collectors.toList());
+            List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
+            baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
+                if(DateTimeUtil.parseDate(p.getDatetime()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
+                    // 历史库存不更新
+                    return;
+                }
+                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDatetime())).findFirst().orElse(null);
+                if(priceMPO == null){
+                    priceMPO = new ScenicSpotProductPriceMPO();
+                    priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
+                    priceMPO.setScenicSpotProductId(productId);
+                    priceMPO.setScenicSpotRuleId(ruleId);
+                    priceMPO.setMerchantCode(baseProduct.getCode());
+                    priceMPO.setUpdateTime(new Date());
+                    priceMPO.setCreateTime(new Date());
+                    priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
+                    priceMPO.setSellPrice(priceMPO.getSettlementPrice());
+                    priceMPO.setStartDate(p.getDatetime());
+                    priceMPO.setEndDate(priceMPO.getStartDate());
+                    priceMPO.setWeekDay("1,2,3,4,5,6,7");
+                    priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
+                    UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
+                            && StringUtils.isNotBlank(s.getStatus())
+                            && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
+                    if(ubrStock != null){
+                        priceMPO.setStock(999);
+                    } else {
+                        priceMPO.setStock(0);
+                    }
+                    priceDao.saveScenicSpotProductPrice(priceMPO);
+                } else {
+                    // 有变化才更新，避免频繁更新，mongo撑不住
+                    if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
+                            || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
+                            || (priceMPO.getSellPrice() != null && StringUtils.isNotBlank(p.getValue()) && priceMPO.getSellPrice().compareTo(new BigDecimal(p.getValue())) != 0)){
+                        priceMPO.setSellPrice(new BigDecimal(p.getValue()));
+                        priceMPO.setSettlementPrice(priceMPO.getSellPrice());
+                        priceMPO.setUpdateTime(new Date());
+                        priceDao.saveScenicSpotProductPrice(priceMPO);
+                }
+            }});
         }
-        return null;
     }
 
     private ScenicSpotRuleMPO convertToRule(ScenicSpotProductMPO productMPO, UBRTicketInfo ticketInfo){
@@ -308,7 +349,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         ruleMPO.setTravellerTypes(Lists.newArrayList(Certificate.ID_CARD.getCode(), Certificate.PASSPORT.getCode()));
         // todo 缺少证件或人脸识别
         if(StringUtils.equals(ticketInfo.getMediaType(), "GID/FR")){
-            ruleMPO.setVoucherType();
+            ruleMPO.setVoucherType(5);
         } else if(StringUtils.equals(ticketInfo.getMediaType(), "QR Code")){
             ruleMPO.setVoucherType(0);
         } else {
