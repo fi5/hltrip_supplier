@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * 版本：1.0<br>
  * 创建日期：2020/12/8<br>
  */
-@FeignClient(name = "UBR", url = "${ubr.host.server}"
+@FeignClient(name = "ubr", url = "${ubr.host.server}"
         , configuration = UBRFeignInterceptor.class
         , fallbackFactory = UBRClientFallback.class)
 public interface IUBRClient {
