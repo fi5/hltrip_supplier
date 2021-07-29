@@ -112,6 +112,10 @@ public class UBRProductServiceImpl implements UBRProductService {
         request.setPassword(Base64.encode(password));
         log.info("请求环球影城登录，request={}", JSON.toJSONString(request));
         UBRBaseResponse<UBRLoginResponse> response = ubrClient.login(request);
+        if(response == null){
+            log.error("环球影城登录无返回内容");
+            return null;
+        }
         if(response.getCode() != 200){
             log.error("环球影城登录失败，code={}, msg={}", response.getCode(), response.getMsg());
             return null;
@@ -130,6 +134,10 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     private String refreshToken(){
         UBRBaseResponse<UBRLoginResponse> response = ubrClient.refreshToken();
+        if(response == null){
+            log.error("环球影城刷新token无返回内容");
+            return null;
+        }
         if(response.getCode() != 200){
             log.error("环球影城刷新token失败，code={}, msg={}", response.getCode(), response.getMsg());
             return null;
