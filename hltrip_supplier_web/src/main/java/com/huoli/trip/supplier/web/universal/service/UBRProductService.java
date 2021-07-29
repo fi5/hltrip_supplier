@@ -30,4 +30,9 @@ public interface UBRProductService {
      * @return
      */
     String getToken();
+
+    /**
+     * 检查登录情况
+     */
+    void checkUserInfo();
 }
