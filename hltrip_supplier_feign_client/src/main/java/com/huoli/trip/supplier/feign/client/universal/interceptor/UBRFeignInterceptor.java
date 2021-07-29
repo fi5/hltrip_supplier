@@ -33,6 +33,7 @@ public class UBRFeignInterceptor implements RequestInterceptor {
                 return;
             } else {
                 String token = clientJedisTemplate.opsForValue().get(UBRConstants.AUTH_KEY).toString();
+                token = String.format("%s%s", "Bearer ", token);
                 requestTemplate.header("Authorization", token);
             }
         } catch (Throwable e) {
