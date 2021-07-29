@@ -44,6 +44,7 @@ public class UBRProductServiceImpl implements UBRProductService {
     @Async
     public void checkUserInfo(){
         try {
+            Thread.sleep(30000);
             if(!jedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
                 log.info("环球影城token过期，准备重新登录。。");
                 getToken();
