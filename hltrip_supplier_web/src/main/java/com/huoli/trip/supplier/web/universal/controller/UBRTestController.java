@@ -34,4 +34,10 @@ public class UBRTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/login")
+    public DfyBaseResult UBRLogin() {
+        ubrProductService.getToken();
+        return DfyBaseResult.success();
+    }
+
 }

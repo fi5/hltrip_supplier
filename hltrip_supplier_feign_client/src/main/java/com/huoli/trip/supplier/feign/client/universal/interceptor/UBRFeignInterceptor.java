@@ -1,25 +1,12 @@
 package com.huoli.trip.supplier.feign.client.universal.interceptor;
 
-import com.alibaba.fastjson.JSON;
-import com.huoli.trip.common.constant.ConfigConstants;
-import com.huoli.trip.common.util.ConfigGetter;
-import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
-import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
-import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
-import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
-import com.xiaoleilu.hutool.lang.Base64;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import java.util.concurrent.TimeUnit;
-
-import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CONFIG_ITEM_API_KEY;
-import static com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants.CONFIG_ITEM_API_SECRET;
 
 /**
  * 描述：<br/>

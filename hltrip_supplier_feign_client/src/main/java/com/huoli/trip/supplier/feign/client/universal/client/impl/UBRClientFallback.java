@@ -43,7 +43,7 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
             }
 
             @Override
-            public UBRBaseResponse<UBRTicketList> getTicketList(UBRTicketListRequest request) {
+            public UBRBaseResponse<UBRTicketList> getTicketList(@RequestBody UBRTicketListRequest request) {
                 return null;
             }
 

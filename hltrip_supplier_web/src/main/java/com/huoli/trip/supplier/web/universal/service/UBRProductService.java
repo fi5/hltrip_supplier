@@ -24,4 +24,10 @@ public interface UBRProductService {
      * 初始化字典
      */
     void init();
+
+    /**
+     * 登录
+     * @return
+     */
+    String getToken();
 }

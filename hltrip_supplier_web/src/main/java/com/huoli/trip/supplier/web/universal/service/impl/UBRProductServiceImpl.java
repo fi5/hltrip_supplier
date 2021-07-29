@@ -103,8 +103,8 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     }
 
-
-    private String getToken(){
+    @Override
+    public String getToken(){
         String account = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_ACCOUNT);
         String password = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_PASSWORD);
         UBRLoginRequest request = new UBRLoginRequest();
