@@ -41,22 +41,18 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @PostConstruct
     public void checkUserInfo(){
-        String token;
         if(!jedisTemplate.hasKey(UBRConstants.AUTH_KEY)) {
-            token = getToken();
+            log.info("环球影城token过期，准备重新登录。。");
+            getToken();
         } else {
-            token = jedisTemplate.opsForValue().get(UBRConstants.AUTH_KEY).toString();
-        }
-        if(StringUtils.isNotBlank(token)){
-            token = String.format("%s%s", "Bearer ", token);
-            log.info("环球影城token={}", token);
-        } else {
-            log.error("环球影城token过期了，redis拿不到。");
-            return;
-        }
-        // token 有效期7天。小于24小时的时候就刷新一下
-        if(jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
-            refreshToken();
+            Long hours = jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS);
+            log.info("环球影城token有效期还有{}小时", hours);
+            // token 有效期7天。小于24小时的时候就刷新一下
+            if(jedisTemplate.getExpire(UBRConstants.AUTH_KEY, TimeUnit.HOURS) < 24){
+                log.info("环球影城token有效期小于24小时，准备刷新。。");
+                refreshToken();
+                log.info("环球影城token刷新完成。。");
+            }
         }
     }
 
@@ -83,13 +79,17 @@ public class UBRProductServiceImpl implements UBRProductService {
         UBRBaseResponse response = ubrClient.init();
         if(response == null){
             log.error("环球影城初始化无返回内容");
+            return;
         }
         if(response.getCode() != 200){
             log.error("环球影城初始化返回失败，code={}, msg={}", response.getCode(), response.getMsg());
+            return;
         }
         if(response.getData() == null){
             log.error("环球影城初始化返回空数据");
+            return;
         }
+        log.info("环球影城初始化返回：{}", JSON.toJSONString(response));
     }
 
     public void syncProduct(String type){
@@ -119,7 +119,8 @@ public class UBRProductServiceImpl implements UBRProductService {
             return null;
         }
         String token = response.getData().getAuth().getToken();
-        jedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token);
+        log.info("环球影城登录成功，token={}, result={}", token, JSON.toJSONString(response));
+        jedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token, (7 * 24), TimeUnit.HOURS);
         return token;
     }
 
@@ -136,6 +137,7 @@ public class UBRProductServiceImpl implements UBRProductService {
             return null;
         }
         String token = response.getData().getAuth().getToken();
+        log.info("环球影城刷新token成功，最新token={}, result={}", token, JSON.toJSONString(response));
         jedisTemplate.opsForValue().set(UBRConstants.AUTH_KEY, token, (7 * 24), TimeUnit.HOURS);
         return token;
     }
