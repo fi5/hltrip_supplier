@@ -30,7 +30,7 @@ public class UBRBaseProduct {
      */
     private String description;
 
-    private boolean purchasable;
+    private Boolean purchasable;
 
     private List<UBRCategory> categories;
 

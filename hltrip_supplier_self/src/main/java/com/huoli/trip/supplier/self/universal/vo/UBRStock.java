@@ -19,12 +19,13 @@ public class UBRStock {
     private String datetime;
 
     /**
-     * 状态
+     * 状态, soldout, normal
      */
     private String status;
 
     /**
-     * 可用库存数量
+     * 可用库存数量，供应商已经不用这个了
      */
+    @Deprecated
     private int stock;
 }

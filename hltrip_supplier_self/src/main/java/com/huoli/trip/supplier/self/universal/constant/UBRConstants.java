@@ -33,4 +33,9 @@ public class UBRConstants {
      * 环球密码
      */
     public static String CONFIG_ITEM_PASSWORD = "ubr.password";
+
+    /**
+     * 景点id
+     */
+    public static String CONFIG_ITEM_SCENIC_ID = "ubr.scenic.id";
 }
