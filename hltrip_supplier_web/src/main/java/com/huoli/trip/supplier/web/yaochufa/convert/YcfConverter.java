@@ -444,6 +444,13 @@ public class YcfConverter {
         scenicSpotMPO.setCountry(productItem.getCountry());
         scenicSpotMPO.setProvince(productItem.getProvince());
         scenicSpotMPO.setCity(productItem.getCity());
+        if (StringUtils.isBlank(productItem.getCity()) && StringUtils.isNotBlank(productItem.getAddress())){
+            int strStartIndex = productItem.getAddress().indexOf("省");
+            int strEndIndex = productItem.getAddress().indexOf("市");
+            if (strStartIndex >= 0 && strEndIndex >= 0) {
+                scenicSpotMPO.setCity(productItem.getAddress().substring(strStartIndex, strEndIndex).substring(1).trim());
+            }
+        }
         scenicSpotMPO.setAddress(productItem.getAddress());
         scenicSpotMPO.setPhone(productItem.getPhone());
         if(StringUtils.isNotBlank(productItem.getLongitude()) && StringUtils.isNotBlank(productItem.getLatitude())){

@@ -13,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
 import com.huoli.trip.common.util.CommonUtils;
 import com.huoli.trip.common.util.CoordinateUtil;
 import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.StringUtil;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
@@ -393,6 +394,13 @@ public class LmmTicketConverter {
         scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
         scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
+        if (StringUtils.isBlank(scenicSpotMPO.getCity()) && StringUtils.isNotBlank(lmmScenic.getPlaceToAddr())){
+            int strStartIndex = lmmScenic.getPlaceToAddr().indexOf("省");
+            int strEndIndex = lmmScenic.getPlaceToAddr().indexOf("市");
+            if (strStartIndex >= 0 && strEndIndex >= 0) {
+                scenicSpotMPO.setCity(lmmScenic.getPlaceToAddr().substring(strStartIndex, strEndIndex).substring(1).trim());
+            }
+        }
         scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
         scenicSpotMPO.setName(lmmScenic.getScenicName());
         scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());

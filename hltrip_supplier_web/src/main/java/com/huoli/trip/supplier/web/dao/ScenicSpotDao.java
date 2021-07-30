@@ -20,7 +20,7 @@ public interface ScenicSpotDao {
      * @param address
      * @return
      */
-    ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String address);
+    ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String cityCode);
 
     /**
      * 新增景点

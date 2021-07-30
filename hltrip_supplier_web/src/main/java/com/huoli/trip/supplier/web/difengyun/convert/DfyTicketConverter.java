@@ -338,6 +338,13 @@ public class DfyTicketConverter {
         scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(scenicDetail.getScenicAddress());
         scenicSpotMPO.setCity(scenicDetail.getCityName());
+        if (StringUtils.isBlank(scenicDetail.getCityName()) && StringUtils.isNotBlank(scenicDetail.getScenicAddress())){
+            int strStartIndex = scenicDetail.getScenicAddress().indexOf("省");
+            int strEndIndex = scenicDetail.getScenicAddress().indexOf("市");
+            if (strStartIndex >= 0 && strEndIndex >= 0) {
+                scenicSpotMPO.setCity(scenicDetail.getScenicAddress().substring(strStartIndex, strEndIndex).substring(1).trim());
+            }
+        }
         if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
             scenicSpotMPO.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
         }

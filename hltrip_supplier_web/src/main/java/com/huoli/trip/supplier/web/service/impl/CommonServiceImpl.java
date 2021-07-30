@@ -855,7 +855,7 @@ public class CommonServiceImpl implements CommonService {
             return;
         }
         log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName());
-        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getCityCode());
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));

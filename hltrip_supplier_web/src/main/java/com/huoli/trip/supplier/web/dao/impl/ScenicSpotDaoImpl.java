@@ -30,10 +30,10 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String address){
+    public ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String cityCode){
         Criteria criteria = Criteria.where("name").is(name);
-        if(StringUtils.isNotBlank(address)){
-            criteria.and("address").is(address);
+        if(StringUtils.isNotBlank(cityCode)){
+            criteria.and("cityCode").is(cityCode);
         }
         return mongoTemplate.findOne(new Query(criteria), ScenicSpotMPO.class);
     }
