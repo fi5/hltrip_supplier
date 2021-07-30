@@ -1138,8 +1138,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     });
                 });
 
-                ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
-                scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+                if(scenicSpotProductBackupMPO == null){
+                    scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+                    scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                }
                 scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
                 // 备份当前这个商品
                 lmmProduct.setGoodsList(Lists.newArrayList(g));

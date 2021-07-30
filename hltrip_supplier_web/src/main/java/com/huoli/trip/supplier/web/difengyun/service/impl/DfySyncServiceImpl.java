@@ -907,9 +907,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
             savePrice(dfyTicketDetail, scenicSpotProductId, ruleId);
-
-            ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
-            scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+            if(scenicSpotProductBackupMPO == null){
+                scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+                scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            }
             scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
             scenicSpotProductBackupMPO.setOriginContent(oriContent);
             scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);

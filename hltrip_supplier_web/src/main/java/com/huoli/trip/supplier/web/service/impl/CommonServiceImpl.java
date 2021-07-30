@@ -1171,10 +1171,16 @@ public class CommonServiceImpl implements CommonService {
                         GroupTourTripInfo groupTourTripInfo = new GroupTourTripInfo();
                         groupTourTripInfo.setDay(day++);
                         List<GroupTourProductTripItem> items = Lists.newArrayList();
-                        if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
+                        if(StringUtils.isNotBlank(hodometer.getScheduling())){
                             GroupTourProductTripItem item1 = new GroupTourProductTripItem();
-                            item1.setType("5");
-                            item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
+                            item1.setType("15");
+                            item1.setPoiName("行程安排");
+                            item1.setPoiDesc(hodometer.getScheduling());
+                            items.add(item1);
+                        }
+                        if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
+
+                            List<GroupTourHotel> groupTourHotels = hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
                                 groupTourHotel.setHotelName(r.getName());
@@ -1182,8 +1188,13 @@ public class CommonServiceImpl implements CommonService {
                                     groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
                                 }
                                 return groupTourHotel;
-                            }).collect(Collectors.toList()));
-                            items.add(item1);
+                            }).collect(Collectors.toList());
+                            if(ListUtils.isNotEmpty(groupTourHotels)){
+                                GroupTourProductTripItem item1 = new GroupTourProductTripItem();
+                                item1.setType("5");
+                                item1.setGroupTourHotels(groupTourHotels);
+                                items.add(item1);
+                            }
                             for (Route route : hodometer.getRoutes()) {
                                 int type = route.getMduleType();
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();

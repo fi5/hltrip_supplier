@@ -901,8 +901,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
         syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString(), ycfProduct.getProductID());
 
-        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
-        scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
+        if(scenicSpotProductBackupMPO == null){
+            scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+            scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+        }
         scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
         scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
         scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
