@@ -1803,4 +1803,23 @@ public class CommonServiceImpl implements CommonService {
         }
         log.info("处理景点描述信息完毕.....");
     }
+
+    @Override
+    public String queryCityCodeByName(String cityName) {
+        String code = "";
+        int len = 0;
+        if (StringUtils.isNotEmpty(cityName)) {
+            List<String> list = chinaCityMapper.queryCityCodeByName(cityName);
+            if (ListUtils.isNotEmpty(list)) {
+                for (String s : list) {
+                    if (s.length() > len) {
+                        len = s.length();
+                        code = s;
+                    }
+                }
+            }
+        }
+        return code;
+    }
+
 }
