@@ -1766,8 +1766,12 @@ public class CommonServiceImpl implements CommonService {
         } else {
             scenicSpotMPOs = scenicSpotDao.getNetImages();
         }
+        int i = scenicSpotMPOs.size();
         for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+            log.info("剩余处理数量 ：" + i);
+            log.info("处理景点ID :" + scenicSpotMPO.getId());
             scenicSpotDao.updateImagesById(UploadUtil.getNetUrlAndUpload(scenicSpotMPO.getImages()),scenicSpotMPO.getId());
+            i--;
         }
         log.info("处理景点图片信息完毕");
     }
@@ -1776,15 +1780,22 @@ public class CommonServiceImpl implements CommonService {
     public void refreshScenicSpotDetailDesc(List<String> ids){
         log.info("处理景点描述信息.....");
         if (!CollectionUtils.isEmpty(ids)){
+            int i = ids.size();
             for (String id : ids){
+                log.info("剩余处理数量 ：" + i);
+                log.info("处理景点ID :" + id);
                 ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(id);
                 scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
                 scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
                 scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+                i--;
             }
         } else {
             List<ScenicSpotMPO> scenicSpotMPOs = scenicSpotDao.getdetailDesc();
+            int i = scenicSpotMPOs.size();
             for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+                log.info("剩余处理数量 ：" + i);
+                log.info("处理景点ID :" + scenicSpotMPO.getId());
                 scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
                 scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
                 scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
