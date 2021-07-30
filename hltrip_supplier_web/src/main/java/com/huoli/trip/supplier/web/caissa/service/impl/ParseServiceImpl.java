@@ -11,6 +11,7 @@ import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.web.caissa.constant.Constant;
 import com.huoli.trip.supplier.web.caissa.enmu.TrafficEnum;
 import com.huoli.trip.supplier.web.caissa.service.ParseService;
@@ -86,7 +87,7 @@ public class ParseServiceImpl implements ParseService {
                 continue;
             }
             String productDbId = matchJson.getString("product_db_id");
-            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, "hllx");
+            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
             if (product != null) {
                 continue;
             }
@@ -164,7 +165,7 @@ public class ParseServiceImpl implements ParseService {
             mpo.setMainImage(outerPictureLink);
             mpo.setMerchantCode(productCode);
             mpo.setCategory("group_tour");
-            mpo.setChannel("hllx");
+            mpo.setChannel(Constant.CHANNEL);
             mpo.setStatus(0);
             mpo.setGroupTourType("1");
             mpo.setTravelerTemplateId(passengerTemplateMapper.getIdByName("凯撒跟团游"));
@@ -212,6 +213,7 @@ public class ParseServiceImpl implements ParseService {
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
                 groupTourProductDao.saveProduct(mpo);
+                commonService.refreshList(1, mpo.getId(), 0, true);
                 mealDao.saveSetMeals(mealMPO);
             } catch (Exception e) {
                 e.printStackTrace();

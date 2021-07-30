@@ -44,6 +44,8 @@ public interface Constant {
 
     String DETAIL_PICTURE_LINK = "http://img8.caissa.com.cn/cloud/image/%s_525_330";
 
+    String CHANNEL = "hllx_shenghe";
+
 
 
     //redis key
@@ -57,7 +59,10 @@ public interface Constant {
     //要访问的日历url
     String DETAIL_PAGE_TO_VISIT = "detail-page-to-visit";
 
+    String CAISSA_RUN = "caissa-start";
+
     List<String> CROWD_LIST_QZ = Lists.newArrayList("亲子");
+
 
 
 
