@@ -704,7 +704,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                     if(scenicSpotMappingMPO == null){
                         log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
-                        return;
+                        syncScenicListByIdV2(lmmProduct.getPlaceId());
+                        scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+                        if(scenicSpotMappingMPO == null){
+                            return;
+                        }
                     }
                     scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                     if(scenicSpotMPO == null){
@@ -1392,7 +1396,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     private void syncScenic(List<LmmScenic> lmmScenicList){
         if(ListUtils.isNotEmpty(lmmScenicList)){
-            lmmScenicList.forEach(s -> syncScenic(s));
+            lmmScenicList.forEach(s -> {
+                try {
+                    syncScenic(s);
+                } catch (Exception e){
+                    log.error("驴妈妈同步景点{},{} 异常", s.getScenicId(), s.getScenicName(), e);
+                }
+            });
         }
     }
 
