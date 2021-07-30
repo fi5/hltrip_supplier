@@ -383,4 +383,6 @@ public class UBRProductServiceImpl implements UBRProductService {
         }
         return ruleMPO;
     }
+
+
 }
