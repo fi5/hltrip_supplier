@@ -118,4 +118,7 @@ public interface CommonService {
     void upLoadImageToLocal(List<String> ids);
 
     void refreshScenicSpotDetailDesc(List<String> ids);
+
+    String queryCityCodeByName(String cityName);
+
 }

@@ -38,4 +38,9 @@ public interface PassengerTemplateMapper {
             "values(#{peopleLimit}, #{passengerInfo}, #{idInfo}, #{templateType}, #{channel}, #{status}, #{createTime})")
     @Options(useGeneratedKeys = true, keyColumn = "id")
     void addPassengerTemplate(PassengerTemplatePO passengerTemplatePO);
+
+
+    @Select("SELECT id FROM trip_passenger_template WHERE name=#{name}")
+    int getIdByName(@Param("name") String name);
+
 }
