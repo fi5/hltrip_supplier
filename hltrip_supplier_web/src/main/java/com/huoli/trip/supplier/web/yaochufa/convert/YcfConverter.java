@@ -445,10 +445,11 @@ public class YcfConverter {
         scenicSpotMPO.setProvince(productItem.getProvince());
         scenicSpotMPO.setCity(productItem.getCity());
         if (StringUtils.isBlank(productItem.getCity()) && StringUtils.isNotBlank(productItem.getAddress())){
-            int strStartIndex = productItem.getAddress().indexOf("省");
-            int strEndIndex = productItem.getAddress().indexOf("市");
-            if (strStartIndex >= 0 && strEndIndex >= 0) {
-                scenicSpotMPO.setCity(productItem.getAddress().substring(strStartIndex, strEndIndex).substring(1).trim());
+            String regEx_address = "(?<=.{0,100}省).*?(?=市)";
+            Pattern p_address = Pattern.compile(regEx_address, Pattern.CASE_INSENSITIVE);
+            Matcher m_address = p_address.matcher(productItem.getAddress());
+            if (m_address.find()){
+                scenicSpotMPO.setCity(m_address.group().trim());
             }
         }
         scenicSpotMPO.setAddress(productItem.getAddress());

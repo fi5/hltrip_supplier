@@ -23,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -395,10 +397,11 @@ public class LmmTicketConverter {
         scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
         scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
         if (StringUtils.isBlank(scenicSpotMPO.getCity()) && StringUtils.isNotBlank(lmmScenic.getPlaceToAddr())){
-            int strStartIndex = lmmScenic.getPlaceToAddr().indexOf("省");
-            int strEndIndex = lmmScenic.getPlaceToAddr().indexOf("市");
-            if (strStartIndex >= 0 && strEndIndex >= 0) {
-                scenicSpotMPO.setCity(lmmScenic.getPlaceToAddr().substring(strStartIndex, strEndIndex).substring(1).trim());
+            String regEx_address = "(?<=.{0,100}省).*?(?=市)";
+            Pattern p_address = Pattern.compile(regEx_address, Pattern.CASE_INSENSITIVE);
+            Matcher m_address = p_address.matcher(lmmScenic.getPlaceToAddr());
+            if (m_address.find()){
+                scenicSpotMPO.setCity(m_address.group().trim());
             }
         }
         scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
