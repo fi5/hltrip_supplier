@@ -11,6 +11,7 @@ import com.huoli.trip.common.entity.mpo.AddressInfo;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.groupTour.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.web.caissa.constant.Constant;
 import com.huoli.trip.supplier.web.caissa.enmu.TrafficEnum;
 import com.huoli.trip.supplier.web.caissa.service.ParseService;
@@ -86,7 +87,7 @@ public class ParseServiceImpl implements ParseService {
                 continue;
             }
             String productDbId = matchJson.getString("product_db_id");
-            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, "hllx");
+            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
             if (product != null) {
                 continue;
             }
@@ -164,7 +165,7 @@ public class ParseServiceImpl implements ParseService {
             mpo.setMainImage(outerPictureLink);
             mpo.setMerchantCode(productCode);
             mpo.setCategory("group_tour");
-            mpo.setChannel("hllx");
+            mpo.setChannel(Constant.CHANNEL);
             mpo.setStatus(0);
             mpo.setGroupTourType("1");
             mpo.setTravelerTemplateId(passengerTemplateMapper.getIdByName("凯撒跟团游"));
@@ -213,6 +214,7 @@ public class ParseServiceImpl implements ParseService {
                 mealMPO.setUpdateTime(new Date());
                 groupTourProductDao.saveProduct(mpo);
                 mealDao.saveSetMeals(mealMPO);
+                commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -574,10 +576,10 @@ public class ParseServiceImpl implements ParseService {
                 if (StringUtils.isNotEmpty(subTitle)) {
                     if (feeInfoTitle.equals("费用说明")) {
                         if (subTitle.contains("费用包含")) {
-                            mealMPO.setConstInclude(subContent);
+                            mealMPO.setConstInclude(subContent.replaceAll("\r\n","\r\n<br>"));
                         }
                         if (subTitle.contains("费用不包含")) {
-                            mealMPO.setCostExclude(subContent);
+                            mealMPO.setCostExclude(subContent.replaceAll("\r\n","\r\n<br>"));
                         }
                         DescInfo descInfo = new DescInfo();
                         descInfo.setTitle(feeInfoTitle);
@@ -586,7 +588,7 @@ public class ParseServiceImpl implements ParseService {
                     }
                 }
                 if (StringUtils.isNotEmpty(subContent) && !feeInfoTitle.contains("费用说明")) {
-                    bookNotice.append(feeInfoTitle).append("\r\n").append(subContent);
+                    bookNotice.append(feeInfoTitle).append("\r\n").append("<br>").append(subContent);
                 }
             }
         }

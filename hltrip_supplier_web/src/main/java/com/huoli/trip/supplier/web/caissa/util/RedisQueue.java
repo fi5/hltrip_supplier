@@ -20,6 +20,17 @@ public class RedisQueue {
         stringJedisTemplate = _stringJedisTemplate;
     }
 
+    public static void set(String key, String value) {
+        stringJedisTemplate.opsForValue().set(key, value);
+    }
+
+    public static void deleteKey(String key) {
+        stringJedisTemplate.delete(key);
+    }
+
+    public static String getValueByKey(String key){
+        return stringJedisTemplate.opsForValue().get(key);
+    }
 
     //将未访问的url加入到toVisit表中(使用的是尾插法)
     public static void addForSet(String key, String url) {
