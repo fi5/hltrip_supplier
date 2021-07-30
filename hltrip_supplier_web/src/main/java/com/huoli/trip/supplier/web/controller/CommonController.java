@@ -74,10 +74,10 @@ public class CommonController {
     }
 
     @PostMapping("/trans/tours")
-    public BaseResponse transTours(){
+    public BaseResponse transTours(@RequestParam String code){
         try {
             log.info("开始转移录入后台数据。");
-            commonService.transTours();
+            commonService.transTours(code);
         } catch (Exception e) {
             log.error("转移录入后台数据异常", e);
             return BaseResponse.withFail(-1, "刷新item失败");

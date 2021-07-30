@@ -81,7 +81,7 @@ public interface CommonService {
 
     void refreshList(int type, String productId, int updateType, boolean add);
 
-    void transTours();
+    void transTours(String code);
 
     void transScenic();
 

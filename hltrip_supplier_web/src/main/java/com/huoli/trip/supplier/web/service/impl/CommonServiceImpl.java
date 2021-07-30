@@ -962,8 +962,14 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void transTours(){
-        List<ProductPO> productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+    public void transTours(String code){
+        List<ProductPO> productPOs = Lists.newArrayList();
+        if(StringUtils.isNotBlank(code)){
+            ProductPO productPO = productDao.getByCode(code);
+            productPOs.add(productPO);
+        } else {
+            productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+        }
         for (ProductPO productPO : productPOs) {
             log.info("开始处理  {}", JSON.toJSONString(productPO));
             boolean add = false;
