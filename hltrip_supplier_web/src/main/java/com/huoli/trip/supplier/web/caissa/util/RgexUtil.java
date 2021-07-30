@@ -35,8 +35,8 @@ public class RgexUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println("a b".replaceAll(" ", "-"));
-        String s = "<pre>ssss</pre>".replaceAll("<pre>", "").replaceAll("</pre>", "");
-        System.out.println(s);
+        String a = "1.行程所示城市间飞机经济舱及火车硬卧（含机场建设税，燃油附加费）；\r\n2.行程中所标明的双人标准间酒店或同级住宿及早餐；\r\n3.行程中所标明的午、晚餐以中式餐食为主； \r\n4.游览时旅游用车，专业司机（如人数增加，根据人数调整车型）；\\r\\n5.拉萨当地全程游览中文导游； \\r\\n6.景点首道门票及行程所标注项目（特殊门票除外，行程中未标注的电瓶车或其他小交通费用均不包含）;\\r\\n7.羊湖旅拍电子版照片，每人不少于8张独立电子版照片（含1张精修电子版）；\\r\\n8.每人每天1瓶矿泉水，赠送每人全程1瓶便携式氧气；\\r\\n9.行程期间的国内旅游意外险；\n";
+        System.out.println(a.replaceAll("\r\n", "\r\n<br>"));
+
     }
 }

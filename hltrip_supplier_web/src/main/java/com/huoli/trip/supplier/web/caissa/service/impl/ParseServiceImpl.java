@@ -213,8 +213,8 @@ public class ParseServiceImpl implements ParseService {
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
                 groupTourProductDao.saveProduct(mpo);
-                commonService.refreshList(1, mpo.getId(), 0, true);
                 mealDao.saveSetMeals(mealMPO);
+                commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -576,10 +576,10 @@ public class ParseServiceImpl implements ParseService {
                 if (StringUtils.isNotEmpty(subTitle)) {
                     if (feeInfoTitle.equals("费用说明")) {
                         if (subTitle.contains("费用包含")) {
-                            mealMPO.setConstInclude(subContent);
+                            mealMPO.setConstInclude(subContent.replaceAll("\r\n","\r\n<br>"));
                         }
                         if (subTitle.contains("费用不包含")) {
-                            mealMPO.setCostExclude(subContent);
+                            mealMPO.setCostExclude(subContent.replaceAll("\r\n","\r\n<br>"));
                         }
                         DescInfo descInfo = new DescInfo();
                         descInfo.setTitle(feeInfoTitle);
@@ -588,7 +588,7 @@ public class ParseServiceImpl implements ParseService {
                     }
                 }
                 if (StringUtils.isNotEmpty(subContent) && !feeInfoTitle.contains("费用说明")) {
-                    bookNotice.append(feeInfoTitle).append("\r\n").append(subContent);
+                    bookNotice.append(feeInfoTitle).append("\r\n").append("<br>").append(subContent);
                 }
             }
         }
