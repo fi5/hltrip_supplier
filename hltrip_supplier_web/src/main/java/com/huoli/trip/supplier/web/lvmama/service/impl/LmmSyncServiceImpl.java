@@ -8,10 +8,7 @@ import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
@@ -687,10 +684,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return syncGoodsListByIdV2(request);
     }
 
-    private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
-
+    private void updateProductV2(LmmProduct oriLmmProduct, List<LmmGoods> goodsList){
+        LmmProduct lmmProduct = JSON.parseObject(JSON.toJSONString(oriLmmProduct), LmmProduct.class);
         if(ListUtils.isNotEmpty(goodsList)){
-            goodsList.forEach(g -> {
+            goodsList.forEach(goods -> {
+                LmmGoods g = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(goods)), LmmGoods.class);
                 // 过滤到付产品
                 if(StringUtils.equals(g.getPaymentType(), "offline")){
                     log.error("到付产品productId={}, goodsId={}，跳过。。", g.getProductId(), g.getGoodsId());
@@ -1142,11 +1140,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 if(scenicSpotProductBackupMPO == null){
                     scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
                     scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+                    scenicSpotProductBackupMPO.setCreateTime(new Date());
                 }
                 scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
                 // 备份当前这个商品
-                lmmProduct.setGoodsList(Lists.newArrayList(g));
-                scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(lmmProduct));
+                oriLmmProduct.setGoodsList(Lists.newArrayList(goods));
+                scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriLmmProduct));
+                scenicSpotProductBackupMPO.setUpdateTime(new Date());
                 scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
                 commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
@@ -1410,7 +1410,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
     }
 
-    private void syncScenic(LmmScenic lmmScenic){
+    private void syncScenic(LmmScenic oriLmmScenic){
+        LmmScenic lmmScenic = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriLmmScenic)), LmmScenic.class);
         // 转本地结构
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
         if(StringUtils.isBlank(newScenic.getCity())){
@@ -1430,7 +1431,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 同时保存映射关系
         commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, Constants.SUPPLIER_NAME_LMM_TICKET, newScenic);
         // 更新备份
-        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, lmmScenic);
+        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, oriLmmScenic);
     }
 
     @Override

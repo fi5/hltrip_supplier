@@ -623,12 +623,13 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     }
 
-    private void syncScenicProduct(YcfProduct ycfProduct){
-        List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+    private void syncScenicProduct(YcfProduct oriYcfProduct){
+        List<String> scenicIds = oriYcfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(scenicIds)){
-            log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+            log.error("要出发产品{}景点不存在，跳过", oriYcfProduct.getProductID());
             return;
         }
+        YcfProduct ycfProduct = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriYcfProduct)), YcfProduct.class);
         syncScenic(scenicIds);
         ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
         ScenicSpotMPO scenicSpotMPO = null;
@@ -905,9 +906,11 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(scenicSpotProductBackupMPO == null){
             scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
             scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            scenicSpotProductBackupMPO.setCreateTime(new Date());
         }
         scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
-        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriYcfProduct));
+        scenicSpotProductBackupMPO.setUpdateTime(new Date());
         scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
         commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
@@ -917,21 +920,22 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
-    private void syncHotelScenicProduct(YcfProduct ycfProduct){
+    private void syncHotelScenicProduct(YcfProduct oriYcfProduct){
         List<String> poiIds = Lists.newArrayList();
-        if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
-            List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+        if(ListUtils.isNotEmpty(oriYcfProduct.getTicketList())){
+            List<String> scenicIds = oriYcfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
             if(ListUtils.isEmpty(scenicIds)){
-                log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
+                log.error("要出发产品{}景点不存在，跳过", oriYcfProduct.getProductID());
                 return;
             }
             poiIds.addAll(scenicIds);
         }
-        List<String> hotelIds = ycfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
+        List<String> hotelIds = oriYcfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(hotelIds)){
-            log.error("要出发产品{}酒店不存在，跳过", ycfProduct.getProductID());
+            log.error("要出发产品{}酒店不存在，跳过", oriYcfProduct.getProductID());
             return;
         }
+        YcfProduct ycfProduct = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriYcfProduct)), YcfProduct.class);
         syncScenic(poiIds);
         syncHotel(hotelIds);
         HotelScenicSpotProductMPO hotelScenicSpotProductMPO = hotelScenicProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
@@ -1297,14 +1301,17 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
         hotelScenicProductSetMealDao.saveProduct(setMealMPO);
 
-        HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
-        hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+        HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = hotelScenicProductBackupDao.getHotelScenicSpotProductBackupByProductId(hotelScenicSpotProductMPO.getId());
+        if(hotelScenicSpotProductBackupMPO == null){
+            hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
+            hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+            hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
+        }
         hotelScenicSpotProductBackupMPO.setSupplierProductId(ycfProduct.getProductID());
-        hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
         hotelScenicSpotProductBackupMPO.setUpdateTime(new Date());
         hotelScenicSpotProductBackupMPO.setProductMPO(hotelScenicSpotProductMPO);
         hotelScenicSpotProductBackupMPO.setSetMealMPO(setMealMPO);
-        hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+        hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriYcfProduct));
         hotelScenicProductBackupDao.saveHotelScenicSpotProductBackup(hotelScenicSpotProductBackupMPO);
 
         commonService.refreshList(2, hotelScenicSpotProductMPO.getId(), 1, fresh);
@@ -1324,19 +1331,20 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(ListUtils.isEmpty(ycfProductItems)){
             return null;
         }
-       return ycfProductItems.stream().map(item -> {
+       return ycfProductItems.stream().map(oriItem -> {
             try {
-                if(item.getPoiType() != 2){
-                    log.error("poi {},{} 不是景点类型，跳过。。", item.getPoiID(), item.getPoiName());
+                if(oriItem.getPoiType() != 2){
+                    log.error("poi {},{} 不是景点类型，跳过。。", oriItem.getPoiID(), oriItem.getPoiName());
                     return null;
                 }
+                YcfProductItem item = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriItem)), YcfProductItem.class);
                 ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
                 // 设置省市区
                 commonService.setCity(newScenic);
                 // 同时保存映射关系
                 commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
                 // 更新备份
-                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, oriItem);
                 return newScenic.getId();
             } catch (Exception e) {
                 log.error("poi落地失败，", e);
@@ -1351,19 +1359,20 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(ListUtils.isEmpty(ycfProductItems)){
             return null;
         }
-        return ycfProductItems.stream().map(item -> {
+        return ycfProductItems.stream().map(oriItem -> {
             try {
-                if(item.getPoiType() != 1){
-                    log.error("poi {},{} 不是酒店类型，跳过。。", item.getPoiID(), item.getPoiName());
+                if(oriItem.getPoiType() != 1){
+                    log.error("poi {},{} 不是酒店类型，跳过。。", oriItem.getPoiID(), oriItem.getPoiName());
                     return null;
                 }
+                YcfProductItem item = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriItem)), YcfProductItem.class);
                 HotelMPO newHotel = YcfConverter.convertToHotelMPO(item);
                 // 设置省市区
                 commonService.setCity(newHotel);
                 // 同时保存映射关系
                 commonService.updateHotelMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newHotel);
                 // 更新备份
-//                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+//                commonService.updateScenicSpotMPOBackup(newHotel, item.getPoiID(), SUPPLIER_CODE_YCF, oriItem);
                 return newHotel.getId();
             } catch (Exception e) {
                 log.error("poi落地失败，", e);
