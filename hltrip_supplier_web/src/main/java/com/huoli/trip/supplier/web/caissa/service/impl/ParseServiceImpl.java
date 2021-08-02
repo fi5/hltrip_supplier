@@ -87,10 +87,10 @@ public class ParseServiceImpl implements ParseService {
                 continue;
             }
             String productDbId = matchJson.getString("product_db_id");
-            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
-            if (product != null) {
-                continue;
-            }
+//            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
+//            if (product != null) {
+//                continue;
+//            }
             String dbId = matchJson.getString("db_id");
             String productCode = matchJson.getString("product_code");
             String productName = matchJson.getString("product_name");
