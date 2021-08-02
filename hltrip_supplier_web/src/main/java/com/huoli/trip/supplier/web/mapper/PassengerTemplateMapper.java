@@ -58,4 +58,10 @@ public interface PassengerTemplateMapper {
     @Select("SELECT id FROM trip_passenger_template WHERE name=#{name}")
     int getIdByName(@Param("name") String name);
 
+    @Select("SELECT * FROM trip_passenger_template WHERE id=#{id}")
+    PassengerTemplatePO getById(@Param("id") int id);
+
+    @Select("delete FROM trip_passenger_template WHERE id=#{id}")
+    void removeById(@Param("id") int id);
+
 }

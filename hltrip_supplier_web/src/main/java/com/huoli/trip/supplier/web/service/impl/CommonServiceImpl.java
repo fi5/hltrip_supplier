@@ -2,7 +2,9 @@ package com.huoli.trip.supplier.web.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.*;
@@ -1839,4 +1841,26 @@ public class CommonServiceImpl implements CommonService {
         return code;
     }
 
+    @Override
+    public void cleanPsTmp(String channel){
+        List<GroupTourProductMPO> passengerInfos = groupTourProductDao.getTravelerTemplateIds(channel);
+        if(ListUtils.isNotEmpty(passengerInfos)){
+            Map<String, String> psMap = Maps.newHashMap();
+            for (GroupTourProductMPO passengerInfo : passengerInfos) {
+                PassengerTemplatePO pt = passengerTemplateMapper.getById(passengerInfo.getTravelerTemplateId());
+                if(pt != null){
+                    SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+                    filter.getExcludes().addAll(Arrays.asList("id", "createTime", "updateTime"));
+                    String s = JSON.toJSONString(pt, filter);
+                    String key = MD5Util.encode(s);
+                    if(psMap.containsKey(key)){
+                        groupTourProductDao.updateTravelerTemplateId(passengerInfo.getId(), Integer.valueOf(psMap.get("key")));
+                        passengerTemplateMapper.removeById(pt.getId());
+                    } else {
+                        psMap.put(key, String.valueOf(pt.getId()));
+                    }
+                }
+            }
+        }
+    }
 }

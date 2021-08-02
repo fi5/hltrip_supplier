@@ -6,6 +6,7 @@ import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.GroupTourProductDao;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -90,5 +91,22 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
             return groupTourProductMPOs.stream().map(GroupTourProductMPO::getSupplierProductId).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @Override
+    public List<GroupTourProductMPO> getTravelerTemplateIds(String channel){
+        Criteria criteria = new Criteria();
+        if(StringUtils.isNotBlank(channel)){
+            criteria.and("channel").is(channel);
+        }
+        Query query = new Query(criteria);
+        query.fields().include("_id").include("travelerTemplateId");
+        return mongoTemplate.find(query, GroupTourProductMPO.class);
+    }
+
+    @Override
+    public void updateTravelerTemplateId(String id, Integer ttId){
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(id)),
+                Update.update("travelerTemplateId", ttId), GroupTourProductMPO.class);
     }
 }

@@ -60,4 +60,18 @@ public interface GroupTourProductDao {
      * @param status
      */
     void updateStatusById(String id, int status);
+
+    /**
+     * 根据渠道获取出行人模板
+     * @param channel
+     * @return
+     */
+    List<GroupTourProductMPO> getTravelerTemplateIds(String channel);
+
+    /**
+     * 更新出新任模板
+     * @param id
+     * @param ttId
+     */
+    void updateTravelerTemplateId(String id, Integer ttId);
 }

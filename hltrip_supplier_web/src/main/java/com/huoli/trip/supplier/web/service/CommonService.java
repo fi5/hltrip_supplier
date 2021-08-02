@@ -121,4 +121,10 @@ public interface CommonService {
 
     String queryCityCodeByName(String cityName);
 
+    /**
+     * 清除重复的出行人模板
+     * @param channel
+     */
+    void cleanPsTmp(String channel);
+
 }

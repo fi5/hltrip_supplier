@@ -168,4 +168,16 @@ public class CommonController {
         }
         return BaseResponse.withSuccess();
     }
+
+    @PostMapping("/clean/passengerTemplate")
+    public BaseResponse cleanPassengerTemplate(@RequestParam("channel") String channel ){
+        try {
+            log.info("开始清除重复出行人模板");
+            commonService.cleanPsTmp(channel);
+        } catch (Exception e) {
+            log.error("清除重复出行人模板异常", e);
+            return BaseResponse.withFail(-1, "清除重复出行人模板失败");
+        }
+        return BaseResponse.withSuccess();
+    }
 }
