@@ -35,6 +35,12 @@ public interface GroupTourProductSetMealDao {
     void saveSetMeals(GroupTourProductSetMealMPO setMealMPO);
 
     /**
+     * 更新套餐
+     * @param setMealMPO
+     */
+    void updateSetMeals(GroupTourProductSetMealMPO setMealMPO);
+
+    /**
      * 根据产品获取所有套餐
      * @param groupTourProductId
      * @return
