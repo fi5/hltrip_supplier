@@ -31,7 +31,7 @@ public interface PassengerTemplateMapper {
             " </if>" +
             " <if test='passengerInfo == null'> " +
             " and passengerInfo is null " +
-            "</if>" +
+            " </if>" +
             " <if test='idInfo != null'> " +
             " and idInfo = #{idInfo} " +
             " </if>" +
@@ -39,7 +39,7 @@ public interface PassengerTemplateMapper {
             " and idInfo is null " +
             " </if>" +
             " and status = 1 " +
-            "</script>")
+            " </script>")
     PassengerTemplatePO getPassengerTemplateByCond(@Param("channel") String channel,
                                                    @Param("peopleLimit") int peopleLimit,
                                                    @Param("passengerInfo") String passengerInfo,
