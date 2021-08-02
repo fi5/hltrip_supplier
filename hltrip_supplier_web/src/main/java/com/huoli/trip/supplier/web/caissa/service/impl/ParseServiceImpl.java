@@ -87,10 +87,10 @@ public class ParseServiceImpl implements ParseService {
                 continue;
             }
             String productDbId = matchJson.getString("product_db_id");
-            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
-            if (product != null) {
-                continue;
-            }
+//            GroupTourProductMPO product = groupTourProductDao.getTourProduct(productDbId, Constant.CHANNEL);
+//            if (product != null) {
+//                continue;
+//            }
             String dbId = matchJson.getString("db_id");
             String productCode = matchJson.getString("product_code");
             String productName = matchJson.getString("product_name");
@@ -193,7 +193,6 @@ public class ParseServiceImpl implements ParseService {
             mpo.setDepInfos(depInfos);
 
             mealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT_MEAL));
-            mealMPO.setGroupTourProductId(mpo.getId());
             mealMPO.setDepCode(departureCode);
             mealMPO.setDepName(departureName);
             mealMPO.setName(productName);
@@ -203,6 +202,7 @@ public class ParseServiceImpl implements ParseService {
             try {
                 //获取详情
                 String chdPrice = getDetail(format(Constant.CAISSA_APP_DETAIL_URL, dbId), dbId, mpo, mealMPO, activeDay);
+                log.info("outer-chdPrice:{}", chdPrice);
                 //获取价格日历
                 getWebCalendars(format(Constant.CAISSA_WEB_SELF_CALENDARS, System.currentTimeMillis(), productDbId, scheduleDays, scheduleNights, departure), mealMPO, chdPrice);
                 //获取费用说明
@@ -212,8 +212,9 @@ public class ParseServiceImpl implements ParseService {
                 mpo.setUpdateTime(new Date());
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
-                groupTourProductDao.saveProduct(mpo);
-                mealDao.saveSetMeals(mealMPO);
+                mpo = groupTourProductDao.updateProduct(mpo);
+                mealMPO.setGroupTourProductId(mpo.getId());
+                mealDao.updateSetMeals(mealMPO);
                 commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -253,9 +254,14 @@ public class ParseServiceImpl implements ParseService {
                                 groupTourPrice.setAdtSellPrice(new BigDecimal(minPrice));
                                 groupTourPrice.setAdtStock(Integer.parseInt(surplusNum));
                                 if (StringUtils.isNotEmpty(chdPrice)) {
-                                    groupTourPrice.setChdPrice(new BigDecimal(chdPrice));
-                                    groupTourPrice.setChdSellPrice(new BigDecimal(chdPrice));
-                                    groupTourPrice.setChdStock(groupTourPrice.getAdtStock());
+                                    if (chdPrice.equals("同价")) {
+                                        groupTourPrice.setChdPrice(new BigDecimal(minPrice));
+                                        groupTourPrice.setChdSellPrice(new BigDecimal(minPrice));
+                                    } else {
+                                        groupTourPrice.setChdPrice(new BigDecimal(chdPrice));
+                                        groupTourPrice.setChdSellPrice(new BigDecimal(chdPrice));
+                                    }
+                                    groupTourPrice.setChdStock(Integer.parseInt(surplusNum));
                                 }
                                 groupTourPrices.add(groupTourPrice);
                             }
@@ -289,7 +295,11 @@ public class ParseServiceImpl implements ParseService {
         mpo.setHighlights(highlightsList);
         Element oldPrice = document.selectFirst("#old_price");
         if (oldPrice != null) {
-            chdPrice = getNumber(oldPrice.text().trim());
+            if (oldPrice.text().contains("同价")) {
+                chdPrice = "同价";
+            } else {
+                chdPrice = getNumber(oldPrice.text().trim());
+            }
         }
         log.info("chdPrice:{}", chdPrice);
         Element element1 = document.selectFirst("body > div.wrap_main > section > div.detail_main > div.dataBox.mar_bot10 > div.dataListBox > ul > a > li.active > div");

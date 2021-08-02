@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.mpo.ProductListMPO;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.ListUtils;
@@ -39,6 +40,22 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
         mongoTemplate.getConverter().write(groupTourProductMPO, document);
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+    }
+
+    @Override
+    public GroupTourProductMPO updateProduct(GroupTourProductMPO groupTourProductMPO) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("supplierProductId").is(groupTourProductMPO.getSupplierProductId()));
+        GroupTourProductMPO one = mongoTemplate.findOne(query, GroupTourProductMPO.class);
+        if (one != null) {
+            groupTourProductMPO.setId(one.getId());
+            groupTourProductMPO.setCreateTime(one.getCreateTime());
+        }
+        Document document = new Document();
+        mongoTemplate.getConverter().write(groupTourProductMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+        return groupTourProductMPO;
     }
 
     @Override
