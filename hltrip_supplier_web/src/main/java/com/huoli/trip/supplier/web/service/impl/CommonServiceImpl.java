@@ -1862,5 +1862,14 @@ public class CommonServiceImpl implements CommonService {
                 }
             }
         }
+        List<PassengerTemplatePO> pts = passengerTemplateMapper.getByChannel(channel);
+        if(ListUtils.isNotEmpty(pts)){
+            for (PassengerTemplatePO pt : pts) {
+                List<GroupTourProductMPO> groupTourProductMPOS = groupTourProductDao.getTravelerTemplateId(pt.getId());
+                if(ListUtils.isEmpty(groupTourProductMPOS)){
+                    passengerTemplateMapper.removeById(pt.getId());
+                }
+            }
+        }
     }
 }

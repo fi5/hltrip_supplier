@@ -4,6 +4,8 @@ import com.huoli.trip.common.entity.po.PassengerTemplatePO;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -63,5 +65,8 @@ public interface PassengerTemplateMapper {
 
     @Select("delete FROM trip_passenger_template WHERE id=#{id}")
     void removeById(@Param("id") int id);
+
+    @Select("SELECT * FROM trip_passenger_template WHERE channel=#{channel}")
+    List<PassengerTemplatePO> getByChannel(@Param("channel") String channel);
 
 }

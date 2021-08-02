@@ -74,4 +74,11 @@ public interface GroupTourProductDao {
      * @param ttId
      */
     void updateTravelerTemplateId(String id, Integer ttId);
+
+    /**
+     * 根据出行人模板获取产品
+     * @param ttId
+     * @return
+     */
+    List<GroupTourProductMPO> getTravelerTemplateId(Integer ttId);
 }

@@ -109,4 +109,9 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
         mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(id)),
                 Update.update("travelerTemplateId", ttId), GroupTourProductMPO.class);
     }
+
+    @Override
+    public List<GroupTourProductMPO> getTravelerTemplateId(Integer ttId){
+        return mongoTemplate.find(Query.query(Criteria.where("travelerTemplateId").is(ttId)), GroupTourProductMPO.class);
+    }
 }
