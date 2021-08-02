@@ -23,8 +23,23 @@ public interface PassengerTemplateMapper {
      * @param passengerInfo
      * @return
      */
-    @Select("select id from trip_passenger_template where channel = #{channel} " +
-            "and peopleLimit = #{peopleLimit} and passengerInfo = #{passengerInfo} and idInfo = #{idInfo} and status = 1")
+    @Select("<script> " +
+            " select id from trip_passenger_template where channel = #{channel} " +
+            " and peopleLimit = #{peopleLimit} " +
+            " <if test='passengerInfo != null'> " +
+            " and passengerInfo = #{passengerInfo} " +
+            " </if>" +
+            " <if test='passengerInfo == null'> " +
+            " and passengerInfo is null " +
+            "</if>" +
+            " <if test='idInfo != null'> " +
+            " and idInfo = #{idInfo} " +
+            " </if>" +
+            " <if test='idInfo == null'> " +
+            " and idInfo is null " +
+            " </if>" +
+            " and status = 1 " +
+            "</script>")
     PassengerTemplatePO getPassengerTemplateByCond(@Param("channel") String channel,
                                                    @Param("peopleLimit") int peopleLimit,
                                                    @Param("passengerInfo") String passengerInfo,
