@@ -253,8 +253,13 @@ public class ParseServiceImpl implements ParseService {
                                 groupTourPrice.setAdtSellPrice(new BigDecimal(minPrice));
                                 groupTourPrice.setAdtStock(Integer.parseInt(surplusNum));
                                 if (StringUtils.isNotEmpty(chdPrice)) {
-                                    groupTourPrice.setChdPrice(new BigDecimal(chdPrice));
-                                    groupTourPrice.setChdSellPrice(new BigDecimal(chdPrice));
+                                    if (chdPrice.equals("同价")) {
+                                        groupTourPrice.setChdPrice(groupTourPrice.getAdtPrice());
+                                        groupTourPrice.setChdSellPrice(groupTourPrice.getAdtSellPrice());
+                                    } else {
+                                        groupTourPrice.setChdPrice(new BigDecimal(chdPrice));
+                                        groupTourPrice.setChdSellPrice(new BigDecimal(chdPrice));
+                                    }
                                     groupTourPrice.setChdStock(groupTourPrice.getAdtStock());
                                 }
                                 groupTourPrices.add(groupTourPrice);
@@ -289,7 +294,11 @@ public class ParseServiceImpl implements ParseService {
         mpo.setHighlights(highlightsList);
         Element oldPrice = document.selectFirst("#old_price");
         if (oldPrice != null) {
-            chdPrice = getNumber(oldPrice.text().trim());
+            if (oldPrice.text().contains("同价")) {
+                chdPrice = "同价";
+            } else {
+                chdPrice = getNumber(oldPrice.text().trim());
+            }
         }
         log.info("chdPrice:{}", chdPrice);
         Element element1 = document.selectFirst("body > div.wrap_main > section > div.detail_main > div.dataBox.mar_bot10 > div.dataListBox > ul > a > li.active > div");
