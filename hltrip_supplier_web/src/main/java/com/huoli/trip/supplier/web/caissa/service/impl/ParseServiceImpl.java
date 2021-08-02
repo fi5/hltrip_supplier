@@ -193,7 +193,6 @@ public class ParseServiceImpl implements ParseService {
             mpo.setDepInfos(depInfos);
 
             mealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT_MEAL));
-            mealMPO.setGroupTourProductId(mpo.getId());
             mealMPO.setDepCode(departureCode);
             mealMPO.setDepName(departureName);
             mealMPO.setName(productName);
@@ -213,7 +212,8 @@ public class ParseServiceImpl implements ParseService {
                 mpo.setUpdateTime(new Date());
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
-                groupTourProductDao.updateProduct(mpo);
+                mpo = groupTourProductDao.updateProduct(mpo);
+                mealMPO.setGroupTourProductId(mpo.getId());
                 mealDao.updateSetMeals(mealMPO);
                 commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {

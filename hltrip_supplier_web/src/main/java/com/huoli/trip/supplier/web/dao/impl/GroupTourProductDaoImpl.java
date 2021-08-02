@@ -43,7 +43,7 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
     }
 
     @Override
-    public void updateProduct(GroupTourProductMPO groupTourProductMPO) {
+    public GroupTourProductMPO updateProduct(GroupTourProductMPO groupTourProductMPO) {
         Query query = new Query();
         query.addCriteria(Criteria.where("supplierProductId").is(groupTourProductMPO.getSupplierProductId()));
         GroupTourProductMPO one = mongoTemplate.findOne(query, GroupTourProductMPO.class);
@@ -55,6 +55,7 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
         mongoTemplate.getConverter().write(groupTourProductMPO, document);
         Update update = Update.fromDocument(document);
         mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+        return groupTourProductMPO;
     }
 
     @Override
