@@ -50,6 +50,7 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
         GroupTourProductSetMealMPO one = mongoTemplate.findOne(query, GroupTourProductSetMealMPO.class);
         if (one != null) {
             setMealMPO.setId(one.getId());
+            setMealMPO.setCreateTime(one.getCreateTime());
         }
         Document document = new Document();
         mongoTemplate.getConverter().write(setMealMPO, document);

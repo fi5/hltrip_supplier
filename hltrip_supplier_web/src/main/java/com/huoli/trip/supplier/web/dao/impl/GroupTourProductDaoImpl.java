@@ -49,6 +49,7 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
         GroupTourProductMPO one = mongoTemplate.findOne(query, GroupTourProductMPO.class);
         if (one != null) {
             groupTourProductMPO.setId(one.getId());
+            groupTourProductMPO.setCreateTime(one.getCreateTime());
         }
         Document document = new Document();
         mongoTemplate.getConverter().write(groupTourProductMPO, document);
