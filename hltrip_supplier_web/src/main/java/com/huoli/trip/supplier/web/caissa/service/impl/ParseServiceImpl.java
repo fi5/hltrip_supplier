@@ -193,7 +193,6 @@ public class ParseServiceImpl implements ParseService {
             mpo.setDepInfos(depInfos);
 
             mealMPO.setId(commonService.getId(BizTagConst.BIZ_GROUP_TOUR_PRODUCT_MEAL));
-            mealMPO.setGroupTourProductId(mpo.getId());
             mealMPO.setDepCode(departureCode);
             mealMPO.setDepName(departureName);
             mealMPO.setName(productName);
@@ -203,6 +202,7 @@ public class ParseServiceImpl implements ParseService {
             try {
                 //获取详情
                 String chdPrice = getDetail(format(Constant.CAISSA_APP_DETAIL_URL, dbId), dbId, mpo, mealMPO, activeDay);
+                log.info("outer-chdPrice:{}", chdPrice);
                 //获取价格日历
                 getWebCalendars(format(Constant.CAISSA_WEB_SELF_CALENDARS, System.currentTimeMillis(), productDbId, scheduleDays, scheduleNights, departure), mealMPO, chdPrice);
                 //获取费用说明
@@ -212,7 +212,8 @@ public class ParseServiceImpl implements ParseService {
                 mpo.setUpdateTime(new Date());
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
-                groupTourProductDao.updateProduct(mpo);
+                mpo = groupTourProductDao.updateProduct(mpo);
+                mealMPO.setGroupTourProductId(mpo.getId());
                 mealDao.updateSetMeals(mealMPO);
                 commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {
@@ -254,13 +255,13 @@ public class ParseServiceImpl implements ParseService {
                                 groupTourPrice.setAdtStock(Integer.parseInt(surplusNum));
                                 if (StringUtils.isNotEmpty(chdPrice)) {
                                     if (chdPrice.equals("同价")) {
-                                        groupTourPrice.setChdPrice(groupTourPrice.getAdtPrice());
-                                        groupTourPrice.setChdSellPrice(groupTourPrice.getAdtSellPrice());
+                                        groupTourPrice.setChdPrice(new BigDecimal(minPrice));
+                                        groupTourPrice.setChdSellPrice(new BigDecimal(minPrice));
                                     } else {
                                         groupTourPrice.setChdPrice(new BigDecimal(chdPrice));
                                         groupTourPrice.setChdSellPrice(new BigDecimal(chdPrice));
                                     }
-                                    groupTourPrice.setChdStock(groupTourPrice.getAdtStock());
+                                    groupTourPrice.setChdStock(Integer.parseInt(surplusNum));
                                 }
                                 groupTourPrices.add(groupTourPrice);
                             }

@@ -24,7 +24,7 @@ public interface GroupTourProductDao {
      * 更新产品
      * @param groupTourProductMPO
      */
-    void updateProduct(GroupTourProductMPO groupTourProductMPO);
+    GroupTourProductMPO updateProduct(GroupTourProductMPO groupTourProductMPO);
 
     /**
      * 新增产品
