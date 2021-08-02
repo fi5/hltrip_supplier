@@ -212,8 +212,8 @@ public class ParseServiceImpl implements ParseService {
                 mpo.setUpdateTime(new Date());
                 mealMPO.setCreateTime(new Date());
                 mealMPO.setUpdateTime(new Date());
-                groupTourProductDao.saveProduct(mpo);
-                mealDao.saveSetMeals(mealMPO);
+                groupTourProductDao.updateProduct(mpo);
+                mealDao.updateSetMeals(mealMPO);
                 commonService.refreshList(1, mpo.getId(), 1, false);
             } catch (Exception e) {
                 e.printStackTrace();

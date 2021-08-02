@@ -44,6 +44,20 @@ public class GroupTourProductSetMealDaoImpl implements GroupTourProductSetMealDa
     }
 
     @Override
+    public void updateSetMeals(GroupTourProductSetMealMPO setMealMPO) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("groupTourProductId").is(setMealMPO.getGroupTourProductId()));
+        GroupTourProductSetMealMPO one = mongoTemplate.findOne(query, GroupTourProductSetMealMPO.class);
+        if (one != null) {
+            setMealMPO.setId(one.getId());
+        }
+        Document document = new Document();
+        mongoTemplate.getConverter().write(setMealMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT_SET_MEAL);
+    }
+
+    @Override
     public GroupTourProductSetMealMPO getSetMeal(String groupTourProductId, String depCode){
         return mongoTemplate.findOne(new Query(Criteria.where("groupTourProductId").is(groupTourProductId)
                 .and("depCode").is(depCode)), GroupTourProductSetMealMPO.class);
