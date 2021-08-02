@@ -1854,7 +1854,7 @@ public class CommonServiceImpl implements CommonService {
                     String s = JSON.toJSONString(pt, filter);
                     String key = MD5Util.encode(s);
                     if(psMap.containsKey(key)){
-                        groupTourProductDao.updateTravelerTemplateId(passengerInfo.getId(), Integer.valueOf(psMap.get("key")));
+                        groupTourProductDao.updateTravelerTemplateId(passengerInfo.getId(), Integer.valueOf(psMap.get(key)));
                         passengerTemplateMapper.removeById(pt.getId());
                     } else {
                         psMap.put(key, String.valueOf(pt.getId()));
