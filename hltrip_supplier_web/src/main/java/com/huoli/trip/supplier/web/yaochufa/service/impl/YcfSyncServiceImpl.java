@@ -609,7 +609,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     });
                     item.getCharacterrList().stream().filter(c -> c.getType() == 3).findAny().ifPresent(c -> {
                         if(StringUtils.isBlank(existScenic.getDetailDesc())){
-                            existScenic.setDetailDesc(c.getDetail());
+                            existScenic.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(c.getDetail())));
                         }
                     });
                     b = true;
@@ -623,13 +623,12 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 
     }
 
-    private void syncScenicProduct(YcfProduct oriYcfProduct){
-        List<String> scenicIds = oriYcfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+    private void syncScenicProduct(YcfProduct ycfProduct){
+        List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(scenicIds)){
-            log.error("要出发产品{}景点不存在，跳过", oriYcfProduct.getProductID());
+            log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
             return;
         }
-        YcfProduct ycfProduct = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriYcfProduct)), YcfProduct.class);
         syncScenic(scenicIds);
         ScenicSpotProductMPO scenicSpotProductMPO = scenicSpotProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
         ScenicSpotMPO scenicSpotMPO = null;
@@ -842,8 +841,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             ruleMPO.setChangedFields(ruleChanged);
         } else {
-            ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
-            ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(ycfProduct.getRefundNote()));
+            ruleMPO.setFeeInclude(StringUtil.delHTMLTag(ycfProduct.getFeeInclude()));
             if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
                 // 规则加动态说明 费用不包含
                 DescInfo feeExclude = new DescInfo();
@@ -909,7 +908,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             scenicSpotProductBackupMPO.setCreateTime(new Date());
         }
         scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
-        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriYcfProduct));
+        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
         scenicSpotProductBackupMPO.setUpdateTime(new Date());
         scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
@@ -920,22 +919,21 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
     }
 
-    private void syncHotelScenicProduct(YcfProduct oriYcfProduct){
+    private void syncHotelScenicProduct(YcfProduct ycfProduct){
         List<String> poiIds = Lists.newArrayList();
-        if(ListUtils.isNotEmpty(oriYcfProduct.getTicketList())){
-            List<String> scenicIds = oriYcfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
+        if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
+            List<String> scenicIds = ycfProduct.getTicketList().stream().map(YcfResourceTicket::getPoiId).collect(Collectors.toList());
             if(ListUtils.isEmpty(scenicIds)){
-                log.error("要出发产品{}景点不存在，跳过", oriYcfProduct.getProductID());
+                log.error("要出发产品{}景点不存在，跳过", ycfProduct.getProductID());
                 return;
             }
             poiIds.addAll(scenicIds);
         }
-        List<String> hotelIds = oriYcfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
+        List<String> hotelIds = ycfProduct.getRoomList().stream().map(YcfResourceRoom::getPoiId).collect(Collectors.toList());
         if(ListUtils.isEmpty(hotelIds)){
-            log.error("要出发产品{}酒店不存在，跳过", oriYcfProduct.getProductID());
+            log.error("要出发产品{}酒店不存在，跳过", ycfProduct.getProductID());
             return;
         }
-        YcfProduct ycfProduct = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriYcfProduct)), YcfProduct.class);
         syncScenic(poiIds);
         syncHotel(hotelIds);
         HotelScenicSpotProductMPO hotelScenicSpotProductMPO = hotelScenicProductDao.getBySupplierProductId(ycfProduct.getProductID(), SUPPLIER_CODE_YCF);
@@ -1311,7 +1309,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         hotelScenicSpotProductBackupMPO.setUpdateTime(new Date());
         hotelScenicSpotProductBackupMPO.setProductMPO(hotelScenicSpotProductMPO);
         hotelScenicSpotProductBackupMPO.setSetMealMPO(setMealMPO);
-        hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriYcfProduct));
+        hotelScenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
         hotelScenicProductBackupDao.saveHotelScenicSpotProductBackup(hotelScenicSpotProductBackupMPO);
 
         commonService.refreshList(2, hotelScenicSpotProductMPO.getId(), 1, fresh);
@@ -1331,20 +1329,19 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(ListUtils.isEmpty(ycfProductItems)){
             return null;
         }
-       return ycfProductItems.stream().map(oriItem -> {
+       return ycfProductItems.stream().map(item -> {
             try {
-                if(oriItem.getPoiType() != 2){
-                    log.error("poi {},{} 不是景点类型，跳过。。", oriItem.getPoiID(), oriItem.getPoiName());
+                if(item.getPoiType() != 2){
+                    log.error("poi {},{} 不是景点类型，跳过。。", item.getPoiID(), item.getPoiName());
                     return null;
                 }
-                YcfProductItem item = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriItem)), YcfProductItem.class);
                 ScenicSpotMPO newScenic = YcfConverter.convertToScenicSpotMPO(item);
                 // 设置省市区
                 commonService.setCity(newScenic);
                 // 同时保存映射关系
                 commonService.updateScenicSpotMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newScenic);
                 // 更新备份
-                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, oriItem);
+                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
                 return newScenic.getId();
             } catch (Exception e) {
                 log.error("poi落地失败，", e);
@@ -1359,20 +1356,19 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         if(ListUtils.isEmpty(ycfProductItems)){
             return null;
         }
-        return ycfProductItems.stream().map(oriItem -> {
+        return ycfProductItems.stream().map(item -> {
             try {
-                if(oriItem.getPoiType() != 1){
-                    log.error("poi {},{} 不是酒店类型，跳过。。", oriItem.getPoiID(), oriItem.getPoiName());
+                if(item.getPoiType() != 1){
+                    log.error("poi {},{} 不是酒店类型，跳过。。", item.getPoiID(), item.getPoiName());
                     return null;
                 }
-                YcfProductItem item = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriItem)), YcfProductItem.class);
                 HotelMPO newHotel = YcfConverter.convertToHotelMPO(item);
                 // 设置省市区
                 commonService.setCity(newHotel);
                 // 同时保存映射关系
                 commonService.updateHotelMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newHotel);
                 // 更新备份
-//                commonService.updateScenicSpotMPOBackup(newHotel, item.getPoiID(), SUPPLIER_CODE_YCF, oriItem);
+//                commonService.updateScenicSpotMPOBackup(newHotel, item.getPoiID(), SUPPLIER_CODE_YCF, item);
                 return newHotel.getId();
             } catch (Exception e) {
                 log.error("poi落地失败，", e);

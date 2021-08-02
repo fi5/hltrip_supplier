@@ -687,8 +687,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     private void updateProductV2(LmmProduct oriLmmProduct, List<LmmGoods> goodsList){
         LmmProduct lmmProduct = JSON.parseObject(JSON.toJSONString(oriLmmProduct), LmmProduct.class);
         if(ListUtils.isNotEmpty(goodsList)){
-            goodsList.forEach(goods -> {
-                LmmGoods g = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(goods)), LmmGoods.class);
+            goodsList.forEach(g -> {
                 // 过滤到付产品
                 if(StringUtils.equals(g.getPaymentType(), "offline")){
                     log.error("到付产品productId={}, goodsId={}，跳过。。", g.getProductId(), g.getGoodsId());
@@ -1144,7 +1143,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
                 scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
                 // 备份当前这个商品
-                oriLmmProduct.setGoodsList(Lists.newArrayList(goods));
+                oriLmmProduct.setGoodsList(Lists.newArrayList(g));
                 scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriLmmProduct));
                 scenicSpotProductBackupMPO.setUpdateTime(new Date());
                 scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
@@ -1309,7 +1308,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.info("驴妈妈补充景点主题{}，用产品{}，内容code={},name={}", scenicSpotMPO.getId(), productMPO.getId(), code, theme);
         }
         if(ListUtils.isEmpty(scenicSpotMPO.getImages())){
-            scenicSpotMPO.setImages(lmmProduct.getImages());
+            scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmProduct.getImages()));
             b = true;
             log.info("驴妈妈补充景点图片{}，用产品{}", scenicSpotMPO.getId(), productMPO.getId());
         }
@@ -1327,7 +1326,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         sb.append("<img src=\"").append(i).append("\"/>").append("<br>"));
                 }
             }
-            scenicSpotMPO.setDetailDesc(sb.toString());
+            scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(sb.toString())));
             b = true;
             log.info("驴妈妈补充景点详细介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), sb.toString());
         }
@@ -1410,8 +1409,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
     }
 
-    private void syncScenic(LmmScenic oriLmmScenic){
-        LmmScenic lmmScenic = JSON.parseObject(StringUtil.delJSONHTMLTag(JSON.toJSONString(oriLmmScenic)), LmmScenic.class);
+    private void syncScenic(LmmScenic lmmScenic){
         // 转本地结构
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
         if(StringUtils.isBlank(newScenic.getCity())){
@@ -1431,7 +1429,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 同时保存映射关系
         commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, Constants.SUPPLIER_NAME_LMM_TICKET, newScenic);
         // 更新备份
-        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, oriLmmScenic);
+        commonService.updateScenicSpotMPOBackup(newScenic, lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, lmmScenic);
     }
 
     @Override

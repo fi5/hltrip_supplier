@@ -10,10 +10,7 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.CoordinateUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.StringUtil;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
@@ -404,9 +401,9 @@ public class LmmTicketConverter {
                 scenicSpotMPO.setCity(m_address.group().trim());
             }
         }
-        scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
+        scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmScenic.getPlaceImage()));
         scenicSpotMPO.setName(lmmScenic.getScenicName());
-        scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());
+        scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(lmmScenic.getPlaceInfo())));
         if(lmmScenic.getBaiduData() != null){
             scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData(), "bd"));
         } else if (lmmScenic.getGoogleData() != null){

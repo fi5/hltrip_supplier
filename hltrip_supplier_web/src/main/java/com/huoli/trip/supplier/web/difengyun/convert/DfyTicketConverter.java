@@ -349,11 +349,11 @@ public class DfyTicketConverter {
             }
         }
         if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
-            scenicSpotMPO.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
+            scenicSpotMPO.setImages(Lists.newArrayList(UploadUtil.getNetUrlAndUpload(scenicDetail.getDefaultPic())));
         }
 
         scenicSpotMPO.setName(scenicDetail.getScenicName());
-        scenicSpotMPO.setDetailDesc(scenicDetail.getScenicDescription());
+        scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(scenicDetail.getScenicDescription())));
         scenicSpotMPO.setCoordinate(convertToCoordinate(scenicDetail.getBlocation(), scenicDetail.getGlocation()));
         scenicSpotMPO.setProvince(scenicDetail.getProvinceName());
         if(StringUtils.isNotBlank(scenicDetail.getOpenTime())){
@@ -361,9 +361,9 @@ public class DfyTicketConverter {
             scenicSpotOpenTime.setTimeDesc(scenicDetail.getOpenTime());
             scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
         }
-        Notice notice = new Notice();
-        notice.setContent(scenicDetail.getBookNotice());
-        notice.setContent("预定须知");
+//        Notice notice = new Notice();
+//        notice.setContent(scenicDetail.getBookNotice());  // 这是个json序列化的对象
+//        notice.setContent("预定须知");
 //        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
         scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
         return scenicSpotMPO;
