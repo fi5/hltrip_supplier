@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.universal.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.supplier.api.UBROrderService;
 import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
@@ -13,6 +14,7 @@ import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -32,18 +34,19 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     @Autowired
     TripOrderRefundMapper tripOrderRefundMapper;
+
     @Autowired
     TripOrderMapper tripOrderMapper;
 
-    @Autowired
-    private HuoliTrace huoliTrace;
-
-    @Autowired
-    private ScenicSpotProductPriceDao scenicSpotProductPriceDao;
-
     @Override
-    public UBRBaseResponse<UBRTicketOrderResponse> createOrder(UBRTicketOrderRequest request){
-        return iubrClient.order(request);
+    public UBRBaseResponse<UBRTicketOrderResponse> createOrder(BaseOrderRequest request){
+        String extend = tripOrderMapper.getExtendById(request.getOrderId());
+        if(StringUtils.isBlank(extend)){
+            log.error("订单 {} 没有查到btg的扩展参数", request.getOrderId());
+            return null;
+        }
+        UBRTicketOrderRequest orderRequest = JSON.parseObject(extend, UBRTicketOrderRequest.class);
+        return iubrClient.order(orderRequest);
     }
 
     @Override

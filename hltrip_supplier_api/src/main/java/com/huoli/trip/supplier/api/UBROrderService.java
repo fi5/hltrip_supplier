@@ -21,7 +21,7 @@ public interface UBROrderService {
      * @param request
      * @return
      */
-    UBRBaseResponse<UBRTicketOrderResponse> createOrder(UBRTicketOrderRequest request);
+    UBRBaseResponse<UBRTicketOrderResponse> createOrder(BaseOrderRequest request);
 
     /**
      * 退款检查

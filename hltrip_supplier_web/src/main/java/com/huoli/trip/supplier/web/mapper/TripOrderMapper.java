@@ -27,4 +27,7 @@ public interface TripOrderMapper {
 
     @Select("select * from trip_order where outOrderId = #{outOrderId}")
     TripOrder getOrderByOutOrderId(String outOrderId);
+
+    @Select("SELECT extend FROM trip_order WHERE orderId = #{orderId}")
+    String getExtendById(String orderId);
 }
