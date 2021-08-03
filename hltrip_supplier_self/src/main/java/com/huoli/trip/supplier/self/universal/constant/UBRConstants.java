@@ -13,29 +13,29 @@ public class UBRConstants {
     /**
      * 环球鉴权token key
      */
-    public static String AUTH_KEY = "UBR_AUTH_TOKEN_KEY";
+    public static String AUTH_KEY = "BTG_AUTH_TOKEN_KEY";
 
     // 配置文件
 
-    public static final String CONFIG_FILE_UBR = "supplier_ubr.properties";
+    public static final String CONFIG_FILE_UBR = "supplier_btg.properties";
 
     // 配置项
     /**
      * 服务器地址
      */
-    public static final String CONFIG_ITEM_HOST_SERVER = "ubr.host.server";
+    public static final String CONFIG_ITEM_HOST_SERVER = "btg.host.server";
     /**
      * 环球账号
      */
-    public static String CONFIG_ITEM_ACCOUNT = "ubr.account";
+    public static String CONFIG_ITEM_ACCOUNT = "btg.account";
 
     /**
      * 环球密码
      */
-    public static String CONFIG_ITEM_PASSWORD = "ubr.password";
+    public static String CONFIG_ITEM_PASSWORD = "btg.password";
 
     /**
      * 景点id
      */
-    public static String CONFIG_ITEM_SCENIC_ID = "ubr.scenic.id";
+    public static String CONFIG_ITEM_SCENIC_ID = "btg.scenic.id";
 }

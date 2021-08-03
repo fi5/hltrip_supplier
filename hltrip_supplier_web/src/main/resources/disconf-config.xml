@@ -56,7 +56,7 @@
 				<value>classpath:/druid-primary-db-huolitrip.properties</value>
 				<value>classpath:/supplier_difengyun.properties</value>
 				<value>classpath:/supplier_lvmama.properties </value>
-				<value>classpath:/supplier_ubr.properties </value>
+				<value>classpath:/supplier_btg.properties </value>
 			</list>
 
 		</property>
