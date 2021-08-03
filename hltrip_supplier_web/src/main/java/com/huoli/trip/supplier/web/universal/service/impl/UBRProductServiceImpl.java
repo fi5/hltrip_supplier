@@ -157,7 +157,8 @@ public class UBRProductServiceImpl implements UBRProductService {
         request.setType(type);
         UBRTicketList ubrTicketList = getTicketList(request);
         for (Map.Entry<String, Object> stringObjectEntry : ubrTicketList.getProducts().entrySet()) {
-            log.info("key={}, value={}", stringObjectEntry.getKey(), JSON.toJSONString(stringObjectEntry.getValue()));
+            UBRTicketInfo ubrTicketInfo = (UBRTicketInfo)stringObjectEntry.getValue();
+            log.info("key={}, value={}", stringObjectEntry.getKey(), JSON.toJSONString(ubrTicketInfo));
         }
 //        List<UBRTicketInfo> infoList = JSON.parseArray(StringUtil.delHTMLTag(oriContent), UBRTicketInfo.class);
 //        infoList.forEach(info -> convertToProduct(info, oriContent));
