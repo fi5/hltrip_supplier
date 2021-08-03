@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -14,7 +16,7 @@ import lombok.Setter;
  * 创建日期：2021/7/27<br>
  */
 @Data
-public class UBRLoginResponse {
+public class UBRLoginResponse implements Serializable {
 
     /**
      * 鉴权
@@ -29,7 +31,7 @@ public class UBRLoginResponse {
 
     @Setter
     @Getter
-    public static class UBRAuth {
+    public static class UBRAuth implements Serializable{
         /**
          * 秘钥
          */
@@ -43,7 +45,7 @@ public class UBRLoginResponse {
 
     @Setter
     @Getter
-    public static class UBRUserInfo {
+    public static class UBRUserInfo implements Serializable{
 
         private String uid;
         /**

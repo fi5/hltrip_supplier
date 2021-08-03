@@ -1,11 +1,15 @@
 package com.huoli.trip.supplier.feign.client.universal.client.impl;
 
 import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
+import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
 import feign.hystrix.FallbackFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,6 +54,26 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
 
             @Override
             public UBRBaseResponse init() {
+                return null;
+            }
+
+            @Override
+            public UBRBaseResponse<UBRTicketOrderResponse> order(UBRTicketOrderRequest request) {
+                return null;
+            }
+
+            @Override
+            public UBRBaseResponse<UBRRefundCheckResponse> refundCheck(String orderId) {
+                return null;
+            }
+
+            @Override
+            public UBRBaseResponse refund(String orderId) {
+                return null;
+            }
+
+            @Override
+            public UBRBaseResponse<UBROrderDetailResponse> orderDetail(String orderId) {
                 return null;
             }
         };

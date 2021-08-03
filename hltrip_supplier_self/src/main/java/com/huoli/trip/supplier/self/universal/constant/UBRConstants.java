@@ -54,4 +54,9 @@ public class UBRConstants {
      * 老人
      */
     public static String PERSON_TYPE_OLD = "Senior";
+
+    /**
+     * 通用
+     */
+    public static String PERSON_TYPE_GST = "Guest";
 }

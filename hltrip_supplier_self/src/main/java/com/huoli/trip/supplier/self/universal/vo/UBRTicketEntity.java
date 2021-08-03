@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.self.universal.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -10,10 +11,15 @@ import java.io.Serializable;
  * 公司：活力天汇<br>
  * 作者：冯志强<br>
  * 版本：1.0<br>
- * 创建日期：2021/7/27<br>
+ * 创建日期：2021/8/3<br>
  */
 @Data
-public class UBRStock implements Serializable {
+public class UBRTicketEntity implements Serializable {
+
+    /**
+     * 产品编码
+     */
+    private String code;
 
     /**
      * 日期
@@ -21,13 +27,12 @@ public class UBRStock implements Serializable {
     private String datetime;
 
     /**
-     * 状态, soldout, normal
+     * 价格
      */
-    private String status;
+    private String price;
 
     /**
-     * 可用库存数量，供应商已经不用这个了
+     * 出新人
      */
-    @Deprecated
-    private int stock;
+    private List<UBRGuest> guest;
 }

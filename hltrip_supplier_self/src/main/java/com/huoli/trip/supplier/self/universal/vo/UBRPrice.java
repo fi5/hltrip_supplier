@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.universal.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2021/7/27<br>
  */
 @Data
-public class UBRPrice {
+public class UBRPrice implements Serializable {
 
     /**
      * 日期

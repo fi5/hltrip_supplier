@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.universal.vo.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,23 +11,19 @@ import java.io.Serializable;
  * 公司：活力天汇<br>
  * 作者：冯志强<br>
  * 版本：1.0<br>
- * 创建日期：2021/7/27<br>
+ * 创建日期：2021/8/3<br>
  */
 @Data
-public class UBRBaseResponse<T> implements Serializable {
+public class UBRTicketOrderResponse implements Serializable {
 
     /**
-     * 结果码
+     *
      */
-    private Integer code;
+    @JsonProperty("order_id")
+    private String orderId;
 
     /**
-     * 结果消息
+     * 状态 NORMAL 成功，BUY_FAILED 失败
      */
-    private String msg;
-
-    /**
-     * 结果数据
-     */
-    private T data;
+    private String status;
 }

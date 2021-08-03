@@ -2,6 +2,8 @@ package com.huoli.trip.supplier.self.universal.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -11,7 +13,7 @@ import lombok.Data;
  * 创建日期：2021/7/27<br>
  */
 @Data
-public class UBRTicketInfo {
+public class UBRTicketInfo implements Serializable {
 
     private String admissionReEntry;
 
@@ -102,7 +104,7 @@ public class UBRTicketInfo {
     private Integer ticketVoidAdvanceDays;
 
     /**
-     * 票种类型 成人 Adult， 儿童 Child， 老人 Senior
+     * 票种类型 成人 Adult， 儿童 Child， 老人 Senior，通用 Guest
      */
     private String personType;
 }

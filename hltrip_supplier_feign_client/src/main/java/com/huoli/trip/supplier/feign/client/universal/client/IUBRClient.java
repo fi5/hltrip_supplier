@@ -2,16 +2,17 @@ package com.huoli.trip.supplier.feign.client.universal.client;
 
 import com.huoli.trip.supplier.feign.client.universal.client.impl.UBRClientFallback;
 import com.huoli.trip.supplier.feign.client.universal.interceptor.UBRFeignInterceptor;
+import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 描述：<br/>
@@ -55,4 +56,36 @@ public interface IUBRClient {
     @RequestMapping(method = RequestMethod.GET, path = "/api/v1/init")
     UBRBaseResponse init();
 
+
+
+    // ------------- 订单 ------------------
+
+
+    /**
+     * 下单
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.POST, path = "/api/v1/order")
+    UBRBaseResponse<UBRTicketOrderResponse> order(@RequestBody UBRTicketOrderRequest request);
+
+    /**
+     * 退款预检查
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/policy/refund/{uid}")
+    UBRBaseResponse<UBRRefundCheckResponse> refundCheck(@PathVariable("uid") String orderId);
+
+    /**
+     * 订单退款
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/refund/ticket/order/{uid}")
+    UBRBaseResponse refund(@PathVariable("uid") String orderId);
+
+    /**
+     * 订单详情
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/order/query/{order_uid}")
+    UBRBaseResponse<UBROrderDetailResponse> orderDetail(@PathVariable("order_uid") String orderId);
 }

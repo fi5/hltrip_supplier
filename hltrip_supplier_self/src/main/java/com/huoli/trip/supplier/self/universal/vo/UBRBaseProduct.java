@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.self.universal.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  * 创建日期：2021/7/27<br>
  */
 @Data
-public class UBRBaseProduct {
+public class UBRBaseProduct implements Serializable {
 
     /**
      * 门票编号
@@ -26,7 +27,7 @@ public class UBRBaseProduct {
     private String name;
 
     /**
-     * 门票描述，供应商建议不要使用这个，留底
+     * 门票描述，英文
      */
     private String description;
 
