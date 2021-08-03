@@ -8,6 +8,7 @@ import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.BackChannelEntry;
+import com.huoli.trip.common.entity.TicketInfoPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
@@ -262,7 +263,7 @@ public class UBRProductServiceImpl implements UBRProductService {
             productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
         }
         productDao.saveProduct(productMPO);
-        convertPrice(baseProduct, productId, ruleMPO.getId());
+        convertPrice(baseProduct, productId, ruleMPO.getId(), ticketInfo.getPersonType());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
         scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
         scenicSpotProductBackupMPO.setScenicSpotProduct(productMPO);
@@ -271,7 +272,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         commonService.refreshList(0, productId, 1, fresh);
     }
 
-    private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId){
+    private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId, String personType){
         if(ListUtils.isNotEmpty(baseProduct.getPrices())){
             List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
             baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
@@ -293,7 +294,17 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setStartDate(p.getDatetime());
                     priceMPO.setEndDate(priceMPO.getStartDate());
                     priceMPO.setWeekDay("1,2,3,4,5,6,7");
-                    priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
+                    if(StringUtils.isBlank(personType)){
+                        priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
+                    } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_ADT)){
+                        priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_2.getCode()));
+                    } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_CHD)){
+                        priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_7.getCode()));
+                    } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_OLD)){
+                        priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_8.getCode()));
+                    } else {
+                        priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
+                    }
                     UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
                             && StringUtils.isNotBlank(s.getStatus())
                             && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);

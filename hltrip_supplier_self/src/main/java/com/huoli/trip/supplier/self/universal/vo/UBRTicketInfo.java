@@ -100,4 +100,9 @@ public class UBRTicketInfo {
      * 离入园日期几天前是否可退
      */
     private Integer ticketVoidAdvanceDays;
+
+    /**
+     * 票种类型 成人 Adult， 儿童 Child， 老人 Senior
+     */
+    private String personType;
 }

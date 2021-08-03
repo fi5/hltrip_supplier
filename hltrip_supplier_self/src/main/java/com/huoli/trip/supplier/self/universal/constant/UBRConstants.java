@@ -38,4 +38,20 @@ public class UBRConstants {
      * 景点id
      */
     public static String CONFIG_ITEM_SCENIC_ID = "btg.scenic.id";
+
+    // 票种
+    /**
+     * 成人
+     */
+    public static String PERSON_TYPE_ADT = "Adult";
+
+    /**
+     * 儿童
+     */
+    public static String PERSON_TYPE_CHD = "Child";
+
+    /**
+     * 老人
+     */
+    public static String PERSON_TYPE_OLD = "Senior";
 }
