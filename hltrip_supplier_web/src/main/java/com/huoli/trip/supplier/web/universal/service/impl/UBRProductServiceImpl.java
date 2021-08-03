@@ -258,7 +258,9 @@ public class UBRProductServiceImpl implements UBRProductService {
         ScenicSpotRuleMPO ruleMPO = convertToRule(productMPO, ticketInfo);
         productMPO.setRuleId(ruleMPO.getId());
         // todo 供应商有个摘要summary要不要
-        productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
+        if(StringUtils.isNotBlank(baseProduct.getDescription())){
+            productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
+        }
         convertPrice(baseProduct, productId, ruleMPO.getId());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
         scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
