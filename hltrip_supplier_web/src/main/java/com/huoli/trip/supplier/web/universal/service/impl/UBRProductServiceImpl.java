@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -155,9 +156,11 @@ public class UBRProductServiceImpl implements UBRProductService {
         UBRTicketListRequest request = new UBRTicketListRequest();
         request.setType(type);
         UBRTicketList ubrTicketList = getTicketList(request);
-        String oriContent = JSON.toJSONString(ubrTicketList.getProduction());
-        List<UBRTicketInfo> infoList = JSON.parseArray(StringUtil.delHTMLTag(oriContent), UBRTicketInfo.class);
-        infoList.forEach(info -> convertToProduct(info, oriContent));
+        for (Map.Entry<String, Object> stringObjectEntry : ubrTicketList.getProducts().entrySet()) {
+            log.info("key={}, value={}", stringObjectEntry.getKey(), stringObjectEntry.getValue());
+        }
+//        List<UBRTicketInfo> infoList = JSON.parseArray(StringUtil.delHTMLTag(oriContent), UBRTicketInfo.class);
+//        infoList.forEach(info -> convertToProduct(info, oriContent));
     }
 
     @Override

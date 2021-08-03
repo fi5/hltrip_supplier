@@ -1,8 +1,10 @@
 package com.huoli.trip.supplier.self.universal.vo;
 
+import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 描述：<br/>
@@ -16,21 +18,6 @@ import java.util.List;
 public class UBRTicketList {
 
     /**
-     * 当前页码
-     */
-    private int currentPage;
-
-    /**
-     * 总页数
-     */
-    private int totalPageCount;
-
-    /**
-     * 数据总数
-     */
-    private int totalProductCount;
-
-    /**
      * 数据更新时间
      */
     private String dataGetDateTime;
@@ -38,6 +25,6 @@ public class UBRTicketList {
     /**
      * 门票数据
      */
-    private List<UBRTicketInfo> production;
+    private JSONObject products;
 
 }
