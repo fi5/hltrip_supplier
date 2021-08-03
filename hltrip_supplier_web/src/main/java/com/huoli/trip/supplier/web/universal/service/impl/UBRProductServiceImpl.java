@@ -261,6 +261,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         if(StringUtils.isNotBlank(baseProduct.getDescription())){
             productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
         }
+        productDao.saveProduct(productMPO);
         convertPrice(baseProduct, productId, ruleMPO.getId());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
         scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
@@ -361,34 +362,6 @@ public class UBRProductServiceImpl implements UBRProductService {
         } else {
             ruleMPO.setVoucherType(5);
         }
-
-        List<ScenicSpotRuleMPO> ruleMPOs = ruleDao.getScenicSpotRule(productMPO.getScenicSpotId());
-        if(ListUtils.isNotEmpty(ruleMPOs)){
-            boolean match = false;
-            for (ScenicSpotRuleMPO mpo : ruleMPOs) {
-                ScenicSpotRuleCompare compareOri = new ScenicSpotRuleCompare();
-                BeanUtils.copyProperties(mpo, compareOri);
-                ScenicSpotRuleCompare compareTgt = new ScenicSpotRuleCompare();
-                BeanUtils.copyProperties(ruleMPO, compareTgt);
-                // 对比规则，内容相同可以重复使用，
-                if(StringUtils.equals(JSON.toJSONString(compareTgt), JSON.toJSONString(compareOri))){
-                    ruleMPO.setId(mpo.getId());
-                    match = true;
-                    log.info("景点{}产品{}匹配到重复景点规则{}", productMPO.getScenicSpotId(), productMPO.getId(), mpo.getId());
-                    break;
-                }
-            }
-            // 没匹配到就创建新的
-            if(!match){
-                log.info("景点{}产品{}没有匹配到重复规则，创建新规则{}", productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO.getId());
-                ruleDao.saveScenicSpotRule(ruleMPO);
-            }
-        } else {
-            log.info("景点{}产品{}还没有规则，创建新规则{}", productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO.getId());
-            ruleDao.saveScenicSpotRule(ruleMPO);
-        }
-        return ruleMPO;
+        return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
     }
-
-
 }
