@@ -157,11 +157,9 @@ public class UBRProductServiceImpl implements UBRProductService {
         request.setType(type);
         UBRTicketList ubrTicketList = getTicketList(request);
         for (Map.Entry<String, Object> stringObjectEntry : ubrTicketList.getProducts().entrySet()) {
-            UBRTicketInfo ubrTicketInfo = (UBRTicketInfo)stringObjectEntry.getValue();
-            log.info("key={}, value={}", stringObjectEntry.getKey(), JSON.toJSONString(ubrTicketInfo));
+            UBRTicketInfo ubrTicketInfo = JSON.parseObject(JSON.toJSONString(stringObjectEntry.getValue()), UBRTicketInfo.class);
+            convertToProduct(ubrTicketInfo);
         }
-//        List<UBRTicketInfo> infoList = JSON.parseArray(StringUtil.delHTMLTag(oriContent), UBRTicketInfo.class);
-//        infoList.forEach(info -> convertToProduct(info, oriContent));
     }
 
     @Override
@@ -216,16 +214,17 @@ public class UBRProductServiceImpl implements UBRProductService {
         return token;
     }
 
-    public void convertToProduct(UBRTicketInfo ticketInfo, String oriContent){
+    public void convertToProduct(UBRTicketInfo ticketInfo){
         ScenicSpotProductMPO productMPO = productDao.getBySupplierProductId(ticketInfo.getBaseProduct().getCode(), Constants.SUPPLIER_CODE_BTG_TICKET);
         boolean fresh = false;
+        UBRBaseProduct baseProduct = ticketInfo.getBaseProduct();
         if(productMPO == null){
             productMPO = new ScenicSpotProductMPO();
             productMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
             productMPO.setCreateTime(new Date());
             productMPO.setIsDel(0);
             productMPO.setSellType(1);
-            productMPO.setSupplierProductId(ticketInfo.getBaseProduct().getCode());
+            productMPO.setSupplierProductId(baseProduct.getCode());
             productMPO.setPayServiceType(0);
             productMPO.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
             // todo 景点需要后台创建
@@ -234,8 +233,7 @@ public class UBRProductServiceImpl implements UBRProductService {
             fresh = true;
         }
         String productId = productMPO.getId();
-        UBRBaseProduct baseProduct = ticketInfo.getBaseProduct();
-        productMPO.setName(baseProduct.getName());
+        productMPO.setName(ticketInfo.getDescription());
         if(baseProduct.getPurchasable() != null && baseProduct.getPurchasable()){
             productMPO.setStatus(1);
         } else {
@@ -259,12 +257,13 @@ public class UBRProductServiceImpl implements UBRProductService {
 
         ScenicSpotRuleMPO ruleMPO = convertToRule(productMPO, ticketInfo);
         productMPO.setRuleId(ruleMPO.getId());
-        productMPO.setPcDescription(ticketInfo.getDescription());
+        // todo 供应商有个摘要summary要不要
+        productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
         convertPrice(baseProduct, productId, ruleMPO.getId());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
         scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
         scenicSpotProductBackupMPO.setScenicSpotProduct(productMPO);
-        scenicSpotProductBackupMPO.setOriginContent(oriContent);
+        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ticketInfo));
         productBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
         commonService.refreshList(0, productId, 1, fresh);
     }
@@ -339,10 +338,11 @@ public class UBRProductServiceImpl implements UBRProductService {
         if(StringUtils.isNotBlank(ticketInfo.getRefundable()) && StringUtils.equals(ticketInfo.getRefundable(), "true")){
             ruleMPO.setRefundCondition(2);
             RefundRule refundRule = new RefundRule();
-            // todo 其它，供应商没有类型
-            refundRule.setRefundRuleType(5);
+            refundRule.setRefundRuleType(1);
             refundRule.setDeductionType(1);
             refundRule.setFee(StringUtils.isBlank(ticketInfo.getServiceFee()) ? 0d : Double.valueOf(ticketInfo.getServiceFee()));
+            refundRule.setDay(ticketInfo.getTicketVoidAdvanceDays() == null ? 0 : ticketInfo.getTicketVoidAdvanceDays());
+            // todo 供应商有改期时间，我们没有改期
             ruleMPO.setRefundRules(Lists.newArrayList(refundRule));
         } else {
             ruleMPO.setRefundCondition(1);

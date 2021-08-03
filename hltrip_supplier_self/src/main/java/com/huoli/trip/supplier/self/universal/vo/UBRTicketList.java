@@ -3,9 +3,6 @@ package com.huoli.trip.supplier.self.universal.vo;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -26,5 +23,10 @@ public class UBRTicketList {
      * 门票数据
      */
     private JSONObject products;
+
+    /**
+     * 字典
+     */
+    private JSONObject options;
 
 }
