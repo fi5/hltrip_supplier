@@ -8,6 +8,7 @@ import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
@@ -46,17 +47,17 @@ public class UBROrderServiceImpl implements UBROrderService {
     }
 
     @Override
-    public UBRBaseResponse refundCheck(String supplierOrderId){
-        return iubrClient.refundCheck(supplierOrderId);
+    public UBRBaseResponse refundCheck(BaseOrderRequest request){
+        return iubrClient.refundCheck(request.getSupplierOrderId());
     }
 
     @Override
-    public UBRBaseResponse<UBRTicketOrderResponse> refund(String supplierOrderId){
-        return iubrClient.refund(supplierOrderId);
+    public UBRBaseResponse<UBRTicketOrderResponse> refund(BaseOrderRequest request){
+        return iubrClient.refund(request.getSupplierOrderId());
     }
 
     @Override
-    public UBRBaseResponse<UBROrderDetailResponse> orderDetail(String supplierOrderId){
-        return iubrClient.orderDetail(supplierOrderId);
+    public UBRBaseResponse<UBROrderDetailResponse> orderDetail(BaseOrderRequest request){
+        return iubrClient.orderDetail(request.getSupplierOrderId());
     }
 }

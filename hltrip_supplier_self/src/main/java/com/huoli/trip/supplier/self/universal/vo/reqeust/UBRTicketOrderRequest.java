@@ -1,6 +1,6 @@
 package com.huoli.trip.supplier.self.universal.vo.reqeust;
 
-import com.huoli.trip.supplier.self.common.BaseTrace;
+import com.huoli.trip.common.vo.request.TraceRequest;
 import com.huoli.trip.supplier.self.universal.vo.UBRGuest;
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketEntity;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.List;
  * 创建日期：2021/8/3<br>
  */
 @Data
-public class UBRTicketOrderRequest extends BaseTrace implements Serializable {
+public class UBRTicketOrderRequest extends TraceRequest implements Serializable {
 
     /**
      * 出行人

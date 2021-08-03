@@ -4,6 +4,7 @@ import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
+import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 
 /**
  * 描述：<br/>
@@ -24,22 +25,22 @@ public interface UBROrderService {
 
     /**
      * 退款检查
-     * @param supplierOrderId
+     * @param request
      * @return
      */
-    UBRBaseResponse refundCheck(String supplierOrderId);
+    UBRBaseResponse refundCheck(BaseOrderRequest request);
 
     /**
      * 退款
-     * @param supplierOrderId
+     * @param request
      * @return
      */
-    UBRBaseResponse<UBRTicketOrderResponse> refund(String supplierOrderId);
+    UBRBaseResponse<UBRTicketOrderResponse> refund(BaseOrderRequest request);
 
     /**
      * 订单详情
-     * @param supplierOrderId
+     * @param request
      * @return
      */
-    UBRBaseResponse<UBROrderDetailResponse> orderDetail(String supplierOrderId);
+    UBRBaseResponse<UBROrderDetailResponse> orderDetail(BaseOrderRequest request);
 }
