@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.universal.vo.reqeust;
 
+import com.huoli.trip.supplier.self.common.BaseTrace;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.io.Serializable;
  * 创建日期：2021/8/3<br>
  */
 @Data
-public class UBROrderDetailRequest  implements Serializable {
+public class UBROrderDetailRequest extends BaseTrace implements Serializable {
 
     /**
      * 供应商订单号
