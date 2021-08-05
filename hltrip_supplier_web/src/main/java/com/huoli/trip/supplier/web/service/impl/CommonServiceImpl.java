@@ -1818,6 +1818,7 @@ public class CommonServiceImpl implements CommonService {
                 scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
                 scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
                 scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+                i--;
             }
         }
         log.info("处理景点描述信息完毕.....");
