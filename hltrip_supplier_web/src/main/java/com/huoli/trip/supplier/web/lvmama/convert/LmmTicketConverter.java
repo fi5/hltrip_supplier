@@ -401,7 +401,9 @@ public class LmmTicketConverter {
                 scenicSpotMPO.setCity(m_address.group().trim());
             }
         }
-        scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmScenic.getPlaceImage()));
+        if(ListUtils.isNotEmpty(lmmScenic.getPlaceImage())){
+            scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmScenic.getPlaceImage()));
+        }
         scenicSpotMPO.setName(lmmScenic.getScenicName());
         scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(lmmScenic.getPlaceInfo())));
         if(lmmScenic.getBaiduData() != null){
