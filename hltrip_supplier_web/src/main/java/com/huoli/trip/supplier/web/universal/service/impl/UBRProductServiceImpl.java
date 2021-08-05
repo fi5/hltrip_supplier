@@ -258,10 +258,15 @@ public class UBRProductServiceImpl implements UBRProductService {
 
         ScenicSpotRuleMPO ruleMPO = convertToRule(productMPO, ticketInfo);
         productMPO.setRuleId(ruleMPO.getId());
-        // todo 供应商有个摘要summary要不要
-        if(StringUtils.isNotBlank(baseProduct.getDescription())){
-            productMPO.setPcDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
+        StringBuffer sb = new StringBuffer();
+        if(StringUtils.isNotBlank(baseProduct.getSummary())){
+            sb.append(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getSummary()))).append("<br>");
         }
+        // 摘要 和说明拼起来
+        if(StringUtils.isNotBlank(baseProduct.getDescription())){
+            sb.append(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(baseProduct.getDescription())));
+        }
+        productMPO.setPcDescription(sb.toString());
         productDao.saveProduct(productMPO);
         convertPrice(baseProduct, productId, ruleMPO.getId(), ticketInfo.getPersonType());
         ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
@@ -345,10 +350,9 @@ public class UBRProductServiceImpl implements UBRProductService {
             ruleMPO = ruleDao.getScenicSpotRuleById(productMPO.getRuleId());
         }
         ruleMPO.setMaxCount(StringUtils.isBlank(ticketInfo.getMaxQuantity()) ? 99 : Integer.valueOf(ticketInfo.getMaxQuantity()));
-        // todo 是否需要最小购买数量
-        // todo 是否需要最大最小年龄
-        // todo 没有
-        //      ticketCategory	string 票类别：Park Ticket, Express, VIP Experiences, Annual Pass 目前只有单日票
+        ruleMPO.setMinCount(StringUtils.isBlank(ticketInfo.getMinQuantity()) ? 1 : Integer.valueOf(ticketInfo.getMinQuantity()));
+        ruleMPO.setMaxAge(StringUtils.isBlank(ticketInfo.getPersonTypeMaxAge()) ? 100 : Integer.valueOf(ticketInfo.getPersonTypeMaxAge()));
+        ruleMPO.setMinAge(StringUtils.isBlank(ticketInfo.getPersonTypeMinAge()) ? 0 : Integer.valueOf(ticketInfo.getPersonTypeMinAge()));
         if(StringUtils.isNotBlank(ticketInfo.getRefundable()) && StringUtils.equals(ticketInfo.getRefundable(), "true")){
             ruleMPO.setRefundCondition(2);
             RefundRule refundRule = new RefundRule();
@@ -356,7 +360,6 @@ public class UBRProductServiceImpl implements UBRProductService {
             refundRule.setDeductionType(1);
             refundRule.setFee(StringUtils.isBlank(ticketInfo.getServiceFee()) ? 0d : Double.valueOf(ticketInfo.getServiceFee()));
             refundRule.setDay(ticketInfo.getTicketVoidAdvanceDays() == null ? 0 : ticketInfo.getTicketVoidAdvanceDays());
-            // todo 供应商有改期时间，我们没有改期
             ruleMPO.setRefundRules(Lists.newArrayList(refundRule));
         } else {
             ruleMPO.setRefundCondition(1);
@@ -365,13 +368,12 @@ public class UBRProductServiceImpl implements UBRProductService {
         ruleMPO.setTicketCardTypes(Lists.newArrayList(Certificate.ID_CARD.getCode(), Certificate.PASSPORT.getCode()));
         ruleMPO.setTravellerInfos(Lists.newArrayList(0, 1));
         ruleMPO.setTravellerTypes(Lists.newArrayList(Certificate.ID_CARD.getCode(), Certificate.PASSPORT.getCode()));
-        // todo 缺少证件或人脸识别
         if(StringUtils.equals(ticketInfo.getMediaType(), "GID/FR")){
-            ruleMPO.setVoucherType(5);
-        } else if(StringUtils.equals(ticketInfo.getMediaType(), "QR Code")){
-            ruleMPO.setVoucherType(0);
+            ruleMPO.setVoucherType(9);
+//        } else if(StringUtils.equals(ticketInfo.getMediaType(), "QR Code")){  // 不需要二维码。所有都可以通过证件入园
+//            ruleMPO.setVoucherType(2);
         } else {
-            ruleMPO.setVoucherType(5);
+            ruleMPO.setVoucherType(8);
         }
         return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
     }

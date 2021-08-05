@@ -1,6 +1,8 @@
 package com.huoli.trip.supplier.api;
 
+import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderLocalRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
@@ -17,11 +19,11 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 public interface UBROrderService {
 
     /**
-     * 下单
+     * 下单，本地单，保存供应商下单需要的参数
      * @param request
      * @return
      */
-    UBRBaseResponse<UBRTicketOrderResponse> createOrder(BaseOrderRequest request);
+    BaseResponse createOrder(UBRTicketOrderLocalRequest request);
 
     /**
      * 退款检查
@@ -43,4 +45,11 @@ public interface UBROrderService {
      * @return
      */
     UBRBaseResponse<UBROrderDetailResponse> orderDetail(BaseOrderRequest request);
+
+    /**
+     * 支付订单，这个是供应商实际下单操作，供应商下单支付是一个接口
+     * @param request
+     * @return
+     */
+    UBRBaseResponse<UBRTicketOrderResponse> payOrder(BaseOrderRequest request);
 }

@@ -44,4 +44,9 @@ public class UBRBaseProduct implements Serializable {
      * 库存列表
      */
     private List<UBRStock> stocks;
+
+    /**
+     * 摘要
+     */
+    private String summary;
 }

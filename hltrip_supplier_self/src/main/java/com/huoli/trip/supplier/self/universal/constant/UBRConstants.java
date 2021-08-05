@@ -59,4 +59,34 @@ public class UBRConstants {
      * 通用
      */
     public static String PERSON_TYPE_GST = "Guest";
+
+    // 订单状态
+    /**
+     * 处理中
+     */
+    public static String ORDER_STATUS_PROCESS = "PROCESS";
+    /**
+     * 正常
+     */
+    public static String ORDER_STATUS_NORMAL = "NORMAL";
+    /**
+     * 已退款
+     */
+    public static String ORDER_STATUS_REFUND = "REFUND";
+    /**
+     * 退款处理中
+     */
+    public static String ORDER_STATUS_REFUND_PROCESS = "REFUND_PROCESS";
+    /**
+     * 取消
+     */
+    public static String ORDER_STATUS_CANCEL = "CANCEL";
+    /**
+     * 预定失败
+     */
+    public static String ORDER_STATUS_BUY_FILED = "BUY_FILED";
+    /**
+     * 已完成
+     */
+    public static String ORDER_STATUS_COMPLETED = "COMPLETED";
 }
