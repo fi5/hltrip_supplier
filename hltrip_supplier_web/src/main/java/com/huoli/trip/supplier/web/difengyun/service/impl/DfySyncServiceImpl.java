@@ -893,7 +893,11 @@ public class DfySyncServiceImpl implements DfySyncService {
                 transaction.setBookBeforeDay(dfyTicketDetail.getAdvanceDay());
             }
             if(dfyTicketDetail.getAdvanceHour() != null){
-                transaction.setBookBeforeTime(dfyTicketDetail.getAdvanceHour().toString());
+                if(dfyTicketDetail.getAdvanceHour() < 10){
+                    transaction.setBookBeforeTime(String.format("0%s:00", dfyTicketDetail.getAdvanceHour().toString()));
+                } else {
+                    transaction.setBookBeforeTime(String.format("%s:00", dfyTicketDetail.getAdvanceHour().toString()));
+                }
             }
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);

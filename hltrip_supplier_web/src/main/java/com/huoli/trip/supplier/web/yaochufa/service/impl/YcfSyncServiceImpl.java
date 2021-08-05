@@ -697,9 +697,15 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         scenicSpotProductMPO.setName(ycfProduct.getProductName());
         scenicSpotProductMPO.setUpdateTime(new Date());
-        ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
         if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
-            transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
+            ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
+            int total = ycfProduct.getBookAheadMin();
+            int day = total / (24 * 60);
+            int newMin = total % (24 * 60);
+            int hour = newMin / 60;
+            int min = hour % 60;
+            transaction.setBookBeforeDay(day);
+            transaction.setBookBeforeTime(String.format("%s:%s", hour > 9 ? hour : String.format("0%s", hour), min > 9 ? min : String.format("0%s", min)));
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
         }
         ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
