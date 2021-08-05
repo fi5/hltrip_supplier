@@ -818,7 +818,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     scenicSpotProductMPO.setTags(Lists.newArrayList(lmmProduct.getServiceGuarantee()));
                 }
                 if(StringUtils.equals(g.getStatus(), "true") && StringUtils.equals(lmmProduct.getProductStatus(), "true")){
-                    scenicSpotProductMPO.setStatus(1);
+                    // 后台人工下线的不改状态
+                    if(scenicSpotProductMPO.getManuallyStatus() != 1){
+                        scenicSpotProductMPO.setStatus(1);
+                    }
                 } else {
                     scenicSpotProductMPO.setStatus(3);
                 }

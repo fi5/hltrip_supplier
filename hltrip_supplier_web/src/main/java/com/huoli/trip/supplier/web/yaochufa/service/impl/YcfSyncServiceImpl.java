@@ -718,7 +718,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         baseSetting.setCategoryCode("d_ss_ticket");
         scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
         if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
-            scenicSpotProductMPO.setStatus(1);
+            // 后台人工下线的不改状态
+            if(scenicSpotProductMPO.getManuallyStatus() != 1){
+                scenicSpotProductMPO.setStatus(1);
+            }
         } else {
             scenicSpotProductMPO.setStatus(3);
         }
