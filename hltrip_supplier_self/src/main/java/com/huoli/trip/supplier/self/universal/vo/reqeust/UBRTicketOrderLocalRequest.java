@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.self.universal.vo.reqeust;
 
+import com.huoli.trip.common.vo.request.TraceRequest;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.io.Serializable;
  * 创建日期：2021/8/3<br>
  */
 @Data
-public class UBRTicketOrderLocalRequest implements Serializable {
+public class UBRTicketOrderLocalRequest extends TraceRequest implements Serializable {
 
     /**
      * 本地(hbgj)订单id
