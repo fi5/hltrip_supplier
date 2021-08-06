@@ -19,11 +19,10 @@ import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 public interface UBROrderService {
 
     /**
-     * 下单，本地单，保存供应商下单需要的参数
-     * @param request
+     * 下单
      * @return
      */
-    BaseResponse createOrder(UBRTicketOrderLocalRequest request);
+    BaseResponse createOrder();
 
     /**
      * 退款检查

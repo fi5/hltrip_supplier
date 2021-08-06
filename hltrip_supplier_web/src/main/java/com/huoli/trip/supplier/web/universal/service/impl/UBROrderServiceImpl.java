@@ -64,8 +64,7 @@ public class UBROrderServiceImpl implements UBROrderService {
     TripOrderMapper tripOrderMapper;
 
     @Override
-    public BaseResponse createOrder(UBRTicketOrderLocalRequest request){
-        tripOrderMapper.updateExtendById(request.getOrderId(), request.getUbrOrderRequest());
+    public BaseResponse createOrder(){
         return BaseResponse.withSuccess();
     }
 
