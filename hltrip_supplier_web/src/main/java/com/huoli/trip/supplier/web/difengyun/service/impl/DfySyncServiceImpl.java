@@ -1076,7 +1076,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 traveller.add(1);
                 traveller.add(2);
             }
-            List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().map(c -> {
+            List<Integer> creds = Lists.newArrayList(dfyTicketDetail.getCertificateType().split(",")).stream().filter(c ->
+                    StringUtils.isNotBlank(c)).map(c -> {
                 switch (Integer.parseInt(c)){
                     case DfyConstants.CRED_TYPE_ID:
                         return Certificate.ID_CARD.getCode();
