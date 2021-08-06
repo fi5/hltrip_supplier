@@ -228,7 +228,6 @@ public class UBRProductServiceImpl implements UBRProductService {
             productMPO.setSupplierProductId(baseProduct.getCode());
             productMPO.setPayServiceType(0);
             productMPO.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
-            // todo 景点需要后台创建
             String scenicId = ConfigGetter.getByFileItemString(UBRConstants.CONFIG_FILE_UBR, UBRConstants.CONFIG_ITEM_SCENIC_ID);
             productMPO.setScenicSpotId(scenicId);
             fresh = true;
@@ -364,9 +363,9 @@ public class UBRProductServiceImpl implements UBRProductService {
         } else {
             ruleMPO.setRefundCondition(1);
         }
-        ruleMPO.setTicketInfos(Lists.newArrayList(0, 1, 2));
+        ruleMPO.setTicketInfos(Lists.newArrayList(0, 1));
         ruleMPO.setTicketCardTypes(Lists.newArrayList(Certificate.ID_CARD.getCode(), Certificate.PASSPORT.getCode()));
-        ruleMPO.setTravellerInfos(Lists.newArrayList(0, 1));
+        ruleMPO.setTravellerInfos(Lists.newArrayList(0, 1, 2));
         ruleMPO.setTravellerTypes(Lists.newArrayList(Certificate.ID_CARD.getCode(), Certificate.PASSPORT.getCode()));
         if(StringUtils.equals(ticketInfo.getMediaType(), "GID/FR")){
             ruleMPO.setVoucherType(9);
