@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.Constants;
+import com.huoli.trip.common.constant.OrderStatus;
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderRefund;
 import com.huoli.trip.common.entity.TripRefundNotify;
@@ -34,6 +35,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.sql.Struct;
 import java.util.Date;
 import java.util.List;
 
@@ -69,12 +71,23 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     @Override
     public UBRBaseResponse<UBRTicketOrderResponse> payOrder(BaseOrderRequest request){
-        String extend = tripOrderMapper.getExtendById(request.getOrderId());
-        if(StringUtils.isBlank(extend)){
+        TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+        if(StringUtils.isBlank(order.getExtend())){
             log.error("订单 {} 没有查到btg的扩展参数", request.getOrderId());
             return null;
         }
-        UBRTicketOrderRequest orderRequest = JSON.parseObject(extend, UBRTicketOrderRequest.class);
+        UBRTicketOrderRequest orderRequest = JSON.parseObject(order.getExtend(), UBRTicketOrderRequest.class);
+        UBRBaseResponse<UBRTicketOrderResponse> baseResponse = iubrClient.order(orderRequest);
+        if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null){
+            String status = baseResponse.getData().getStatus();
+            int channelStatus = order.getChannelStatus();
+            if(StringUtils.equals("NORMAL", status)){
+                channelStatus = OrderStatus.WAITING_TO_TRAVEL.getCode();
+            } else if(StringUtils.equals("BUY_FAILED", status)){
+                channelStatus = OrderStatus.REFUNDED.getCode();
+            }
+            tripOrderMapper.updateOutOrderIdById(request.getOrderId(), channelStatus, baseResponse.getData().getOrderId());
+        }
         return iubrClient.order(orderRequest);
     }
 

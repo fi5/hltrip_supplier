@@ -34,6 +34,9 @@ public interface TripOrderMapper {
     @Select("update trip_order set extend = #{extend} WHERE orderId = #{orderId}")
     void updateExtendById(@Param("orderId") String orderId, @Param("extend") String extend);
 
-    @Select("select outOrderId, outPayPrice from trip_order where orderId = #{orderId}")
+    @Select("select outOrderId, outPayPrice, extend, status, channelStatus from trip_order where orderId = #{orderId}")
     TripOrder getOrderByOrderId(String orderId);
+
+    @Select("update trip_order set outOrderId = #{outOrderId} WHERE orderId = #{orderId}")
+    void updateOutOrderIdById(@Param("orderId") String orderId, @Param("channelStatus") int channelStatus, @Param("outOrderId") String outOrderId);
 }
