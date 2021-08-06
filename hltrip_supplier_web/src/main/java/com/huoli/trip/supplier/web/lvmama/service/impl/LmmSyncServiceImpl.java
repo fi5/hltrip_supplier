@@ -1447,15 +1447,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public void pushUpdateV2(String product) throws JAXBException {
-        log.info("接收驴妈妈产品通知v2。。");
+        log.info("接收驴妈妈产品通知v2。。{}", product);
         LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
         String changeType = request.getBody().getChangeType();
+        log.info("xml转json的结果：", JSON.toJSONString(request));
         LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
         if(Arrays.asList("product_online", "product_create", "product_info_change").contains(changeType)){
+            log.info("产品内容变更。。");
             syncProductListByIdV2(lmmPushProduct.getProductId().toString());
         } else if(Arrays.asList("goods_online", "goods_create", "goods_info_change", "price_change").contains(changeType)){
+            log.info("商品内容变更。。");
             syncGoodsListByIdV2(lmmPushProduct.getGoodsId().toString());
         } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
+            log.info("产品状态变更。。");
             Map<String, String> cond = Maps.newHashMap();
             cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
             List<ScenicSpotProductMPO> productMPOs = scenicSpotProductDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
@@ -1463,6 +1467,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 productMPOs.forEach(p -> scenicSpotProductDao.updateStatusById(p.getId(), 3));
             }
         } else if(Arrays.asList("goods_offline").contains(changeType)){
+            log.info("商品状态变更。。");
             ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
             if(productMPO != null){
                 scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);

@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     @Override
     public void updateStatusById(String id, Integer status){
         mongoTemplate.updateFirst(new Query(Criteria.where("_id").is(id)),
-                Update.update("status", status), ScenicSpotProductMPO.class);
+                Update.update("status", status).set("updateTime", new Date()), ScenicSpotProductMPO.class);
     }
 
     @Override
