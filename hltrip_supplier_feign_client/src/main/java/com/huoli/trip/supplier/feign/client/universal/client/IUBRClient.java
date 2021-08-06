@@ -79,7 +79,7 @@ public interface IUBRClient {
      * 订单退款
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/refund/ticket/order/{uid}")
+    @RequestMapping(method = RequestMethod.POST, path = "/api/v1/refund/ticket/order/{uid}")
     UBRBaseResponse refund(@PathVariable("uid") String orderId);
 
     /**
