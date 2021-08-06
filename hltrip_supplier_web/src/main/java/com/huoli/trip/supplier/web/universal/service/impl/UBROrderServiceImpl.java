@@ -88,7 +88,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             }
             tripOrderMapper.updateOutOrderIdById(request.getOrderId(), channelStatus, baseResponse.getData().getOrderId());
         }
-        return iubrClient.order(orderRequest);
+        return baseResponse;
     }
 
     @Override
