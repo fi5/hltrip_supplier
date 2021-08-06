@@ -87,4 +87,14 @@ public interface DfyOrderService {
 	DfyBaseResult<DfyVerifyOrderResponse> verifyOrder(DfyBaseRequest<DfyOrderDetailRequest> request);
 
 
+	/**
+	 * 门票退款
+	 */
+	void processNotifyTicket();
+
+	/**
+	 * 跟团游退款
+	 */
+	void processNotifyTour();
+
 }

@@ -1,14 +1,9 @@
 package com.huoli.trip.supplier.web.lvmama.controller;
 
-import com.alibaba.fastjson.JSONObject;
-import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
-import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.*;
 

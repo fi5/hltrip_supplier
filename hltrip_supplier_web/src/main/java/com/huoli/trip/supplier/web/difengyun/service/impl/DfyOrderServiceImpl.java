@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.trip.common.constant.CentralError;
+import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourPrice;
@@ -539,6 +540,36 @@ public class DfyOrderServiceImpl implements DfyOrderService {
         request.setTraceId(null);
         dfyBaseRequest.setData(request);
         return diFengYunClient.refundTicket(dfyBaseRequest);
+    }
+
+    @Override
+    public void processNotifyTicket() {
+        List<TripRefundNotify> pendingNotifys = tripOrderRefundMapper.getRefundNotifyByChannel(Constants.SUPPLIER_CODE_DFY);
+        pendingNotifys.forEach(item -> {
+            try {
+                processNotify(item);
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                log.error("处理退款通知失败", e);
+            } catch (Exception e) {
+                log.error("处理退款通知失败了，id={}", item.getId(), e);
+            }
+        });
+    }
+
+    @Override
+    public void processNotifyTour(){
+        List<TripRefundNotify> pendingNotifys = tripOrderRefundMapper.getRefundNotifyByChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+        pendingNotifys.forEach(item -> {
+            try {
+                processNotify(item);
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                log.error("处理退款通知失败", e);
+            } catch (Exception e) {
+                log.error("处理退款通知失败了，id={}", item.getId(), e);
+            }
+        });
     }
 
     @Override

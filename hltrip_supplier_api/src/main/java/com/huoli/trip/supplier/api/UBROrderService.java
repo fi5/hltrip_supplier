@@ -51,4 +51,9 @@ public interface UBROrderService {
      * @return
      */
     UBRBaseResponse<UBRTicketOrderResponse> payOrder(BaseOrderRequest request);
+
+    /**
+     * 退票单轮询
+     */
+    void processNotify();
 }
