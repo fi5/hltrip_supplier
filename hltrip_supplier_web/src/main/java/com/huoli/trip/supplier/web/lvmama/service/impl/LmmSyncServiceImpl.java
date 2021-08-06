@@ -1450,7 +1450,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         log.info("接收驴妈妈产品通知v2。。{}", product);
         LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
         String changeType = request.getBody().getChangeType();
-        log.info("xml转json的结果：", JSON.toJSONString(request));
+        log.info("xml转json的结果：{}", JSON.toJSONString(request));
         LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
         if(Arrays.asList("product_online", "product_create", "product_info_change").contains(changeType)){
             log.info("产品内容变更。。");
