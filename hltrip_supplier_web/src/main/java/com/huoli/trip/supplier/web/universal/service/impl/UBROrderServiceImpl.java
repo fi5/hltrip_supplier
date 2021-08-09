@@ -80,11 +80,11 @@ public class UBROrderServiceImpl implements UBROrderService {
         if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null){
             String status = baseResponse.getData().getStatus();
             int channelStatus = order.getChannelStatus();
-            if(StringUtils.equals("PROCESS", status)){
+            if(StringUtils.equals(UBRConstants.ORDER_STATUS_PROCESS, status)){
                 channelStatus = OrderStatus.TO_BE_CONFIRMED.getCode();
-            } else if(StringUtils.equals("NORMAL", status) ){
+            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_NORMAL, status) ){
                 channelStatus = OrderStatus.WAITING_TO_TRAVEL.getCode();
-            } else if(StringUtils.equals("BUY_FAILED", status)){
+            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_BUY_FILED, status)){
                 channelStatus = OrderStatus.REFUNDED.getCode();
             }
             tripOrderMapper.updateOutOrderIdById(request.getOrderId(), channelStatus, baseResponse.getData().getOrderId());
@@ -129,19 +129,8 @@ public class UBROrderServiceImpl implements UBROrderService {
                     || StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_BUY_FILED) ){
                 TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
                 if(tripRefundNotify == null){
-                    String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
-                    String refundUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_REFUND_NOTICE);
                     TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
-                    RefundNoticeReq req = new RefundNoticeReq();
-                    req.setPartnerOrderId(request.getOrderId());
-                    req.setRefundFrom(2);
-                    req.setRefundPrice(order.getOutPayPrice());
-                    req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
-                    req.setSource("btg");
-                    req.setRefundStatus(1);
-                    log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
-                    String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
-                    log.info("btg发送退款通知返回：{}", res);
+                    refunded(order.getOrderId(), order.getOutPayPrice(), 0, 1);
                     try {
                         // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
                         TripRefundNotify notify = new TripRefundNotify();
@@ -159,6 +148,25 @@ public class UBROrderServiceImpl implements UBROrderService {
                     }
                 }
             }
+            // todo 这个状态不需要通知？订单状态怎么变化
+//            else if(StringUtils.equals(UBRConstants.ORDER_STATUS_REFUND, detailResponse.getStatus())) {
+//                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
+//                // 如果任务里面处理完了就再发通知了，防止重复发
+//                if(tripRefundNotify.getStatus() != 1){
+//                    refundNotify(tripRefundNotify, detailResponse.getStatus(), request.getOrderId());
+//                }
+//            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_NORMAL, detailResponse.getStatus())){
+//                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
+//                // 如果有退款记录说明退款失败
+//                if(tripRefundNotify != null){
+//                    refundNotify(tripRefundNotify, detailResponse.getStatus(), request.getOrderId());
+//                }
+//            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_NORMAL, detailResponse.getStatus())){
+//                TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+//                if(order.getStatus() != OrderStatus.CONSUMED.getCode()){
+//                    statusChanged(order.getOrderId(), UBRConstants.ORDER_STATUS_NORMAL);
+//                }
+//            }
         }
         return baseResponse;
     }
@@ -169,7 +177,16 @@ public class UBROrderServiceImpl implements UBROrderService {
                 Constants.SUPPLIER_CODE_BTG_TICKET);
         notifyList.forEach(n -> {
             try {
-                refundNotify(n);
+                TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(n.getOrderId());
+                BaseOrderRequest request = new BaseOrderRequest();
+                request.setSupplierOrderId(tripOrder.getOutOrderId());
+                request.setOrderId(n.getOrderId());
+                request.setTraceId(huoliTrace.getTraceInfo().getTraceId());
+                UBRBaseResponse<UBROrderDetailResponse> baseResponse = orderDetail(request);
+                if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null) {
+                    UBROrderDetailResponse ubrOrderDetailResponse = baseResponse.getData();
+                    refundNotify(n, ubrOrderDetailResponse.getStatus(), tripOrder.getOrderId());
+                }
             } catch (Exception e) {
                 log.error("btg处理退款通知异常，id={}，orderId={}, {refundId}",
                         n.getId(), n.getOrderId(), n.getRefundId(), e);
@@ -178,70 +195,49 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     }
 
-    private void refundNotify(TripRefundNotify n){
-        TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(n.getOrderId());
-        BaseOrderRequest request = new BaseOrderRequest();
-        request.setSupplierOrderId(tripOrder.getOutOrderId());
-        request.setOrderId(n.getOrderId());
-        request.setTraceId(huoliTrace.getTraceInfo().getTraceId());
-        UBRBaseResponse<UBROrderDetailResponse> baseResponse = orderDetail(request);
-        if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null){
-            String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
-            String refundUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_REFUND_NOTICE);
-            UBROrderDetailResponse ubrOrderDetailResponse = baseResponse.getData();
-            if(StringUtils.equals(ubrOrderDetailResponse.getStatus(), UBRConstants.ORDER_STATUS_REFUND)){
-                // todo 已退款
-                n.setStatus(1);
-                tripOrderRefundMapper.updateRefundNotify(n);
-
-                RefundNoticeReq req = new RefundNoticeReq();
-                req.setPartnerOrderId(n.getOrderId());
-                req.setRefundFrom(2);
-                req.setRefundPrice(BigDecimal.valueOf(n.getRefundMoney()));
-                req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
-                req.setSource("btg");
-                if(n.getRefundId() > 0){
-                    req.setRefundId(n.getRefundId());
-                }
-                req.setRefundStatus(1);
-
-                log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
-                String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
-                log.info("btg发送退款通知返回：{}", res);
-
-                //退款成功后再发个通知
-                PushOrderStatusReq statusReq =new PushOrderStatusReq();
-                statusReq.setStrStatus("已退款");
-                statusReq.setPartnerOrderId(tripOrder.getOrderId());
-                statusReq.setType(3);
-
-                String statusUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_ORDER_STATUS_NOTICE);
-                log.info("btg发送状态通知给中台：url = {} , 参数 = {}", statusUrl, JSON.toJSONString(statusReq));
-                String res3 = HttpUtil.doPostWithTimeout(statusUrl, JSONObject.toJSONString(statusReq), 10000, TraceConfig.traceHeaders(huoliTrace, statusUrl));
-                log.info("btg发送状态通知返回:"+res3);
-
-
-            } else if(StringUtils.equals(ubrOrderDetailResponse.getStatus(), UBRConstants.ORDER_STATUS_NORMAL)){  // 供应商退款失败会变成正常状态，如果我们有退款任务说明是退款失败
-                n.setStatus(2);
-                tripOrderRefundMapper.updateRefundNotify(n);
-
-                RefundNoticeReq req=new RefundNoticeReq();
-                req.setPartnerOrderId(n.getOrderId());
-                req.setRefundFrom(2);
-                req.setRefundPrice(BigDecimal.valueOf(n.getRefundMoney()));
-                req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
-                req.setSource("btg");
-                if(n.getRefundId() > 0){
-                    req.setRefundId(n.getRefundId());
-                }
-                BigDecimal refundCharge = tripOrder.getOutPayPrice().subtract(req.getRefundPrice());
-                req.setRefundCharge(refundCharge);
-                req.setRefundStatus(-1);
-                log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
-                String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
-                log.info("btg发送退款通知返回：{}", res);
-
-            }
+    private void refundNotify(TripRefundNotify n, String ubrStatus, String orderId){
+        if(StringUtils.equals(ubrStatus, UBRConstants.ORDER_STATUS_REFUND)){
+            n.setStatus(1);
+            tripOrderRefundMapper.updateRefundNotify(n);
+            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), n.getRefundId(), 1);
+            //退款成功后再发个通知
+            statusChanged(orderId, UBRConstants.ORDER_STATUS_REFUND);
+        } else if(StringUtils.equals(ubrStatus, UBRConstants.ORDER_STATUS_NORMAL)){  // 供应商退款失败会变成正常状态，如果我们有退款任务说明是退款失败
+            n.setStatus(2);
+            tripOrderRefundMapper.updateRefundNotify(n);
+            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), n.getRefundId(), -1);
         }
+    }
+
+    private void refunded(String orderId, BigDecimal refundMoney, int refundId, int refundStatus){
+        String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
+        String refundUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_REFUND_NOTICE);
+        RefundNoticeReq req = new RefundNoticeReq();
+        req.setPartnerOrderId(orderId);
+        req.setRefundFrom(2);
+        req.setRefundPrice(refundMoney);
+        req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
+        req.setSource("btg");
+        if(refundId > 0){
+            req.setRefundId(refundId);
+        }
+        req.setRefundStatus(refundStatus);
+
+        log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
+        String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
+        log.info("btg发送退款通知返回：{}", res);
+    }
+
+    private void statusChanged(String orderId, String ubrStatus){
+        String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
+        PushOrderStatusReq statusReq =new PushOrderStatusReq();
+        statusReq.setStrStatus(ubrStatus);
+        statusReq.setPartnerOrderId(orderId);
+        statusReq.setType(6);
+
+        String statusUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_ORDER_STATUS_NOTICE);
+        log.info("btg发送状态通知给中台：url = {} , 参数 = {}", statusUrl, JSON.toJSONString(statusReq));
+        String res3 = HttpUtil.doPostWithTimeout(statusUrl, JSONObject.toJSONString(statusReq), 10000, TraceConfig.traceHeaders(huoliTrace, statusUrl));
+        log.info("btg发送状态通知返回:"+res3);
     }
 }
