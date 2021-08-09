@@ -25,5 +25,6 @@ public class UBROrderDetailResponse implements Serializable {
     /**
      * 状态
      */
+    @JsonProperty("status_display")
     private String status;
 }

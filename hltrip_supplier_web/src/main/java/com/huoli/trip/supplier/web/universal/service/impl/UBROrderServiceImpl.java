@@ -80,7 +80,9 @@ public class UBROrderServiceImpl implements UBROrderService {
         if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null){
             String status = baseResponse.getData().getStatus();
             int channelStatus = order.getChannelStatus();
-            if(StringUtils.equals("NORMAL", status) || StringUtils.equals("PROCESS", status)){
+            if(StringUtils.equals("PROCESS", status)){
+                channelStatus = OrderStatus.TO_BE_CONFIRMED.getCode();
+            } else if(StringUtils.equals("NORMAL", status) ){
                 channelStatus = OrderStatus.WAITING_TO_TRAVEL.getCode();
             } else if(StringUtils.equals("BUY_FAILED", status)){
                 channelStatus = OrderStatus.REFUNDED.getCode();
