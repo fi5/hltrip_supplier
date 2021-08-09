@@ -148,25 +148,6 @@ public class UBROrderServiceImpl implements UBROrderService {
                     }
                 }
             }
-            // todo 这个状态不需要通知？订单状态怎么变化
-//            else if(StringUtils.equals(UBRConstants.ORDER_STATUS_REFUND, detailResponse.getStatus())) {
-//                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
-//                // 如果任务里面处理完了就再发通知了，防止重复发
-//                if(tripRefundNotify.getStatus() != 1){
-//                    refundNotify(tripRefundNotify, detailResponse.getStatus(), request.getOrderId());
-//                }
-//            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_NORMAL, detailResponse.getStatus())){
-//                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
-//                // 如果有退款记录说明退款失败
-//                if(tripRefundNotify != null){
-//                    refundNotify(tripRefundNotify, detailResponse.getStatus(), request.getOrderId());
-//                }
-//            } else if(StringUtils.equals(UBRConstants.ORDER_STATUS_NORMAL, detailResponse.getStatus())){
-//                TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
-//                if(order.getStatus() != OrderStatus.CONSUMED.getCode()){
-//                    statusChanged(order.getOrderId(), UBRConstants.ORDER_STATUS_NORMAL);
-//                }
-//            }
         }
         return baseResponse;
     }
