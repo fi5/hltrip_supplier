@@ -114,6 +114,7 @@ public class UBROrderServiceImpl implements UBROrderService {
                 refundNotify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
                 refundNotify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
                 refundNotify.setStatus(0);
+                refundNotify.setRemark("供应商下单失败");
                 tripOrderRefundMapper.saveTripRefundNotify(refundNotify);
             }
         }

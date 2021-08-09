@@ -28,8 +28,8 @@ public interface TripOrderRefundMapper {
     @Select("select * from trip_order_refund_notify where status=0 order by createTime desc limit 20")
     List<TripRefundNotify> getPendingNotifys();
 
-    @Insert("insert into trip_order_refund_notify(orderId, status, channel, refundId,createTime) values" +
-            "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW())")
+    @Insert("insert into trip_order_refund_notify(orderId, status, channel, refundId,createTime, remark, refundStatus,refundMoney,refundTime) values" +
+            "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW(), #{remark}, #{refundStatus}, #{refundMoney}, #{refundTime})")
     void saveTripRefundNotify(TripRefundNotify notify);
 
     @Update("update trip_order_refund_notify set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
