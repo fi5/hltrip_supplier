@@ -888,9 +888,15 @@ public class DfySyncServiceImpl implements DfySyncService {
                 transaction.setAppointInDate(1);
                 transaction.setAppointnType(2);
                 transaction.setInDate(dfyTicketDetail.getIndate());
+            } else {
+                transaction.setAppointInDate(0);
+                transaction.setAppointnType(0);
+                transaction.setInDate(null);
             }
             if(dfyTicketDetail.getAdvanceDay() != null){
                 transaction.setBookBeforeDay(dfyTicketDetail.getAdvanceDay());
+            } else {
+                transaction.setBookBeforeDay(0);
             }
             if(dfyTicketDetail.getAdvanceHour() != null){
                 if(dfyTicketDetail.getAdvanceHour() < 10){
@@ -898,6 +904,8 @@ public class DfySyncServiceImpl implements DfySyncService {
                 } else {
                     transaction.setBookBeforeTime(String.format("%s:00", dfyTicketDetail.getAdvanceHour().toString()));
                 }
+            } else {
+                transaction.setBookBeforeTime(null);
             }
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
             scenicSpotProductMPO.setChangedFields(changedFields);
