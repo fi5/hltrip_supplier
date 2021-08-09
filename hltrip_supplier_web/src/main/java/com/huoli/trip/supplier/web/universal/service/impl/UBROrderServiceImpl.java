@@ -21,9 +21,9 @@ import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
 import com.huoli.trip.supplier.self.common.ConstConfig;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
 import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
-import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderLocalRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
@@ -93,7 +93,7 @@ public class UBROrderServiceImpl implements UBROrderService {
     }
 
     @Override
-    public UBRBaseResponse refundCheck(BaseOrderRequest request){
+    public UBRBaseResponse<UBRRefundCheckResponse> refundCheck(BaseOrderRequest request){
         return iubrClient.refundCheck(request.getSupplierOrderId());
     }
 
