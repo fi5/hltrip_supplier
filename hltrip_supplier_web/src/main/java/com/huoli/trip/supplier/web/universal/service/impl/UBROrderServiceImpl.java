@@ -122,6 +122,26 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     @Override
     public UBRBaseResponse<UBROrderDetailResponse> orderDetail(BaseOrderRequest request){
+        UBRBaseResponse<UBROrderDetailResponse> baseResponse = iubrClient.orderDetail(request.getSupplierOrderId());
+        if(baseResponse != null){
+            UBROrderDetailResponse detailResponse = baseResponse.getData();
+            if(StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_CANCEL)
+                    || StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_BUY_FILED) ){
+                String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
+                String refundUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_REFUND_NOTICE);
+                TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+                RefundNoticeReq req = new RefundNoticeReq();
+                req.setPartnerOrderId(request.getOrderId());
+                req.setRefundFrom(2);
+                req.setRefundPrice(order.getOutPayPrice());
+                req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
+                req.setSource("btg");
+                req.setRefundStatus(1);
+                log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
+                String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
+                log.info("btg发送退款通知返回：{}", res);
+            }
+        }
         return iubrClient.orderDetail(request.getSupplierOrderId());
     }
 
