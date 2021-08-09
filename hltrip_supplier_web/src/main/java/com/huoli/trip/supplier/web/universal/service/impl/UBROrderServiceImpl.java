@@ -114,7 +114,6 @@ public class UBROrderServiceImpl implements UBROrderService {
                 refundNotify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
                 refundNotify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
                 refundNotify.setStatus(0);
-                refundNotify.setRemark("供应商下单失败");
                 tripOrderRefundMapper.saveTripRefundNotify(refundNotify);
             }
         }
@@ -153,6 +152,7 @@ public class UBROrderServiceImpl implements UBROrderService {
                         notify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
                         notify.setRefundMoney(order.getOutPayPrice().floatValue());
                         notify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
+                        notify.setRemark("供应商下单失败");
                         tripOrderRefundMapper.saveTripRefundNotify(notify);
                     } catch (Exception e) {
                         log.error("btg订单详情保存退款通知表异常，", e);

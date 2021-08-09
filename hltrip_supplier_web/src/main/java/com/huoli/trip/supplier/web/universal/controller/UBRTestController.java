@@ -1,7 +1,9 @@
 package com.huoli.trip.supplier.web.universal.controller;
 
+import com.huoli.trip.supplier.api.UBROrderService;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
+import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import com.huoli.trip.supplier.web.lvmama.task.LmmTicketTask;
 import com.huoli.trip.supplier.web.universal.service.UBRProductService;
@@ -28,6 +30,9 @@ public class UBRTestController {
     @Autowired
     private UBRProductService ubrProductService;
 
+    @Autowired
+    private UBROrderService ubrOrderService;
+
     @PostMapping(path = "/init")
     public DfyBaseResult UBRInit() {
         ubrProductService.init();
@@ -50,6 +55,13 @@ public class UBRTestController {
     public DfyBaseResult UBRSyncProduct(@RequestBody String type) {
         ubrProductService.syncProduct(type);
         return DfyBaseResult.success();
+    }
+
+    @PostMapping(path = "/refund/check")
+    public DfyBaseResult refundCheck(@RequestBody String outOrderId) {
+        BaseOrderRequest request = new BaseOrderRequest();
+        request.setSupplierOrderId(outOrderId);
+        return DfyBaseResult.success(ubrOrderService.refundCheck(request));
     }
 
 }
