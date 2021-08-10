@@ -145,6 +145,7 @@ public class SupplierAspect {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+        Span span = null;
         try {
             Object args[] = joinPoint.getArgs();
             Object result;
@@ -157,7 +158,7 @@ public class SupplierAspect {
                         log.error("方法 {} 参数不包含traceId", function);
                     } else {
                         // 设置traceId
-                        TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
+                        span = (Span) TraceConfig.createSpan(function, this.huoliTrace, param.getString("traceId"));
                     }
                 }  catch (JSONException e) {
                     log.error("反序列化方法 {} 的请求参数异常，这是为了获取traceId，不影响主流程。", function);
@@ -193,6 +194,9 @@ public class SupplierAspect {
         } finally {
             Event event = eventBuilder.build();
             huoliAtrace.reportEvent(event);
+            if(span != null){
+                this.huoliTrace.close(span);
+            }
         }
     }
 }
