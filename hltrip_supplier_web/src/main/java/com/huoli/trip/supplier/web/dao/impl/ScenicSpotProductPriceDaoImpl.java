@@ -6,6 +6,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductPriceM
 import com.huoli.trip.supplier.web.dao.ScenicSpotProductPriceDao;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.BulkOperations;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -35,12 +36,23 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
 
     @Override
     public void saveScenicSpotProductPrice(ScenicSpotProductPriceMPO scenicSpotProductPriceMPO){
-        Query query = new Query();
-        query.addCriteria(Criteria.where("_id").is(scenicSpotProductPriceMPO.getId()));
         Document document = new Document();
         mongoTemplate.getConverter().write(scenicSpotProductPriceMPO, document);
         Update update = Update.fromDocument(document);
-        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT_PRICE);
+        mongoTemplate.upsert(Query.query(Criteria.where("_id").is(scenicSpotProductPriceMPO.getId())),
+                update, MongoConst.COLLECTION_NAME_SCENICSPOT_PRODUCT_PRICE);
+    }
+
+    @Override
+    public void saveScenicSpotProductPrice(List<ScenicSpotProductPriceMPO> scenicSpotProductPriceMPOs){
+        BulkOperations bulk = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, ScenicSpotProductPriceMPO.class);
+        for (ScenicSpotProductPriceMPO scenicSpotProductPriceMPO : scenicSpotProductPriceMPOs) {
+            Document document = new Document();
+            mongoTemplate.getConverter().write(scenicSpotProductPriceMPO, document);
+            Update update = Update.fromDocument(document);
+            bulk.upsert(Query.query(Criteria.where("_id").is(scenicSpotProductPriceMPO.getId())), update);
+        }
+        bulk.execute();
     }
 
     @Override

@@ -987,6 +987,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             Integer ticketKind = type;
             List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
+            List<ScenicSpotProductPriceMPO> updatePriceMPOs = Lists.newArrayList();
             dfyTicketDetail.getPriceCalendar().forEach(p -> {
                 if(DateTimeUtil.parseDate(p.getDepartDate()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
                     // 历史库存不更新
@@ -1021,10 +1022,12 @@ public class DfySyncServiceImpl implements DfySyncService {
                         scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
                         scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
                         scenicSpotProductPriceMPO.setUpdateTime(new Date());
-                        scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+                        updatePriceMPOs.add(scenicSpotProductPriceMPO);
                     }
                 }
             });
+            log.info("批量更新价格：{}", JSON.toJSONString(updatePriceMPOs));
+            scenicSpotProductPriceDao.saveScenicSpotProductPrice(updatePriceMPOs);
         }
     }
 
