@@ -1022,12 +1022,13 @@ public class DfySyncServiceImpl implements DfySyncService {
                         scenicSpotProductPriceMPO.setSellPrice(new BigDecimal(p.getSalePrice()));
                         scenicSpotProductPriceMPO.setSettlementPrice(scenicSpotProductPriceMPO.getSellPrice());
                         scenicSpotProductPriceMPO.setUpdateTime(new Date());
-                        updatePriceMPOs.add(scenicSpotProductPriceMPO);
+                        scenicSpotProductPriceDao.saveScenicSpotProductPrice(scenicSpotProductPriceMPO);
+//                        updatePriceMPOs.add(scenicSpotProductPriceMPO);
                     }
                 }
             });
             log.info("批量更新价格：{}", JSON.toJSONString(updatePriceMPOs));
-            scenicSpotProductPriceDao.saveScenicSpotProductPrice(updatePriceMPOs);
+//            scenicSpotProductPriceDao.saveScenicSpotProductPrice(updatePriceMPOs);
         }
     }
 
