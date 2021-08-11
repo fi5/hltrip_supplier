@@ -50,7 +50,7 @@ public class ScenicSpotProductPriceDaoImpl implements ScenicSpotProductPriceDao 
             Document document = new Document();
             mongoTemplate.getConverter().write(scenicSpotProductPriceMPO, document);
             Update update = Update.fromDocument(document);
-            bulk.upsert(Query.query(Criteria.where("_id").is(scenicSpotProductPriceMPO.getId())), update);
+            bulk.upsert(Query.query(Criteria.where("id").is(scenicSpotProductPriceMPO.getId())), update);
         }
         bulk.execute();
     }
