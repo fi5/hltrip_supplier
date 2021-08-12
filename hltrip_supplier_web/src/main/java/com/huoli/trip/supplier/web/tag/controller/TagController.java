@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -55,4 +56,21 @@ public class TagController {
         return BaseResponse.withSuccess();
     }
 
+    @GetMapping("/delCityRun")
+    public BaseResponse delCityRun() {
+        RedisQueue.deleteKey(Const.CITY_RUN);
+        return BaseResponse.withSuccess();
+    }
+
+    @GetMapping("/delTagRun")
+    public BaseResponse delTagRun() {
+        RedisQueue.deleteKey(Const.TAG_RUN);
+        return BaseResponse.withSuccess();
+    }
+
+    @GetMapping("/delTagCity")
+    public BaseResponse delTagCity() {
+        RedisQueue.deleteKey(Const.CTRIP_CITY_TAG);
+        return BaseResponse.withSuccess();
+    }
 }
