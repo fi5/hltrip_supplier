@@ -24,6 +24,7 @@ import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketOrderRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponseCustom;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.config.TraceConfig;
@@ -32,6 +33,7 @@ import com.huoli.trip.supplier.web.mapper.TripOrderRefundMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -93,19 +95,31 @@ public class UBROrderServiceImpl implements UBROrderService {
     }
 
     @Override
-    public UBRBaseResponse<UBRRefundCheckResponse> refundCheck(BaseOrderRequest request){
+    public UBRBaseResponse<UBRRefundCheckResponseCustom> refundCheck(BaseOrderRequest request){
         // 供应商创单失败对应我们这边是支付失败，客服后台需要操作退款，这时候没有供应商订单，直接返回成功给用户退款就行
         TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(request.getOrderId());
         if(StringUtils.isBlank(tripOrder.getOutOrderId())){
-            UBRRefundCheckResponse ubrRefundCheckResponse = new UBRRefundCheckResponse();
+            UBRRefundCheckResponseCustom ubrRefundCheckResponse = new UBRRefundCheckResponseCustom();
             ubrRefundCheckResponse.setRefundFee(new BigDecimal(0));
             ubrRefundCheckResponse.setRefundAllow(true);
+            ubrRefundCheckResponse.setRefundPrice(tripOrder.getOutPayPrice());
             UBRBaseResponse ubrBaseResponse = new UBRBaseResponse();
             ubrBaseResponse.setCode(200);
             ubrBaseResponse.setData(ubrRefundCheckResponse);
             return ubrBaseResponse;
         }
-        return iubrClient.refundCheck(request.getSupplierOrderId());
+        UBRBaseResponse ubrBaseResponse = iubrClient.refundCheck(request.getSupplierOrderId());
+        if(ubrBaseResponse == null){
+            return null;
+        }
+        UBRRefundCheckResponseCustom custom;
+        if(ubrBaseResponse.getData() != null){
+            custom = new UBRRefundCheckResponseCustom();
+            BeanUtils.copyProperties(ubrBaseResponse.getData(), custom);
+            custom.setRefundPrice(tripOrder.getOutPayPrice());
+            ubrBaseResponse.setData(custom);
+        }
+        return ubrBaseResponse;
     }
 
     @Override

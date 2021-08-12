@@ -4,6 +4,7 @@ import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.UBROrderDetailResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponse;
+import com.huoli.trip.supplier.self.universal.vo.response.UBRRefundCheckResponseCustom;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRTicketOrderResponse;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 
@@ -28,7 +29,7 @@ public interface UBROrderService {
      * @param request
      * @return
      */
-    UBRBaseResponse<UBRRefundCheckResponse> refundCheck(BaseOrderRequest request);
+    UBRBaseResponse<UBRRefundCheckResponseCustom> refundCheck(BaseOrderRequest request);
 
     /**
      * 退款
