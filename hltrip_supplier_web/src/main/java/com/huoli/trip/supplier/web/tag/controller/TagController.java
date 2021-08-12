@@ -73,4 +73,17 @@ public class TagController {
         RedisQueue.deleteKey(Const.CTRIP_CITY_TAG);
         return BaseResponse.withSuccess();
     }
+
+    @GetMapping("/len")
+    public BaseResponse len() {
+        Long aLong = RedisQueue.lLen(Const.CTRIP_CITY_TAG);
+        return BaseResponse.withSuccess(aLong);
+    }
+
+    @GetMapping("/count")
+    public BaseResponse count() {
+        String valueByKey = RedisQueue.getValueByKey(Const.MATCH_COUNT);
+        return BaseResponse.withSuccess(valueByKey);
+    }
+
 }

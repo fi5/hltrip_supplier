@@ -85,6 +85,26 @@ public class RedisQueue {
         return stringJedisTemplate.opsForList().leftPop(key);
     }
 
+    /**
+     * 获取列表长度
+     *
+     * @param key
+     * @return
+     */
+    public static Long lLen(String key) {
+        return stringJedisTemplate.opsForList().size(key);
+    }
+
+    /**
+     * 增加(自增长), 负数则为自减
+     *
+     * @param key
+     * @return
+     */
+    public static Long incrBy(String key, long increment) {
+        return stringJedisTemplate.opsForValue().increment(key, increment);
+    }
+
     public static List<String> getNumber(String text) {
         List<String> list = new ArrayList<String>();
         String regEx="[^0-9]";

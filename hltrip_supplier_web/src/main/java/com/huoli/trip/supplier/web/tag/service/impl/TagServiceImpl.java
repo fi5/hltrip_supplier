@@ -78,7 +78,7 @@ public class TagServiceImpl implements TagService {
     }
 
     private int doGetTag(int page, CityMap cityMap) {
-        log.info("更新景点tags，cityId:{}，cityName:{}，page:{}", cityMap.getCityId(), cityMap.getCityName(), page);
+        log.info("更新景点tags中，cityId:{}，cityName:{}，page:{}", cityMap.getCityId(), cityMap.getCityName(), page);
         String req = buildTagReq(page, String.valueOf(cityMap.getCityId()));
         String res = HttpUtil.doPost("https://m.ctrip.com/restapi/soa2/20684/json/productSearch", req);
         if (StringUtils.isNotEmpty(res)) {
@@ -120,12 +120,13 @@ public class TagServiceImpl implements TagService {
             }
             //获取库中的景点
             ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getByCityAndName(cityName, name);
-            log.info("更新景点tags，库中没有该景点，cityName:{}，name:{}", cityName, name);
+            log.info("更新景点tags失败，库中没有该景点，cityName:{}，name:{}", cityName, name);
             if (scenicSpotMPO != null && tagNames.size() > 0) {
                 if (ListUtils.isEmpty(scenicSpotMPO.getTages())) {
                     scenicSpotMPO.setTages(tagNames);
                     scenicSpotDao.updateTagsById(scenicSpotMPO.getTages(), scenicSpotMPO.getId());
-                    log.info("更新景点tags，id:{}，cityName:{}，name:{}，tags:{}", scenicSpotMPO.getId(), cityName, name, JSONObject.toJSONString(tagNames));
+                    log.info("更新景点tags成功，id:{}，cityName:{}，name:{}，tags:{}", scenicSpotMPO.getId(), cityName, name, JSONObject.toJSONString(tagNames));
+                    RedisQueue.incrBy(Const.MATCH_COUNT, 1);
                 }
             }
         }

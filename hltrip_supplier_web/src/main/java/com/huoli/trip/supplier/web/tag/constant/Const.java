@@ -10,4 +10,6 @@ public interface Const {
 
     String CITY_RUN = "cTrip-tag-city-run";
 
+    String MATCH_COUNT = "cTrip-matchCount";
+
 }
