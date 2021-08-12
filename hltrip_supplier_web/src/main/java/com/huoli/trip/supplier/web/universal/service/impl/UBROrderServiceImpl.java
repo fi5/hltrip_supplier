@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
+import com.huoli.hlwx.tool.method.BigDecimalUtil;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.OrderStatus;
@@ -169,7 +170,12 @@ public class UBROrderServiceImpl implements UBROrderService {
         TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(orderId);
         if(tripRefundNotify == null){
             TripOrder order = tripOrderMapper.getOrderByOrderId(orderId);
-            refunded(order.getOrderId(), order.getOutPayPrice(), 0, 1);
+            TripOrderRefund refund = tripOrderRefundMapper.getRefundingOrderByOrderId(orderId);
+            BigDecimal refundFee = new BigDecimal(0);
+            if(refund != null){
+                refundFee = refund.getChannelRefundCharge();
+            }
+            refunded(order.getOrderId(), order.getOutPayPrice(), refundFee, 0, 1);
             try {
                 // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
                 TripRefundNotify notify = new TripRefundNotify();
@@ -195,6 +201,12 @@ public class UBROrderServiceImpl implements UBROrderService {
         notifyList.forEach(n -> {
             try {
                 TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(n.getOrderId());
+                // consumer项目处理kafka通知手续费必填
+                TripOrderRefund tripOrderRefund = tripOrderRefundMapper.getRefundingOrderByOrderId(n.getOrderId());
+                BigDecimal refundFee = new BigDecimal(0);
+                if(tripOrderRefund != null){
+                    refundFee = tripOrderRefund.getChannelRefundCharge();
+                }
                 BaseOrderRequest request = new BaseOrderRequest();
                 request.setSupplierOrderId(tripOrder.getOutOrderId());
                 request.setOrderId(n.getOrderId());
@@ -202,7 +214,7 @@ public class UBROrderServiceImpl implements UBROrderService {
                 UBRBaseResponse<UBROrderDetailResponse> baseResponse = orderDetail(request);
                 if(baseResponse != null && baseResponse.getCode() == 200 && baseResponse.getData() != null) {
                     UBROrderDetailResponse ubrOrderDetailResponse = baseResponse.getData();
-                    refundNotify(n, ubrOrderDetailResponse.getStatus(), tripOrder.getOrderId());
+                    refundNotify(n, ubrOrderDetailResponse.getStatus(), tripOrder.getOrderId(), refundFee);
                 }
             } catch (Exception e) {
                 log.error("btg处理退款通知异常，id={}，orderId={}, {refundId}",
@@ -212,26 +224,29 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     }
 
-    private void refundNotify(TripRefundNotify n, String ubrStatus, String orderId){
+    private void refundNotify(TripRefundNotify n, String ubrStatus, String orderId, BigDecimal refundFee){
         if(StringUtils.equals(ubrStatus, UBRConstants.ORDER_STATUS_REFUND)){
             n.setStatus(1);
             tripOrderRefundMapper.updateRefundNotify(n);
-            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), n.getRefundId(), 1);
+            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), refundFee, n.getRefundId(), 1);
             //退款成功后再发个通知
             statusChanged(orderId, UBRConstants.ORDER_STATUS_REFUND);
         } else if(StringUtils.equals(ubrStatus, UBRConstants.ORDER_STATUS_NORMAL)){  // 供应商退款失败会变成正常状态，如果我们有退款任务说明是退款失败
             n.setStatus(2);
             tripOrderRefundMapper.updateRefundNotify(n);
-            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), n.getRefundId(), -1);
+            refunded(orderId, BigDecimal.valueOf(n.getRefundMoney()), refundFee, n.getRefundId(), -1);
         }
     }
 
-    private void refunded(String orderId, BigDecimal refundMoney, int refundId, int refundStatus){
+    private void refunded(String orderId, BigDecimal refundMoney, BigDecimal refundFee, int refundId, int refundStatus){
         String centralUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, ConstConfig.CONFIG_CENTRAL_URL);
         String refundUrl =  String.format("%s%s", centralUrl, ConstConfig.CONFIG_CENTRAL_REFUND_NOTICE);
         RefundNoticeReq req = new RefundNoticeReq();
         req.setPartnerOrderId(orderId);
         req.setRefundFrom(2);
+        if(refundFee != null && refundMoney != null){
+            refundMoney = BigDecimal.valueOf(BigDecimalUtil.sub(refundMoney.doubleValue(), refundFee.doubleValue()));
+        }
         req.setRefundPrice(refundMoney);
         req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
         req.setSource("btg");
@@ -239,7 +254,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             req.setRefundId(refundId);
         }
         req.setRefundStatus(refundStatus);
-
+        req.setRefundCharge(refundFee);
         log.info("btg发送退款通知给中台：url = {} , 参数 = {}", refundUrl, JSON.toJSONString(req));
         String res = HttpUtil.doPostWithTimeout(refundUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundUrl));
         log.info("btg发送退款通知返回：{}", res);
