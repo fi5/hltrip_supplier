@@ -39,6 +39,15 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
     }
 
     @Override
+    public ScenicSpotMPO getByCityAndName(String city, String name) {
+        Criteria criteria = Criteria.where("name").is(name);
+        if(StringUtils.isNotBlank(city)){
+            criteria.and("city").is(city);
+        }
+        return mongoTemplate.findOne(new Query(criteria), ScenicSpotMPO.class);
+    }
+
+    @Override
     public ScenicSpotMPO addScenicSpot(ScenicSpotMPO scenicSpotMPO){
         return mongoTemplate.insert(scenicSpotMPO);
     }
@@ -93,6 +102,14 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
         Query query = Query.query(Criteria.where("_id").is(id));
         Update update = new Update();
         update.set("detailDesc",detailDesc);
+        mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public void updateTagsById(List<String> tags, String id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        Update update = new Update();
+        update.set("tags", tags);
         mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
     }
 }

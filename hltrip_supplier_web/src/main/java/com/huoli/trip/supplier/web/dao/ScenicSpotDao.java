@@ -23,6 +23,14 @@ public interface ScenicSpotDao {
     ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String cityCode);
 
     /**
+     * 匹配景点
+     * @param city
+     * @param name
+     * @return
+     */
+    ScenicSpotMPO getByCityAndName(String city, String name);
+
+    /**
      * 新增景点
      * @param scenicSpotMPO
      * @return
@@ -61,4 +69,6 @@ public interface ScenicSpotDao {
      * 更新景点描述
      */
     void updateDeatailDescById(String detailDesc,String id);
+
+    void updateTagsById(List<String> tags, String id);
 }

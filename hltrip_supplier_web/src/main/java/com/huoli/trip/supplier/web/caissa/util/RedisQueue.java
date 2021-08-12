@@ -64,6 +64,27 @@ public class RedisQueue {
         return list;
     }
 
+    /**
+     * 存储在list头部
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public static Long lLeftPush(String key, String value) {
+        return stringJedisTemplate.opsForList().leftPush(key, value);
+    }
+
+    /**
+     * 移出并获取列表的第一个元素
+     *
+     * @param key
+     * @return 删除的元素
+     */
+    public static String lLeftPop(String key) {
+        return stringJedisTemplate.opsForList().leftPop(key);
+    }
+
     public static List<String> getNumber(String text) {
         List<String> list = new ArrayList<String>();
         String regEx="[^0-9]";
