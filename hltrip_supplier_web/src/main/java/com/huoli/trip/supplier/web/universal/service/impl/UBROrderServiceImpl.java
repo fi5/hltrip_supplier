@@ -104,7 +104,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             ubrRefundCheckResponse.setRefundFee(new BigDecimal(0));
             ubrRefundCheckResponse.setRefundAllow(true);
             ubrRefundCheckResponse.setRefundPrice(BigDecimal.valueOf(BigDecimalUtil.sub(tripOrder.getOutPayPrice().doubleValue(),
-                    ubrRefundCheckResponse.getRefundPrice().doubleValue())));
+                    ubrRefundCheckResponse.getRefundFee().doubleValue())));
             UBRBaseResponse ubrBaseResponse = new UBRBaseResponse();
             ubrBaseResponse.setCode(200);
             ubrBaseResponse.setData(ubrRefundCheckResponse);
@@ -144,7 +144,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             } else {
                 TripRefundNotify refundNotify = new TripRefundNotify();
                 refundNotify.setRefundId(tripOrderRefund.getId());
-                refundNotify.setRefundMoney(Float.valueOf(tripOrder.getOutPayPrice().toPlainString()));
+                refundNotify.setRefundMoney(tripOrder.getOutPayPrice().floatValue());
                 refundNotify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
                 refundNotify.setRefundStatus(3);
                 refundNotify.setOrderId(request.getOrderId());
@@ -179,8 +179,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             if(refund != null){
                 refundFee = refund.getChannelRefundCharge();
             }
-            refunded(order.getOrderId(), BigDecimal.valueOf(BigDecimalUtil.sub(order.getOutPayPrice().doubleValue(),
-                    refundFee.doubleValue())), refundFee, 0, 1);
+            refunded(order.getOrderId(), order.getOutPayPrice(), refundFee, 0, 1);
             try {
                 // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
                 TripRefundNotify notify = new TripRefundNotify();
