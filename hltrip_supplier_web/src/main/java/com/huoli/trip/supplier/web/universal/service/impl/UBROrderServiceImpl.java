@@ -103,13 +103,14 @@ public class UBROrderServiceImpl implements UBROrderService {
             UBRRefundCheckResponseCustom ubrRefundCheckResponse = new UBRRefundCheckResponseCustom();
             ubrRefundCheckResponse.setRefundFee(new BigDecimal(0));
             ubrRefundCheckResponse.setRefundAllow(true);
-            ubrRefundCheckResponse.setRefundPrice(tripOrder.getOutPayPrice());
+            ubrRefundCheckResponse.setRefundPrice(BigDecimal.valueOf(BigDecimalUtil.sub(tripOrder.getOutPayPrice().doubleValue(),
+                    ubrRefundCheckResponse.getRefundPrice().doubleValue())));
             UBRBaseResponse ubrBaseResponse = new UBRBaseResponse();
             ubrBaseResponse.setCode(200);
             ubrBaseResponse.setData(ubrRefundCheckResponse);
             return ubrBaseResponse;
         }
-        UBRBaseResponse ubrBaseResponse = iubrClient.refundCheck(request.getSupplierOrderId());
+        UBRBaseResponse<UBRRefundCheckResponse> ubrBaseResponse = iubrClient.refundCheck(request.getSupplierOrderId());
         if(ubrBaseResponse == null){
             return null;
         }
@@ -117,10 +118,13 @@ public class UBROrderServiceImpl implements UBROrderService {
         if(ubrBaseResponse.getData() != null){
             custom = new UBRRefundCheckResponseCustom();
             BeanUtils.copyProperties(ubrBaseResponse.getData(), custom);
-            custom.setRefundPrice(tripOrder.getOutPayPrice());
+            custom.setRefundPrice(BigDecimal.valueOf(BigDecimalUtil.sub(tripOrder.getOutPayPrice().doubleValue(),
+                    ubrBaseResponse.getData().getRefundFee().doubleValue())));
             ubrBaseResponse.setData(custom);
         }
-        return ubrBaseResponse;
+        UBRBaseResponse<UBRRefundCheckResponseCustom> ubrBaseResponse1 = new UBRBaseResponse<>();
+        BeanUtils.copyProperties(ubrBaseResponse, ubrBaseResponse1);
+        return ubrBaseResponse1;
     }
 
     @Override
@@ -140,7 +144,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             } else {
                 TripRefundNotify refundNotify = new TripRefundNotify();
                 refundNotify.setRefundId(tripOrderRefund.getId());
-                refundNotify.setRefundMoney(tripOrderRefund.getChannelRefundPrice() == null ? 0f : Float.valueOf(tripOrderRefund.getChannelRefundPrice().toPlainString()));
+                refundNotify.setRefundMoney(Float.valueOf(tripOrder.getOutPayPrice().toPlainString()));
                 refundNotify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
                 refundNotify.setRefundStatus(3);
                 refundNotify.setOrderId(request.getOrderId());
@@ -175,7 +179,8 @@ public class UBROrderServiceImpl implements UBROrderService {
             if(refund != null){
                 refundFee = refund.getChannelRefundCharge();
             }
-            refunded(order.getOrderId(), order.getOutPayPrice(), refundFee, 0, 1);
+            refunded(order.getOrderId(), BigDecimal.valueOf(BigDecimalUtil.sub(order.getOutPayPrice().doubleValue(),
+                    refundFee.doubleValue())), refundFee, 0, 1);
             try {
                 // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
                 TripRefundNotify notify = new TripRefundNotify();
