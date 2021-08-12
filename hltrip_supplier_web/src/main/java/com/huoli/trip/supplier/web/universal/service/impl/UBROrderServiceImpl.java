@@ -94,11 +94,29 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     @Override
     public UBRBaseResponse<UBRRefundCheckResponse> refundCheck(BaseOrderRequest request){
+        // 供应商创单失败对应我们这边是支付失败，客服后台需要操作退款，这时候没有供应商订单，直接返回成功给用户退款就行
+        TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+        if(StringUtils.isBlank(tripOrder.getOutOrderId())){
+            UBRRefundCheckResponse ubrRefundCheckResponse = new UBRRefundCheckResponse();
+            ubrRefundCheckResponse.setRefundFee(new BigDecimal(0));
+            ubrRefundCheckResponse.setRefundAllow(true);
+            UBRBaseResponse ubrBaseResponse = new UBRBaseResponse();
+            ubrBaseResponse.setCode(200);
+            ubrBaseResponse.setData(ubrRefundCheckResponse);
+            return ubrBaseResponse;
+        }
         return iubrClient.refundCheck(request.getSupplierOrderId());
     }
 
     @Override
     public UBRBaseResponse<UBRTicketOrderResponse> refund(BaseOrderRequest request){
+        // 供应商创单失败对应我们这边是支付失败，客服后台需要操作退款，这时候没有供应商订单，直接返回成功给用户退款就行
+        TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+        if(StringUtils.isBlank(tripOrder.getOutOrderId())){
+            UBRBaseResponse ubrBaseResponse = new UBRBaseResponse();
+            ubrBaseResponse.setCode(200);
+            return ubrBaseResponse;
+        }
         UBRBaseResponse<UBRTicketOrderResponse> baseResponse = iubrClient.refund(request.getSupplierOrderId());
         if(baseResponse != null && baseResponse.getCode() == 200){
             TripOrderRefund tripOrderRefund = tripOrderRefundMapper.getRefundingOrderByOrderId(request.getOrderId());
@@ -127,29 +145,33 @@ public class UBROrderServiceImpl implements UBROrderService {
             UBROrderDetailResponse detailResponse = baseResponse.getData();
             if(StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_CANCEL)
                     || StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_BUY_FILED) ){
-                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
-                if(tripRefundNotify == null){
-                    TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
-                    refunded(order.getOrderId(), order.getOutPayPrice(), 0, 1);
-                    try {
-                        // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
-                        TripRefundNotify notify = new TripRefundNotify();
-                        notify.setStatus(1);
-                        notify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
-                        notify.setOrderId(request.getOrderId());
-                        notify.setRefundStatus(1);
-                        notify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
-                        notify.setRefundMoney(order.getOutPayPrice().floatValue());
-                        notify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
-                        notify.setRemark("供应商下单失败");
-                        tripOrderRefundMapper.saveTripRefundNotify(notify);
-                    } catch (Exception e) {
-                        log.error("btg订单详情保存退款通知表异常，", e);
-                    }
-                }
+                orderFailed(request.getOrderId());
             }
         }
         return baseResponse;
+    }
+
+    private void orderFailed(String orderId){
+        TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(orderId);
+        if(tripRefundNotify == null){
+            TripOrder order = tripOrderMapper.getOrderByOrderId(orderId);
+            refunded(order.getOrderId(), order.getOutPayPrice(), 0, 1);
+            try {
+                // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
+                TripRefundNotify notify = new TripRefundNotify();
+                notify.setStatus(1);
+                notify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
+                notify.setOrderId(orderId);
+                notify.setRefundStatus(1);
+                notify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
+                notify.setRefundMoney(order.getOutPayPrice().floatValue());
+                notify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
+                notify.setRemark("供应商下单失败");
+                tripOrderRefundMapper.saveTripRefundNotify(notify);
+            } catch (Exception e) {
+                log.error("btg订单详情保存退款通知表异常，", e);
+            }
+        }
     }
 
     @Override
