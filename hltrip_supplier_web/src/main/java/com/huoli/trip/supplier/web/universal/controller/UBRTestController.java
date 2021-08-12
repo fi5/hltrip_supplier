@@ -1,13 +1,13 @@
 package com.huoli.trip.supplier.web.universal.controller;
 
+import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.supplier.api.UBROrderService;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
-import com.huoli.trip.supplier.self.lvmama.vo.request.LmmScenicListRequest;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
-import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
-import com.huoli.trip.supplier.web.lvmama.task.LmmTicketTask;
+import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
 import com.huoli.trip.supplier.web.universal.service.UBRProductService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +32,11 @@ public class UBRTestController {
 
     @Autowired
     private UBROrderService ubrOrderService;
+
+    @Autowired
+    private TripOrderMapper tripOrderMapper;
+
+    @Autowired
 
     @PostMapping(path = "/init")
     public DfyBaseResult UBRInit() {
@@ -58,10 +63,20 @@ public class UBRTestController {
     }
 
     @PostMapping(path = "/refund/check")
-    public DfyBaseResult refundCheck(@RequestBody String outOrderId) {
+    public DfyBaseResult UBRRefundCheck(@RequestBody String outOrderId) {
         BaseOrderRequest request = new BaseOrderRequest();
         request.setSupplierOrderId(outOrderId);
         return DfyBaseResult.success(ubrOrderService.refundCheck(request));
     }
 
+    @PostMapping(path = "/order/detail")
+    public DfyBaseResult UBROrderDetail(@RequestBody String orderId) {
+        TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(orderId);
+        if(tripOrder != null && StringUtils.isNotBlank(tripOrder.getOutOrderId())){
+            orderId = tripOrder.getOutOrderId();
+        }
+        BaseOrderRequest request = new BaseOrderRequest();
+        request.setSupplierOrderId(orderId);
+        return DfyBaseResult.success(ubrOrderService.orderDetail(request));
+    }
 }
