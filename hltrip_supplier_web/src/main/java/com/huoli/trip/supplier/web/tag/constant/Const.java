@@ -12,4 +12,6 @@ public interface Const {
 
     String MATCH_COUNT = "cTrip-matchCount";
 
+    String HAD_COUNT = "cTrip-hadCount";
+
 }

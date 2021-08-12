@@ -127,6 +127,8 @@ public class TagServiceImpl implements TagService {
                     scenicSpotDao.updateTagsById(scenicSpotMPO.getTages(), scenicSpotMPO.getId());
                     log.info("更新景点tags成功，id:{}，cityName:{}，name:{}，tags:{}", scenicSpotMPO.getId(), cityName, name, JSONObject.toJSONString(tagNames));
                     RedisQueue.incrBy(Const.MATCH_COUNT, 1);
+                } else {
+                    RedisQueue.incrBy(Const.HAD_COUNT, 1);
                 }
             }
         }

@@ -86,4 +86,10 @@ public class TagController {
         return BaseResponse.withSuccess(valueByKey);
     }
 
+    @GetMapping("/hadCount")
+    public BaseResponse hadCount() {
+        String valueByKey = RedisQueue.getValueByKey(Const.HAD_COUNT);
+        return BaseResponse.withSuccess(valueByKey);
+    }
+
 }
