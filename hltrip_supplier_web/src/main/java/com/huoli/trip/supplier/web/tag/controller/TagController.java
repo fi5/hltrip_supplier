@@ -1,5 +1,6 @@
 package com.huoli.trip.supplier.web.tag.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.huoli.trip.common.vo.response.BaseResponse;
 import com.huoli.trip.supplier.web.caissa.util.RedisQueue;
 import com.huoli.trip.supplier.web.tag.constant.Const;
@@ -87,7 +88,7 @@ public class TagController {
     }
 
     @GetMapping("/len/{key}")
-    public BaseResponse len(@PathVariable String key ) {
+    public BaseResponse len(@PathVariable String key) {
         Long len = -1L;
         switch (key) {
             case "cTrip-city-ta":
@@ -126,4 +127,20 @@ public class TagController {
         return BaseResponse.withSuccess(count);
     }
 
+    @GetMapping("/list/{key}")
+    public BaseResponse list(@PathVariable String key) {
+        String list = "-1";
+        switch (key) {
+            case "cTrip-matchLikeList":
+                list = JSONObject.toJSONString(RedisQueue.rang(Const.MATCH_LIKE_LIST, 0L, -1L));
+                break;
+            case "cTrip-noMatchList":
+                list = JSONObject.toJSONString(RedisQueue.rang(Const.NO_MATCH_LIST, 0L, -1L));
+                break;
+            case "cTrip-noMatchCityList":
+                list = JSONObject.toJSONString(RedisQueue.rang(Const.NO_MATCH_CITY, 0L, -1L));
+                break;
+        }
+        return BaseResponse.withSuccess(list);
+    }
 }

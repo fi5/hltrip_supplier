@@ -32,6 +32,10 @@ public class RedisQueue {
         return stringJedisTemplate.opsForValue().get(key);
     }
 
+    public static List<String> rang(String key, Long start, Long end) {
+        return stringJedisTemplate.opsForList().range(key, start, end);
+    }
+
     //将未访问的url加入到toVisit表中(使用的是尾插法)
     public static void addForSet(String key, String url) {
         stringJedisTemplate.opsForSet().add(key, url);
