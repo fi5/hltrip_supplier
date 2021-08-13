@@ -89,7 +89,7 @@ public class TagServiceImpl implements TagService {
         log.info("spiderTagListSize:{}", list.size());
         for (ScenicSpotMPO mpo : list) {
             if (StringUtils.isNotEmpty(mpo.getCity()) && StringUtils.isNotEmpty(mpo.getName())) {
-                String valueByKey = RedisQueue.getValueByKey("key");
+                String valueByKey = RedisQueue.getValueByKey(String.format(Const.CTRIP_CITY_TAG_MAP, mpo.getCity()));
                 if (StringUtils.isNotEmpty(valueByKey)) {
                     doGetSearch(mpo.getCity(), valueByKey, mpo.getName(), mpo);
                 } else {
