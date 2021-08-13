@@ -109,7 +109,7 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
     public void updateTagsById(List<String> tags, String id) {
         Query query = Query.query(Criteria.where("_id").is(id));
         Update update = new Update();
-        update.set("tags", tags);
+        update.set("tages", tags);
         mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
     }
 }
