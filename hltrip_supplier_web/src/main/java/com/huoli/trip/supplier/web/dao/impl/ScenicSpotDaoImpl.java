@@ -112,4 +112,11 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
         update.set("tages", tags);
         mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
     }
+
+    @Override
+    public List<ScenicSpotMPO> getNoTags() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("tages").is(null));
+        return mongoTemplate.find(query, ScenicSpotMPO.class);
+    }
 }

@@ -71,4 +71,7 @@ public interface ScenicSpotDao {
     void updateDeatailDescById(String detailDesc,String id);
 
     void updateTagsById(List<String> tags, String id);
+
+    List<ScenicSpotMPO> getNoTags();
+
 }

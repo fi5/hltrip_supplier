@@ -20,15 +20,22 @@ public class TagController {
     @Autowired
     private TagService tagService;
 
-    @GetMapping("/run")
-    public BaseResponse start() {
+    @GetMapping("/run/{key}")
+    public BaseResponse start(@PathVariable String key) {
         if (StringUtils.isNotEmpty(RedisQueue.getValueByKey(Const.TAG_RUN))) {
             log.info("景点tags抓取正在进行，请勿重复进行");
             return BaseResponse.withFail(-1, "景点tags抓取正在进行，请勿重复进行");
         }
         try {
             RedisQueue.set(Const.TAG_RUN, "1");
-            tagService.getTag();
+            switch (key) {
+                case "tag":
+                    tagService.getTag();
+                    break;
+                case "search":
+                    tagService.getSearch();
+                    break;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return BaseResponse.withFail(-1, "景点tags抓取报错");
@@ -38,15 +45,22 @@ public class TagController {
         return BaseResponse.withSuccess();
     }
 
-    @GetMapping("/city/run")
-    public BaseResponse cityStart() {
+    @GetMapping("/city/run/{key}")
+    public BaseResponse cityStart(@PathVariable String key) {
         if (StringUtils.isNotEmpty(RedisQueue.getValueByKey(Const.CITY_RUN))) {
             log.info("景点tagsCity抓取正在进行，请勿重复进行");
             return BaseResponse.withFail(-1, "景点tagsCity抓取正在进行，请勿重复进行");
         }
         try {
             RedisQueue.set(Const.CITY_RUN, "1");
-            tagService.getCity();
+            switch (key) {
+                case "cTrip-city-tag":
+                    tagService.getCity(Const.CTRIP_CITY_TAG);
+                    break;
+                case "cTrip-city-tag-map":
+                    tagService.getCity(Const.CTRIP_CITY_TAG_MAP);
+                    break;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return BaseResponse.withFail(-1, "景点tagsCity抓取报错");
@@ -56,40 +70,60 @@ public class TagController {
         return BaseResponse.withSuccess();
     }
 
-    @GetMapping("/delCityRun")
-    public BaseResponse delCityRun() {
-        RedisQueue.deleteKey(Const.CITY_RUN);
+    @GetMapping("/delKey/{key}")
+    public BaseResponse delCityRun(@PathVariable String key) {
+        switch (key) {
+            case "cTrip-tag-city-run":
+                RedisQueue.deleteKey(Const.CITY_RUN);
+                break;
+            case "cTrip-tag-run":
+                RedisQueue.deleteKey(Const.TAG_RUN);
+                break;
+            case "cTrip-city-tag":
+                RedisQueue.deleteKey(Const.CTRIP_CITY_TAG);
+                break;
+        }
         return BaseResponse.withSuccess();
     }
 
-    @GetMapping("/delTagRun")
-    public BaseResponse delTagRun() {
-        RedisQueue.deleteKey(Const.TAG_RUN);
-        return BaseResponse.withSuccess();
+    @GetMapping("/len/{key}")
+    public BaseResponse len(@PathVariable String key ) {
+        Long len = -1L;
+        switch (key) {
+            case "cTrip-city-ta":
+                len = RedisQueue.lLen(Const.CTRIP_CITY_TAG);
+                break;
+            case "cTrip-matchLikeList":
+                len = RedisQueue.lLen(Const.MATCH_LIKE_LIST);
+                break;
+            case "cTrip-noMatchList":
+                len = RedisQueue.lLen(Const.NO_MATCH_LIST);
+                break;
+            case "cTrip-noMatchCityList":
+                len = RedisQueue.lLen(Const.NO_MATCH_CITY);
+                break;
+        }
+        return BaseResponse.withSuccess(len);
     }
 
-    @GetMapping("/delTagCity")
-    public BaseResponse delTagCity() {
-        RedisQueue.deleteKey(Const.CTRIP_CITY_TAG);
-        return BaseResponse.withSuccess();
-    }
-
-    @GetMapping("/len")
-    public BaseResponse len() {
-        Long aLong = RedisQueue.lLen(Const.CTRIP_CITY_TAG);
-        return BaseResponse.withSuccess(aLong);
-    }
-
-    @GetMapping("/count")
-    public BaseResponse count() {
-        String valueByKey = RedisQueue.getValueByKey(Const.MATCH_COUNT);
-        return BaseResponse.withSuccess(valueByKey);
-    }
-
-    @GetMapping("/hadCount")
-    public BaseResponse hadCount() {
-        String valueByKey = RedisQueue.getValueByKey(Const.HAD_COUNT);
-        return BaseResponse.withSuccess(valueByKey);
+    @GetMapping("/count/{key}")
+    public BaseResponse count(@PathVariable String key) {
+        String count = "-1";
+        switch (key) {
+            case "cTrip-matchCount":
+                count = RedisQueue.getValueByKey(Const.MATCH_COUNT);
+                break;
+            case "cTrip-matchLikeCount":
+                count = RedisQueue.getValueByKey(Const.MATCH_LIKE_COUNT);
+                break;
+            case "cTrip-noMatchCount":
+                count = RedisQueue.getValueByKey(Const.NO_MATCH_COUNT);
+                break;
+            case "cTrip-hadCount":
+                count = RedisQueue.getValueByKey(Const.HAD_COUNT);
+                break;
+        }
+        return BaseResponse.withSuccess(count);
     }
 
 }
