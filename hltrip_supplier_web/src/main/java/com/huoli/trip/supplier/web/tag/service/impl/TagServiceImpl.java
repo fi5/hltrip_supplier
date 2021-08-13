@@ -132,7 +132,11 @@ public class TagServiceImpl implements TagService {
         List<String> tagNames = new ArrayList<>();
         for (Object pro : products) {
             JSONObject product = (JSONObject) pro;
-            String name = product.getString("name");
+            JSONObject basicInfo = product.getJSONObject("basicInfo");
+            if (basicInfo == null) {
+                continue;
+            }
+            String name = basicInfo.getString("name");
             if (poiName.equals(name)) {
                 JSONArray tagGroups = product.getJSONArray("tagGroups");
                 if (tagGroups != null && tagGroups.size() != 0) {
@@ -159,7 +163,11 @@ public class TagServiceImpl implements TagService {
         if (tagNames.size() == 0) {
             for (Object pro : products) {
                 JSONObject product = (JSONObject) pro;
-                String name = product.getString("name");
+                JSONObject basicInfo = product.getJSONObject("basicInfo");
+                if (basicInfo == null) {
+                    continue;
+                }
+                String name = basicInfo.getString("name");
                 likeName = name;
                 if (poiName.contains(name)) {
                     JSONArray tagGroups = product.getJSONArray("tagGroups");
