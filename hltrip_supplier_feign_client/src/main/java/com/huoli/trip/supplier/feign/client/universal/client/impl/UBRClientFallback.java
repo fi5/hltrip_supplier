@@ -34,11 +34,12 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
     public IUBRClient create(Throwable throwable) {
         String msg = throwable == null ? "" : throwable.getMessage();
         if (!StringUtils.isEmpty(msg)) {
-            log.error(msg);
+            log.error("feign client 有错误={}", msg, throwable);
         }
         return new IUBRClient() {
             @Override
             public UBRBaseResponse<UBRLoginResponse> login(@RequestBody UBRLoginRequest request) {
+                log.info("难道有错误了？？？？？");
                 return null;
             }
 
