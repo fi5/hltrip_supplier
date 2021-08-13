@@ -94,7 +94,7 @@ public class UBRProductServiceImpl implements UBRProductService {
     private ScenicSpotProductBackupDao productBackupDao;
 
     @PostConstruct
-    @Async
+//    @Async
     public void checkUserInfo(){
         try {
             Thread.sleep(30000);
