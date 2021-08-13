@@ -88,12 +88,14 @@ public class TagServiceImpl implements TagService {
         List<ScenicSpotMPO> list = scenicSpotDao.getNoTags();
         log.info("spiderTagListSize:{}", list.size());
         for (ScenicSpotMPO mpo : list) {
-            String valueByKey = RedisQueue.getValueByKey("key");
-            if (StringUtils.isNotEmpty(valueByKey)) {
-                doGetSearch(mpo.getCity(), valueByKey, mpo.getName(), mpo);
-            } else {
-                //redis记录城市
-                RedisQueue.lLeftPush(Const.NO_MATCH_CITY, mpo.getCity());
+            if (StringUtils.isNotEmpty(mpo.getCity()) && StringUtils.isNotEmpty(mpo.getName())) {
+                String valueByKey = RedisQueue.getValueByKey("key");
+                if (StringUtils.isNotEmpty(valueByKey)) {
+                    doGetSearch(mpo.getCity(), valueByKey, mpo.getName(), mpo);
+                } else {
+                    //redis记录城市
+                    RedisQueue.lLeftPush(Const.NO_MATCH_CITY, mpo.getCity());
+                }
             }
         }
 
