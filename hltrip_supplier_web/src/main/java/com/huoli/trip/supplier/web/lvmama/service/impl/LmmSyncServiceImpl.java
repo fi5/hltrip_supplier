@@ -4,6 +4,9 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.huoli.eagle.eye.core.HuoliAtrace;
+import com.huoli.eagle.eye.core.statistical.Event;
+import com.huoli.eagle.eye.core.statistical.EventStatusEnum;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
@@ -96,6 +99,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private TripDictionaryMapper tripDictionaryMapper;
+
+    /**
+     * 事件上报处理类
+     */
+    @Autowired
+    private HuoliAtrace huoliAtrace;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -1424,6 +1433,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 设置省市区
         commonService.setCity(newScenic);
         if(StringUtils.isBlank(newScenic.getCityCode())){
+            Map<String, String> data = Maps.newHashMap();
+            data.put("supplier.failed", "noCity");
+            data.put("supplier.channel", Constants.SUPPLIER_CODE_LMM_TICKET);
+            report(data, EventStatusEnum.FAIL);
             log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
             return;
         }
@@ -1474,6 +1487,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             if(productMPO != null){
                 scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);
             }
+        }
+    }
+
+    private void report(Map<String, String> data, EventStatusEnum status){
+        try {
+            Event.EventBuilder eventBuilder = new Event.EventBuilder();
+            eventBuilder.withIndex(huoliAtrace.getAppname(), "service");
+            data.forEach((k, v) -> eventBuilder.withData(k, v));
+            eventBuilder.withStatus(status);
+            Event event = eventBuilder.build();
+            huoliAtrace.reportEvent(event);
+        } catch (Throwable e) {
+            log.error("上报事件异常, 上报数据={}", JSON.toJSONString(data), e);
         }
     }
 }
