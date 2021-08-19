@@ -1433,9 +1433,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 设置省市区
         commonService.setCity(newScenic);
         if(StringUtils.isBlank(newScenic.getCityCode())){
-            Map<String, String> data = Maps.newHashMap();
-            data.put("supplier.failed", "noCity");
-            data.put("supplier.channel", Constants.SUPPLIER_CODE_LMM_TICKET);
+            Map<String, Object> data = Maps.newHashMap();
+            Map<String, String> subData = Maps.newHashMap();
+            subData.put("failed", "noCity");
+            subData.put("channel", Constants.SUPPLIER_CODE_LMM_TICKET);
+            data.put("supplier", subData);
             report(data, EventStatusEnum.FAIL);
             log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
             return;
@@ -1490,7 +1492,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
     }
 
-    private void report(Map<String, String> data, EventStatusEnum status){
+    private void report(Map<String, Object> data, EventStatusEnum status){
         try {
             Event.EventBuilder eventBuilder = new Event.EventBuilder();
             eventBuilder.withIndex(huoliAtrace.getAppname(), "service");
