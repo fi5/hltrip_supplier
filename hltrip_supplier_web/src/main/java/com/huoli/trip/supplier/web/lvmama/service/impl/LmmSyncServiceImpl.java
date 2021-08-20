@@ -1279,7 +1279,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         boolean b = false;
         // 更新景点，用产品的数据填充
         if(StringUtils.isBlank(scenicSpotMPO.getBriefDesc())){
-            scenicSpotMPO.setBriefDesc(lmmProduct.getIntrodution());
+            scenicSpotMPO.setBriefDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(lmmProduct.getIntrodution())));
             b = true;
             log.info("驴妈妈补充景点简要介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), lmmProduct.getIntrodution());
         }

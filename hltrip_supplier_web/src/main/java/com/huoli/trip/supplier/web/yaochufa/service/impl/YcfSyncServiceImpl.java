@@ -597,7 +597,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     b = true;
                 }
                 if(StringUtils.isBlank(existScenic.getBriefDesc()) && StringUtils.isNotBlank(item.getDescription())){
-                    existScenic.setBriefDesc(item.getDescription());
+                    existScenic.setBriefDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(item.getDescription())));
                     log.info("要出发补充简要介绍{}", existScenic.getId());
                     b = true;
                 }
