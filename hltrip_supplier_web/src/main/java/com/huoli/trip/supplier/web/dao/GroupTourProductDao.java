@@ -21,6 +21,12 @@ public interface GroupTourProductDao {
     void saveProduct(GroupTourProductMPO groupTourProductMPO);
 
     /**
+     * 更新产品
+     * @param groupTourProductMPO
+     */
+    GroupTourProductMPO updateProduct(GroupTourProductMPO groupTourProductMPO);
+
+    /**
      * 新增产品
      * @param groupTourProductMPO
      */
@@ -54,4 +60,25 @@ public interface GroupTourProductDao {
      * @param status
      */
     void updateStatusById(String id, int status);
+
+    /**
+     * 根据渠道获取出行人模板
+     * @param channel
+     * @return
+     */
+    List<GroupTourProductMPO> getTravelerTemplateIds(String channel);
+
+    /**
+     * 更新出新任模板
+     * @param id
+     * @param ttId
+     */
+    void updateTravelerTemplateId(String id, Integer ttId);
+
+    /**
+     * 根据出行人模板获取产品
+     * @param ttId
+     * @return
+     */
+    List<GroupTourProductMPO> getTravelerTemplateId(Integer ttId);
 }

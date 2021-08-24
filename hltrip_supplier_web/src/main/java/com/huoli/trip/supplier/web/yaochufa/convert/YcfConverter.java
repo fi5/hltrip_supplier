@@ -444,6 +444,14 @@ public class YcfConverter {
         scenicSpotMPO.setCountry(productItem.getCountry());
         scenicSpotMPO.setProvince(productItem.getProvince());
         scenicSpotMPO.setCity(productItem.getCity());
+        if (StringUtils.isBlank(productItem.getCity()) && StringUtils.isNotBlank(productItem.getAddress())){
+            String regEx_address = "(?<=.{0,100}省).*?(?=市)";
+            Pattern p_address = Pattern.compile(regEx_address, Pattern.CASE_INSENSITIVE);
+            Matcher m_address = p_address.matcher(productItem.getAddress());
+            if (m_address.find()){
+                scenicSpotMPO.setCity(m_address.group().trim());
+            }
+        }
         scenicSpotMPO.setAddress(productItem.getAddress());
         scenicSpotMPO.setPhone(productItem.getPhone());
         if(StringUtils.isNotBlank(productItem.getLongitude()) && StringUtils.isNotBlank(productItem.getLatitude())){
@@ -455,7 +463,7 @@ public class YcfConverter {
                 scenicSpotMPO.setCoordinate(coordinate);
             }
         }
-        scenicSpotMPO.setDetailDesc(productItem.getDescription());
+        scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(productItem.getDescription())));
         List<String> images = Lists.newArrayList();
         if(ListUtils.isNotEmpty(productItem.getImageList())){
             images.addAll(productItem.getImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
@@ -464,7 +472,7 @@ public class YcfConverter {
                 images.addAll(productItem.getMainImageList().stream().map(YcfImageBase::getImageUrl).collect(Collectors.toList()));
             }
         }
-        scenicSpotMPO.setImages(images);
+        scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(images));
         // 把购买须知加到产品动态说明，需要加字段
 //        if(ListUtils.isNotEmpty(productItem.getCharacterrList())){
 //            scenicSpotMPO.setNotices(productItem.getCharacterrList().stream().map(c -> {
@@ -513,13 +521,13 @@ public class YcfConverter {
         hotelMPO.setCity(productItem.getCity());
         hotelMPO.setAddress(productItem.getAddress());
         hotelMPO.setTel(productItem.getPhone());
-        hotelMPO.setDescription(productItem.getDescription());
+        hotelMPO.setDescription(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(productItem.getDescription())));
         List<HotelPic> images = Lists.newArrayList();
         if(ListUtils.isNotEmpty(productItem.getImageList())){
             images.addAll(productItem.getImageList().stream().map(i -> {
                 HotelPic hotelPic = new HotelPic();
                 hotelPic.setName(i.getImageName());
-                hotelPic.setUrl(i.getImageUrl());
+                hotelPic.setUrl(UploadUtil.getNetUrlAndUpload(i.getImageUrl()));
                 return hotelPic;
             }).collect(Collectors.toList()));
         } else {
@@ -527,7 +535,7 @@ public class YcfConverter {
                 images.addAll(productItem.getMainImageList().stream().map(i -> {
                     HotelPic hotelPic = new HotelPic();
                     hotelPic.setName(i.getImageName());
-                    hotelPic.setUrl(i.getImageUrl());
+                    hotelPic.setUrl(UploadUtil.getNetUrlAndUpload(i.getImageUrl()));
                     return hotelPic;
                 }).collect(Collectors.toList()));
             }

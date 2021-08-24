@@ -28,4 +28,7 @@ public interface ChinaCityMapper {
 
     @Select("select * from china_city where code = #{code}")
     ChinaCity getCityByCode(@Param("code") String code);
+
+    @Select("SELECT code FROM china_city WHERE name LIKE CONCAT('%',#{condition},'%') AND parentCode is not null")
+    List<String> queryCityCodeByName(@Param("condition") String condition);
 }

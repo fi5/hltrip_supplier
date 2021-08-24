@@ -82,7 +82,7 @@ public interface CommonService {
 
     void refreshList(int type, String productId, int updateType, boolean add);
 
-    void transTours();
+    void transTours(String code);
 
     void transScenic();
 
@@ -119,6 +119,15 @@ public interface CommonService {
     void upLoadImageToLocal(List<String> ids);
 
     void refreshScenicSpotDetailDesc(List<String> ids);
+
+    String queryCityCodeByName(String cityName);
+
+    /**
+     * 清除重复的出行人模板
+     * @param channel
+     */
+    void cleanPsTmp(String channel);
+
 
     /**
      * 对比景点规则

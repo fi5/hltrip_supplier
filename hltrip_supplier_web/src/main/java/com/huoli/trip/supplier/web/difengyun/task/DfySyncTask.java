@@ -213,7 +213,7 @@ public class DfySyncTask {
             for (String id : ids) {
                 try {
                     long sTime = System.currentTimeMillis();
-                    dfySyncService.syncProduct(id, null, PRODUCT_SYNC_MODE_ONLY_UPDATE);
+                    dfySyncService.syncProductV2(id);
                     long useTime = System.currentTimeMillis() - sTime;
                     log.info("同步第{}个产品V2 supplierProductCode={}，用时{}毫秒（只更新本地已有产品）", i, id, useTime);
                     // 如果执行时间超过310毫秒就不用睡了

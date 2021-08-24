@@ -115,4 +115,10 @@ public class LmmTestController {
         }
         return DfyBaseResult.success();
     }
+
+    @PostMapping(path = "/sync/product/all/v2")
+    public DfyBaseResult syncAllProductV2() {
+        lmmTicketTask.syncAllProductV2();
+        return DfyBaseResult.success();
+    }
 }

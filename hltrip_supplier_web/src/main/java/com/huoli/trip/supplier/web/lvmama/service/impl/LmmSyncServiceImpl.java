@@ -4,14 +4,14 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.huoli.eagle.eye.core.HuoliAtrace;
+import com.huoli.eagle.eye.core.statistical.Event;
+import com.huoli.eagle.eye.core.statistical.EventStatusEnum;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.MongoDateUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
@@ -99,6 +99,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Autowired
     private TripDictionaryMapper tripDictionaryMapper;
+
+    /**
+     * 事件上报处理类
+     */
+    @Autowired
+    private HuoliAtrace huoliAtrace;
 
     @Override
     public List<LmmScenic> getScenicList(LmmScenicListRequest request){
@@ -687,8 +693,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         return syncGoodsListByIdV2(request);
     }
 
-    private void updateProductV2(LmmProduct lmmProduct, List<LmmGoods> goodsList){
-
+    private void updateProductV2(LmmProduct oriLmmProduct, List<LmmGoods> goodsList){
+        LmmProduct lmmProduct = JSON.parseObject(JSON.toJSONString(oriLmmProduct), LmmProduct.class);
         if(ListUtils.isNotEmpty(goodsList)){
             goodsList.forEach(g -> {
                 // 过滤到付产品
@@ -703,8 +709,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 if(scenicSpotProductMPO == null){
                     ScenicSpotMappingMPO scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
                     if(scenicSpotMappingMPO == null){
-                        log.error("驴妈妈产品{}没有查到关联景点{}", lmmProduct.getProductId(), lmmProduct.getPlaceId());
-                        return;
+                        log.error("驴妈妈产品{}没有查到关联景点{}， 准备同步景点", lmmProduct.getProductId(), lmmProduct.getPlaceId());
+                        syncScenicListByIdV2(lmmProduct.getPlaceId());
+                        scenicSpotMappingMPO = scenicSpotMappingDao.getScenicSpotByChannelScenicSpotIdAndChannel(lmmProduct.getPlaceId(), Constants.SUPPLIER_CODE_LMM_TICKET);
+                        if(scenicSpotMappingMPO == null){
+                            log.error("驴妈妈产品{}没有同步到景点{}， 跳过。。", lmmProduct.getProductId(), lmmProduct.getPlaceId());
+                            return;
+                        }
                     }
                     scenicSpotMPO = scenicSpotDao.getScenicSpotById(scenicSpotMappingMPO.getScenicSpotId());
                     if(scenicSpotMPO == null){
@@ -816,7 +827,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     scenicSpotProductMPO.setTags(Lists.newArrayList(lmmProduct.getServiceGuarantee()));
                 }
                 if(StringUtils.equals(g.getStatus(), "true") && StringUtils.equals(lmmProduct.getProductStatus(), "true")){
-                    scenicSpotProductMPO.setStatus(1);
+                    // 后台人工下线的不改状态
+                    if(scenicSpotProductMPO.getManuallyStatus() != 1){
+                        scenicSpotProductMPO.setStatus(1);
+                    }
                 } else {
                     scenicSpotProductMPO.setStatus(3);
                 }
@@ -1238,7 +1252,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         boolean b = false;
         // 更新景点，用产品的数据填充
         if(StringUtils.isBlank(scenicSpotMPO.getBriefDesc())){
-            scenicSpotMPO.setBriefDesc(lmmProduct.getIntrodution());
+            scenicSpotMPO.setBriefDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(lmmProduct.getIntrodution())));
             b = true;
             log.info("驴妈妈补充景点简要介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), lmmProduct.getIntrodution());
         }
@@ -1281,7 +1295,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.info("驴妈妈补充景点主题{}，用产品{}，内容code={},name={}", scenicSpotMPO.getId(), productMPO.getId(), code, theme);
         }
         if(ListUtils.isEmpty(scenicSpotMPO.getImages())){
-            scenicSpotMPO.setImages(lmmProduct.getImages());
+            scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmProduct.getImages()));
             b = true;
             log.info("驴妈妈补充景点图片{}，用产品{}", scenicSpotMPO.getId(), productMPO.getId());
         }
@@ -1299,7 +1313,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         sb.append("<img src=\"").append(i).append("\"/>").append("<br>"));
                 }
             }
-            scenicSpotMPO.setDetailDesc(sb.toString());
+            scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(sb.toString())));
             b = true;
             log.info("驴妈妈补充景点详细介绍{}，用产品{}，内容={}", scenicSpotMPO.getId(), productMPO.getId(), sb.toString());
         }
@@ -1372,7 +1386,13 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     private void syncScenic(List<LmmScenic> lmmScenicList){
         if(ListUtils.isNotEmpty(lmmScenicList)){
-            lmmScenicList.forEach(s -> syncScenic(s));
+            lmmScenicList.forEach(s -> {
+                try {
+                    syncScenic(s);
+                } catch (Exception e){
+                    log.error("驴妈妈同步景点{},{} 异常", s.getScenicId(), s.getScenicName(), e);
+                }
+            });
         }
     }
 
@@ -1386,6 +1406,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         // 设置省市区
         commonService.setCity(newScenic);
         if(StringUtils.isBlank(newScenic.getCityCode())){
+            Map<String, Object> data = Maps.newHashMap();
+            Map<String, String> subData = Maps.newHashMap();
+            subData.put("failed", "noCity");
+            subData.put("channel", Constants.SUPPLIER_CODE_LMM_TICKET);
+            data.put("supplier", subData);
+            report(data, EventStatusEnum.FAIL);
             log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
             return;
         }
@@ -1411,15 +1437,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     @Override
     public void pushUpdateV2(String product) throws JAXBException {
-        log.info("接收驴妈妈产品通知v2。。");
+        log.info("接收驴妈妈产品通知v2。。{}", product);
         LmmProductPushRequest request = XmlConvertUtil.convertToJava(product, LmmProductPushRequest.class);
         String changeType = request.getBody().getChangeType();
+        log.info("xml转json的结果：{}", JSON.toJSONString(request));
         LmmProductPushRequest.LmmPushProduct lmmPushProduct = request.getBody().getProduct();
         if(Arrays.asList("product_online", "product_create", "product_info_change").contains(changeType)){
+            log.info("产品内容变更。。");
             syncProductListByIdV2(lmmPushProduct.getProductId().toString());
         } else if(Arrays.asList("goods_online", "goods_create", "goods_info_change", "price_change").contains(changeType)){
+            log.info("商品内容变更。。");
             syncGoodsListByIdV2(lmmPushProduct.getGoodsId().toString());
         } else if(Arrays.asList("product_online", "product_offline").contains(changeType)){
+            log.info("产品状态变更。。");
             Map<String, String> cond = Maps.newHashMap();
             cond.put("extendParams.productId", lmmPushProduct.getProductId().toString());
             List<ScenicSpotProductMPO> productMPOs = scenicSpotProductDao.getByCond(Constants.SUPPLIER_CODE_LMM_TICKET, cond);
@@ -1427,10 +1457,24 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 productMPOs.forEach(p -> scenicSpotProductDao.updateStatusById(p.getId(), 3));
             }
         } else if(Arrays.asList("goods_offline").contains(changeType)){
+            log.info("商品状态变更。。");
             ScenicSpotProductMPO productMPO = scenicSpotProductDao.getBySupplierProductId(lmmPushProduct.getGoodsId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET);
             if(productMPO != null){
                 scenicSpotProductDao.updateStatusById(productMPO.getId(), 3);
             }
+        }
+    }
+
+    private void report(Map<String, Object> data, EventStatusEnum status){
+        try {
+            Event.EventBuilder eventBuilder = new Event.EventBuilder();
+            eventBuilder.withIndex(huoliAtrace.getAppname(), "service");
+            data.forEach((k, v) -> eventBuilder.withData(k, v));
+            eventBuilder.withStatus(status);
+            Event event = eventBuilder.build();
+            huoliAtrace.reportEvent(event);
+        } catch (Throwable e) {
+            log.error("上报事件异常, 上报数据={}", JSON.toJSONString(data), e);
         }
     }
 }

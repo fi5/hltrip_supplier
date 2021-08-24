@@ -30,10 +30,19 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String address){
+    public ScenicSpotMPO getScenicSpotByNameAndAddress(String name, String cityCode){
         Criteria criteria = Criteria.where("name").is(name);
-        if(StringUtils.isNotBlank(address)){
-            criteria.and("address").is(address);
+        if(StringUtils.isNotBlank(cityCode)){
+            criteria.and("cityCode").is(cityCode);
+        }
+        return mongoTemplate.findOne(new Query(criteria), ScenicSpotMPO.class);
+    }
+
+    @Override
+    public ScenicSpotMPO getByCityAndName(String city, String name) {
+        Criteria criteria = Criteria.where("name").is(name);
+        if(StringUtils.isNotBlank(city)){
+            criteria.and("city").is(city);
         }
         return mongoTemplate.findOne(new Query(criteria), ScenicSpotMPO.class);
     }
@@ -94,5 +103,20 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
         Update update = new Update();
         update.set("detailDesc",detailDesc);
         mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public void updateTagsById(List<String> tags, String id) {
+        Query query = Query.query(Criteria.where("_id").is(id));
+        Update update = new Update();
+        update.set("tages", tags);
+        mongoTemplate.updateFirst(query, update, ScenicSpotMPO.class);
+    }
+
+    @Override
+    public List<ScenicSpotMPO> getNoTags() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("tages").is(null));
+        return mongoTemplate.find(query, ScenicSpotMPO.class);
     }
 }

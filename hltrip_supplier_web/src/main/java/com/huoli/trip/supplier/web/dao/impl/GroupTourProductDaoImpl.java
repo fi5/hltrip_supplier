@@ -1,10 +1,12 @@
 package com.huoli.trip.supplier.web.dao.impl;
 
 import com.huoli.trip.common.constant.MongoConst;
+import com.huoli.trip.common.entity.mpo.ProductListMPO;
 import com.huoli.trip.common.entity.mpo.groupTour.GroupTourProductMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.supplier.web.dao.GroupTourProductDao;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -42,6 +44,22 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
     }
 
     @Override
+    public GroupTourProductMPO updateProduct(GroupTourProductMPO groupTourProductMPO) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("supplierProductId").is(groupTourProductMPO.getSupplierProductId()));
+        GroupTourProductMPO one = mongoTemplate.findOne(query, GroupTourProductMPO.class);
+        if (one != null) {
+            groupTourProductMPO.setId(one.getId());
+            groupTourProductMPO.setCreateTime(one.getCreateTime());
+        }
+        Document document = new Document();
+        mongoTemplate.getConverter().write(groupTourProductMPO, document);
+        Update update = Update.fromDocument(document);
+        mongoTemplate.upsert(query, update, MongoConst.COLLECTION_NAME_GROUPTOUR_PRODUCT);
+        return groupTourProductMPO;
+    }
+
+    @Override
     public void addProduct(GroupTourProductMPO groupTourProductMPO){
         mongoTemplate.insert(groupTourProductMPO);
     }
@@ -73,5 +91,27 @@ public class GroupTourProductDaoImpl implements GroupTourProductDao {
             return groupTourProductMPOs.stream().map(GroupTourProductMPO::getSupplierProductId).collect(Collectors.toList());
         }
         return null;
+    }
+
+    @Override
+    public List<GroupTourProductMPO> getTravelerTemplateIds(String channel){
+        Criteria criteria = new Criteria();
+        if(StringUtils.isNotBlank(channel)){
+            criteria.and("channel").is(channel);
+        }
+        Query query = new Query(criteria);
+        query.fields().include("_id").include("travelerTemplateId");
+        return mongoTemplate.find(query, GroupTourProductMPO.class);
+    }
+
+    @Override
+    public void updateTravelerTemplateId(String id, Integer ttId){
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(id)),
+                Update.update("travelerTemplateId", ttId), GroupTourProductMPO.class);
+    }
+
+    @Override
+    public List<GroupTourProductMPO> getTravelerTemplateId(Integer ttId){
+        return mongoTemplate.find(Query.query(Criteria.where("travelerTemplateId").is(ttId)), GroupTourProductMPO.class);
     }
 }

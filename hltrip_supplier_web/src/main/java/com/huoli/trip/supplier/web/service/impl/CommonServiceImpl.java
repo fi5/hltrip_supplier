@@ -2,7 +2,9 @@ package com.huoli.trip.supplier.web.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.huoli.trip.common.constant.*;
 import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.*;
@@ -860,7 +862,7 @@ public class CommonServiceImpl implements CommonService {
             return;
         }
         log.info("查询是否存在同名同址景点，name={}，address={}", newScenic.getName());
-        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getAddress());
+        ScenicSpotMPO existScenic = scenicSpotDao.getScenicSpotByNameAndAddress(newScenic.getName(), newScenic.getCityCode());
         String scenicId;
         if(existScenic == null){
             newScenic.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
@@ -967,8 +969,14 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public void transTours(){
-        List<ProductPO> productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+    public void transTours(String code){
+        List<ProductPO> productPOs = Lists.newArrayList();
+        if(StringUtils.isNotBlank(code)){
+            ProductPO productPO = productDao.getByCode(code);
+            productPOs.add(productPO);
+        } else {
+            productPOs = productDao.getBySupplierId(Constants.SUPPLIER_CODE_SHENGHE_TICKET);
+        }
         for (ProductPO productPO : productPOs) {
             log.info("开始处理  {}", JSON.toJSONString(productPO));
             boolean add = false;
@@ -1176,10 +1184,16 @@ public class CommonServiceImpl implements CommonService {
                         GroupTourTripInfo groupTourTripInfo = new GroupTourTripInfo();
                         groupTourTripInfo.setDay(day++);
                         List<GroupTourProductTripItem> items = Lists.newArrayList();
-                        if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
+                        if(StringUtils.isNotBlank(hodometer.getScheduling())){
                             GroupTourProductTripItem item1 = new GroupTourProductTripItem();
-                            item1.setType("5");
-                            item1.setGroupTourHotels(hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
+                            item1.setType("15");
+                            item1.setPoiName("行程安排");
+                            item1.setPoiDesc(hodometer.getScheduling());
+                            items.add(item1);
+                        }
+                        if (ListUtils.isNotEmpty(hodometer.getRoutes())) {
+
+                            List<GroupTourHotel> groupTourHotels = hodometer.getRoutes().stream().filter(r -> r.getMduleType() == DfyConstants.MODULE_TYPE_HOTEL).map(r -> {
                                 GroupTourHotel groupTourHotel = new GroupTourHotel();
                                 groupTourHotel.setDesc(r.getDescribe());
                                 groupTourHotel.setHotelName(r.getName());
@@ -1187,8 +1201,13 @@ public class CommonServiceImpl implements CommonService {
                                     groupTourHotel.setImages(r.getImages().stream().map(ImageBase::getUrl).collect(Collectors.toList()));
                                 }
                                 return groupTourHotel;
-                            }).collect(Collectors.toList()));
-                            items.add(item1);
+                            }).collect(Collectors.toList());
+                            if(ListUtils.isNotEmpty(groupTourHotels)){
+                                GroupTourProductTripItem item1 = new GroupTourProductTripItem();
+                                item1.setType("5");
+                                item1.setGroupTourHotels(groupTourHotels);
+                                items.add(item1);
+                            }
                             for (Route route : hodometer.getRoutes()) {
                                 int type = route.getMduleType();
                                 GroupTourProductTripItem item = new GroupTourProductTripItem();
@@ -1771,8 +1790,12 @@ public class CommonServiceImpl implements CommonService {
         } else {
             scenicSpotMPOs = scenicSpotDao.getNetImages();
         }
+        int i = scenicSpotMPOs.size();
         for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+            log.info("剩余处理数量 ：" + i);
+            log.info("处理景点ID :" + scenicSpotMPO.getId());
             scenicSpotDao.updateImagesById(UploadUtil.getNetUrlAndUpload(scenicSpotMPO.getImages()),scenicSpotMPO.getId());
+            i--;
         }
         log.info("处理景点图片信息完毕");
     }
@@ -1781,21 +1804,79 @@ public class CommonServiceImpl implements CommonService {
     public void refreshScenicSpotDetailDesc(List<String> ids){
         log.info("处理景点描述信息.....");
         if (!CollectionUtils.isEmpty(ids)){
+            int i = ids.size();
             for (String id : ids){
+                log.info("剩余处理数量 ：" + i);
+                log.info("处理景点ID :" + id);
                 ScenicSpotMPO scenicSpotMPO = scenicSpotDao.getScenicSpotById(id);
                 scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
                 scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
                 scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+                i--;
             }
         } else {
             List<ScenicSpotMPO> scenicSpotMPOs = scenicSpotDao.getdetailDesc();
+            int i = scenicSpotMPOs.size();
             for (ScenicSpotMPO scenicSpotMPO : scenicSpotMPOs){
+                log.info("剩余处理数量 ：" + i);
+                log.info("处理景点ID :" + scenicSpotMPO.getId());
                 scenicSpotMPO.setDetailDesc(StringUtil.delHTMLTag(scenicSpotMPO.getDetailDesc()));
                 scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(scenicSpotMPO.getDetailDesc()));
                 scenicSpotDao.updateDeatailDescById(scenicSpotMPO.getDetailDesc(),scenicSpotMPO.getId());
+                i--;
             }
         }
         log.info("处理景点描述信息完毕.....");
+    }
+
+    @Override
+    public String queryCityCodeByName(String cityName) {
+        String code = "";
+        int len = 0;
+        if (StringUtils.isNotEmpty(cityName)) {
+            List<String> list = chinaCityMapper.queryCityCodeByName(cityName);
+            if (ListUtils.isNotEmpty(list)) {
+                for (String s : list) {
+                    if (s.length() > len) {
+                        len = s.length();
+                        code = s;
+                    }
+                }
+            }
+        }
+        return code;
+    }
+
+    @Override
+    public void cleanPsTmp(String channel){
+        List<GroupTourProductMPO> passengerInfos = groupTourProductDao.getTravelerTemplateIds(channel);
+        if(ListUtils.isNotEmpty(passengerInfos)){
+            Map<String, String> psMap = Maps.newHashMap();
+            for (GroupTourProductMPO passengerInfo : passengerInfos) {
+                PassengerTemplatePO pt = passengerTemplateMapper.getById(passengerInfo.getTravelerTemplateId());
+                if(pt != null){
+                    SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+                    filter.getExcludes().addAll(Arrays.asList("id", "createTime", "updateTime"));
+                    String s = JSON.toJSONString(pt, filter);
+                    String key = MD5Util.encode(s);
+                    if(psMap.containsKey(key)){
+                        groupTourProductDao.updateTravelerTemplateId(passengerInfo.getId(), Integer.valueOf(psMap.get(key)));
+                        passengerTemplateMapper.removeById(pt.getId());
+                    } else {
+                        psMap.put(key, String.valueOf(pt.getId()));
+                    }
+                }
+            }
+        }
+        List<PassengerTemplatePO> pts = passengerTemplateMapper.getByChannel(channel);
+        if(ListUtils.isNotEmpty(pts)){
+            for (PassengerTemplatePO pt : pts) {
+                List<GroupTourProductMPO> groupTourProductMPOS = groupTourProductDao.getTravelerTemplateId(pt.getId());
+                if(ListUtils.isEmpty(groupTourProductMPOS)){
+                    passengerTemplateMapper.removeById(pt.getId());
+                }
+            }
+        }
     }
 
     @Override

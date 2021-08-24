@@ -597,7 +597,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     b = true;
                 }
                 if(StringUtils.isBlank(existScenic.getBriefDesc()) && StringUtils.isNotBlank(item.getDescription())){
-                    existScenic.setBriefDesc(item.getDescription());
+                    existScenic.setBriefDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(item.getDescription())));
                     log.info("要出发补充简要介绍{}", existScenic.getId());
                     b = true;
                 }
@@ -609,7 +609,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                     });
                     item.getCharacterrList().stream().filter(c -> c.getType() == 3).findAny().ifPresent(c -> {
                         if(StringUtils.isBlank(existScenic.getDetailDesc())){
-                            existScenic.setDetailDesc(c.getDetail());
+                            existScenic.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(c.getDetail())));
                         }
                     });
                     b = true;
@@ -697,9 +697,15 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         }
         scenicSpotProductMPO.setName(ycfProduct.getProductName());
         scenicSpotProductMPO.setUpdateTime(new Date());
-        ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
         if(ycfProduct.getBookAheadMin() != null && ycfProduct.getBookAheadMin() > 0){
-            transaction.setBookBeforeTime(ycfProduct.getBookAheadMin().toString());
+            ScenicSpotProductTransaction transaction = new ScenicSpotProductTransaction();
+            int total = ycfProduct.getBookAheadMin();
+            int day = total / (24 * 60);
+            int newMin = total % (24 * 60);
+            int hour = newMin / 60;
+            int min = hour % 60;
+            transaction.setBookBeforeDay(day);
+            transaction.setBookBeforeTime(String.format("%s:%s", hour > 9 ? hour : String.format("0%s", hour), min > 9 ? min : String.format("0%s", min)));
             scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
         }
         ScenicSpotProductBaseSetting baseSetting = new ScenicSpotProductBaseSetting();
@@ -718,7 +724,10 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         baseSetting.setCategoryCode("d_ss_ticket");
         scenicSpotProductMPO.setScenicSpotProductBaseSetting(baseSetting);
         if(ycfProduct.getProductStatus() == YcfConstants.PRODUCT_STATUS_VALID){
-            scenicSpotProductMPO.setStatus(1);
+            // 后台人工下线的不改状态
+            if(scenicSpotProductMPO.getManuallyStatus() != 1){
+                scenicSpotProductMPO.setStatus(1);
+            }
         } else {
             scenicSpotProductMPO.setStatus(3);
         }
@@ -870,8 +879,8 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             }
             ruleMPO.setChangedFields(ruleChanged);
         } else {
-            ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
-            ruleMPO.setFeeInclude(ycfProduct.getFeeInclude());
+            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(ycfProduct.getRefundNote()));
+            ruleMPO.setFeeInclude(StringUtil.delHTMLTag(ycfProduct.getFeeInclude()));
             if(StringUtils.isNotBlank(ycfProduct.getFeeExclude())){
                 // 规则加动态说明 费用不包含
                 DescInfo feeExclude = new DescInfo();
@@ -1274,10 +1283,13 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         hotelScenicProductDao.saveProduct(hotelScenicSpotProductMPO);
         hotelScenicProductSetMealDao.saveProduct(setMealMPO);
 
-        HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
-        hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+        HotelScenicSpotProductBackupMPO hotelScenicSpotProductBackupMPO = hotelScenicProductBackupDao.getHotelScenicSpotProductBackupByProductId(hotelScenicSpotProductMPO.getId());
+        if(hotelScenicSpotProductBackupMPO == null){
+            hotelScenicSpotProductBackupMPO = new HotelScenicSpotProductBackupMPO();
+            hotelScenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_HOTEL_SCENICSPORT_PRODUCT));
+            hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
+        }
         hotelScenicSpotProductBackupMPO.setSupplierProductId(ycfProduct.getProductID());
-        hotelScenicSpotProductBackupMPO.setCreateTime(new Date());
         hotelScenicSpotProductBackupMPO.setUpdateTime(new Date());
         hotelScenicSpotProductBackupMPO.setProductMPO(hotelScenicSpotProductMPO);
         hotelScenicSpotProductBackupMPO.setSetMealMPO(setMealMPO);
@@ -1340,7 +1352,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 // 同时保存映射关系
                 commonService.updateHotelMapping(item.getPoiID(), SUPPLIER_CODE_YCF, SUPPLIER_NAME_YCF, newHotel);
                 // 更新备份
-//                commonService.updateScenicSpotMPOBackup(newScenic, item.getPoiID(), SUPPLIER_CODE_YCF, item);
+//                commonService.updateScenicSpotMPOBackup(newHotel, item.getPoiID(), SUPPLIER_CODE_YCF, item);
                 return newHotel.getId();
             } catch (Exception e) {
                 log.error("poi落地失败，", e);

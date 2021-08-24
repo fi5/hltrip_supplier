@@ -74,10 +74,10 @@ public class CommonController {
     }
 
     @PostMapping("/trans/tours")
-    public BaseResponse transTours(){
+    public BaseResponse transTours(@RequestParam String code){
         try {
             log.info("开始转移录入后台数据。");
-            commonService.transTours();
+            commonService.transTours(code);
         } catch (Exception e) {
             log.error("转移录入后台数据异常", e);
             return BaseResponse.withFail(-1, "刷新item失败");
@@ -165,6 +165,18 @@ public class CommonController {
         } catch (Exception e) {
             log.error("更新景点描述异常", e);
             return BaseResponse.withFail(-1, "更新景点描述失败");
+        }
+        return BaseResponse.withSuccess();
+    }
+
+    @PostMapping("/clean/passengerTemplate")
+    public BaseResponse cleanPassengerTemplate(@RequestParam("channel") String channel ){
+        try {
+            log.info("开始清除重复出行人模板");
+            commonService.cleanPsTmp(channel);
+        } catch (Exception e) {
+            log.error("清除重复出行人模板异常", e);
+            return BaseResponse.withFail(-1, "清除重复出行人模板失败");
         }
         return BaseResponse.withSuccess();
     }

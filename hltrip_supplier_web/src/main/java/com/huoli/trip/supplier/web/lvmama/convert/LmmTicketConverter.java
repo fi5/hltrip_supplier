@@ -10,9 +10,7 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.Coordinate;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotOpenTime;
-import com.huoli.trip.common.util.CommonUtils;
-import com.huoli.trip.common.util.CoordinateUtil;
-import com.huoli.trip.common.util.ListUtils;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmGoods;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmOpenTime;
 import com.huoli.trip.supplier.self.lvmama.vo.LmmProduct;
@@ -22,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -393,9 +393,19 @@ public class LmmTicketConverter {
         scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(lmmScenic.getPlaceToAddr());
         scenicSpotMPO.setCity(lmmScenic.getPlaceCity());
-        scenicSpotMPO.setImages(lmmScenic.getPlaceImage());
+        if (StringUtils.isBlank(scenicSpotMPO.getCity()) && StringUtils.isNotBlank(lmmScenic.getPlaceToAddr())){
+            String regEx_address = "(?<=.{0,100}省).*?(?=市)";
+            Pattern p_address = Pattern.compile(regEx_address, Pattern.CASE_INSENSITIVE);
+            Matcher m_address = p_address.matcher(lmmScenic.getPlaceToAddr());
+            if (m_address.find()){
+                scenicSpotMPO.setCity(m_address.group().trim());
+            }
+        }
+        if(ListUtils.isNotEmpty(lmmScenic.getPlaceImage())){
+            scenicSpotMPO.setImages(UploadUtil.getNetUrlAndUpload(lmmScenic.getPlaceImage()));
+        }
         scenicSpotMPO.setName(lmmScenic.getScenicName());
-        scenicSpotMPO.setDetailDesc(lmmScenic.getPlaceInfo());
+        scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(lmmScenic.getPlaceInfo())));
         if(lmmScenic.getBaiduData() != null){
             scenicSpotMPO.setCoordinate(convertToCoordinate(lmmScenic.getBaiduData(), "bd"));
         } else if (lmmScenic.getGoogleData() != null){

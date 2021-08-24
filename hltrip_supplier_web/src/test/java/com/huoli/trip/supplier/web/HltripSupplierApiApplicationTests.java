@@ -21,7 +21,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -149,7 +148,7 @@ class HltripSupplierApiApplicationTests {
         }
     }
 
-    @Test
+//    @Test
     public void test8(){
         DfyScenicListRequest request = new DfyScenicListRequest();
         request.setPage(1);

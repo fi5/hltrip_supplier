@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -338,12 +340,20 @@ public class DfyTicketConverter {
         scenicSpotMPO.setStatus(0);
         scenicSpotMPO.setAddress(scenicDetail.getScenicAddress());
         scenicSpotMPO.setCity(scenicDetail.getCityName());
+        if (StringUtils.isBlank(scenicDetail.getCityName()) && StringUtils.isNotBlank(scenicDetail.getScenicAddress())){
+            String regEx_address = "(?<=.{0,100}省).*?(?=市)";
+            Pattern p_address = Pattern.compile(regEx_address, Pattern.CASE_INSENSITIVE);
+            Matcher m_address = p_address.matcher(scenicDetail.getScenicAddress());
+            if (m_address.find()){
+                scenicSpotMPO.setCity(m_address.group().trim());
+            }
+        }
         if(StringUtils.isNotBlank(scenicDetail.getDefaultPic())){
-            scenicSpotMPO.setImages(Lists.newArrayList(scenicDetail.getDefaultPic()));
+            scenicSpotMPO.setImages(Lists.newArrayList(UploadUtil.getNetUrlAndUpload(scenicDetail.getDefaultPic())));
         }
 
         scenicSpotMPO.setName(scenicDetail.getScenicName());
-        scenicSpotMPO.setDetailDesc(scenicDetail.getScenicDescription());
+        scenicSpotMPO.setDetailDesc(StringUtil.replaceImgSrc(StringUtil.delHTMLTag(scenicDetail.getScenicDescription())));
         scenicSpotMPO.setCoordinate(convertToCoordinate(scenicDetail.getBlocation(), scenicDetail.getGlocation()));
         scenicSpotMPO.setProvince(scenicDetail.getProvinceName());
         if(StringUtils.isNotBlank(scenicDetail.getOpenTime())){
@@ -351,9 +361,9 @@ public class DfyTicketConverter {
             scenicSpotOpenTime.setTimeDesc(scenicDetail.getOpenTime());
             scenicSpotMPO.setScenicSpotOpenTimes(Lists.newArrayList(scenicSpotOpenTime));
         }
-        Notice notice = new Notice();
-        notice.setContent(scenicDetail.getBookNotice());
-        notice.setContent("预定须知");
+//        Notice notice = new Notice();
+//        notice.setContent(scenicDetail.getBookNotice());  // 这是个json序列化的对象
+//        notice.setContent("预定须知");
 //        scenicSpotMPO.setNotices(Lists.newArrayList(notice));
         scenicSpotMPO.setTraffic(scenicDetail.getTrafficBus());
         return scenicSpotMPO;

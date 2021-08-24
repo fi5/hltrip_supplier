@@ -1,5 +1,9 @@
 package com.huoli.trip.supplier.web.lvmama.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.huoli.eagle.eye.core.HuoliTrace;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
+import com.huoli.trip.supplier.self.lvmama.vo.push.LmmRefundPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmBaseResponse;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +30,15 @@ public class LmmProductController {
     @Autowired
     private ThreadPoolTaskExecutor threadPool;
 
+    @Autowired
+    private HuoliTrace huoliTrace;
+
     @PostMapping(path = "/pushProductChangeInfo")
-    public LmmBaseResponse productUpdate(@RequestParam("product") String product) {
+    public LmmBaseResponse lmmProductUpdate(@RequestParam("product") String product) {
         try {
             threadPool.execute(() -> {
                 try {
+                    huoliTrace.createSpan("lmmProductUpdate");
                     lmmSyncService.pushUpdateV2(product);
                 } catch (Exception e) {
                     log.error("接收驴妈妈产品通知异常v2", e);
