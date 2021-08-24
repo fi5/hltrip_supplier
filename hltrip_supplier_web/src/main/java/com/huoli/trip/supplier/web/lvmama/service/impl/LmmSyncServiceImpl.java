@@ -1140,7 +1140,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             descInfos.add(exclude);
             ruleMPO.setDescInfos(descInfos);
         }
-        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+//        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     private void updatePrice(String scenicSpotProductId, String ruleId, LmmPrice price, LmmGoods g){

@@ -999,7 +999,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             Integer ticketKind = type;
             List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductId);
-            List<ScenicSpotProductPriceMPO> updatePriceMPOs = Lists.newArrayList();
+//            List<ScenicSpotProductPriceMPO> updatePriceMPOs = Lists.newArrayList();
             dfyTicketDetail.getPriceCalendar().forEach(p -> {
                 if(DateTimeUtil.parseDate(p.getDepartDate()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
                     // 历史库存不更新
@@ -1039,7 +1039,7 @@ public class DfySyncServiceImpl implements DfySyncService {
                     }
                 }
             });
-            log.info("批量更新价格：{}", JSON.toJSONString(updatePriceMPOs));
+//            log.info("批量更新价格：{}", JSON.toJSONString(updatePriceMPOs));
 //            scenicSpotProductPriceDao.saveScenicSpotProductPrice(updatePriceMPOs);
         }
     }
@@ -1218,7 +1218,9 @@ public class DfySyncServiceImpl implements DfySyncService {
             descInfo.setContent(dfyTicketDetail.getBookNotice());
             ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
         }
-        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+//        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     @Override

@@ -900,7 +900,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
             }
         }
-        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+//        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     private void syncHotelScenicProduct(YcfProduct ycfProduct){

@@ -93,6 +93,9 @@ public class UBRProductServiceImpl implements UBRProductService {
     @Autowired
     private ScenicSpotProductBackupDao productBackupDao;
 
+    @Autowired
+    private ScenicSpotRuleDao scenicSpotRuleDao;
+
     @PostConstruct
 //    @Async
     public void checkUserInfo(){
@@ -374,6 +377,8 @@ public class UBRProductServiceImpl implements UBRProductService {
         } else {
             ruleMPO.setVoucherType(8);
         }
-        return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
+//        return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 }

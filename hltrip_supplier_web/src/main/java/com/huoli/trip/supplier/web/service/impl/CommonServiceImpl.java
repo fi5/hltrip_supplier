@@ -1879,6 +1879,7 @@ public class CommonServiceImpl implements CommonService {
         }
     }
 
+    //这种匹配方式有个问题，如果规则有变化就会创建新规则。旧规则还在，价格日历就会有两份，会有问题；所以还采用一个产品一个规则，弊端就是可能会出现大量重复的规则
     @Override
     public ScenicSpotRuleMPO compareRule(String scenicId, String productId, ScenicSpotRuleMPO ruleMPO){
         List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicId);
