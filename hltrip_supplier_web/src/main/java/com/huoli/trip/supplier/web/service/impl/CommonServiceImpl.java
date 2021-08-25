@@ -1424,14 +1424,17 @@ public class CommonServiceImpl implements CommonService {
                     noticeMPO.setCategory(scenicSpotProductMPO.getScenicSpotProductBaseSetting().getCategoryCode());
                     noticeMPO.setType(0);
                     noticeMPO.setUserId(subscribe.getUserId());
+                    noticeMPO.setScenicId(scenicSpotMPO.getId());
                 }
                 noticeMPO.setUpdateTime(new Date());
                 if(ListUtils.isNotEmpty(scenicSpotProductMPO.getImages())){
                     noticeMPO.setProductImageUrl(scenicSpotProductMPO.getImages().get(0));
                 }
+                noticeMPO.setTitle(String.format("产品更新通知(%s)", scenicSpotProductMPO.getName()));
                 noticeMPO.setProductName(scenicSpotProductMPO.getName());
                 noticeMPO.setProductStatus(scenicSpotProductMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
+                noticeMPO.setScenicName(scenicSpotMPO.getName());
                 List<ScenicSpotProductPriceMPO> priceMPOs = scenicSpotProductPriceDao.getByProductId(scenicSpotProductMPO.getId());
                 priceMPOs.stream().filter(p ->
                         p.getSettlementPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
@@ -1524,9 +1527,10 @@ public class CommonServiceImpl implements CommonService {
                 if(ListUtils.isNotEmpty(productMPO.getImages())){
                     noticeMPO.setProductImageUrl(productMPO.getImages().get(0));
                 }
-//                noticeMPO.setProductName(hotelScenicSpotProductMPO.getName());
+                noticeMPO.setProductName(productMPO.getProductName());
                 noticeMPO.setProductStatus(productMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
+                noticeMPO.setTitle(String.format("产品更新通知(%s)", productMPO.getProductName()));
                 List<HotelScenicSpotPriceStock> priceMPOs = setMealMPO.getPriceStocks();
                 priceMPOs.stream().filter(p ->
                         p.getAdtSellPrice() != null).collect(Collectors.toList()).sort(Comparator.comparing(p ->
@@ -1585,6 +1589,7 @@ public class CommonServiceImpl implements CommonService {
                 noticeMPO.setProductName(groupTourProductMPO.getProductName());
                 noticeMPO.setProductStatus(groupTourProductMPO.getStatus());
                 noticeMPO.setUpdateType(fresh ? "0" : "1");
+                noticeMPO.setTitle(String.format("产品更新通知(%s)", groupTourProductMPO.getProductName()));
                 List<GroupTourProductSetMealMPO> setMealMPOs = groupTourProductSetMealDao.getSetMealByProductId(groupTourProductMPO.getId());
                 if(ListUtils.isNotEmpty(setMealMPOs)){
                     List<GroupTourPrice> prices = setMealMPOs.stream().flatMap(m -> m.getGroupTourPrices().stream()).collect(Collectors.toList());
