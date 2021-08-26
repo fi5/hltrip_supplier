@@ -1033,6 +1033,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                         refundRule.setFee(r.getDeductionValue());
                         return refundRule;
                     }).collect(Collectors.toList());
+                    // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
+                    if(!refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
+                        RefundRule refundRule = new RefundRule();
+                        refundRule.setRefundRuleType(5);
+                        refundRule.setDeductionType(0);
+                        refundRule.setFee(100);
+                        refundRules.add(refundRule);
+                    }
                     ruleMPO.setRefundRules(refundRules);
                     Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
                     ruleMPO.setRefundCondition(2);
@@ -1065,14 +1073,39 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ruleMPO.setFeeInclude(g.getCostInclude());
                     buildRefundDesc(ruleMPO, g);
                 }
+                List<DescInfo> descInfos = Lists.newArrayList();
                 if(StringUtils.isNotBlank(g.getCostNoinclude())){
-                    List<DescInfo> descInfos = Lists.newArrayList();
                     DescInfo exclude = new DescInfo();
                     exclude.setTitle("费用不包含");
                     exclude.setContent(g.getCostNoinclude());
                     descInfos.add(exclude);
-                    ruleMPO.setDescInfos(descInfos);
                 }
+                if(g.getNotice() != null){
+                    LmmGoods.Notice notice = g.getNotice();
+                    StringBuffer sb = new StringBuffer();
+                    if(StringUtils.isNotBlank(notice.getGetTicketTime())){
+                        sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
+                    }
+                    if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
+                        sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
+                    }
+                    if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
+                        sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
+                    }
+                    if(StringUtils.isNotBlank(notice.getWays())){
+                        sb.append("入园方式:").append(notice.getWays()).append("<br>");
+                    }
+                    if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
+                        sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
+                    }
+                    if(StringUtils.isNotBlank(sb.toString())){
+                        DescInfo noticeDesc = new DescInfo();
+                        noticeDesc.setTitle("入园须知");
+                        noticeDesc.setContent(sb.toString());
+                        descInfos.add(noticeDesc);
+                    }
+                }
+                ruleMPO.setDescInfos(descInfos);
                 // 这种匹配方式有个问题，如果规则有变化就会创建新规则。旧规则还在，价格日历就会有两份，会有问题；所以还采用一个产品一个规则，弊端就是可能会出现大量重复的规则
 //                List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
 //                if(ListUtils.isNotEmpty(ruleMPOs)){
@@ -1383,31 +1416,32 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 //            productDesc.setContent(lmmProduct.getIntrodution());
 //            descInfos.add(productDesc);
 //        }
-        if(g.getNotice() != null){
-            LmmGoods.Notice notice = g.getNotice();
-            StringBuffer sb = new StringBuffer();
-            if(StringUtils.isNotBlank(notice.getGetTicketTime())){
-                sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
-            }
-            if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
-                sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
-            }
-            if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
-                sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
-            }
-            if(StringUtils.isNotBlank(notice.getWays())){
-                sb.append("入园方式:").append(notice.getWays()).append("<br>");
-            }
-            if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
-                sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
-            }
-            if(StringUtils.isNotBlank(sb.toString())){
-                DescInfo noticeDesc = new DescInfo();
-                noticeDesc.setTitle("入园须知");
-                noticeDesc.setContent(sb.toString());
-                descInfos.add(noticeDesc);
-            }
-        }
+        // 产品要求放到规则表里
+//        if(g.getNotice() != null){
+//            LmmGoods.Notice notice = g.getNotice();
+//            StringBuffer sb = new StringBuffer();
+//            if(StringUtils.isNotBlank(notice.getGetTicketTime())){
+//                sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
+//            }
+//            if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
+//                sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
+//            }
+//            if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
+//                sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
+//            }
+//            if(StringUtils.isNotBlank(notice.getWays())){
+//                sb.append("入园方式:").append(notice.getWays()).append("<br>");
+//            }
+//            if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
+//                sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
+//            }
+//            if(StringUtils.isNotBlank(sb.toString())){
+//                DescInfo noticeDesc = new DescInfo();
+//                noticeDesc.setTitle("入园须知");
+//                noticeDesc.setContent(sb.toString());
+//                descInfos.add(noticeDesc);
+//            }
+//        }
         return descInfos;
     }
 
