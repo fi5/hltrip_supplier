@@ -1385,16 +1385,16 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     private void buildRefundDesc(ScenicSpotRuleMPO ruleMPO, LmmGoods g){
         if(StringUtils.isNotBlank(g.getImportentPoint())){
-            ruleMPO.setRefundRuleDesc(g.getImportentPoint());
+            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportentPoint()));
         } else {
             if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
-                ruleMPO.setRefundRuleDesc(g.getRefundRuleNotice());
+                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getRefundRuleNotice()));
             }
             if(StringUtils.isNotBlank(g.getImportantNotice())){
                 if(StringUtils.isNotBlank(ruleMPO.getRefundRuleDesc())){
-                    ruleMPO.setRefundRuleDesc(String.format("%s<br>%s", ruleMPO.getRefundRuleDesc(), g.getImportantNotice()));
+                    ruleMPO.setRefundRuleDesc(String.format("%s<br>%s", ruleMPO.getRefundRuleDesc(), StringUtil.delHTMLTag(g.getImportantNotice())));
                 } else {
-                    ruleMPO.setRefundRuleDesc(g.getImportantNotice());
+                    ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportantNotice()));
                 }
             }
         }

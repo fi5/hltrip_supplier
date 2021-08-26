@@ -1181,11 +1181,11 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyTicketDetail backup = JSON.parseObject(scenicSpotProductBackupMPO.getOriginContent(), DfyTicketDetail.class);
             if(!StringUtils.equals(backup.getMpLossInfo(), dfyTicketDetail.getMpLossInfo())){
                 changedFields.add("refundRuleDesc");
-                ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
+                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo()));
             }
             if(!StringUtils.equals(backup.getInfo(), dfyTicketDetail.getInfo())){
                 changedFields.add("supplementDesc");
-                ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
+                ruleMPO.setSupplementDesc(StringUtil.delHTMLTag(dfyTicketDetail.getInfo()));
             }
             //  预定说明没有 dfyTicketDetail.bookNotice 加动态说明字段
             if(StringUtils.isNotBlank(dfyTicketDetail.getBookNotice())){
@@ -1207,8 +1207,8 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ruleMPO.setChangedFields(changedFields);
         } else {
-            ruleMPO.setRefundRuleDesc(dfyTicketDetail.getMpLossInfo());
-            ruleMPO.setSupplementDesc(dfyTicketDetail.getInfo());
+            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo()));
+            ruleMPO.setSupplementDesc(StringUtil.delHTMLTag(dfyTicketDetail.getInfo()));
             DescInfo descInfo = new DescInfo();
             descInfo.setTitle("预订须知");
             descInfo.setContent(dfyTicketDetail.getBookNotice());

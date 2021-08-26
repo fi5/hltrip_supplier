@@ -831,7 +831,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
             YcfProduct backup = JSON.parseObject(backupMPO.getOriginContent(), YcfProduct.class);
             if(!StringUtils.equals(backup.getRefundNote(), ycfProduct.getRefundNote())){
                 ruleChanged.add("refundRuleDesc");
-                ruleMPO.setRefundRuleDesc(ycfProduct.getRefundNote());
+                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(ycfProduct.getRefundNote()));
             }
             if(!StringUtils.equals(backup.getFeeInclude(), ycfProduct.getFeeInclude())){
                 ruleChanged.add("feeInclude");
