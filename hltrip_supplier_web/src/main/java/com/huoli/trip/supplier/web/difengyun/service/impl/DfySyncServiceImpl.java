@@ -1181,7 +1181,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             DfyTicketDetail backup = JSON.parseObject(scenicSpotProductBackupMPO.getOriginContent(), DfyTicketDetail.class);
             if(!StringUtils.equals(backup.getMpLossInfo(), dfyTicketDetail.getMpLossInfo())){
                 changedFields.add("refundRuleDesc");
-                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo()));
+                ruleMPO.setRefundRuleDesc(checkRefundDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo())));
             }
             if(!StringUtils.equals(backup.getInfo(), dfyTicketDetail.getInfo())){
                 changedFields.add("supplementDesc");
@@ -1207,7 +1207,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             }
             ruleMPO.setChangedFields(changedFields);
         } else {
-            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo()));
+            ruleMPO.setRefundRuleDesc(checkRefundDesc(StringUtil.delHTMLTag(dfyTicketDetail.getMpLossInfo())));
             ruleMPO.setSupplementDesc(StringUtil.delHTMLTag(dfyTicketDetail.getInfo()));
             DescInfo descInfo = new DescInfo();
             descInfo.setTitle("预订须知");
@@ -1240,6 +1240,15 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         }
         return ruleMPO;
+    }
+
+    private String checkRefundDesc(String desc){
+        if(StringUtils.isBlank(desc)){
+            return desc;
+        }
+        desc = desc.replace("扣除每张（份）票价百分比（%）：0", "可免费退订");
+        desc = desc.replace("扣除每张（份）票价百分比（%）：0.0", "可免费退订");
+        return desc;
     }
 
     @Override
