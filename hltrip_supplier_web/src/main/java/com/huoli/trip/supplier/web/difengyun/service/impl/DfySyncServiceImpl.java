@@ -1191,7 +1191,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             if(StringUtils.isNotBlank(dfyTicketDetail.getBookNotice())){
                 DescInfo descInfo = new DescInfo();
                 descInfo.setTitle("预订须知");
-                descInfo.setContent(dfyTicketDetail.getBookNotice());
+                descInfo.setContent(checkRefundDesc(StringUtil.delHTMLTag(dfyTicketDetail.getBookNotice())));
                 if(StringUtils.isNotBlank(backup.getBookNotice())){
                     if(!StringUtils.equals(dfyTicketDetail.getBookNotice(), backup.getBookNotice())){
                         descInfo.setChangedFields(Lists.newArrayList("content"));
@@ -1211,7 +1211,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             ruleMPO.setSupplementDesc(StringUtil.delHTMLTag(dfyTicketDetail.getInfo()));
             DescInfo descInfo = new DescInfo();
             descInfo.setTitle("预订须知");
-            descInfo.setContent(dfyTicketDetail.getBookNotice());
+            descInfo.setContent(checkRefundDesc(StringUtil.delHTMLTag(dfyTicketDetail.getBookNotice())));
             ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
         }
         List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
@@ -1248,6 +1248,8 @@ public class DfySyncServiceImpl implements DfySyncService {
         }
         desc = desc.replace("扣除每张（份）票价百分比（%）：0", "可免费退订");
         desc = desc.replace("扣除每张（份）票价百分比（%）：0.0", "可免费退订");
+        desc = desc.replace("扣除每张（份）票价百分比（%）：100.0", "不可退订");
+        desc = desc.replace("扣除每张（份）票价百分比（%）：100", "不可退订");
         return desc;
     }
 
