@@ -1,6 +1,5 @@
 package com.huoli.trip.supplier.web.lvmama.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -12,8 +11,6 @@ import com.huoli.trip.common.entity.*;
 import com.huoli.trip.common.entity.mpo.DescInfo;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
-import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
-import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
@@ -23,8 +20,6 @@ import com.huoli.trip.supplier.self.lvmama.vo.response.LmmGoodsListByIdResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmPriceResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmProductListResponse;
 import com.huoli.trip.supplier.self.lvmama.vo.response.LmmScenicListResponse;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfImageBase;
-import com.huoli.trip.supplier.self.yaochufa.vo.YcfProduct;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.lvmama.convert.LmmTicketConverter;
 import com.huoli.trip.supplier.web.lvmama.service.LmmSyncService;
@@ -33,11 +28,9 @@ import com.huoli.trip.supplier.web.service.CommonService;
 import com.huoli.trip.supplier.web.util.XmlConvertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
 import java.util.Arrays;
