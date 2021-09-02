@@ -21,17 +21,22 @@ public interface TripOrderRefundMapper {
 
     @Select("select * from trip_order_refund_notify where orderId = #{orderId} limit 1")
     TripRefundNotify getRefundNotifyByOrderId(String orderId);
+
     @Select("select * from trip_order_refund_notify where orderId = #{orderId} and refundId= #{refundId} limit 1")
     TripRefundNotify getRefundNotify(String orderId,Integer refundId);
 
     @Select("select * from trip_order_refund_notify where status=0 order by createTime desc limit 20")
     List<TripRefundNotify> getPendingNotifys();
 
-    @Insert("insert into trip_order_refund_notify(orderId, status, channel, refundId,createTime) values" +
-            "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW())")
+    @Insert("insert into trip_order_refund_notify(orderId, status, channel, refundId,createTime, remark, refundStatus,refundMoney,refundTime) values" +
+            "( #{orderId}, #{status}, #{channel}, #{refundId}, NOW(), #{remark}, #{refundStatus}, #{refundMoney}, #{refundTime})")
     void saveTripRefundNotify(TripRefundNotify notify);
 
     @Update("update trip_order_refund_notify set status = #{status}, refundTime = #{refundTime},refundStatus = #{refundStatus} " +
             ",refundMoney = #{refundMoney} ,billInfo = #{billInfo} where id = #{id}")
     void updateRefundNotify(TripRefundNotify notify);
+
+    @Select("select * from trip_order_refund_notify where status=0 " +
+            "and channel = #{channel} ")
+    List<TripRefundNotify> getRefundNotifyByChannel(String channel);
 }

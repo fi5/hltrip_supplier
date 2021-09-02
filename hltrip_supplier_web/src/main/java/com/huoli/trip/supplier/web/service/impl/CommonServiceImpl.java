@@ -16,6 +16,7 @@ import com.huoli.trip.common.entity.po.PassengerTemplatePO;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.vo.ImageBase;
+import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
@@ -30,6 +31,7 @@ import com.huoli.trip.supplier.web.mapper.PassengerTemplateMapper;
 import com.huoli.trip.supplier.web.service.CommonService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -119,6 +121,9 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     private PassengerTemplateMapper passengerTemplateMapper;
+
+    @Autowired
+    private ScenicSpotRuleDao scenicSpotRuleDao;
 
     @Override
     public BackChannelEntry getSupplierById(String supplierId){
@@ -1877,5 +1882,36 @@ public class CommonServiceImpl implements CommonService {
                 }
             }
         }
+    }
+
+    //这种匹配方式有个问题，如果规则有变化就会创建新规则。旧规则还在，价格日历就会有两份，会有问题；所以还采用一个产品一个规则，弊端就是可能会出现大量重复的规则
+    @Override
+    public ScenicSpotRuleMPO compareRule(String scenicId, String productId, ScenicSpotRuleMPO ruleMPO){
+        List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicId);
+        if(ListUtils.isNotEmpty(ruleMPOs)){
+            boolean match = false;
+            for (ScenicSpotRuleMPO mpo : ruleMPOs) {
+                ScenicSpotRuleCompare compareOri = new ScenicSpotRuleCompare();
+                BeanUtils.copyProperties(mpo, compareOri);
+                ScenicSpotRuleCompare compareTgt = new ScenicSpotRuleCompare();
+                BeanUtils.copyProperties(ruleMPO, compareTgt);
+                // 对比规则，内容相同可以重复使用，
+                if(StringUtils.equals(JSON.toJSONString(compareTgt), JSON.toJSONString(compareOri))){
+                    ruleMPO.setId(mpo.getId());
+                    match = true;
+                    log.info("景点{}产品{}匹配到重复景点规则{}", scenicId, productId, mpo.getId());
+                    break;
+                }
+            }
+            // 没匹配到就创建新的
+            if(!match){
+                log.info("景点{}产品{}没有匹配到重复规则，创建新规则{}", scenicId, productId, ruleMPO.getId());
+                scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+            }
+        } else {
+            log.info("景点{}产品{}还没有规则，创建新规则{}", scenicId, productId, ruleMPO.getId());
+            scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        }
+        return ruleMPO;
     }
 }

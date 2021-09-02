@@ -11,6 +11,7 @@ import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductMP
 import com.huoli.trip.common.entity.mpo.hotelScenicSpot.HotelScenicSpotProductSetMealMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotProductMPO;
+import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
 
 import java.util.Date;
 import java.util.List;
@@ -127,4 +128,13 @@ public interface CommonService {
      */
     void cleanPsTmp(String channel);
 
+
+    /**
+     * 对比景点规则
+     * @param scenicId
+     * @param productId
+     * @param ruleMPO
+     * @return
+     */
+    ScenicSpotRuleMPO compareRule(String scenicId, String productId, ScenicSpotRuleMPO ruleMPO);
 }

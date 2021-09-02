@@ -46,4 +46,10 @@ public interface ScenicSpotProductPriceDao {
      * @return
      */
     ScenicSpotProductPriceMPO getExistPrice(String productId, String ruleId, String startDate);
+
+    /**
+     * 批量更新
+     * @param scenicSpotProductPriceMPOs
+     */
+    void saveScenicSpotProductPrice(List<ScenicSpotProductPriceMPO> scenicSpotProductPriceMPOs);
 }

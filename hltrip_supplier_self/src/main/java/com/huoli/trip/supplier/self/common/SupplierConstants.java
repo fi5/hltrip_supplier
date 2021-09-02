@@ -23,4 +23,5 @@ public class SupplierConstants {
      * 只更新
      */
     public static final int PRODUCT_SYNC_MODE_ONLY_UPDATE = 2;
+
 }

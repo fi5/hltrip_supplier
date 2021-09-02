@@ -862,277 +862,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
 
                 scenicSpotProductMPO.setScenicSpotProductTransaction(transaction);
-                ScenicSpotRuleMPO ruleMPO;
-                if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
-                    ruleMPO = new ScenicSpotRuleMPO();
-                    ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                    ruleMPO.setRuleName("退改规则");
-                    ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
-                    ruleMPO.setIsCouponRule(0);
-                } else {
-                    ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
-                }
-                if(StringUtils.equals("Y", g.getNeedTicket())){
-                    ruleMPO.setInType(1);
-                } else if(StringUtils.equals("N", g.getNeedTicket())){
-                    ruleMPO.setInType(0);
-                }
-                if(StringUtils.isNotBlank(g.getGoodsType())){
-                    if(StringUtils.equals(g.getGoodsType(), "EXPRESSTYPE_DISPLAY")){
-                        ruleMPO.setTicketType(1);
-                    } else if(StringUtils.equals(g.getGoodsType(), "NOTICETYPE_DISPLAY")){
-                        ruleMPO.setTicketType(0);
-                    } else {
-                        log.error("不支持的门票类型goodsType={}", g.getGoodsType());
-                    }
-                }
-                if(g.getBooker() != null){
-                    List<Integer> booker = Lists.newArrayList();
-                    if(g.getBooker().isEmail()){
-                        booker.add(3);
-                    }
-                    if(g.getBooker().isMobile()){
-                        booker.add(1);
-                    }
-                    if(g.getBooker().isName()){
-                        booker.add(0);
-                    }
-                    ruleMPO.setTicketInfos(booker);
-                }
-                if(g.getTraveller() != null){
-                    List<Integer> traveller = Lists.newArrayList();
-                    List<Integer> creds = Lists.newArrayList();
-                    if(!StringUtils.equals(g.getTraveller().getName(), "TRAV_NUM_NO")){
-                        traveller.add(0);
-                    }
-                    if(!StringUtils.equals(g.getTraveller().getMobile(), "TRAV_NUM_NO")){
-                        traveller.add(1);
-                    }
-                    if(!StringUtils.equals(g.getTraveller().getCredentials(), "TRAV_NUM_NO")){
-                        traveller.add(2);
-                        if(StringUtils.isNotBlank(g.getTraveller().getCredentialsType())){
-                            creds = Arrays.asList(g.getTraveller().getCredentialsType().split("-")).stream().map(t -> {
-                                switch (t) {
-                                    case "ID_CARD":
-                                        return Certificate.ID_CARD.getCode();
-                                    case "HUZHAO":
-                                        return Certificate.PASSPORT.getCode();
-                                    case "GANGAO":
-                                        return Certificate.HKM_PASS.getCode();
-                                    case "TAIBAO":
-                                        return Certificate.TW_PASS.getCode();
-                                    case "TAIBAOZHENG":
-                                        return Certificate.TW_CARD.getCode();
-                                    case "CHUSHENGZHENGMING":
-                                    case "HUKOUBO":
-                                        return Certificate.OTHER.getCode();
-                                    case "SHIBING":
-                                        return Certificate.SOLDIERS.getCode();
-                                    case "JUNGUAN":
-                                        return Certificate.OFFICER.getCode();
-                                    case "HUIXIANG":
-                                        return Certificate.HOME_CARD.getCode();
-                                    default:
-                                        return Certificate.ID_CARD.getCode();
-                                }
-                            }).collect(Collectors.toList());
-                        }
-                    }
-                    if(!StringUtils.equals(g.getTraveller().getEmail(), "TRAV_NUM_NO")){
-                        traveller.add(3);
-                    }
-                    ruleMPO.setTravellerInfos(traveller);
-                    ruleMPO.setTravellerTypes(creds);
-                }
-                if(g.getMaximum() > 0){
-                    ruleMPO.setLimitBuy(1);
-                    ruleMPO.setMaxCount(g.getMaximum());
-                }
-                // limitType 限购类型在本地要加字典值，身份证、身份证+手机号
-                // limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
-                // 只有限购数量>0才有意义，否则不视为限购
-                if(g.getLimitation() != null && g.getLimitation().getLimitAmount() > 0){
-                    LmmGoods.Limitation limitation = g.getLimitation();
-                    ruleMPO.setLimitBuy(1);
-                    // -1 这些是为了防止0起作用，实际只为设置maxcount
-                    ruleMPO.setLimitWay(-1);
-                    if(StringUtils.isNotBlank(limitation.getTimeType())){
-                        if(StringUtils.equals(limitation.getTimeType(), "orderTime")){
-                            ruleMPO.setLimitBuyType(0);
-                        } else if(StringUtils.equals(limitation.getTimeType(), "playTime")){
-                            ruleMPO.setLimitBuyType(1);
-                        }
-                    }
-                    ruleMPO.setLimitDay(limitation.getAmountCycle());
-                    if(StringUtils.isNotBlank(limitation.getLimitWay())){
-                        if(StringUtils.equals(limitation.getLimitWay(), "ORDERNUM")){
-                            ruleMPO.setLimitWay(1);
-                        } else if(StringUtils.equals(limitation.getLimitWay(), "GOODSNUM")){
-                            ruleMPO.setLimitWay(2);
-                        }
-                    }
-                    if(StringUtils.isNotBlank(limitation.getLimitType())){
-                        if(StringUtils.equals(limitation.getLimitType(), "phoneNum")){
-                            ruleMPO.setDistinguishUser(1);
-                        } else if(StringUtils.equals(limitation.getLimitType(), "IDcard")){
-                            ruleMPO.setDistinguishUser(2);
-                        } else if(StringUtils.equals(limitation.getLimitType(), "phoneAndIDCard")){
-                            ruleMPO.setDistinguishUser(3);
-                        }
-                    }
-                    ruleMPO.setMaxCount(limitation.getLimitAmount());
-                    ruleMPO.setOrderStartTime(limitation.getOrderStartTime());
-                    ruleMPO.setOrderEndTime(limitation.getOrderEntTime());
-                    ruleMPO.setPlayStartTime(limitation.getPlayStartTime());
-                    ruleMPO.setPlayEndTime(limitation.getPlayEntTime());
-                }
-                // importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
-                buildRefundDesc(ruleMPO, g);
-                List<RefundRule> refundRules;
-                if(ListUtils.isNotEmpty(g.getRules())){
-                    refundRules = g.getRules().stream().map(r -> {
-                        RefundRule refundRule = new RefundRule();
-                        int day = 0;
-                        int hour = 0;
-                        int min = 0;
-                        if(r.getAheadTime() > 0){
-                            refundRule.setRefundRuleType(1);
-                            // 至少前一天
-                            day = r.getAheadTime() / 1440 + 1;
-                            // 供应商给的分钟是到的游玩当天0点的差，逆向时间，所以要反推实际时间
-                            min = 1440 - (r.getAheadTime() % 1440);
-                            if(min > 60){
-                                hour = min / 60;
-                                min = min % 60;
-                            }
-                        } else if(r.getAheadTime() < 0 && r.getAheadTime() > -1440){
-                            refundRule.setRefundRuleType(2);
-                            // 当天和游玩后分钟就是正向时间，可以直接计算
-                            hour = r.getAheadTime() / -60;
-                            min = Math.abs(r.getAheadTime()) % 60;
-                        } else if(r.getAheadTime() <= -1440){
-                            refundRule.setRefundRuleType(4);
-                            // 小于-1440的肯定是从后一天开始，所以不用+1
-                            day = r.getAheadTime() / -1440;
-                            min = Math.abs(r.getAheadTime()) % 1440;
-                            if(min > 60){
-                                hour = min / 60;
-                                min = min % 60;
-                            }
-                        } else {
-                            refundRule.setRefundRuleType(5);
-                        }
-                        refundRule.setDay(day);
-                        refundRule.setHour(hour);
-                        refundRule.setMinute(min);
-                        if(StringUtils.equals(r.getDeductionType(), "AMOUNT")){
-                            refundRule.setDeductionType(1);
-                        } else if(StringUtils.equals(r.getDeductionType(), "PERCENT")){
-                            refundRule.setDeductionType(0);
-                        }
-                        refundRule.setFee(r.getDeductionValue());
-                        return refundRule;
-                    }).collect(Collectors.toList());
-                    // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
-                    if(!refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
-                        RefundRule refundRule = new RefundRule();
-                        refundRule.setRefundRuleType(5);
-                        refundRule.setDeductionType(0);
-                        refundRule.setFee(100);
-                        refundRules.add(refundRule);
-                    }
-                    ruleMPO.setRefundRules(refundRules);
-                    Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
-                    ruleMPO.setRefundCondition(2);
-                    // 全部不可退就认为是不可退，其它都认为是条件退，没有全退
-                    if(ruleMap.size() == 1 && !ruleMap.keySet().iterator().next()){
-                        ruleMPO.setRefundCondition(1);
-                    }
-                }
-                ruleMPO.setInAddress(g.getVisitAddress());
-                ruleMPO.setCreateTime(new Date());
-                ruleMPO.setUpdateTime(new Date());
-                ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
-                ruleMPO.setValid(1);
-                if(backupMPO != null){
-                    List<String> ruleChanged = Lists.newArrayList();
-                    LmmProduct backup = JSON.parseObject(backupMPO.getOriginContent(), LmmProduct.class);
-                    LmmGoods lmmGoods = backup.getGoodsList().stream().filter(bg -> StringUtils.equals(bg.getGoodsId(), g.getGoodsId())).findFirst().orElse(null);
-                    if(lmmGoods != null){
-                        if(!StringUtils.equals(lmmGoods.getCostInclude(), g.getCostInclude())){
-                            ruleChanged.add("feeInclude");
-                            ruleMPO.setFeeInclude(g.getCostInclude());
-                        }
-                        if(!StringUtils.equals(lmmGoods.getImportentPoint(), g.getImportentPoint())){
-                            ruleChanged.add("refundRuleDesc");
-                            buildRefundDesc(ruleMPO, g);
-                        }
-                        ruleMPO.setChangedFields(ruleChanged);
-                    }
-                } else {
-                    ruleMPO.setFeeInclude(g.getCostInclude());
-                    buildRefundDesc(ruleMPO, g);
-                }
-                List<DescInfo> descInfos = Lists.newArrayList();
-                if(StringUtils.isNotBlank(g.getCostNoinclude())){
-                    DescInfo exclude = new DescInfo();
-                    exclude.setTitle("费用不包含");
-                    exclude.setContent(g.getCostNoinclude());
-                    descInfos.add(exclude);
-                }
-                if(g.getNotice() != null){
-                    LmmGoods.Notice notice = g.getNotice();
-                    StringBuffer sb = new StringBuffer();
-                    if(StringUtils.isNotBlank(notice.getGetTicketTime())){
-                        sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
-                    }
-                    if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
-                        sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
-                    }
-                    if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
-                        sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
-                    }
-                    if(StringUtils.isNotBlank(notice.getWays())){
-                        sb.append("入园方式:").append(notice.getWays()).append("<br>");
-                    }
-                    if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
-                        sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
-                    }
-                    if(StringUtils.isNotBlank(sb.toString())){
-                        DescInfo noticeDesc = new DescInfo();
-                        noticeDesc.setTitle("入园须知");
-                        noticeDesc.setContent(sb.toString());
-                        descInfos.add(noticeDesc);
-                    }
-                }
-                ruleMPO.setDescInfos(descInfos);
-                // 这种匹配方式有个问题，如果规则有变化就会创建新规则。旧规则还在，价格日历就会有两份，会有问题；所以还采用一个产品一个规则，弊端就是可能会出现大量重复的规则
-//                List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
-//                if(ListUtils.isNotEmpty(ruleMPOs)){
-//                    boolean match = false;
-//                    for (ScenicSpotRuleMPO mpo : ruleMPOs) {
-//                        ScenicSpotRuleCompare compareOri = new ScenicSpotRuleCompare();
-//                        BeanUtils.copyProperties(mpo, compareOri);
-//                        ScenicSpotRuleCompare compareTgt = new ScenicSpotRuleCompare();
-//                        BeanUtils.copyProperties(ruleMPO, compareTgt);
-//                        // 对比规则，内容相同可以重复使用，
-//                        if(StringUtils.equals(JSON.toJSONString(compareTgt), JSON.toJSONString(compareOri))){
-//                            ruleMPO.setId(mpo.getId());
-//                            match = true;
-//                            log.info("景点{}产品{}匹配到重复景点规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), mpo.getId());
-//                            break;
-//                        }
-//                    }
-//                    // 没匹配到就创建新的
-//                    if(!match){
-//                        log.info("景点{}产品{}没有匹配到重复规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
-//                        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
-//                    }
-//                } else {
-//                    log.info("景点{}产品{}还没有规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
-//                    scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
-//                }
-                scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+                ScenicSpotRuleMPO ruleMPO = convertRule(scenicSpotProductMPO, g, backupMPO);
                 scenicSpotProductMPO.setRuleId(ruleMPO.getId());
                 scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
                 LmmPriceRequest request = new LmmPriceRequest();
@@ -1182,17 +912,12 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     });
                 });
 
-                ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
-                if(scenicSpotProductBackupMPO == null){
-                    scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
-                    scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-                    scenicSpotProductBackupMPO.setCreateTime(new Date());
-                }
+                ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+                scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
                 scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
                 // 备份当前这个商品
-                oriLmmProduct.setGoodsList(Lists.newArrayList(g));
-                scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(oriLmmProduct));
-                scenicSpotProductBackupMPO.setUpdateTime(new Date());
+                lmmProduct.setGoodsList(Lists.newArrayList(g));
+                scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(lmmProduct));
                 scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
 
                 commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
@@ -1201,6 +926,256 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 }
             });
         }
+    }
+
+    private ScenicSpotRuleMPO convertRule(ScenicSpotProductMPO scenicSpotProductMPO, LmmGoods g, ScenicSpotProductBackupMPO backupMPO){
+        ScenicSpotRuleMPO ruleMPO;
+        if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
+            ruleMPO = new ScenicSpotRuleMPO();
+            ruleMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+            ruleMPO.setRuleName("退改规则");
+            ruleMPO.setScenicSpotId(scenicSpotProductMPO.getScenicSpotId());
+            ruleMPO.setIsCouponRule(0);
+        } else {
+            ruleMPO = scenicSpotRuleDao.getScenicSpotRuleById(scenicSpotProductMPO.getRuleId());
+        }
+        if(StringUtils.equals("Y", g.getNeedTicket())){
+            ruleMPO.setInType(1);
+        } else if(StringUtils.equals("N", g.getNeedTicket())){
+            ruleMPO.setInType(0);
+        }
+        if(StringUtils.isNotBlank(g.getGoodsType())){
+            if(StringUtils.equals(g.getGoodsType(), "EXPRESSTYPE_DISPLAY")){
+                ruleMPO.setTicketType(1);
+            } else if(StringUtils.equals(g.getGoodsType(), "NOTICETYPE_DISPLAY")){
+                ruleMPO.setTicketType(0);
+            } else {
+                log.error("不支持的门票类型goodsType={}", g.getGoodsType());
+            }
+        }
+        if(g.getBooker() != null){
+            List<Integer> booker = Lists.newArrayList();
+            if(g.getBooker().isEmail()){
+                booker.add(3);
+            }
+            if(g.getBooker().isMobile()){
+                booker.add(1);
+            }
+            if(g.getBooker().isName()){
+                booker.add(0);
+            }
+            ruleMPO.setTicketInfos(booker);
+        }
+        if(g.getTraveller() != null){
+            List<Integer> traveller = Lists.newArrayList();
+            List<Integer> creds = Lists.newArrayList();
+            if(!StringUtils.equals(g.getTraveller().getName(), "TRAV_NUM_NO")){
+                traveller.add(0);
+            }
+            if(!StringUtils.equals(g.getTraveller().getMobile(), "TRAV_NUM_NO")){
+                traveller.add(1);
+            }
+            if(!StringUtils.equals(g.getTraveller().getCredentials(), "TRAV_NUM_NO")){
+                traveller.add(2);
+                if(StringUtils.isNotBlank(g.getTraveller().getCredentialsType())){
+                    creds = Arrays.asList(g.getTraveller().getCredentialsType().split("-")).stream().map(t -> {
+                        switch (t) {
+                            case "ID_CARD":
+                                return Certificate.ID_CARD.getCode();
+                            case "HUZHAO":
+                                return Certificate.PASSPORT.getCode();
+                            case "GANGAO":
+                                return Certificate.HKM_PASS.getCode();
+                            case "TAIBAO":
+                                return Certificate.TW_PASS.getCode();
+                            case "TAIBAOZHENG":
+                                return Certificate.TW_CARD.getCode();
+                            case "CHUSHENGZHENGMING":
+                            case "HUKOUBO":
+                                return Certificate.OTHER.getCode();
+                            case "SHIBING":
+                                return Certificate.SOLDIERS.getCode();
+                            case "JUNGUAN":
+                                return Certificate.OFFICER.getCode();
+                            case "HUIXIANG":
+                                return Certificate.HOME_CARD.getCode();
+                            default:
+                                return Certificate.ID_CARD.getCode();
+                        }
+                    }).collect(Collectors.toList());
+                }
+            }
+            if(!StringUtils.equals(g.getTraveller().getEmail(), "TRAV_NUM_NO")){
+                traveller.add(3);
+            }
+            ruleMPO.setTravellerInfos(traveller);
+            ruleMPO.setTravellerTypes(creds);
+        }
+        if(g.getMaximum() > 0){
+            ruleMPO.setLimitBuy(1);
+            ruleMPO.setMaxCount(g.getMaximum());
+        }
+        // limitType 限购类型在本地要加字典值，身份证、身份证+手机号
+        // limitation  限制购买字段都要加，再加个限购数量类型对应 limitWay
+        // 只有限购数量>0才有意义，否则不视为限购
+        if(g.getLimitation() != null && g.getLimitation().getLimitAmount() > 0){
+            LmmGoods.Limitation limitation = g.getLimitation();
+            ruleMPO.setLimitBuy(1);
+            // -1 这些是为了防止0起作用，实际只为设置maxcount
+            ruleMPO.setLimitWay(-1);
+            if(StringUtils.isNotBlank(limitation.getTimeType())){
+                if(StringUtils.equals(limitation.getTimeType(), "orderTime")){
+                    ruleMPO.setLimitBuyType(0);
+                } else if(StringUtils.equals(limitation.getTimeType(), "playTime")){
+                    ruleMPO.setLimitBuyType(1);
+                }
+            }
+            ruleMPO.setLimitDay(limitation.getAmountCycle());
+            if(StringUtils.isNotBlank(limitation.getLimitWay())){
+                if(StringUtils.equals(limitation.getLimitWay(), "ORDERNUM")){
+                    ruleMPO.setLimitWay(1);
+                } else if(StringUtils.equals(limitation.getLimitWay(), "GOODSNUM")){
+                    ruleMPO.setLimitWay(2);
+                }
+            }
+            if(StringUtils.isNotBlank(limitation.getLimitType())){
+                if(StringUtils.equals(limitation.getLimitType(), "phoneNum")){
+                    ruleMPO.setDistinguishUser(1);
+                } else if(StringUtils.equals(limitation.getLimitType(), "IDcard")){
+                    ruleMPO.setDistinguishUser(2);
+                } else if(StringUtils.equals(limitation.getLimitType(), "phoneAndIDCard")){
+                    ruleMPO.setDistinguishUser(3);
+                }
+            }
+            ruleMPO.setMaxCount(limitation.getLimitAmount());
+            ruleMPO.setOrderStartTime(limitation.getOrderStartTime());
+            ruleMPO.setOrderEndTime(limitation.getOrderEntTime());
+            ruleMPO.setPlayStartTime(limitation.getPlayStartTime());
+            ruleMPO.setPlayEndTime(limitation.getPlayEntTime());
+        }
+        // importentPoint 放到退改说明，优先判断这个，如果没有取分开的退改规则和重要说明
+        buildRefundDesc(ruleMPO, g);
+        List<RefundRule> refundRules;
+        if(ListUtils.isNotEmpty(g.getRules())){
+            refundRules = g.getRules().stream().map(r -> {
+                RefundRule refundRule = new RefundRule();
+                int day = 0;
+                int hour = 0;
+                int min = 0;
+                if(r.getAheadTime() > 0){
+                    refundRule.setRefundRuleType(1);
+                    // 至少前一天
+                    day = r.getAheadTime() / 1440 + 1;
+                    // 供应商给的分钟是到的游玩当天0点的差，逆向时间，所以要反推实际时间
+                    min = 1440 - (r.getAheadTime() % 1440);
+                    if(min > 60){
+                        hour = min / 60;
+                        min = min % 60;
+                    }
+                } else if(r.getAheadTime() < 0 && r.getAheadTime() > -1440){
+                    refundRule.setRefundRuleType(2);
+                    // 当天和游玩后分钟就是正向时间，可以直接计算
+                    hour = r.getAheadTime() / -60;
+                    min = Math.abs(r.getAheadTime()) % 60;
+                } else if(r.getAheadTime() <= -1440){
+                    refundRule.setRefundRuleType(4);
+                    // 小于-1440的肯定是从后一天开始，所以不用+1
+                    day = r.getAheadTime() / -1440;
+                    min = Math.abs(r.getAheadTime()) % 1440;
+                    if(min > 60){
+                        hour = min / 60;
+                        min = min % 60;
+                    }
+                } else {
+                    refundRule.setRefundRuleType(5);
+                }
+                refundRule.setDay(day);
+                refundRule.setHour(hour);
+                refundRule.setMinute(min);
+                if(StringUtils.equals(r.getDeductionType(), "AMOUNT")){
+                    refundRule.setDeductionType(1);
+                } else if(StringUtils.equals(r.getDeductionType(), "PERCENT")){
+                    refundRule.setDeductionType(0);
+                }
+                refundRule.setFee(r.getDeductionValue());
+                return refundRule;
+            }).collect(Collectors.toList());
+            // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
+            if(!refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
+                RefundRule refundRule = new RefundRule();
+                refundRule.setRefundRuleType(5);
+                refundRule.setDeductionType(0);
+                refundRule.setFee(100);
+                refundRules.add(refundRule);
+            }
+            ruleMPO.setRefundRules(refundRules);
+            Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
+            ruleMPO.setRefundCondition(2);
+            // 全部不可退就认为是不可退，其它都认为是条件退，没有全退
+            if(ruleMap.size() == 1 && !ruleMap.keySet().iterator().next()){
+                ruleMPO.setRefundCondition(1);
+            }
+        }
+        ruleMPO.setInAddress(g.getVisitAddress());
+        ruleMPO.setCreateTime(new Date());
+        ruleMPO.setUpdateTime(new Date());
+        ruleMPO.setChannel(scenicSpotProductMPO.getChannel());
+        ruleMPO.setValid(1);
+        if(backupMPO != null){
+            List<String> ruleChanged = Lists.newArrayList();
+            LmmProduct backup = JSON.parseObject(backupMPO.getOriginContent(), LmmProduct.class);
+            LmmGoods lmmGoods = backup.getGoodsList().stream().filter(bg -> StringUtils.equals(bg.getGoodsId(), g.getGoodsId())).findFirst().orElse(null);
+            if(lmmGoods != null){
+                if(!StringUtils.equals(lmmGoods.getCostInclude(), g.getCostInclude())){
+                    ruleChanged.add("feeInclude");
+                    ruleMPO.setFeeInclude(g.getCostInclude());
+                }
+                if(!StringUtils.equals(lmmGoods.getImportentPoint(), g.getImportentPoint())){
+                    ruleChanged.add("refundRuleDesc");
+                    buildRefundDesc(ruleMPO, g);
+                }
+                ruleMPO.setChangedFields(ruleChanged);
+            }
+        } else {
+            ruleMPO.setFeeInclude(g.getCostInclude());
+            buildRefundDesc(ruleMPO, g);
+        }
+        List<DescInfo> descInfos = Lists.newArrayList();
+        if(StringUtils.isNotBlank(g.getCostNoinclude())){
+            DescInfo exclude = new DescInfo();
+            exclude.setTitle("费用不包含");
+            exclude.setContent(g.getCostNoinclude());
+            descInfos.add(exclude);
+        }
+        if(g.getNotice() != null){
+            LmmGoods.Notice notice = g.getNotice();
+            StringBuffer sb = new StringBuffer();
+            if(StringUtils.isNotBlank(notice.getGetTicketTime())){
+                sb.append("取票时间:").append(notice.getGetTicketTime()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getGetTicketPlace())){
+                sb.append("取票地点:").append(notice.getGetTicketPlace()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getEffectiveDesc())){
+                sb.append("有效期:").append(notice.getEffectiveDesc()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(notice.getWays())){
+                sb.append("入园方式:").append(notice.getWays()).append("<br>");
+            }
+            if(notice.getEnterLimit() != null && notice.getEnterLimit().isLimitFlag()){
+                sb.append("入园限制:").append(notice.getEnterLimit().getLimitTime()).append("<br>");
+            }
+            if(StringUtils.isNotBlank(sb.toString())){
+                DescInfo noticeDesc = new DescInfo();
+                noticeDesc.setTitle("入园须知");
+                noticeDesc.setContent(sb.toString());
+                descInfos.add(noticeDesc);
+            }
+        }
+        ruleMPO.setDescInfos(descInfos);
+//        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     private void updatePrice(String scenicSpotProductId, String ruleId, LmmPrice price, LmmGoods g){

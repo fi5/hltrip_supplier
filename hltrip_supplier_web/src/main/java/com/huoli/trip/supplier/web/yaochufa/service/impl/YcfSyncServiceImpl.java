@@ -749,6 +749,35 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 scenicSpotProductMPO.setDescInfos(Lists.newArrayList(bookNotice));
             }
         }
+        ScenicSpotRuleMPO ruleMPO = convertRule(scenicSpotProductMPO, ycfProduct, backupMPO);
+        scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+        scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
+        Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
+        days = days == null ? Integer.valueOf(30) : days;
+        String start = DateTimeUtil.formatDate(new Date());
+        String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
+        YcfGetPriceRequest request = new YcfGetPriceRequest();
+        request.setPartnerProductID(scenicSpotProductMPO.getId());
+        request.setProductID(ycfProduct.getProductID());
+        request.setStartDate(start);
+        request.setEndDate(end);
+        List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
+        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString(), ycfProduct.getProductID());
+
+        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
+        scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
+        scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
+        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
+        scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
+
+        commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
+
+        if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
+            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
+        }
+    }
+
+    private ScenicSpotRuleMPO convertRule(ScenicSpotProductMPO scenicSpotProductMPO, YcfProduct ycfProduct, ScenicSpotProductBackupMPO backupMPO){
         ScenicSpotRuleMPO ruleMPO;
         if(StringUtils.isBlank(scenicSpotProductMPO.getRuleId())){
             ruleMPO = new ScenicSpotRuleMPO();
@@ -871,61 +900,9 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 ruleMPO.setDescInfos(Lists.newArrayList(descInfo));
             }
         }
-        List<ScenicSpotRuleMPO> ruleMPOs = scenicSpotRuleDao.getScenicSpotRule(scenicSpotProductMPO.getScenicSpotId());
-        if(ListUtils.isNotEmpty(ruleMPOs)){
-            boolean match = false;
-            for (ScenicSpotRuleMPO mpo : ruleMPOs) {
-                ScenicSpotRuleCompare compareOri = new ScenicSpotRuleCompare();
-                BeanUtils.copyProperties(mpo, compareOri);
-                ScenicSpotRuleCompare compareTgt = new ScenicSpotRuleCompare();
-                BeanUtils.copyProperties(ruleMPO, compareTgt);
-                // 对比规则，内容相同可以重复使用，
-                if(StringUtils.equals(JSON.toJSONString(compareTgt), JSON.toJSONString(compareOri))){
-                    ruleMPO.setId(mpo.getId());
-                    match = true;
-                    log.info("景点{}产品{}匹配到重复景点规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), mpo.getId());
-                    break;
-                }
-            }
-            // 没匹配到就创建新的
-            if(!match){
-                log.info("景点{}产品{}没有匹配到重复规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
-                scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
-            }
-        } else {
-            log.info("景点{}产品{}还没有规则，创建新规则{}", scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO.getId());
-            scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
-        }
-        scenicSpotProductMPO.setRuleId(ruleMPO.getId());
-        scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
-        Integer days = ConfigGetter.getByFileItemInteger(YcfConfigConstants.CONFIG_FILE_NAME, YcfConfigConstants.TASK_SYNC_PRICE_INTERVAL);
-        days = days == null ? Integer.valueOf(30) : days;
-        String start = DateTimeUtil.formatDate(new Date());
-        String end = DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days));
-        YcfGetPriceRequest request = new YcfGetPriceRequest();
-        request.setPartnerProductID(scenicSpotProductMPO.getId());
-        request.setProductID(ycfProduct.getProductID());
-        request.setStartDate(start);
-        request.setEndDate(end);
-        List<YcfPriceInfo> ycfPriceInfos = getPriceV2(request);
-        syncPrice(scenicSpotProductMPO.getId(), ycfPriceInfos, ruleMPO.getId(), ycfProduct.getTicketType() == null ? null : ycfProduct.getTicketType().toString(), ycfProduct.getProductID());
-
-        ScenicSpotProductBackupMPO scenicSpotProductBackupMPO = scenicSpotProductBackupDao.getScenicSpotProductBackupByProductId(scenicSpotProductMPO.getId());
-        if(scenicSpotProductBackupMPO == null){
-            scenicSpotProductBackupMPO = new ScenicSpotProductBackupMPO();
-            scenicSpotProductBackupMPO.setId(commonService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT));
-            scenicSpotProductBackupMPO.setCreateTime(new Date());
-        }
-        scenicSpotProductBackupMPO.setScenicSpotProduct(scenicSpotProductMPO);
-        scenicSpotProductBackupMPO.setOriginContent(JSON.toJSONString(ycfProduct));
-        scenicSpotProductBackupMPO.setUpdateTime(new Date());
-        scenicSpotProductBackupDao.saveScenicSpotProductBackup(scenicSpotProductBackupMPO);
-
-        commonService.refreshList(0, scenicSpotProductMPO.getId(), 1, fresh);
-
-        if(ListUtils.isNotEmpty(scenicSpotProductMPO.getChangedFields()) || ListUtils.isNotEmpty(ruleMPO.getChangedFields()) || fresh){
-            commonService.addScenicProductSubscribe(scenicSpotMPO, scenicSpotProductMPO, fresh);
-        }
+//        return commonService.compareRule(scenicSpotProductMPO.getScenicSpotId(), scenicSpotProductMPO.getId(), ruleMPO);
+        scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
+        return ruleMPO;
     }
 
     private void syncHotelScenicProduct(YcfProduct ycfProduct){
