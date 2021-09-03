@@ -1557,6 +1557,18 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             return;
         }
         if(lmmScenic.getScenicName().contains("酒店") ||
+                lmmScenic.getScenicName().contains("客栈") ||
+                lmmScenic.getScenicName().contains("农家院") ||
+                lmmScenic.getScenicName().contains("宾馆") ||
+                lmmScenic.getScenicName().contains("旅社") ||
+                lmmScenic.getScenicName().contains("悦榕庄") ||
+                lmmScenic.getScenicName().contains("测试") ||
+                lmmScenic.getScenicName().contains("东南亚") ||
+                lmmScenic.getScenicName().contains("欧") ||
+                lmmScenic.getScenicName().contains("饭店") ||
+                lmmScenic.getScenicName().contains("会议") ||
+                lmmScenic.getScenicName().contains("山庄") ||
+                lmmScenic.getScenicName().contains("旅舍") ||
                 lmmScenic.getScenicName().contains("洲")){
             return;
         }
