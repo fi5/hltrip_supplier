@@ -1570,6 +1570,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 lmmScenic.getScenicName().contains("山庄") ||
                 lmmScenic.getScenicName().contains("旅舍") ||
                 lmmScenic.getScenicName().contains("公寓") ||
+                lmmScenic.getScenicName().contains("住宿") ||
                 lmmScenic.getScenicName().contains("洲")){
             return;
         }
