@@ -1509,7 +1509,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
 
     // 统计没有城市的景点，临时方法
     @Override
-    public boolean syncScenic(LmmScenicListRequest request){
+    public boolean syncNoCityScenic(LmmScenicListRequest request){
         List<LmmScenic> lmmScenicList = getScenicList(request);
         if(ListUtils.isEmpty(lmmScenicList)){
             return false;

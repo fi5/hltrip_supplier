@@ -121,4 +121,10 @@ public class LmmTestController {
         lmmTicketTask.syncAllProductV2();
         return DfyBaseResult.success();
     }
+
+    @PostMapping(path = "/sync/scenic/nocity")
+    public DfyBaseResult syncNoCityScenic() {
+        lmmTicketTask.syncNoCityScenic();
+        return DfyBaseResult.success();
+    }
 }
