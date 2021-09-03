@@ -1545,6 +1545,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         }
         if(StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceProvince()) ||
                 StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceXian()) ||
+                StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceCountry()) ||
                 StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceCity()) ){
             return;
         }
@@ -1555,7 +1556,8 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 Arrays.asList("香港","澳门","台湾").contains(StringUtils.isBlank(lmmScenic.getPlaceCity()) ? "a" : lmmScenic.getPlaceCity())){
             return;
         }
-        if(lmmScenic.getScenicName().contains("酒店")){
+        if(lmmScenic.getScenicName().contains("酒店") ||
+                lmmScenic.getScenicName().contains("洲")){
             return;
         }
         scenicSpotDao.addNoCityScenic(lmmScenic);
