@@ -1540,10 +1540,20 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     private void addNoCity(LmmScenic lmmScenic){
+        if(StringUtils.isBlank(lmmScenic.getScenicName())){
+            return;
+        }
         if(StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceProvince())){
             return;
         }
         if(StringUtils.isNotBlank(lmmScenic.getPlaceCountry()) && !StringUtils.equals("中国", lmmScenic.getPlaceCountry())){
+            return;
+        }
+        if(Arrays.asList("香港","澳门","台湾").contains(StringUtils.isBlank(lmmScenic.getPlaceProvince()) ? "a" : lmmScenic.getPlaceProvince()) ||
+                Arrays.asList("香港","澳门","台湾").contains(StringUtils.isBlank(lmmScenic.getPlaceCity()) ? "a" : lmmScenic.getPlaceCity())){
+            return;
+        }
+        if(lmmScenic.getScenicName().contains("酒店")){
             return;
         }
         scenicSpotDao.addNoCityScenic(lmmScenic);
