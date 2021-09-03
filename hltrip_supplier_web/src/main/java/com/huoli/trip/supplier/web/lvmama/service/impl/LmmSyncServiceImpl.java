@@ -1543,7 +1543,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(StringUtils.isBlank(lmmScenic.getScenicName())){
             return;
         }
-        if(StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceProvince())){
+        if(StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceProvince()) ||
+                StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceXian()) ||
+                StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceCity()) ){
             return;
         }
         if(StringUtils.isNotBlank(lmmScenic.getPlaceCountry()) && !StringUtils.equals("中国", lmmScenic.getPlaceCountry())){
