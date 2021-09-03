@@ -3,6 +3,7 @@ package com.huoli.trip.supplier.web.dao.impl;
 import com.huoli.trip.common.constant.MongoConst;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotRuleMPO;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 import com.huoli.trip.supplier.web.dao.ScenicSpotDao;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -118,5 +119,11 @@ public class ScenicSpotDaoImpl implements ScenicSpotDao {
         Query query = new Query();
         query.addCriteria(Criteria.where("tages").is(null));
         return mongoTemplate.find(query, ScenicSpotMPO.class);
+    }
+
+    // 统计没城市的景点,临时
+    @Override
+    public void addNoCityScenic(LmmScenic lmmScenic) {
+        mongoTemplate.insert(lmmScenic, "temp_scenic_no_city");
     }
 }

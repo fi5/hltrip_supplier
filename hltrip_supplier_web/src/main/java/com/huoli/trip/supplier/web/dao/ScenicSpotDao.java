@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.dao;
 
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.ScenicSpotMPO;
+import com.huoli.trip.supplier.self.lvmama.vo.LmmScenic;
 
 import java.util.List;
 
@@ -73,5 +74,7 @@ public interface ScenicSpotDao {
     void updateTagsById(List<String> tags, String id);
 
     List<ScenicSpotMPO> getNoTags();
+
+    void addNoCityScenic(LmmScenic lmmScenic);
 
 }

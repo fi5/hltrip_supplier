@@ -1506,4 +1506,36 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             log.error("上报事件异常, 上报数据={}", JSON.toJSONString(data), e);
         }
     }
+
+    // 统计没有城市的景点，临时方法
+    @Override
+    public boolean syncScenic(LmmScenicListRequest request){
+        List<LmmScenic> lmmScenicList = getScenicList(request);
+        if(ListUtils.isEmpty(lmmScenicList)){
+            return false;
+        }
+        if(ListUtils.isNotEmpty(lmmScenicList)){
+            lmmScenicList.forEach(lmmScenic -> {
+                try {
+                    // 转本地结构
+                    ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
+                    if(StringUtils.isBlank(newScenic.getCity())){
+                        log.error("驴妈妈景点[{}],[{}]没有城市v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName());
+                        scenicSpotDao.addNoCityScenic(lmmScenic);
+                        return;
+                    }
+                    // 设置省市区
+                    commonService.setCity(newScenic);
+                    if(StringUtils.isBlank(newScenic.getCityCode())){
+                        log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
+                        scenicSpotDao.addNoCityScenic(lmmScenic);
+                        return;
+                    }
+                } catch (Exception e){
+                    log.error("驴妈妈同步景点{},{} 异常", lmmScenic.getScenicId(), lmmScenic.getScenicName(), e);
+                }
+            });
+        }
+        return true;
+    }
 }

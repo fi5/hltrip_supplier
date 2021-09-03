@@ -231,4 +231,10 @@ public interface LmmSyncService {
      * @param product
      */
     void pushUpdateV2(String product) throws JAXBException;
+
+    /**
+     * 统计没城市景点，临时
+     * @param request
+     */
+    boolean syncScenic(LmmScenicListRequest request);
 }
