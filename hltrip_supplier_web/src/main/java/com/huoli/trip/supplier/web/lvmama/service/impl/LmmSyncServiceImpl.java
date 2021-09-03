@@ -1521,14 +1521,14 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
                     if(StringUtils.isBlank(newScenic.getCity())){
                         log.error("驴妈妈景点[{}],[{}]没有城市v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName());
-                        scenicSpotDao.addNoCityScenic(lmmScenic);
+                        addNoCity(lmmScenic);
                         return;
                     }
                     // 设置省市区
                     commonService.setCity(newScenic);
                     if(StringUtils.isBlank(newScenic.getCityCode())){
                         log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
-                        scenicSpotDao.addNoCityScenic(lmmScenic);
+                        addNoCity(lmmScenic);
                         return;
                     }
                 } catch (Exception e){
@@ -1537,5 +1537,15 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             });
         }
         return true;
+    }
+
+    private void addNoCity(LmmScenic lmmScenic){
+        if(StringUtils.equals(lmmScenic.getScenicName(), lmmScenic.getPlaceProvince())){
+            return;
+        }
+        if(StringUtils.isNotBlank(lmmScenic.getPlaceCountry()) && !StringUtils.equals("中国", lmmScenic.getPlaceCountry())){
+            return;
+        }
+        scenicSpotDao.addNoCityScenic(lmmScenic);
     }
 }
