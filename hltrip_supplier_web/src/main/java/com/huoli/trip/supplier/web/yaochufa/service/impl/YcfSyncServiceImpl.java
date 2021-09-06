@@ -1073,6 +1073,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         setMealMPO.setName(ycfProduct.getProductName());
         setMealMPO.setBuyMax(ycfProduct.getMaxNum());
         setMealMPO.setBuyMin(ycfProduct.getMinNum());
+        List<String> elements = Lists.newArrayList();
         List<HotelScenicSpotProductHotelElement> hotelElements = ycfProduct.getRoomList().stream().map(r -> {
             HotelMappingMPO hotelMappingMPO = hotelMappingDao.getHotelByChannelHotelIdAndChannel(r.getPoiId(), SUPPLIER_CODE_YCF);
             String hotelName = null;
@@ -1125,6 +1126,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
         setMealMPO.setHotelElements(hotelElements);
         if(ListUtils.isNotEmpty(hotelElements)){
             hotelScenicSpotProductMPO.setNight(hotelElements.get(0).getNight());
+            elements.add("1");
         }
         if(ListUtils.isNotEmpty(ycfProduct.getTicketList())){
             List<HotelScenicSpotProductScenicSpotElement> scenicSpotElements = ycfProduct.getTicketList().stream().map(t -> {
@@ -1177,6 +1179,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
 //                return;
 //            }
             setMealMPO.setScenicSpotElements(scenicSpotElements);
+            elements.add("2");
         }
         if(ListUtils.isNotEmpty(ycfProduct.getFoodList())){
             List<HotelScenicSpotProductRestaurantElement> restaurantElements = ycfProduct.getFoodList().stream().map(f -> {
@@ -1186,6 +1189,7 @@ public class YcfSyncServiceImpl implements YcfSyncService {
                 return restaurantElement;
             }).collect(Collectors.toList());
             setMealMPO.setRestaurantElements(restaurantElements);
+            elements.add("4");
         }
         YcfGetPriceRequest request = new YcfGetPriceRequest();
         request.setPartnerProductID(hotelScenicSpotProductMPO.getId());
