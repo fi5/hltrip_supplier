@@ -174,10 +174,24 @@ public interface LmmSyncService {
     void syncScenicListByIdV2(LmmScenicListByIdRequest request);
 
     /**
+     * 不检查城市
+     * @param request
+     * @param checkCity
+     */
+    void syncScenicListByIdV2(LmmScenicListByIdRequest request, boolean checkCity);
+
+    /**
      * 根据id同步
      * @param id
      */
     void syncScenicListByIdV2(String id);
+
+    /**
+     * 根据id同步 不检查城市
+     * @param id
+     * @param checkCity
+     */
+    void syncScenicListByIdV2(String id, boolean checkCity);
 
     /**
      * 同步商品，分页

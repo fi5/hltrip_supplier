@@ -613,10 +613,23 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     @Override
+    public void syncScenicListByIdV2(LmmScenicListByIdRequest request, boolean checkCity){
+        List<LmmScenic> lmmScenicList = getScenicListById(request);
+        syncScenic(lmmScenicList, checkCity);
+    }
+
+    @Override
     public void syncScenicListByIdV2(String id){
         LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
         request.setScenicId(id);
         syncScenicListByIdV2(request);
+    }
+
+    @Override
+    public void syncScenicListByIdV2(String id, boolean checkCity){
+        LmmScenicListByIdRequest request = new LmmScenicListByIdRequest();
+        request.setScenicId(id);
+        syncScenicListByIdV2(request, checkCity);
     }
 
     @Override
@@ -1417,7 +1430,19 @@ public class LmmSyncServiceImpl implements LmmSyncService {
         if(ListUtils.isNotEmpty(lmmScenicList)){
             lmmScenicList.forEach(s -> {
                 try {
-                    syncScenic(s);
+                    syncScenic(s, true);
+                } catch (Exception e){
+                    log.error("驴妈妈同步景点{},{} 异常", s.getScenicId(), s.getScenicName(), e);
+                }
+            });
+        }
+    }
+
+    private void syncScenic(List<LmmScenic> lmmScenicList, boolean checkCity){
+        if(ListUtils.isNotEmpty(lmmScenicList)){
+            lmmScenicList.forEach(s -> {
+                try {
+                    syncScenic(s, checkCity);
                 } catch (Exception e){
                     log.error("驴妈妈同步景点{},{} 异常", s.getScenicId(), s.getScenicName(), e);
                 }
@@ -1426,27 +1451,33 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     private void syncScenic(LmmScenic lmmScenic){
+        syncScenic(lmmScenic, true);
+    }
+
+    private void syncScenic(LmmScenic lmmScenic, boolean checkCity){
         // 转本地结构
         ScenicSpotMPO newScenic = LmmTicketConverter.convertToScenicSpotMPO(lmmScenic);
-        if(StringUtils.isBlank(newScenic.getCity())){
-            log.error("驴妈妈景点[{}],[{}]没有城市v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName());
-            return;
-        }
-        // 设置省市区
-        commonService.setCity(newScenic);
-        if(StringUtils.isBlank(newScenic.getCityCode())){
-            Map<String, Object> data = Maps.newHashMap();
-            Map<String, String> subData = Maps.newHashMap();
-            subData.put("failed", "noCity");
-            subData.put("channel", Constants.SUPPLIER_CODE_LMM_TICKET);
-            data.put("supplier", subData);
-            report(data, EventStatusEnum.FAIL);
-            log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
-            return;
-        }
-        if(StringUtils.equals(newScenic.getCity(), newScenic.getName())){
-            log.error("驴妈妈景点名称[{}]和城市[{}]相同v2，跳过。。", newScenic.getName(), newScenic.getCity());
-            return;
+        if(checkCity){
+            if(StringUtils.isBlank(newScenic.getCity())){
+                log.error("驴妈妈景点[{}],[{}]没有城市v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName());
+                return;
+            }
+            // 设置省市区
+            commonService.setCity(newScenic);
+            if(StringUtils.isBlank(newScenic.getCityCode())){
+                Map<String, Object> data = Maps.newHashMap();
+                Map<String, String> subData = Maps.newHashMap();
+                subData.put("failed", "noCity");
+                subData.put("channel", Constants.SUPPLIER_CODE_LMM_TICKET);
+                data.put("supplier", subData);
+                report(data, EventStatusEnum.FAIL);
+                log.error("驴妈妈景点[{}],[{}]城市不存在[{}]v2，跳过。。", lmmScenic.getScenicId(), lmmScenic.getScenicName(), lmmScenic.getPlaceCity());
+                return;
+            }
+            if(StringUtils.equals(newScenic.getCity(), newScenic.getName())){
+                log.error("驴妈妈景点名称[{}]和城市[{}]相同v2，跳过。。", newScenic.getName(), newScenic.getCity());
+                return;
+            }
         }
         // 同时保存映射关系
         commonService.updateScenicSpotMapping(lmmScenic.getScenicId().toString(), Constants.SUPPLIER_CODE_LMM_TICKET, Constants.SUPPLIER_NAME_LMM_TICKET, newScenic);

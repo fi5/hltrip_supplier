@@ -102,6 +102,12 @@ public class LmmTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/scenic/update/id/v2/nocity")
+    public DfyBaseResult syncScenicUpdateByIdV2NoCity(@RequestBody String scenicId) {
+        lmmSyncService.syncScenicListByIdV2(scenicId, false);
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/scenic/update/all/v2")
     public DfyBaseResult syncScenicUpdateByIdV2() {
         LmmScenicListRequest request = new LmmScenicListRequest();
