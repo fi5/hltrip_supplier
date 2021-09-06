@@ -4,11 +4,13 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
+import com.huoli.hlwx.tool.method.BigDecimalUtil;
 import com.huoli.trip.common.constant.CentralError;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderRefund;
 import com.huoli.trip.common.util.ConfigGetter;
+import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
@@ -36,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.xml.bind.JAXBException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -214,10 +217,17 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
         RefundNoticeReq req = new RefundNoticeReq();
         req.setPartnerOrderId(pushOrder.getPartnerOrderID());
         req.setRefundFrom(2);
-        req.setRefundPrice(new BigDecimal(pushOrder.getRefundAmount() * 100));
+        req.setRefundPrice(new BigDecimal(0));
+        req.setRefundCharge(new BigDecimal(0));
+        if(pushOrder.getRefundAmount() != null){
+            double refundAmount = BigDecimalUtil.div(pushOrder.getRefundAmount(), 100d, 2);
+            req.setRefundPrice(BigDecimal.valueOf(refundAmount));
+        }
+        if(pushOrder.getFactorage() != null){
+            double refundCharge = BigDecimalUtil.div(pushOrder.getFactorage(), 100d, 2);
+            req.setRefundCharge(BigDecimal.valueOf(refundCharge));
+        }
         req.setSource("lvmama");
-        BigDecimal refundCharge = new BigDecimal(pushOrder.getFactorage() * 100);
-        req.setRefundCharge(refundCharge);
         //判断退款状态
         String strStatus = "退款申请中";
         if (pushOrder.getRequestStatus() == null || pushOrder.getRequestStatus().equals("REVIEWING"))
@@ -229,7 +239,7 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
             req.setRefundStatus(2);
             strStatus = "退款失败";
         }
-
+        req.setResponseTime(DateTimeUtil.formatFullDate(new Date()));
         String refundNotiUrl = ConfigGetter.getByFileItemString(ConfigConstants.CONFIG_FILE_NAME_COMMON, "hltrip.centtral") + "/recSupplier/refundNotice";
         log.info("doRefund请求的地址:" + refundNotiUrl + ",参数:" + JSONObject.toJSONString(req));
         String res = HttpUtil.doPostWithTimeout(refundNotiUrl, JSONObject.toJSONString(req), 10000, TraceConfig.traceHeaders(huoliTrace, refundNotiUrl));

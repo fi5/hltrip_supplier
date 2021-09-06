@@ -341,7 +341,7 @@ public class LmmTicketTask {
     }
 
     // 用来统计没有城市的景点，没有其它作用，不落数据
-    @Scheduled(cron = "0 0 1 ? * SAT")
+//    @Scheduled(cron = "0 0 1 ? * SAT")
     public void syncNoCityScenic(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
