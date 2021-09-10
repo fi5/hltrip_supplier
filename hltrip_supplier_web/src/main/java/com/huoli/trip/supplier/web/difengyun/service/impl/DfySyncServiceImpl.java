@@ -1257,6 +1257,11 @@ public class DfySyncServiceImpl implements DfySyncService {
 
     @Override
     public void syncToursDetailV2(String productId) {
+        syncToursDetailV2(productId, true);
+    }
+
+    @Override
+    public void syncToursDetailV2(String productId, boolean checkNationwide) {
         DfyBaseResult<DfyToursDetailResponse> baseResult = getToursDetail(productId);
         if (baseResult == null) {
             log.error("笛风云跟团游详情没有返回数据v2，productId={}", productId);
@@ -1286,7 +1291,7 @@ public class DfySyncServiceImpl implements DfySyncService {
             return;
         } else {
             for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
-                if (StringUtils.equals(departCity.getName(), "全国")) {
+                if (StringUtils.equals(departCity.getName(), "全国") && checkNationwide) {
                     // 过滤全国这种产品，将来放到当地参团单独处理
                     log.info("过滤全国出发的产品v2。跳过。");
                     return;

@@ -170,6 +170,13 @@ public interface DfySyncService {
     void syncToursDetailV2(String productId);
 
     /**
+     * 同步跟团游，
+     * @param productId
+     * @param checkNationwide  是否过滤全国
+     */
+    void syncToursDetailV2(String productId, boolean checkNationwide);
+
+    /**
      * 同步跟团游价格，新版
      * @param supplierProductId
      * @param city

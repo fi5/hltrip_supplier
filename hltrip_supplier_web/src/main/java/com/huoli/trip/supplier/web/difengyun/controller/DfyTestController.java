@@ -240,6 +240,12 @@ public class DfyTestController {
         return DfyBaseResult.success();
     }
 
+    @PostMapping(path = "/sync/tours/detail/v2/uncheck/nationwide")
+    DfyBaseResult syncToursDetailV2UncheckNationwide(@RequestBody String productId) {
+        dfySyncService.syncToursDetailV2(productId, false);
+        return DfyBaseResult.success();
+    }
+
     @PostMapping(path = "/sync/tours/price/v2")
     DfyBaseResult syncToursPriceV2(@RequestBody DfyToursCalendarRequest request) {
         dfySyncService.syncToursPriceV2(String.valueOf(request.getProductId()), String.valueOf(request.getDepartCityCode()));
