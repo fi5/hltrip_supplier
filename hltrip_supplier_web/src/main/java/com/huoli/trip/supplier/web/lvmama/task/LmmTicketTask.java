@@ -270,8 +270,8 @@ public class LmmTicketTask {
     /**
      * 驴妈妈一周更新一次，周一凌晨1点
      */
-    @Scheduled(cron = "0 0 1 ? * *")
-//    @Scheduled(cron = "0 0 1 ? * MON")
+//    @Scheduled(cron = "0 0 1 ? * *")
+    @Scheduled(cron = "0 0 1 ? * MON")
     public void syncAllProductV2(){
         try {
             if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
