@@ -158,7 +158,7 @@ public class UBRProductServiceImpl implements UBRProductService {
     @Override
     public void syncProduct(String type){
         UBRTicketListRequest request = new UBRTicketListRequest();
-        request.setType(type);
+//        request.setType(type);
         UBRTicketList ubrTicketList = getTicketList(request);
         if(ubrTicketList != null){
             for (Map.Entry<String, Object> stringObjectEntry : ubrTicketList.getProducts().entrySet()) {
