@@ -301,6 +301,7 @@ public class UBRProductServiceImpl implements UBRProductService {
     private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId, String personType){
         if(ListUtils.isNotEmpty(baseProduct.getPrices())){
             List<UBRVirtualStock> ubrVirtualStocks = getVirtualStock(baseProduct.getPrices());
+            log.info("虚拟库存列表={}", JSON.toJSONString(ubrVirtualStocks));
             List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
             baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
                 String date = DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime()));
@@ -346,21 +347,25 @@ public class UBRProductServiceImpl implements UBRProductService {
                 UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
                         && StringUtils.isNotBlank(s.getStatus())
                         && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
-                UBRVirtualStock virtualStock = ubrVirtualStocks.stream().filter(s -> StringUtils.equals(s.getDate(),
-                        date)).findFirst().orElse(null);
+                UBRVirtualStock virtualStock = null;
+                if(ListUtils.isNotEmpty(ubrVirtualStocks)){
+                    for (int i = 0; i < ubrVirtualStocks.size(); i++) {
+                        UBRVirtualStock ubrVirtualStock = JSON.parseObject(JSON.toJSONString(ubrVirtualStocks.get(i)), UBRVirtualStock.class);
+                        if(StringUtils.equals(ubrVirtualStock.getDate(), date)){
+                            virtualStock = ubrVirtualStock;
+                            break;
+                        }
+                    }
+                }
+
                 if(virtualStock != null){
-                    if(virtualStock.getCommonStock() > 0 && ubrStock != null){
+                    if(virtualStock.getCommonStock() > 0){
                         priceMPO.setStock(virtualStock.getCommonStock());
                     } else {
-                        log.info("虚拟库存为0或者神舟库存不是normal都将库存置为0，虚拟库存={}，神舟库存={}", virtualStock.getCommonStock(), ubrStock == null ? "null" : ubrStock.getStatus());
                         priceMPO.setStock(0);
                     }
                 } else {
-                    if(ubrStock != null){
-                        priceMPO.setStock(999);
-                    } else {
-                        priceMPO.setStock(0);
-                    }
+                    priceMPO.setStock(0);
                 }
                 priceMPO.setUpdateTime(new Date());
                 priceDao.saveScenicSpotProductPrice(priceMPO);
