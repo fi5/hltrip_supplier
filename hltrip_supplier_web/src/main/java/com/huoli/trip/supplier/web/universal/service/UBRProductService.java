@@ -1,7 +1,11 @@
 package com.huoli.trip.supplier.web.universal.service;
 
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
+import com.huoli.trip.supplier.self.universal.vo.UBRVirtualStock;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRStockRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
+
+import java.util.List;
 
 /**
  * 描述：<br/>
@@ -47,4 +51,19 @@ public interface UBRProductService {
      * @param type
      */
     void syncProduct(String type);
+
+    /**
+     * 同步库存
+     * @param request
+     * @return
+     */
+    List<UBRVirtualStock> getStock(UBRStockRequest request);
+
+    /**
+     * 同步库存
+     * @param startDate
+     * @param endDate
+     * @return
+     */
+    List<UBRVirtualStock> syncStock(String startDate, String endDate);
 }

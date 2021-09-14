@@ -22,11 +22,9 @@ import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
-import com.huoli.trip.supplier.self.universal.vo.UBRBaseProduct;
-import com.huoli.trip.supplier.self.universal.vo.UBRStock;
-import com.huoli.trip.supplier.self.universal.vo.UBRTicketInfo;
-import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
+import com.huoli.trip.supplier.self.universal.vo.*;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRStockRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
@@ -44,6 +42,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +152,24 @@ public class UBRProductServiceImpl implements UBRProductService {
             return;
         }
         log.info("环球影城初始化返回：{}", JSON.toJSONString(response));
+    }
+
+    @Override
+    public List<UBRVirtualStock> getStock(UBRStockRequest request){
+        UBRBaseResponse<List<UBRVirtualStock>> response = ubrClient.getStock(request.getStartAt(), request.getEndAt(), request.getCategory());
+        if(response == null){
+            log.error("环球影城虚拟库存无返回内容");
+            return null;
+        }
+        if(response.getCode() != 200){
+            log.error("环球影城虚拟库存返回失败，code={}, msg={}", response.getCode(), response.getMsg());
+            return null;
+        }
+        if(response.getData() == null){
+            log.error("环球影城虚拟库存返回空数据");
+            return null;
+        }
+        return response.getData();
     }
 
     @Override
@@ -283,6 +300,7 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId, String personType){
         if(ListUtils.isNotEmpty(baseProduct.getPrices())){
+            List<UBRVirtualStock> ubrVirtualStocks = getVirtualStock(baseProduct.getPrices());
             List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
             baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
                 if(DateTimeUtil.parseDate(p.getDatetime()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
@@ -317,10 +335,21 @@ public class UBRProductServiceImpl implements UBRProductService {
                     UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
                             && StringUtils.isNotBlank(s.getStatus())
                             && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
-                    if(ubrStock != null){
-                        priceMPO.setStock(999);
+                    UBRVirtualStock virtualStock = ubrVirtualStocks.stream().filter(s -> StringUtils.equals(s.getDate(),
+                            DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())))).findFirst().orElse(null);
+                    if(virtualStock != null){
+                        if(virtualStock.getCommonStock() > 0 && ubrStock != null){
+                            priceMPO.setStock(virtualStock.getCommonStock());
+                        } else {
+                            log.info("虚拟库存为0或者神舟库存不是normal都将库存置为0，虚拟库存={}，神舟库存={}", virtualStock.getCommonStock(), ubrStock == null ? "null" : ubrStock.getStatus());
+                            priceMPO.setStock(0);
+                        }
                     } else {
-                        priceMPO.setStock(0);
+                        if(ubrStock != null){
+                            priceMPO.setStock(999);
+                        } else {
+                            priceMPO.setStock(0);
+                        }
                     }
                     priceDao.saveScenicSpotProductPrice(priceMPO);
                 } else {
@@ -345,6 +374,24 @@ public class UBRProductServiceImpl implements UBRProductService {
 //                }
             }});
         }
+    }
+
+    private List<UBRVirtualStock> getVirtualStock(List<UBRPrice> prices){
+        String startDate = DateTimeUtil.formatDate(new Date());
+        String endDate = startDate;
+        UBRPrice startPrice = prices.stream().min(Comparator.comparing(p -> DateTimeUtil.parseDate(p.getDatetime()).getTime())).get();
+        UBRPrice endPrice = prices.stream().max(Comparator.comparing(p -> DateTimeUtil.parseDate(p.getDatetime()).getTime())).get();
+        if(startPrice != null && StringUtils.isNotBlank(startPrice.getDatetime())){
+            startDate = DateTimeUtil.formatDate(DateTimeUtil.parseDate(startPrice.getDatetime()));
+        }
+        if(endPrice != null && StringUtils.isNotBlank(endPrice.getDatetime())){
+            endDate = DateTimeUtil.formatDate(DateTimeUtil.parseDate(endPrice.getDatetime()));
+        }
+        List<UBRVirtualStock> ubrVirtualStocks = syncStock(startDate, endDate);
+        if(ubrVirtualStocks == null){
+            ubrVirtualStocks = Lists.newArrayList();
+        }
+        return ubrVirtualStocks;
     }
 
     private ScenicSpotRuleMPO convertToRule(ScenicSpotProductMPO productMPO, UBRTicketInfo ticketInfo){
@@ -392,5 +439,14 @@ public class UBRProductServiceImpl implements UBRProductService {
 //        return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
         scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         return ruleMPO;
+    }
+
+    @Override
+    public List<UBRVirtualStock> syncStock(String startDate, String endDate){
+        UBRStockRequest request = new UBRStockRequest();
+        request.setCategory("Park");
+        request.setStartAt(startDate);
+        request.setEndAt(endDate);
+        return getStock(request);
     }
 }
