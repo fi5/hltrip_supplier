@@ -436,4 +436,10 @@ public class UBRProductServiceImpl implements UBRProductService {
         request.setEndAt(endDate);
         return getStock(request);
     }
+
+    @Override
+    public UBRTicketList getTicketList(){
+        UBRTicketListRequest request = new UBRTicketListRequest();
+        return getTicketList(request);
+    }
 }

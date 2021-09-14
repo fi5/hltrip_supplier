@@ -66,4 +66,10 @@ public interface UBRProductService {
      * @return
      */
     List<UBRVirtualStock> getStock(String startDate, String endDate);
+
+    /**
+     * 这个主要为了同步库存
+     * @return
+     */
+    UBRTicketList getTicketList();
 }
