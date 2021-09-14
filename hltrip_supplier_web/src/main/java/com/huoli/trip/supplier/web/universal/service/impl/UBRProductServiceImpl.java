@@ -303,11 +303,12 @@ public class UBRProductServiceImpl implements UBRProductService {
             List<UBRVirtualStock> ubrVirtualStocks = getVirtualStock(baseProduct.getPrices());
             List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
             baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
-                if(DateTimeUtil.parseDate(p.getDatetime()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
+                String date = DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime()));
+                if(DateTimeUtil.parseDate(date).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
                     // 历史库存不更新
                     return;
                 }
-                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDatetime())).findFirst().orElse(null);
+                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), date)).findFirst().orElse(null);
                 if(priceMPO == null){
                     priceMPO = new ScenicSpotProductPriceMPO();
                     priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
@@ -317,7 +318,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setCreateTime(new Date());
                     priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                    priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())));
+                    priceMPO.setStartDate(date);
                     priceMPO.setEndDate(priceMPO.getStartDate());
                     priceMPO.setWeekDay("1,2,3,4,5,6,7");
                     if(StringUtils.isBlank(personType)){
@@ -346,7 +347,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                         && StringUtils.isNotBlank(s.getStatus())
                         && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
                 UBRVirtualStock virtualStock = ubrVirtualStocks.stream().filter(s -> StringUtils.equals(s.getDate(),
-                        DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())))).findFirst().orElse(null);
+                        date)).findFirst().orElse(null);
                 if(virtualStock != null){
                     if(virtualStock.getCommonStock() > 0 && ubrStock != null){
                         priceMPO.setStock(virtualStock.getCommonStock());
