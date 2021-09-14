@@ -300,7 +300,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setCreateTime(new Date());
                     priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                    priceMPO.setStartDate(p.getDatetime());
+                    priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())));
                     priceMPO.setEndDate(priceMPO.getStartDate());
                     priceMPO.setWeekDay("1,2,3,4,5,6,7");
                     if(StringUtils.isBlank(personType)){
@@ -324,6 +324,9 @@ public class UBRProductServiceImpl implements UBRProductService {
                     }
                     priceDao.saveScenicSpotProductPrice(priceMPO);
                 } else {
+                    if(StringUtils.isNotBlank(priceMPO.getStartDate())){
+                        priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getStartDate())));
+                    }
                     // 有变化才更新，避免频繁更新，mongo撑不住
                     if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
                             || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
