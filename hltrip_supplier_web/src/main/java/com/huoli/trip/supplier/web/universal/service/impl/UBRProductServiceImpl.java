@@ -357,7 +357,6 @@ public class UBRProductServiceImpl implements UBRProductService {
                         }
                     }
                 }
-
                 if(virtualStock != null){
                     if(virtualStock.getCommonStock() > 0){
                         priceMPO.setStock(virtualStock.getCommonStock());
