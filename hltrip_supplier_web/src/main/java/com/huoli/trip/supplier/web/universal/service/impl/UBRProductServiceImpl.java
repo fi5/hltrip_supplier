@@ -314,7 +314,6 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setScenicSpotProductId(productId);
                     priceMPO.setScenicSpotRuleId(ruleId);
                     priceMPO.setMerchantCode(baseProduct.getCode());
-                    priceMPO.setUpdateTime(new Date());
                     priceMPO.setCreateTime(new Date());
                     priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSellPrice(priceMPO.getSettlementPrice());
@@ -332,26 +331,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                     } else {
                         priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
                     }
-                    UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
-                            && StringUtils.isNotBlank(s.getStatus())
-                            && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
-                    UBRVirtualStock virtualStock = ubrVirtualStocks.stream().filter(s -> StringUtils.equals(s.getDate(),
-                            DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())))).findFirst().orElse(null);
-                    if(virtualStock != null){
-                        if(virtualStock.getCommonStock() > 0 && ubrStock != null){
-                            priceMPO.setStock(virtualStock.getCommonStock());
-                        } else {
-                            log.info("虚拟库存为0或者神舟库存不是normal都将库存置为0，虚拟库存={}，神舟库存={}", virtualStock.getCommonStock(), ubrStock == null ? "null" : ubrStock.getStatus());
-                            priceMPO.setStock(0);
-                        }
-                    } else {
-                        if(ubrStock != null){
-                            priceMPO.setStock(999);
-                        } else {
-                            priceMPO.setStock(0);
-                        }
-                    }
-                    priceDao.saveScenicSpotProductPrice(priceMPO);
+
                 } else {
                     if(StringUtils.isNotBlank(priceMPO.getStartDate())){
                         priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getStartDate())));
@@ -361,18 +341,29 @@ public class UBRProductServiceImpl implements UBRProductService {
                     }
                     priceMPO.setSellPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSettlementPrice(priceMPO.getSellPrice());
-                    priceMPO.setUpdateTime(new Date());
-                    priceDao.saveScenicSpotProductPrice(priceMPO);
-                    // 有变化才更新，避免频繁更新，mongo撑不住
-//                    if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
-//                            || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
-//                            || (priceMPO.getSellPrice() != null && StringUtils.isNotBlank(p.getValue()) && priceMPO.getSellPrice().compareTo(new BigDecimal(p.getValue())) != 0)){
-//                        priceMPO.setSellPrice(new BigDecimal(p.getValue()));
-//                        priceMPO.setSettlementPrice(priceMPO.getSellPrice());
-//                        priceMPO.setUpdateTime(new Date());
-//                        priceDao.saveScenicSpotProductPrice(priceMPO);
-//                }
-            }});
+                }
+                UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
+                        && StringUtils.isNotBlank(s.getStatus())
+                        && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
+                UBRVirtualStock virtualStock = ubrVirtualStocks.stream().filter(s -> StringUtils.equals(s.getDate(),
+                        DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())))).findFirst().orElse(null);
+                if(virtualStock != null){
+                    if(virtualStock.getCommonStock() > 0 && ubrStock != null){
+                        priceMPO.setStock(virtualStock.getCommonStock());
+                    } else {
+                        log.info("虚拟库存为0或者神舟库存不是normal都将库存置为0，虚拟库存={}，神舟库存={}", virtualStock.getCommonStock(), ubrStock == null ? "null" : ubrStock.getStatus());
+                        priceMPO.setStock(0);
+                    }
+                } else {
+                    if(ubrStock != null){
+                        priceMPO.setStock(999);
+                    } else {
+                        priceMPO.setStock(0);
+                    }
+                }
+                priceMPO.setUpdateTime(new Date());
+                priceDao.saveScenicSpotProductPrice(priceMPO);
+            });
         }
     }
 
