@@ -327,15 +327,22 @@ public class UBRProductServiceImpl implements UBRProductService {
                     if(StringUtils.isNotBlank(priceMPO.getStartDate())){
                         priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getStartDate())));
                     }
+                    if(StringUtils.isNotBlank(priceMPO.getEndDate())){
+                        priceMPO.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getEndDate())));
+                    }
+                    priceMPO.setSellPrice(new BigDecimal(p.getValue()));
+                    priceMPO.setSettlementPrice(priceMPO.getSellPrice());
+                    priceMPO.setUpdateTime(new Date());
+                    priceDao.saveScenicSpotProductPrice(priceMPO);
                     // 有变化才更新，避免频繁更新，mongo撑不住
-                    if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
-                            || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
-                            || (priceMPO.getSellPrice() != null && StringUtils.isNotBlank(p.getValue()) && priceMPO.getSellPrice().compareTo(new BigDecimal(p.getValue())) != 0)){
-                        priceMPO.setSellPrice(new BigDecimal(p.getValue()));
-                        priceMPO.setSettlementPrice(priceMPO.getSellPrice());
-                        priceMPO.setUpdateTime(new Date());
-                        priceDao.saveScenicSpotProductPrice(priceMPO);
-                }
+//                    if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
+//                            || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
+//                            || (priceMPO.getSellPrice() != null && StringUtils.isNotBlank(p.getValue()) && priceMPO.getSellPrice().compareTo(new BigDecimal(p.getValue())) != 0)){
+//                        priceMPO.setSellPrice(new BigDecimal(p.getValue()));
+//                        priceMPO.setSettlementPrice(priceMPO.getSellPrice());
+//                        priceMPO.setUpdateTime(new Date());
+//                        priceDao.saveScenicSpotProductPrice(priceMPO);
+//                }
             }});
         }
     }
