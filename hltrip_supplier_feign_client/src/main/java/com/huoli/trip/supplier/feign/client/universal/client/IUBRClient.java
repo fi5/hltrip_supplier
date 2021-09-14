@@ -56,6 +56,14 @@ public interface IUBRClient {
     @RequestMapping(method = RequestMethod.GET, path = "/api/v1/init")
     UBRBaseResponse init();
 
+    /**
+     * 初始化数据
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, path = "/api/v1/virtual-stock/ticket")
+    UBRBaseResponse getStock(@RequestParam("startAt") String startAt,
+                             @RequestParam("endAt") String endAt,
+                             @RequestParam("category") String category);
 
 
     // ------------- 订单 ------------------

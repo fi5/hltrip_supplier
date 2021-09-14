@@ -22,11 +22,9 @@ import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
 import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
 import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
-import com.huoli.trip.supplier.self.universal.vo.UBRBaseProduct;
-import com.huoli.trip.supplier.self.universal.vo.UBRStock;
-import com.huoli.trip.supplier.self.universal.vo.UBRTicketInfo;
-import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
+import com.huoli.trip.supplier.self.universal.vo.*;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
+import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRStockRequest;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRTicketListRequest;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
@@ -44,6 +42,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +152,24 @@ public class UBRProductServiceImpl implements UBRProductService {
             return;
         }
         log.info("环球影城初始化返回：{}", JSON.toJSONString(response));
+    }
+
+    @Override
+    public List<UBRVirtualStock> getStock(UBRStockRequest request){
+        UBRBaseResponse<List<UBRVirtualStock>> response = ubrClient.getStock(request.getStartAt(), request.getEndAt(), request.getCategory());
+        if(response == null){
+            log.error("环球影城虚拟库存无返回内容");
+            return null;
+        }
+        if(response.getCode() != 200){
+            log.error("环球影城虚拟库存返回失败，code={}, msg={}", response.getCode(), response.getMsg());
+            return null;
+        }
+        if(response.getData() == null){
+            log.error("环球影城虚拟库存返回空数据");
+            return null;
+        }
+        return response.getData();
     }
 
     @Override
@@ -283,24 +300,26 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     private void convertPrice(UBRBaseProduct baseProduct, String productId, String ruleId, String personType){
         if(ListUtils.isNotEmpty(baseProduct.getPrices())){
+            List<UBRVirtualStock> ubrVirtualStocks = getVirtualStock(baseProduct.getPrices());
+            log.info("虚拟库存列表={}", JSON.toJSONString(ubrVirtualStocks));
             List<ScenicSpotProductPriceMPO> priceMPOs = priceDao.getByProductId(productId);
             baseProduct.getPrices().stream().filter(p -> StringUtils.isNotBlank(p.getValue())).forEach(p -> {
-                if(DateTimeUtil.parseDate(p.getDatetime()).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
+                String date = DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime()));
+                if(DateTimeUtil.parseDate(date).getTime() < DateTimeUtil.trancateToDate(new Date()).getTime()){
                     // 历史库存不更新
                     return;
                 }
-                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), p.getDatetime())).findFirst().orElse(null);
+                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), date)).findFirst().orElse(null);
                 if(priceMPO == null){
                     priceMPO = new ScenicSpotProductPriceMPO();
                     priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
                     priceMPO.setScenicSpotProductId(productId);
                     priceMPO.setScenicSpotRuleId(ruleId);
                     priceMPO.setMerchantCode(baseProduct.getCode());
-                    priceMPO.setUpdateTime(new Date());
                     priceMPO.setCreateTime(new Date());
                     priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                    priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(p.getDatetime())));
+                    priceMPO.setStartDate(date);
                     priceMPO.setEndDate(priceMPO.getStartDate());
                     priceMPO.setWeekDay("1,2,3,4,5,6,7");
                     if(StringUtils.isBlank(personType)){
@@ -314,15 +333,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                     } else {
                         priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
                     }
-                    UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
-                            && StringUtils.isNotBlank(s.getStatus())
-                            && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
-                    if(ubrStock != null){
-                        priceMPO.setStock(999);
-                    } else {
-                        priceMPO.setStock(0);
-                    }
-                    priceDao.saveScenicSpotProductPrice(priceMPO);
+
                 } else {
                     if(StringUtils.isNotBlank(priceMPO.getStartDate())){
                         priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getStartDate())));
@@ -332,19 +343,52 @@ public class UBRProductServiceImpl implements UBRProductService {
                     }
                     priceMPO.setSellPrice(new BigDecimal(p.getValue()));
                     priceMPO.setSettlementPrice(priceMPO.getSellPrice());
-                    priceMPO.setUpdateTime(new Date());
-                    priceDao.saveScenicSpotProductPrice(priceMPO);
-                    // 有变化才更新，避免频繁更新，mongo撑不住
-//                    if((priceMPO.getSellPrice() == null && StringUtils.isNotBlank(p.getValue()))
-//                            || (priceMPO.getSellPrice() != null && StringUtils.isBlank(p.getValue()))
-//                            || (priceMPO.getSellPrice() != null && StringUtils.isNotBlank(p.getValue()) && priceMPO.getSellPrice().compareTo(new BigDecimal(p.getValue())) != 0)){
-//                        priceMPO.setSellPrice(new BigDecimal(p.getValue()));
-//                        priceMPO.setSettlementPrice(priceMPO.getSellPrice());
-//                        priceMPO.setUpdateTime(new Date());
-//                        priceDao.saveScenicSpotProductPrice(priceMPO);
-//                }
-            }});
+                }
+                UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
+                        && StringUtils.isNotBlank(s.getStatus())
+                        && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
+                UBRVirtualStock virtualStock = null;
+                if(ListUtils.isNotEmpty(ubrVirtualStocks)){
+                    for (int i = 0; i < ubrVirtualStocks.size(); i++) {
+                        UBRVirtualStock ubrVirtualStock = JSON.parseObject(JSON.toJSONString(ubrVirtualStocks.get(i)), UBRVirtualStock.class);
+                        if(StringUtils.equals(ubrVirtualStock.getDate(), date)){
+                            virtualStock = ubrVirtualStock;
+                            break;
+                        }
+                    }
+                }
+
+                if(virtualStock != null){
+                    if(virtualStock.getCommonStock() > 0){
+                        priceMPO.setStock(virtualStock.getCommonStock());
+                    } else {
+                        priceMPO.setStock(0);
+                    }
+                } else {
+                    priceMPO.setStock(0);
+                }
+                priceMPO.setUpdateTime(new Date());
+                priceDao.saveScenicSpotProductPrice(priceMPO);
+            });
         }
+    }
+
+    private List<UBRVirtualStock> getVirtualStock(List<UBRPrice> prices){
+        String startDate = DateTimeUtil.formatDate(new Date());
+        String endDate = startDate;
+        UBRPrice startPrice = prices.stream().min(Comparator.comparing(p -> DateTimeUtil.parseDate(p.getDatetime()).getTime())).get();
+        UBRPrice endPrice = prices.stream().max(Comparator.comparing(p -> DateTimeUtil.parseDate(p.getDatetime()).getTime())).get();
+        if(startPrice != null && StringUtils.isNotBlank(startPrice.getDatetime())){
+            startDate = DateTimeUtil.formatDate(DateTimeUtil.parseDate(startPrice.getDatetime()));
+        }
+        if(endPrice != null && StringUtils.isNotBlank(endPrice.getDatetime())){
+            endDate = DateTimeUtil.formatDate(DateTimeUtil.parseDate(endPrice.getDatetime()));
+        }
+        List<UBRVirtualStock> ubrVirtualStocks = syncStock(startDate, endDate);
+        if(ubrVirtualStocks == null){
+            ubrVirtualStocks = Lists.newArrayList();
+        }
+        return ubrVirtualStocks;
     }
 
     private ScenicSpotRuleMPO convertToRule(ScenicSpotProductMPO productMPO, UBRTicketInfo ticketInfo){
@@ -392,5 +436,14 @@ public class UBRProductServiceImpl implements UBRProductService {
 //        return commonService.compareRule(productMPO.getScenicSpotId(), productMPO.getId(), ruleMPO);
         scenicSpotRuleDao.saveScenicSpotRule(ruleMPO);
         return ruleMPO;
+    }
+
+    @Override
+    public List<UBRVirtualStock> syncStock(String startDate, String endDate){
+        UBRStockRequest request = new UBRStockRequest();
+        request.setCategory("Park");
+        request.setStartAt(startDate);
+        request.setEndAt(endDate);
+        return getStock(request);
     }
 }

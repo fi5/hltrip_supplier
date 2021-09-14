@@ -77,6 +77,13 @@ public class UBRClientFallback implements FallbackFactory<IUBRClient> {
             public UBRBaseResponse<UBROrderDetailResponse> orderDetail(String orderId) {
                 return null;
             }
+
+            @Override
+            public UBRBaseResponse getStock(@RequestParam("startAt") String startAt,
+                                            @RequestParam("endAt") String endAt,
+                                            @RequestParam("category") String category){
+                return null;
+            }
         };
 
     }
