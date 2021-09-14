@@ -2,10 +2,10 @@ package com.huoli.trip.supplier.web.universal.controller;
 
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.supplier.api.UBROrderService;
+import com.huoli.trip.supplier.api.UBRProductService;
 import com.huoli.trip.supplier.self.difengyun.vo.response.DfyBaseResult;
 import com.huoli.trip.supplier.self.yaochufa.vo.BaseOrderRequest;
 import com.huoli.trip.supplier.web.mapper.TripOrderMapper;
-import com.huoli.trip.supplier.web.universal.service.UBRProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

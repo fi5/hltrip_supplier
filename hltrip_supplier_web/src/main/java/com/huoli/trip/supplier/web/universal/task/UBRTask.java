@@ -1,8 +1,7 @@
 package com.huoli.trip.supplier.web.universal.task;
 
-import com.huoli.trip.supplier.web.universal.service.UBRProductService;
+import com.huoli.trip.supplier.api.UBRProductService;
 import lombok.extern.slf4j.Slf4j;
-import org.mortbay.log.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

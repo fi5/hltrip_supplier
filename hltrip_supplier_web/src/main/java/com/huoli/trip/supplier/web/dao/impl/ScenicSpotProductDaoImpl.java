@@ -69,7 +69,7 @@ public class ScenicSpotProductDaoImpl implements ScenicSpotProductDao {
     @Override
     public List<ScenicSpotProductMPO> getByChannel(String channel){
         Query query = new Query(Criteria.where("channel").is(channel));
-        query.fields().include("supplierProductId").exclude("_id");
+        query.fields().include("supplierProductId").include("_id");
         return mongoTemplate.find(query, ScenicSpotProductMPO.class);
     }
 

@@ -1,4 +1,4 @@
-package com.huoli.trip.supplier.web.universal.service;
+package com.huoli.trip.supplier.api;
 
 import com.huoli.trip.supplier.self.universal.vo.UBRTicketList;
 import com.huoli.trip.supplier.self.universal.vo.UBRVirtualStock;
@@ -65,5 +65,5 @@ public interface UBRProductService {
      * @param endDate
      * @return
      */
-    List<UBRVirtualStock> syncStock(String startDate, String endDate);
+    List<UBRVirtualStock> getStock(String startDate, String endDate);
 }

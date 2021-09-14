@@ -8,19 +8,15 @@ import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.BackChannelEntry;
-import com.huoli.trip.common.entity.TicketInfoPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.util.StringUtil;
-import com.huoli.trip.common.vo.response.BaseResponse;
-import com.huoli.trip.common.vo.v2.ScenicSpotRuleCompare;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
+import com.huoli.trip.supplier.api.UBRProductService;
 import com.huoli.trip.supplier.feign.client.universal.client.IUBRClient;
-import com.huoli.trip.supplier.self.difengyun.constant.DfyConstants;
-import com.huoli.trip.supplier.self.difengyun.vo.DfyTicketDetail;
 import com.huoli.trip.supplier.self.universal.constant.UBRConstants;
 import com.huoli.trip.supplier.self.universal.vo.*;
 import com.huoli.trip.supplier.self.universal.vo.reqeust.UBRLoginRequest;
@@ -30,14 +26,11 @@ import com.huoli.trip.supplier.self.universal.vo.response.UBRBaseResponse;
 import com.huoli.trip.supplier.self.universal.vo.response.UBRLoginResponse;
 import com.huoli.trip.supplier.web.dao.*;
 import com.huoli.trip.supplier.web.service.CommonService;
-import com.huoli.trip.supplier.web.universal.service.UBRProductService;
 import com.xiaoleilu.hutool.lang.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -47,7 +40,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * 描述：<br/>
@@ -156,7 +148,7 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @Override
     public List<UBRVirtualStock> getStock(UBRStockRequest request){
-        UBRBaseResponse<List<UBRVirtualStock>> response = ubrClient.getStock(request.getStartAt(), request.getEndAt(), request.getCategory());
+        UBRBaseResponse<List<UBRVirtualStock>> response = ubrClient.getStock(request.getStartAt(), request.getEndAt(), "Park");
         if(response == null){
             log.error("环球影城虚拟库存无返回内容");
             return null;
@@ -383,7 +375,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         if(endPrice != null && StringUtils.isNotBlank(endPrice.getDatetime())){
             endDate = DateTimeUtil.formatDate(DateTimeUtil.parseDate(endPrice.getDatetime()));
         }
-        List<UBRVirtualStock> ubrVirtualStocks = syncStock(startDate, endDate);
+        List<UBRVirtualStock> ubrVirtualStocks = getStock(startDate, endDate);
         if(ubrVirtualStocks == null){
             ubrVirtualStocks = Lists.newArrayList();
         }
@@ -438,9 +430,8 @@ public class UBRProductServiceImpl implements UBRProductService {
     }
 
     @Override
-    public List<UBRVirtualStock> syncStock(String startDate, String endDate){
+    public List<UBRVirtualStock> getStock(String startDate, String endDate){
         UBRStockRequest request = new UBRStockRequest();
-        request.setCategory("Park");
         request.setStartAt(startDate);
         request.setEndAt(endDate);
         return getStock(request);
