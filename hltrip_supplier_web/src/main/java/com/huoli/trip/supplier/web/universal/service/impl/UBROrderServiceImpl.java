@@ -157,6 +157,9 @@ public class UBROrderServiceImpl implements UBROrderService {
 
     @Override
     public UBRBaseResponse<UBROrderDetailResponse> orderDetail(BaseOrderRequest request){
+        if(StringUtils.isBlank(request.getSupplierOrderId())){
+            return null;
+        }
         UBRBaseResponse<UBROrderDetailResponse> baseResponse = iubrClient.orderDetail(request.getSupplierOrderId());
         if(baseResponse != null){
             UBROrderDetailResponse detailResponse = baseResponse.getData();
