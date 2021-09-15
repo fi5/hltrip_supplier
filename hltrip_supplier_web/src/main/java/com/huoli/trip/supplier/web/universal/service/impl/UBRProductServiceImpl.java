@@ -1,6 +1,7 @@
 package com.huoli.trip.supplier.web.universal.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.huoli.trip.common.constant.BizTagConst;
@@ -31,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
@@ -49,8 +49,8 @@ import java.util.concurrent.TimeUnit;
  * 版本：1.0<br>
  * 创建日期：2021/7/28<br>
  */
-@Service
 @Slf4j
+@Service(timeout = 10000,group = "hltrip")
 public class UBRProductServiceImpl implements UBRProductService {
 
     @Autowired
