@@ -73,7 +73,7 @@ public class RefundNotifyTask {
         log.info("执行notifyRefundDFY任务完成");
     }
 
-    @Scheduled(cron="0 0 0/25 * * ?")
+    @Scheduled(cron="0 0/30 * * * ?")
     public void notifyRefundBTG(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
