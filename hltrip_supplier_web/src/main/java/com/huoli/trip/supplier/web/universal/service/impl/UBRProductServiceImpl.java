@@ -358,6 +358,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                 } else {
                     priceMPO.setStock(0);
                 }
+                priceMPO.setOriDate(p.getDatetime());
                 priceMPO.setUpdateTime(new Date());
                 priceDao.saveScenicSpotProductPrice(priceMPO);
             });
