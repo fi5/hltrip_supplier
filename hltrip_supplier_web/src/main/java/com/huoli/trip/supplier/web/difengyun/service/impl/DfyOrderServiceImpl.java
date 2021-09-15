@@ -545,6 +545,10 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public void processNotifyTicket() {
         List<TripRefundNotify> pendingNotifys = tripOrderRefundMapper.getRefundNotifyByChannel(Constants.SUPPLIER_CODE_DFY);
+        if(ListUtils.isEmpty(pendingNotifys)){
+            log.info("笛风云门票没有处理中的退款任务。");
+            return;
+        }
         pendingNotifys.forEach(item -> {
             try {
                 processNotify(item);
@@ -560,6 +564,10 @@ public class DfyOrderServiceImpl implements DfyOrderService {
     @Override
     public void processNotifyTour(){
         List<TripRefundNotify> pendingNotifys = tripOrderRefundMapper.getRefundNotifyByChannel(Constants.SUPPLIER_CODE_DFY_TOURS);
+        if(ListUtils.isEmpty(pendingNotifys)){
+            log.info("笛风云跟团游没有处理中的退款任务。");
+            return;
+        }
         pendingNotifys.forEach(item -> {
             try {
                 processNotify(item);
