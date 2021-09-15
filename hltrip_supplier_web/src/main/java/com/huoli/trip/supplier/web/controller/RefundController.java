@@ -39,9 +39,15 @@ public class RefundController {
 		return supplierRefundService.refuseRefund(req);
 	}
 
-	@PostMapping("/notify")
-	public BaseResponse refundNotify()  {
-		refundNotifyTask.notifyRefund();
+	@PostMapping("/notify/difengyun")
+	public BaseResponse refundNotifyDFY()  {
+		refundNotifyTask.notifyRefundDFY();
+		return BaseResponse.withSuccess();
+	}
+
+	@PostMapping("/notify/btg")
+	public BaseResponse refundNotifyBTG()  {
+		refundNotifyTask.notifyRefundBTG();
 		return BaseResponse.withSuccess();
 	}
 }

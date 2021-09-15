@@ -46,7 +46,7 @@ public class RefundNotifyTask {
     private HuoliTrace huoliTrace;
 
     @Scheduled(cron="0 0 0/1 * * ?")
-    public void notifyRefund(){
+    public void notifyRefundDFY(){
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
         }
