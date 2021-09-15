@@ -50,15 +50,46 @@ public class RefundNotifyTask {
         if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
             return;
         }
-        long s = System.currentTimeMillis();
-        log.info("开始执行notifyRefund任务。。。");
+        log.info("开始执行notifyRefundDFY任务。。。");
         threadPool.execute(() -> {
-            huoliTrace.createSpan("notifyRefund");
-            dfyOrderService.processNotifyTicket();
-            dfyOrderService.processNotifyTour();
-            ubrOrderService.processNotify();
+            huoliTrace.continueSpan(huoliTrace.currentSpan());
+            long s = System.currentTimeMillis();
+            try {
+                dfyOrderService.processNotifyTicket();
+                long t = System.currentTimeMillis() - s;
+                log.info("执行笛风云门票通知退款任务完成。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
+            } catch (Exception e) {
+                log.error("笛风云门票通知退款异常", e);
+            }
+            s = System.currentTimeMillis();
+            try {
+                dfyOrderService.processNotifyTour();
+                long t = System.currentTimeMillis() - s;
+                log.info("执行笛风云跟团游通知退款任务完成。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
+            } catch (Exception e) {
+                log.error("笛风云跟团游通知退款异常", e);
+            }
         });
-        long t = System.currentTimeMillis() - s;
-        log.info("执行notifyRefund任务。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
+        log.info("执行notifyRefundDFY任务完成");
+    }
+
+    @Scheduled(cron="0 0 0/30 * * ?")
+    public void notifyRefundBTG(){
+        if(schedule == null || !StringUtils.equalsIgnoreCase("yes", schedule)){
+            return;
+        }
+        log.info("开始执行notifyRefundBTG任务。。。");
+        threadPool.execute(() -> {
+            huoliTrace.continueSpan(huoliTrace.currentSpan());
+            long s = System.currentTimeMillis();
+            try {
+                ubrOrderService.processNotify();
+                long t = System.currentTimeMillis() - s;
+                log.info("执行btg通知退款任务。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));
+            } catch (Exception e) {
+                log.error("btg通知退款异常", e);
+            }
+        });
+        log.info("执行notifyRefundBTG任务完成");
     }
 }

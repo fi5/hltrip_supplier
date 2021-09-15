@@ -14,6 +14,7 @@ import com.huoli.trip.common.entity.TripRefundNotify;
 import com.huoli.trip.common.util.ConfigGetter;
 import com.huoli.trip.common.util.DateTimeUtil;
 import com.huoli.trip.common.util.HttpUtil;
+import com.huoli.trip.common.util.ListUtils;
 import com.huoli.trip.common.vo.request.PushOrderStatusReq;
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
@@ -203,6 +204,10 @@ public class UBROrderServiceImpl implements UBROrderService {
     public void processNotify(){
         List<TripRefundNotify> notifyList = tripOrderRefundMapper.getRefundNotifyByChannel(
                 Constants.SUPPLIER_CODE_BTG_TICKET);
+        if(ListUtils.isEmpty(notifyList)){
+            log.info("btg没有处理中的退款任务。");
+            return;
+        }
         notifyList.forEach(n -> {
             try {
                 TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(n.getOrderId());
@@ -226,7 +231,6 @@ public class UBROrderServiceImpl implements UBROrderService {
                         n.getId(), n.getOrderId(), n.getRefundId(), e);
             }
         });
-
     }
 
     private void refundNotify(TripRefundNotify n, String ubrStatus, String orderId, BigDecimal refundFee){
