@@ -10,10 +10,7 @@ import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.BackChannelEntry;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
-import com.huoli.trip.common.util.ConfigGetter;
-import com.huoli.trip.common.util.DateTimeUtil;
-import com.huoli.trip.common.util.ListUtils;
-import com.huoli.trip.common.util.StringUtil;
+import com.huoli.trip.common.util.*;
 import com.huoli.trip.data.api.DataService;
 import com.huoli.trip.data.api.ProductDataService;
 import com.huoli.trip.supplier.api.UBRProductService;
@@ -309,8 +306,6 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setScenicSpotRuleId(ruleId);
                     priceMPO.setMerchantCode(baseProduct.getCode());
                     priceMPO.setCreateTime(new Date());
-                    priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
-                    priceMPO.setSellPrice(priceMPO.getSettlementPrice());
                     priceMPO.setStartDate(date);
                     priceMPO.setEndDate(priceMPO.getStartDate());
                     priceMPO.setWeekDay("1,2,3,4,5,6,7");
@@ -325,20 +320,10 @@ public class UBRProductServiceImpl implements UBRProductService {
                     } else {
                         priceMPO.setTicketKind(String.valueOf(TicketType.TICKET_TYPE_1.getCode()));
                     }
-
-                } else {
-                    if(StringUtils.isNotBlank(priceMPO.getStartDate())){
-                        priceMPO.setStartDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getStartDate())));
-                    }
-                    if(StringUtils.isNotBlank(priceMPO.getEndDate())){
-                        priceMPO.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.parseDate(priceMPO.getEndDate())));
-                    }
-                    priceMPO.setSellPrice(new BigDecimal(p.getValue()));
-                    priceMPO.setSettlementPrice(priceMPO.getSellPrice());
                 }
-                UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
-                        && StringUtils.isNotBlank(s.getStatus())
-                        && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
+                priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
+                priceMPO.setSellPrice(priceMPO.getSettlementPrice());
+                priceMPO.setMarketPrice(BigDecimal.valueOf(BigDecimalUtil.div(priceMPO.getSettlementPrice().doubleValue(), 0.99)));
                 UBRVirtualStock virtualStock = null;
                 if(ListUtils.isNotEmpty(ubrVirtualStocks)){
                     for (int i = 0; i < ubrVirtualStocks.size(); i++) {
