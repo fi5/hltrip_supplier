@@ -323,7 +323,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                 }
                 priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                 priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                priceMPO.setMarketPrice(BigDecimal.valueOf(BigDecimalUtil.div(priceMPO.getSettlementPrice().doubleValue(), 0.99)));
+                priceMPO.setMarketPrice(BigDecimal.valueOf(BigDecimalUtil.div(priceMPO.getSettlementPrice().doubleValue(), 0.99, 0)));
                 UBRVirtualStock virtualStock = null;
                 if(ListUtils.isNotEmpty(ubrVirtualStocks)){
                     for (int i = 0; i < ubrVirtualStocks.size(); i++) {
