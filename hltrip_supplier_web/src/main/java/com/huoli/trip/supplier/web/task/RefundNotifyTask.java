@@ -82,6 +82,7 @@ public class RefundNotifyTask {
         threadPool.execute(() -> {
             try {
                 huoliTrace.continueSpan(huoliTrace.currentSpan());
+                log.info("异步执行notifyRefundBTG任务。。。");
                 long s = System.currentTimeMillis();
                 ubrOrderService.processNotify();
                 long t = System.currentTimeMillis() - s;
