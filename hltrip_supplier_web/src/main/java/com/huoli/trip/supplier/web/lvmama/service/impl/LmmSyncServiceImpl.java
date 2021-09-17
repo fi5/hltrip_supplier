@@ -1107,7 +1107,7 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 return refundRule;
             }).collect(Collectors.toList());
             // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
-            if(!refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
+            if(ListUtils.isNotEmpty(refundRules) && !refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
                 RefundRule refundRule = new RefundRule();
                 refundRule.setRefundRuleType(5);
                 refundRule.setDeductionType(0);
