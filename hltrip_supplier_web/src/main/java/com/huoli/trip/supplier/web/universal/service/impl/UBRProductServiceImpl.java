@@ -324,6 +324,9 @@ public class UBRProductServiceImpl implements UBRProductService {
                 priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                 priceMPO.setSellPrice(priceMPO.getSettlementPrice());
                 priceMPO.setMarketPrice(BigDecimal.valueOf(BigDecimalUtil.div(priceMPO.getSettlementPrice().doubleValue(), 0.99, 0)));
+                UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
+                        && StringUtils.isNotBlank(s.getStatus())
+                        && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
                 UBRVirtualStock virtualStock = null;
                 if(ListUtils.isNotEmpty(ubrVirtualStocks)){
                     for (int i = 0; i < ubrVirtualStocks.size(); i++) {
@@ -334,7 +337,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                         }
                     }
                 }
-                if(virtualStock != null){
+                if(virtualStock != null && ubrStock != null){
                     if(virtualStock.getCommonStock() > 0){
                         priceMPO.setStock(virtualStock.getCommonStock());
                     } else {
