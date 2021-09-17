@@ -80,9 +80,9 @@ public class RefundNotifyTask {
         }
         log.info("开始执行notifyRefundBTG任务。。。");
         threadPool.execute(() -> {
-            huoliTrace.continueSpan(huoliTrace.currentSpan());
-            long s = System.currentTimeMillis();
             try {
+                huoliTrace.continueSpan(huoliTrace.currentSpan());
+                long s = System.currentTimeMillis();
                 ubrOrderService.processNotify();
                 long t = System.currentTimeMillis() - s;
                 log.info("执行btg通知退款任务。用时{}", DateTimeUtil.format(DateTimeUtil.toGreenWichTime(new Date(t)), "HH:mm:ss"));

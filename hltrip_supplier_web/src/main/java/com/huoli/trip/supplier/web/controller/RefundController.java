@@ -2,6 +2,7 @@ package com.huoli.trip.supplier.web.controller;
 
 import com.huoli.trip.common.vo.request.RefundNoticeReq;
 import com.huoli.trip.common.vo.response.BaseResponse;
+import com.huoli.trip.supplier.api.UBROrderService;
 import com.huoli.trip.supplier.web.service.SupplierRefundService;
 import com.huoli.trip.supplier.web.task.RefundNotifyTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class RefundController {
 	@Autowired
 	private RefundNotifyTask refundNotifyTask;
 
+	@Autowired
+	private UBROrderService ubrOrderService;
+
 	@RequestMapping("/doRefund")
 	public BaseResponse doRefund(@RequestBody RefundNoticeReq req)  {
 		return supplierRefundService.doRefund(req);
@@ -47,7 +51,7 @@ public class RefundController {
 
 	@PostMapping("/notify/btg")
 	public BaseResponse refundNotifyBTG()  {
-		refundNotifyTask.notifyRefundBTG();
+		ubrOrderService.processNotify();
 		return BaseResponse.withSuccess();
 	}
 }
