@@ -9,6 +9,7 @@ import com.huoli.trip.common.constant.Certificate;
 import com.huoli.trip.common.constant.Constants;
 import com.huoli.trip.common.constant.TicketType;
 import com.huoli.trip.common.entity.BackChannelEntry;
+import com.huoli.trip.common.entity.mpo.UBRPriceConfigMPO;
 import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.data.api.DataService;
@@ -70,9 +71,6 @@ public class UBRProductServiceImpl implements UBRProductService {
     private ScenicSpotProductDao productDao;
 
     @Autowired
-    private ScenicSpotDao scenicSpotDao;
-
-    @Autowired
     private ScenicSpotRuleDao ruleDao;
 
     @Autowired
@@ -83,6 +81,9 @@ public class UBRProductServiceImpl implements UBRProductService {
 
     @Autowired
     private ScenicSpotRuleDao scenicSpotRuleDao;
+
+    @Autowired
+    private UBRPriceConfigDao ubrPriceConfigDao;
 
     @PostConstruct
 //    @Async
@@ -323,7 +324,25 @@ public class UBRProductServiceImpl implements UBRProductService {
                 }
                 priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                 priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-                priceMPO.setMarketPrice(BigDecimal.valueOf(BigDecimalUtil.div(priceMPO.getSettlementPrice().doubleValue(), 0.99, 0)));
+//                priceMPO.setMarketPrice();
+                UBRPriceConfigMPO ubrPriceConfigMPO = ubrPriceConfigDao.getUBRPriceByDate(date);
+                BigDecimal marketPrice = null;
+                if(ubrPriceConfigMPO != null && StringUtils.isNotBlank(personType)){
+                    if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_ADT)){
+                        marketPrice = ubrPriceConfigMPO.getAdtPrice();
+                    } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_CHD)){
+                        marketPrice = ubrPriceConfigMPO.getChdPrice();
+                    } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_OLD)){
+                        marketPrice = ubrPriceConfigMPO.getOldPrice();
+                    }
+                }
+                if(marketPrice != null){
+                    BigDecimal settlePrice = BigDecimal.valueOf(BigDecimalUtil.round(BigDecimalUtil.add(marketPrice.doubleValue(),
+                            BigDecimalUtil.mul(marketPrice.doubleValue(), ubrPriceConfigMPO.getFloatPrice())), 0));
+                    priceMPO.setSettlementPrice(settlePrice);
+                    priceMPO.setSellPrice(marketPrice);
+                    priceMPO.setMarketPrice(marketPrice);
+                }
                 UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
                         && StringUtils.isNotBlank(s.getStatus())
                         && StringUtils.equals(s.getStatus(), "normal")).findFirst().orElse(null);
@@ -347,6 +366,7 @@ public class UBRProductServiceImpl implements UBRProductService {
                     priceMPO.setStock(0);
                 }
                 priceMPO.setOriDate(p.getDatetime());
+                priceMPO.setOriPrice(p.getValue());
                 priceMPO.setUpdateTime(new Date());
                 priceDao.saveScenicSpotProductPrice(priceMPO);
             });
