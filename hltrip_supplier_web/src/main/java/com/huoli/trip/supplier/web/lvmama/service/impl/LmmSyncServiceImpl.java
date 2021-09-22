@@ -1280,6 +1280,9 @@ public class LmmSyncServiceImpl implements LmmSyncService {
             if(price.getSellPrice() != null){
                 scenicSpotProductPriceMPO.setSettlementPrice(BigDecimal.valueOf(price.getSellPrice()));
             }
+            if(price.getMarketPrice() != null){
+                scenicSpotProductPriceMPO.setMarketPrice(BigDecimal.valueOf(price.getMarketPrice()));
+            }
             scenicSpotProductPriceMPO.setCreateTime(new Date());
             scenicSpotProductPriceMPO.setUpdateTime(new Date());
             scenicSpotProductPriceDao.addScenicSpotProductPrice(scenicSpotProductPriceMPO);
