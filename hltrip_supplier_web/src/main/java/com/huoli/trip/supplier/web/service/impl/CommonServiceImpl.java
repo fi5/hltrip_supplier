@@ -778,19 +778,24 @@ public class CommonServiceImpl implements CommonService {
             }
         }
         if(StringUtils.isNotBlank(cityName)){
-            if(cityName.endsWith("市")){
-                cityName = cityName.substring(0, cityName.length() - 1);
-            }
-            List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(cityName, 2, provinceId);
-            if(ListUtils.isNotEmpty(cites)){
-                ChinaCity cityObj = cites.get(0);
-                city = cityObj.getName();
-                cityId = cityObj.getCode();
-                if(StringUtils.isBlank(provinceId)){
-                    ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
-                    if(provinceObj != null){
-                        provinceId = provinceObj.getCode();
-                        province = provinceObj.getName();
+            if(StringUtils.equals(cityName, "全国")){
+                city = "全国";
+                cityId = "qg0";
+            } else {
+                if(cityName.endsWith("市")){
+                    cityName = cityName.substring(0, cityName.length() - 1);
+                }
+                List<ChinaCity> cites = chinaCityMapper.getCityByNameAndTypeAndParentId(cityName, 2, provinceId);
+                if(ListUtils.isNotEmpty(cites)){
+                    ChinaCity cityObj = cites.get(0);
+                    city = cityObj.getName();
+                    cityId = cityObj.getCode();
+                    if(StringUtils.isBlank(provinceId)){
+                        ChinaCity provinceObj = chinaCityMapper.getCityByCode(cityObj.getParentCode());
+                        if(provinceObj != null){
+                            provinceId = provinceObj.getCode();
+                            province = provinceObj.getName();
+                        }
                     }
                 }
             }

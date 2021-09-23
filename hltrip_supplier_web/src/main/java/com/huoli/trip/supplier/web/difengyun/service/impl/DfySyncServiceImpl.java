@@ -1290,13 +1290,14 @@ public class DfySyncServiceImpl implements DfySyncService {
             log.error("笛风云跟团游产品{}没有出发城市v2，跳过。。", productId);
             return;
         } else {
-            for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
-                if (StringUtils.equals(departCity.getName(), "全国") && checkNationwide) {
-                    // 过滤全国这种产品，将来放到当地参团单独处理
-                    log.info("过滤全国出发的产品v2。跳过。");
-                    return;
-                }
-            }
+            // 全国也要落地，城市给"0"
+//            for (DfyDepartCity departCity : dfyToursDetail.getDepartCitys()) {
+//                if (StringUtils.equals(departCity.getName(), "全国") && checkNationwide) {
+//                    // 过滤全国这种产品，将来放到当地参团单独处理
+//                    log.info("过滤全国出发的产品v2。跳过。");
+//                    return;
+//                }
+//            }
         }
         if (dfyToursDetail.getJourneyInfo() == null) {
             log.error("笛风云跟团游产品{}没有行程信息，跳过。。", productId);
