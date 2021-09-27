@@ -168,6 +168,23 @@ public class UBROrderServiceImpl implements UBROrderService {
                     || StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_BUY_FILED) ){
                 orderFailed(request.getOrderId());
             }
+            // 发现如果供应商有退款我们这边没有退款任务就创建一个，后台客服提交的退款申请不会创建退款任务
+            else if(StringUtils.equals(detailResponse.getStatus(), UBRConstants.ORDER_STATUS_REFUND)){
+                TripRefundNotify tripRefundNotify = tripOrderRefundMapper.getRefundNotifyByOrderId(request.getOrderId());
+                if(tripRefundNotify == null){
+                    TripOrder order = tripOrderMapper.getOrderByOrderId(request.getOrderId());
+                    TripRefundNotify notify = new TripRefundNotify();
+                    notify.setStatus(1);
+                    notify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
+                    notify.setOrderId(request.getOrderId());
+                    notify.setRefundStatus(1);
+                    notify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
+                    notify.setRefundMoney(order.getOutPayPrice().floatValue());
+                    notify.setCreateTime(DateTimeUtil.formatFullDate(new Date()));
+                    notify.setRemark("订单详情补录退款任务。");
+                    tripOrderRefundMapper.saveTripRefundNotify(notify);
+                }
+            }
         }
         return baseResponse;
     }
