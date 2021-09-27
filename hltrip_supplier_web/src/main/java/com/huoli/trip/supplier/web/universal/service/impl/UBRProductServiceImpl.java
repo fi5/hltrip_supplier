@@ -324,24 +324,31 @@ public class UBRProductServiceImpl implements UBRProductService {
                 }
                 priceMPO.setSettlementPrice(new BigDecimal(p.getValue()));
                 priceMPO.setSellPrice(priceMPO.getSettlementPrice());
-//                priceMPO.setMarketPrice();
                 UBRPriceConfigMPO ubrPriceConfigMPO = ubrPriceConfigDao.getUBRPriceByDate(date);
                 BigDecimal marketPrice = null;
+                BigDecimal settlePrice = null;
                 if(ubrPriceConfigMPO != null && StringUtils.isNotBlank(personType)){
                     if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_ADT)){
                         marketPrice = ubrPriceConfigMPO.getAdtPrice();
+                        settlePrice = ubrPriceConfigMPO.getAdtSettlePrice();
                     } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_CHD)){
                         marketPrice = ubrPriceConfigMPO.getChdPrice();
+                        settlePrice = ubrPriceConfigMPO.getChdSettlePrice();
                     } else if(StringUtils.equals(personType, UBRConstants.PERSON_TYPE_OLD)){
                         marketPrice = ubrPriceConfigMPO.getOldPrice();
+                        settlePrice = ubrPriceConfigMPO.getOldSettlePrice();
                     }
                 }
                 if(marketPrice != null){
-                    BigDecimal settlePrice = BigDecimal.valueOf(BigDecimalUtil.round(BigDecimalUtil.add(marketPrice.doubleValue(),
-                            BigDecimalUtil.mul(marketPrice.doubleValue(), ubrPriceConfigMPO.getFloatPrice())), 0));
-                    priceMPO.setSettlementPrice(settlePrice);
+                    // 开始说结算价用市场价的固定折扣（配置）计算，后面神舟又给出了对应环球官方价格的结算价格，所以直接取配置的结算价
+//                    BigDecimal settlePrice = BigDecimal.valueOf(BigDecimalUtil.round(BigDecimalUtil.add(marketPrice.doubleValue(),
+//                            BigDecimalUtil.mul(marketPrice.doubleValue(), ubrPriceConfigMPO.getFloatPrice())), 0));
                     priceMPO.setSellPrice(marketPrice);
                     priceMPO.setMarketPrice(marketPrice);
+                }
+                if(settlePrice != null){
+                    // 结算价直接取配置的数据
+                    priceMPO.setSettlementPrice(settlePrice);
                 }
                 UBRStock ubrStock = baseProduct.getStocks().stream().filter(s -> StringUtils.equals(s.getDatetime(), p.getDatetime())
                         && StringUtils.isNotBlank(s.getStatus())
