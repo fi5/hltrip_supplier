@@ -204,7 +204,7 @@ public class UBROrderServiceImpl implements UBROrderService {
                 TripRefundNotify notify = new TripRefundNotify();
                 notify.setStatus(1);
                 notify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
-                notify.setOrderId(orderId);
+                notify.setOrderId(orderId);UBROrderServiceImpl.java:182
                 notify.setRefundStatus(1);
                 notify.setRefundTime(DateTimeUtil.formatFullDate(new Date()));
                 notify.setRefundMoney(order.getOutPayPrice().floatValue());

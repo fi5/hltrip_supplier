@@ -77,6 +77,7 @@ public class UBRTestController {
         }
         BaseOrderRequest request = new BaseOrderRequest();
         request.setSupplierOrderId(orderId);
+        request.setOrderId(tripOrder.getOrderId());
         return DfyBaseResult.success(ubrOrderService.orderDetail(request));
     }
 }
