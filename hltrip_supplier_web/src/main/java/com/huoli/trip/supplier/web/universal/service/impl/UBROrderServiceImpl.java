@@ -202,7 +202,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             try {
                 // 供应商失败的直接退款，写一条记录标记已通知，防止重复发退款通知
                 TripRefundNotify notify = new TripRefundNotify();
-                notify.setStatus(1);
+                notify.setStatus(0);
                 notify.setChannel(Constants.SUPPLIER_CODE_BTG_TICKET);
                 notify.setOrderId(orderId);
                 notify.setRefundStatus(1);
