@@ -414,7 +414,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         } else {
             ruleMPO = ruleDao.getScenicSpotRuleById(productMPO.getRuleId());
         }
-        ruleMPO.setMaxCount(StringUtils.isBlank(ticketInfo.getMaxQuantity()) ? 99 : Integer.valueOf(ticketInfo.getMaxQuantity()));
+        ruleMPO.setMaxCount(StringUtils.isBlank(ticketInfo.getMaxQuantity()) ? 5 : Integer.valueOf(ticketInfo.getMaxQuantity()));
         ruleMPO.setMinCount(StringUtils.isBlank(ticketInfo.getMinQuantity()) ? 1 : Integer.valueOf(ticketInfo.getMinQuantity()));
         ruleMPO.setMaxAge(StringUtils.isBlank(ticketInfo.getPersonTypeMaxAge()) ? 100 : Integer.valueOf(ticketInfo.getPersonTypeMaxAge()));
         ruleMPO.setMinAge(StringUtils.isBlank(ticketInfo.getPersonTypeMinAge()) ? 0 : Integer.valueOf(ticketInfo.getPersonTypeMinAge()));
