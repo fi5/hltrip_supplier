@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.huoli.eagle.eye.core.HuoliTrace;
 import com.huoli.hlwx.tool.method.BigDecimalUtil;
 import com.huoli.trip.common.constant.CentralError;
+import com.huoli.trip.common.constant.ChannelConstant;
 import com.huoli.trip.common.constant.ConfigConstants;
 import com.huoli.trip.common.entity.TripOrder;
 import com.huoli.trip.common.entity.TripOrderRefund;
@@ -153,11 +154,14 @@ public class LvmamaOrderServiceImpl implements LvmamaOrderService {
             req.setStrStatus(getGjStatus(order));
             req.setPartnerOrderId(order.getPartnerOrderNo());
             req.setVochers(genTicketsVoucher(order));
-            orderStatusNotice(req);
+            TripOrder tripOrder = tripOrderMapper.getOrderByOrderId(order.getPartnerOrderNo());
+            // 因为驴妈妈的订单通知是用我们的订单号，如果查到订单的渠道不是驴妈妈说明订单转出票了，渠道、外部订单号会改变，所以不能再更新驴妈妈的订单数据了，防止信息错乱，
+            if(tripOrder != null && StringUtils.equals(tripOrder.getChannel(), ChannelConstant.SUPPLIER_TYPE_LMM)){
+                orderStatusNotice(req);
+            }
         } catch (Exception e) {
             log.error("信息{}", e);
         }
-
         return LmmBaseResponse.success();
     }
 
