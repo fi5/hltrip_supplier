@@ -1106,17 +1106,34 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 refundRule.setFee(r.getDeductionValue());
                 return refundRule;
             }).collect(Collectors.toList());
-            // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
-            if(ListUtils.isNotEmpty(refundRules) && !refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
-                RefundRule refundRule = new RefundRule();
-                refundRule.setRefundRuleType(5);
-                refundRule.setDeductionType(0);
-                refundRule.setFee(100);
-                refundRules.add(refundRule);
+            int condition = 2;
+            if(ListUtils.isNotEmpty(refundRules)) {
+                // 只有一条的时候会出现没有时限的情况，多条不会有（跟驴妈妈技术确认过的），多以不需要处理多条的情况
+                if(refundRules.size() == 1){
+                    RefundRule rr = refundRules.get(0);
+                    // 当只有一条格式化数据，并且既没价格也没时限，这种情况要把退改类型设置成"全部未使用无条件退票"
+                    if(rr.getDay() == 0 && rr.getHour() == 0
+                            && rr.getMinute() == 0 && rr.getFee() == 0d && rr.getRefundRuleType() == 5){
+                        condition = 0;
+                    }
+                    // 没时限有价格的情况在上面转换逻辑里就会处理成其它，收取接口给出的退票费
+                    // 其余情况都是条件退，在下面的逻辑中会加上其它收取100%退票费
+                }
+                // 产品要求 如果供应商没有返回"其它"情况，需要默认一个100%退票费的规则
+                if(!refundRules.stream().anyMatch(r -> r.getRefundRuleType() == 5)){
+                    RefundRule refundRule = new RefundRule();
+                    refundRule.setRefundRuleType(5);
+                    refundRule.setDeductionType(0);
+                    refundRule.setFee(100);
+                    refundRules.add(refundRule);
+                }
             }
-            ruleMPO.setRefundRules(refundRules);
+            // 当不是全退的时候才需要格式化数据，全退的不需要设置
+            if(condition != 0){
+                ruleMPO.setRefundRules(refundRules);
+            }
+            ruleMPO.setRefundCondition(condition);
             Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
-            ruleMPO.setRefundCondition(2);
             // 全部不可退就认为是不可退，其它都认为是条件退，没有全退
             if(ruleMap.size() == 1 && !ruleMap.keySet().iterator().next()){
                 ruleMPO.setRefundCondition(1);
