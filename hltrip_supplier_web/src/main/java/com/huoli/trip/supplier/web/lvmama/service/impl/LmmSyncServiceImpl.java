@@ -1128,9 +1128,10 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                     refundRules.add(refundRule);
                 }
             }
-            // 当不是全退的时候才需要格式化数据，全退的不需要设置
-            if(condition != 0){
-                ruleMPO.setRefundRules(refundRules);
+            ruleMPO.setRefundRules(refundRules);
+            // 当不是全退的时候才需要格式化数据，全退的不需要设置，全退的时候要把格式化清空，否则consumer会展示格式化数据；
+            if(condition == 0){
+                ruleMPO.setRefundRules(null);
             }
             ruleMPO.setRefundCondition(condition);
             Map<Boolean, List<LmmGoods.Rule>> ruleMap = g.getRules().stream().collect(Collectors.groupingBy(r -> r.isChange()));
