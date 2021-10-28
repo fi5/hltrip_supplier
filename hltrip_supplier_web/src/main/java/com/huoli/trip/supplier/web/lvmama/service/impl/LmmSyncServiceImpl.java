@@ -1386,19 +1386,34 @@ public class LmmSyncServiceImpl implements LmmSyncService {
     }
 
     private void buildRefundDesc(ScenicSpotRuleMPO ruleMPO, LmmGoods g){
-        if(StringUtils.isNotBlank(g.getImportentPoint())){
-            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportentPoint()));
-        } else {
-            if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
-                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getRefundRuleNotice()));
+//        if(StringUtils.isNotBlank(g.getImportentPoint())){
+//            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportentPoint()));
+//        } else {
+//            if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
+//                ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getRefundRuleNotice()));
+//            }
+//            if(StringUtils.isNotBlank(g.getImportantNotice())){
+//                if(StringUtils.isNotBlank(ruleMPO.getRefundRuleDesc())){
+//                    ruleMPO.setRefundRuleDesc(String.format("%s<br>%s", ruleMPO.getRefundRuleDesc(), StringUtil.delHTMLTag(g.getImportantNotice())));
+//                } else {
+//                    ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportantNotice()));
+//                }
+//            }
+//        }
+        // 之前的逻辑推翻了，退改只要退改说明，重要说明放到动态说明，importentPoint不要了
+        if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
+            ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getRefundRuleNotice()));
+        }
+        if(StringUtils.isNotBlank(g.getRefundRuleNotice())){
+            List<DescInfo> descInfos = ruleMPO.getDescInfos();
+            if(ListUtils.isEmpty(descInfos)){
+                descInfos = Lists.newArrayList();
             }
-            if(StringUtils.isNotBlank(g.getImportantNotice())){
-                if(StringUtils.isNotBlank(ruleMPO.getRefundRuleDesc())){
-                    ruleMPO.setRefundRuleDesc(String.format("%s<br>%s", ruleMPO.getRefundRuleDesc(), StringUtil.delHTMLTag(g.getImportantNotice())));
-                } else {
-                    ruleMPO.setRefundRuleDesc(StringUtil.delHTMLTag(g.getImportantNotice()));
-                }
-            }
+            DescInfo descInfo = new DescInfo();
+            descInfo.setTitle("重要通知");
+            descInfo.setContent(g.getRefundRuleNotice());
+            descInfos.add(descInfo);
+            ruleMPO.setDescInfos(descInfos);
         }
     }
 
