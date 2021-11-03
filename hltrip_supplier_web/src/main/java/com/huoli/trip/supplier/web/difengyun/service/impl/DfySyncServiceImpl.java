@@ -911,6 +911,10 @@ public class DfySyncServiceImpl implements DfySyncService {
             scenicSpotProductMPO.setChangedFields(changedFields);
             ScenicSpotRuleMPO ruleMPO = saveRule(scenicSpotProductMPO, dfyTicketDetail, fresh);
             scenicSpotProductMPO.setRuleId(ruleMPO.getId());
+            // 后台人工下线的不改状态
+            if(scenicSpotProductMPO.getManuallyStatus() != 1){
+                scenicSpotProductMPO.setStatus(1);
+            }
             scenicSpotProductDao.saveProduct(scenicSpotProductMPO);
             String scenicSpotProductId = scenicSpotProductMPO.getId();
             String ruleId = ruleMPO.getId();
