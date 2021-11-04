@@ -299,7 +299,10 @@ public class UBRProductServiceImpl implements UBRProductService {
                     // 历史库存不更新
                     return;
                 }
-                ScenicSpotProductPriceMPO priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), date)).findFirst().orElse(null);
+                ScenicSpotProductPriceMPO priceMPO = null;
+                if(ListUtils.isNotEmpty(priceMPOs)){
+                    priceMPO = priceMPOs.stream().filter(pm -> StringUtils.equals(pm.getStartDate(), date)).findFirst().orElse(null);
+                }
                 if(priceMPO == null){
                     priceMPO = new ScenicSpotProductPriceMPO();
                     priceMPO.setId(String.valueOf(dataService.getId(BizTagConst.BIZ_SCENICSPOT_PRODUCT)));
