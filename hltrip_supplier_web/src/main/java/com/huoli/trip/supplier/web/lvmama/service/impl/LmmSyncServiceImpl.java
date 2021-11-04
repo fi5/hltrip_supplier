@@ -13,6 +13,7 @@ import com.huoli.trip.common.entity.mpo.scenicSpotTicket.*;
 import com.huoli.trip.common.util.*;
 import com.huoli.trip.supplier.api.DynamicProductItemService;
 import com.huoli.trip.supplier.feign.client.lvmama.client.ILvmamaProductClient;
+import com.huoli.trip.supplier.self.lvmama.constant.LmmConfigConstants;
 import com.huoli.trip.supplier.self.lvmama.vo.*;
 import com.huoli.trip.supplier.self.lvmama.vo.push.LmmProductPushRequest;
 import com.huoli.trip.supplier.self.lvmama.vo.request.*;
@@ -874,7 +875,11 @@ public class LmmSyncServiceImpl implements LmmSyncService {
                 LmmPriceRequest request = new LmmPriceRequest();
                 request.setGoodsIds(g.getGoodsId());
                 request.setBeginDate(DateTimeUtil.formatDate(new Date()));
-                request.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), 45)));
+                Integer days = ConfigGetter.getByFileItemInteger(LmmConfigConstants.CONFIG_FILE_LVMAMA, LmmConfigConstants.CONFIG_ITEM_PRICE_DAYS);
+                if(days == null){
+                    days = 60;
+                }
+                request.setEndDate(DateTimeUtil.formatDate(DateTimeUtil.addDay(new Date(), days)));
                 List<LmmPriceProduct> priceList = getPriceList(request);
                 String scenicSpotProductId = scenicSpotProductMPO.getId();
                 String ruleId = ruleMPO.getId();

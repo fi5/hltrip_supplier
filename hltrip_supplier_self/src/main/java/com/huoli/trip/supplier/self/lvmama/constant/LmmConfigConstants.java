@@ -36,4 +36,9 @@ public class LmmConfigConstants {
      */
     public static final String CONFIG_ITEM_API_PASSWORD = "lvmama.api.password";
 
+    /**
+     * 价格日历获取天数
+     */
+    public static final String CONFIG_ITEM_PRICE_DAYS = "lvmama.price.days";
+
 }
