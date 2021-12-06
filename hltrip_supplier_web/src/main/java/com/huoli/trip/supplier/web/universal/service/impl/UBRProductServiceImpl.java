@@ -246,7 +246,7 @@ public class UBRProductServiceImpl implements UBRProductService {
         }
         String productId = productMPO.getId();
         productMPO.setName(ticketInfo.getDescription());
-        if(baseProduct.getPurchasable() != null && baseProduct.getPurchasable()){
+        if(baseProduct.getPurchasable() != null && baseProduct.getPurchasable() && productMPO.getManuallyStatus() != 1){
             productMPO.setStatus(1);
         } else {
             productMPO.setStatus(3);
