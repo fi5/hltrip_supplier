@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * 描述：<br/>
  * 版权：Copyright (c) 2011-2020<br>
@@ -63,10 +65,19 @@ public class UBRTestController {
     }
 
     @PostMapping(path = "/refund/check")
-    public DfyBaseResult UBRRefundCheck(@RequestBody String outOrderId) {
+    public DfyBaseResult UBRRefundCheck(@RequestBody Map<String, String> params) {
         BaseOrderRequest request = new BaseOrderRequest();
-        request.setSupplierOrderId(outOrderId);
+        request.setSupplierOrderId(params.get("outOrderId"));
+        request.setOrderId(params.get("orderId"));
         return DfyBaseResult.success(ubrOrderService.refundCheck(request));
+    }
+
+    @PostMapping(path = "/refund")
+    public DfyBaseResult UBRRefund(@RequestBody Map<String, String> params) {
+        BaseOrderRequest request = new BaseOrderRequest();
+        request.setSupplierOrderId(params.get("outOrderId"));
+        request.setOrderId(params.get("orderId"));
+        return DfyBaseResult.success(ubrOrderService.refund(request));
     }
 
     @PostMapping(path = "/order/detail")
