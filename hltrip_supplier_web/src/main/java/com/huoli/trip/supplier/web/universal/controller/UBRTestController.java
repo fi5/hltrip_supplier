@@ -65,18 +65,12 @@ public class UBRTestController {
     }
 
     @PostMapping(path = "/refund/check")
-    public DfyBaseResult UBRRefundCheck(@RequestBody Map<String, String> params) {
-        BaseOrderRequest request = new BaseOrderRequest();
-        request.setSupplierOrderId(params.get("outOrderId"));
-        request.setOrderId(params.get("orderId"));
+    public DfyBaseResult UBRRefundCheck(@RequestBody BaseOrderRequest request) {
         return DfyBaseResult.success(ubrOrderService.refundCheck(request));
     }
 
     @PostMapping(path = "/refund")
-    public DfyBaseResult UBRRefund(@RequestBody Map<String, String> params) {
-        BaseOrderRequest request = new BaseOrderRequest();
-        request.setSupplierOrderId(params.get("outOrderId"));
-        request.setOrderId(params.get("orderId"));
+    public DfyBaseResult UBRRefund(@RequestBody BaseOrderRequest request) {
         return DfyBaseResult.success(ubrOrderService.refund(request));
     }
 
