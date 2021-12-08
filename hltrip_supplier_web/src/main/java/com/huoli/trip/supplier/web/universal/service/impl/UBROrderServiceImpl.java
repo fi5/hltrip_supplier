@@ -109,7 +109,7 @@ public class UBROrderServiceImpl implements UBROrderService {
             ubrBaseResponse.setData(ubrRefundCheckResponse);
             return ubrBaseResponse;
         }
-        UBRBaseResponse<UBRRefundCheckResponse> ubrBaseResponse = iubrClient.refundCheck(request.getSupplierOrderId());
+        UBRBaseResponse<UBRRefundCheckResponse> ubrBaseResponse = iubrClient.refundCheck(tripOrder.getOutOrderId());
         if(ubrBaseResponse == null){
             return null;
         }
